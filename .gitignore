@@ -1,0 +1,22 @@
+# API 키 등 비밀 값
+.env
+.env.*
+!.env.example
+
+# 수집 중간 캐시
+.hours_cache.jsonl
+
+
+# OS·에디터
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
