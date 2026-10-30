@@ -129,7 +129,7 @@ docs/        compliance.md agent-spec.md subscription-plans.md
 |---|---|---|
 | 프론트 | **React + TypeScript** (Vite) | 팀 결정. 환자 웹·병원 대시보드 두 앱을 같은 스택으로 |
 | 백엔드 | **FastAPI** (Python) | 팀 결정. 데이터 가공(etl)·AI(에이전트·RAG)와 같은 언어 |
-| DB | PostgreSQL (데모는 SQLite도 가능) | 제안 |
+| DB | **PostgreSQL + pgvector** (로컬은 Docker Compose) | 팀 결정 (2026-10-30). 백엔드 상세: [docs/backend-plan.md](../docs/backend-plan.md) |
 | 캘린더 | FullCalendar (React) | 제안 |
 | i18n | react-i18next | 제안 |
 | 지도 | 카카오맵 또는 Leaflet | 제안 (좌표는 심평원 데이터에 있음) |

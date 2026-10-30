@@ -63,7 +63,7 @@
 ## 4. 브랜치·리뷰 규칙
 
 ```
-main  ←(PR, 리더 승인)─  backend  ←(PR, 상대 리뷰)─  backend/A-auth, backend/B-booking ...
+main  ←(PR, 리더 승인)─  backend  ←(PR, 상대 리뷰)─  backend-A-auth, backend-B-booking ...
 ```
 
 - 각자 `backend`에서 **작업 브랜치**를 따서 작업 → `backend`로 PR → **상대 백엔드가 리뷰** 후 머지

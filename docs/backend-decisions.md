@@ -6,7 +6,7 @@
 | # | 날짜 | 결정 | 이유 | 누가 | 링크 |
 |---|---|---|---|---|---|
 | 9 | 2026-10-30 | AI 지침은 `backend/AGENTS.md` 한 곳 (Claude는 `backend/CLAUDE.md`에서 import) | Claude Code·Codex가 같은 지침을 읽게 | 팀 | [backend/AGENTS.md](../backend/AGENTS.md) |
-| 8 | 2026-10-30 | 브랜치: `backend/A-*`·`backend/B-*` → `backend` PR(상대 리뷰) → `main` PR(리더 승인) | 2인 동시 작업, main 보호 | 팀 | [backend-roles.md](backend-roles.md) 4절 |
+| 8 | 2026-10-30 | 브랜치: `backend-A-*`·`backend-B-*` → `backend` PR(상대 리뷰) → `main` PR(리더 승인) | 2인 동시 작업, main 보호. `backend/A-…`처럼 슬래시를 쓰면 `backend` 브랜치와 이름이 겹쳐 Git이 만들지 못함 → 하이픈 사용 | 팀 | [backend-roles.md](backend-roles.md) 4절 |
 | 7 | 2026-10-30 | 마이그레이션 파일은 B만 생성 | Alembic 리비전 충돌 방지 | 팀 | [backend-roles.md](backend-roles.md) |
 | 6 | 2026-10-30 | `booking` 모델·상태 흐름 주인 = B, A는 service 함수 호출 | 같은 파일 동시 수정 방지 | 팀 | [backend-contracts.md](backend-contracts.md) 5절 |
 | 5 | 2026-10-30 | 분담: A = 환자 쪽 API, B = 병원 쪽 API | 프론트와 짝, 파일 충돌 최소 | 팀 | [backend-roles.md](backend-roles.md) |

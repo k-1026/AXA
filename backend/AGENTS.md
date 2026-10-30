@@ -13,16 +13,16 @@
 
 ## 2. 내가 A인지 B인지
 
-- 사용자가 말한 값 → 없으면 브랜치 이름(`backend/A-…`, `backend/B-…`) → 그래도 모르면 **사용자에게 묻기**
+- 사용자가 말한 값 → 없으면 브랜치 이름(`backend-A-…`, `backend-B-…`) → 그래도 모르면 **사용자에게 묻기**
 - A = 환자 쪽 API, B = 병원 쪽 API + `booking` 주인 + 마이그레이션 ([contracts 1절](../docs/backend-contracts.md))
 
 ## 3. 브랜치
 
 ```
-main ←(PR, 리더 승인)─ backend ←(PR, 상대 리뷰)─ backend/A-<기능>, backend/B-<기능>
+main ←(PR, 리더 승인)─ backend ←(PR, 상대 리뷰)─ backend-A-<기능>, backend-B-<기능>
 ```
 
-- 작업 시작: `git switch backend && git pull` → `git switch -c backend/A-auth` 처럼 새 브랜치
+- 작업 시작: `git switch backend && git pull` → `git switch -c backend-A-auth` 처럼 새 브랜치
 - 작업 중 `backend`가 바뀌면 `git pull origin backend` 후 충돌 해결
 - **`main`·`backend`에 직접 push 금지**. 항상 작업 브랜치 → `backend`로 PR
 - `backend` → `main` PR은 사람이 결정 (AI가 임의로 만들지 않음)

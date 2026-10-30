@@ -93,7 +93,7 @@
 
 ## 매번 지킬 것 (backend/AGENTS.md 요약)
 
-- 브랜치 `backend/A-<기능>` → `backend`로 PR → B 리뷰
+- 브랜치 `backend-A-<기능>` → `backend`로 PR → B 리뷰
 - B 파일은 고치지 않고 worklog "B에게 요청"에
 - 세션 끝날 때 `backend-worklog-A.md` 맨 위에 기록
 - 실명·실제 환자 정보·API 키 X, `.env` 커밋 X
