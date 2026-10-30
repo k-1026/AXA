@@ -19,8 +19,8 @@
 - [ ] B와 `docs/backend-contracts.md` 초안 확정 (상태 코드, 토큰, 에러 코드, 함수 10개, `BookingCreate`)
 - [ ] `proposed` 거절 후 상태 결정 → `backend-decisions.md`
 - [ ] `backend/src/main.py`, `core/` 구조 같이 잡기 (B: `db.py`, A: `security.py`)
-- [ ] `core/security.py`: JWT 발급·검증, `current_patient()`·`current_staff()` 의존성
-- [ ] `core/errors.py`: `{code, message, detail}` 형식 (같이)
+- [x] `core/security.py`: JWT 발급·검증, `current_patient()`·`current_staff()` 의존성
+- [x] `core/errors.py`: `{code, message, detail}` 형식 (초안, B 확인 필요)
 - [ ] 로컬에서 `docker compose up` + 서버 실행, `GET /api/v1/health` 확인 (B가 compose 준비)
 
 ## 11/5~8 · 로그인 → 요청서 (11/9 시연)
