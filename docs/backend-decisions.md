@@ -11,7 +11,7 @@
 | 6 | 2026-10-30 | `booking` 모델·상태 흐름 주인 = B, A는 service 함수 호출 | 같은 파일 동시 수정 방지 | 팀 | [backend-contracts.md](backend-contracts.md) 5절 |
 | 5 | 2026-10-30 | 분담: A = 환자 쪽 API, B = 병원 쪽 API | 프론트와 짝, 파일 충돌 최소 | 팀 | [backend-roles.md](backend-roles.md) |
 | 4 | 2026-10-30 | API 경로 `/api/v1`, 응답 값은 코드, 시간은 UTC 저장 | 프론트 i18n, 해외 환자 시간대 | 팀 | [backend-plan.md](backend-plan.md) 8절 |
-| 3 | 2026-10-30 | 열람은 로그인 X, 요청서 제출·내 요청만 환자 로그인(이메일 인증코드) | 공공정보 성격 유지 + 남용 방지·동의 기록 | 팀 | [backend-plan.md](backend-plan.md) 6절 |
+| 3 | 2026-10-30 | 환자 계정(이메일 인증코드)으로 언어·시간대·동의 저장, 요청서 제출·결과 확인. 병원 정보 열람만 비로그인 | 언어 저장·결과 확인·남용 방지·동의 기록 + 공공정보 성격 유지 | 팀 | [backend-plan.md](backend-plan.md) 6절 |
 | 2 | 2026-10-30 | PostgreSQL + pgvector 처음부터, 로컬은 Docker Compose | 이전 작업 없음, 챗봇 벡터 같은 DB | 팀 | [backend-plan.md](backend-plan.md) 1절 |
 | 1 | 2026-10-29 | 백엔드 FastAPI (Python) | 데이터·AI와 같은 언어 | 팀 | [plan.md](../subject/plan.md) 9절 |
 
