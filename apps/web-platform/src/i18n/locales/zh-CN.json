@@ -1,5 +1,10 @@
 {
-  "header": { "language": "语言", "currency": "货币", "login": "登录 / 注册" },
+  "header": {
+    "language": "语言",
+    "currency": "货币",
+    "login": "登录 / 注册",
+    "chatbot": "聊天机器人"
+  },
   "nav": {
     "title": "菜单",
     "main": "首页",
@@ -44,11 +49,61 @@
     "보건지소": "保健支所",
     "보건진료소": "保健诊疗所"
   },
-  "ad": { "label": "广告" },
+  "ad": {
+    "label": "广告"
+  },
   "footer": {
     "notice": "基于韩国公共数据的医院信息，并非医院推荐或医疗咨询。",
     "source": "数据：韩国健康保险审查评价院 医院信息服务（公共数据门户 data.go.kr）",
     "emergency": "紧急情况请拨打 119。"
   },
-  "placeholder": { "comingSoon": "页面准备中。" }
+  "placeholder": {
+    "comingSoon": "页面准备中。"
+  },
+  "district": {
+    "label": "地区筛选",
+    "all": "全部",
+    "중구": "中区",
+    "동구": "东区",
+    "서구": "西区",
+    "남구": "南区",
+    "북구": "北区",
+    "수성구": "寿城区",
+    "달서구": "达西区",
+    "달성군": "达城郡",
+    "군위군": "军威郡"
+  },
+  "day": {
+    "mon": "周一",
+    "tue": "周二",
+    "wed": "周三",
+    "thu": "周四",
+    "fri": "周五",
+    "sat": "周六",
+    "sun": "周日",
+    "holiday": "公休日"
+  },
+  "hospital": {
+    "homepage": "官网",
+    "more": "查看更多（剩余 {{count}} 家）",
+    "empty": "没有符合条件的医院。",
+    "back": "医院列表",
+    "notFound": "找不到该医院。",
+    "hours": "诊疗时间",
+    "hoursNote": "诊疗时间可能变动，就诊前请致电医院确认。",
+    "facilities": "急诊室·停车",
+    "emergencyDay": "日间急诊",
+    "emergencyNight": "夜间急诊",
+    "parking": "停车",
+    "parkingSpaces": "{{count}} 个车位",
+    "parkingFee": "停车费",
+    "location": "位置",
+    "yes": "有",
+    "no": "无",
+    "closed": "休诊",
+    "lunchWeek": "午休（工作日）",
+    "lunchSat": "午休（周六）",
+    "rcvWeek": "挂号时间（工作日）",
+    "rcvSat": "挂号时间（周六）"
+  }
 }

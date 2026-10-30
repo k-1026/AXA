@@ -91,6 +91,279 @@ a {
   color: var(--accent);
 }
 
+.header-chatbot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* 병원 정보 페이지 */
+.hospitals-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.filter-grid button {
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  background: var(--surface);
+  /* 칸 구분선 (바깥쪽 선은 overflow: hidden 으로 잘림) */
+  box-shadow: 1px 0 0 var(--border), 0 1px 0 var(--border);
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.filter-grid button:hover {
+  background: var(--surface-muted);
+}
+
+.filter-grid button[aria-pressed='true'] {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.list-count {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.list-status {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.hospital-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.hospital-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.hospital-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgb(31 111 235 / 0.12);
+}
+
+.hospital-photo {
+  aspect-ratio: 4 / 3;
+  background: var(--surface-muted);
+}
+
+.hospital-card-body {
+  padding: 14px 16px 16px;
+}
+
+.hospital-card h2 {
+  margin: 2px 0 10px;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.card-link {
+  text-decoration: none;
+}
+
+.card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.hospital-type {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.hospital-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.hospital-facts dt {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hospital-facts dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* 카드 링크 위에서도 전화·홈페이지는 따로 눌리게 */
+.hospital-facts a {
+  position: relative;
+  z-index: 1;
+  color: var(--accent);
+}
+
+.more-button {
+  align-self: center;
+  height: 44px;
+  padding: 0 24px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.more-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* 병원 상세 */
+.hospital-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.back-link {
+  align-self: flex-start;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.detail-head {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+}
+
+.detail-photo {
+  border-radius: 16px;
+}
+
+.detail-head h1 {
+  margin: 4px 0 8px;
+  font-size: 1.5rem;
+}
+
+.dept-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.dept-tags li {
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.detail-card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.detail-card h2 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.detail-map-card {
+  grid-column: 1 / -1;
+}
+
+.detail-map {
+  height: 280px;
+  border-radius: 12px;
+}
+
+.hours-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.hours-table th,
+.hours-table td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--surface-muted);
+  text-align: left;
+}
+
+.hours-table th {
+  width: 45%;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.detail-note,
+.detail-source {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 /* 본문 = 사이드바 + 메인 */
 .app-body {
   flex: 1;
@@ -337,8 +610,14 @@ a {
     white-space: nowrap;
   }
 
-  .ad-row {
+  .ad-row,
+  .detail-grid,
+  .detail-head {
     grid-template-columns: 1fr;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

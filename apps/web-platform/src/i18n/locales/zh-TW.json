@@ -1,5 +1,10 @@
 {
-  "header": { "language": "語言", "currency": "貨幣", "login": "登入 / 註冊" },
+  "header": {
+    "language": "語言",
+    "currency": "貨幣",
+    "login": "登入 / 註冊",
+    "chatbot": "聊天機器人"
+  },
   "nav": {
     "title": "選單",
     "main": "首頁",
@@ -44,11 +49,61 @@
     "보건지소": "保健支所",
     "보건진료소": "保健診療所"
   },
-  "ad": { "label": "廣告" },
+  "ad": {
+    "label": "廣告"
+  },
   "footer": {
     "notice": "基於韓國公共資料的醫院資訊，並非醫院推薦或醫療諮詢。",
     "source": "資料：韓國健康保險審查評價院 醫院資訊服務（公共資料入口網 data.go.kr）",
     "emergency": "緊急情況請撥打 119。"
   },
-  "placeholder": { "comingSoon": "頁面準備中。" }
+  "placeholder": {
+    "comingSoon": "頁面準備中。"
+  },
+  "district": {
+    "label": "地區篩選",
+    "all": "全部",
+    "중구": "中區",
+    "동구": "東區",
+    "서구": "西區",
+    "남구": "南區",
+    "북구": "北區",
+    "수성구": "壽城區",
+    "달서구": "達西區",
+    "달성군": "達城郡",
+    "군위군": "軍威郡"
+  },
+  "day": {
+    "mon": "週一",
+    "tue": "週二",
+    "wed": "週三",
+    "thu": "週四",
+    "fri": "週五",
+    "sat": "週六",
+    "sun": "週日",
+    "holiday": "國定假日"
+  },
+  "hospital": {
+    "homepage": "官網",
+    "more": "查看更多（剩餘 {{count}} 家）",
+    "empty": "沒有符合條件的醫院。",
+    "back": "醫院列表",
+    "notFound": "找不到該醫院。",
+    "hours": "門診時間",
+    "hoursNote": "門診時間可能變動，就診前請致電醫院確認。",
+    "facilities": "急診室·停車",
+    "emergencyDay": "日間急診",
+    "emergencyNight": "夜間急診",
+    "parking": "停車",
+    "parkingSpaces": "{{count}} 個車位",
+    "parkingFee": "停車費",
+    "location": "位置",
+    "yes": "有",
+    "no": "無",
+    "closed": "休診",
+    "lunchWeek": "午休（平日）",
+    "lunchSat": "午休（週六）",
+    "rcvWeek": "掛號時間（平日）",
+    "rcvSat": "掛號時間（週六）"
+  }
 }

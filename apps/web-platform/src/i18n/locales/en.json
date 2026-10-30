@@ -1,5 +1,10 @@
 {
-  "header": { "language": "Language", "currency": "Currency", "login": "Log in / Sign up" },
+  "header": {
+    "language": "Language",
+    "currency": "Currency",
+    "login": "Log in / Sign up",
+    "chatbot": "Chatbot"
+  },
   "nav": {
     "title": "Menu",
     "main": "Home",
@@ -44,11 +49,61 @@
     "보건지소": "Public health branch",
     "보건진료소": "Rural health post"
   },
-  "ad": { "label": "Advertisement" },
+  "ad": {
+    "label": "Advertisement"
+  },
   "footer": {
     "notice": "Hospital information based on Korean public data. This is not a recommendation or medical advice.",
     "source": "Data: Health Insurance Review & Assessment Service (HIRA) hospital information APIs, via data.go.kr",
     "emergency": "In an emergency, call 119."
   },
-  "placeholder": { "comingSoon": "This page is coming soon." }
+  "placeholder": {
+    "comingSoon": "This page is coming soon."
+  },
+  "district": {
+    "label": "District filter",
+    "all": "All",
+    "중구": "Jung-gu",
+    "동구": "Dong-gu",
+    "서구": "Seo-gu",
+    "남구": "Nam-gu",
+    "북구": "Buk-gu",
+    "수성구": "Suseong-gu",
+    "달서구": "Dalseo-gu",
+    "달성군": "Dalseong-gun",
+    "군위군": "Gunwi-gun"
+  },
+  "day": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun",
+    "holiday": "Holidays"
+  },
+  "hospital": {
+    "homepage": "Website",
+    "more": "Show more ({{count}} left)",
+    "empty": "No hospitals match these filters.",
+    "back": "Hospital list",
+    "notFound": "Hospital not found.",
+    "hours": "Opening hours",
+    "hoursNote": "Hours may change. Please call the hospital before you visit.",
+    "facilities": "Emergency room & parking",
+    "emergencyDay": "Daytime ER",
+    "emergencyNight": "Night ER",
+    "parking": "Parking",
+    "parkingSpaces": "{{count}} spaces",
+    "parkingFee": "Parking fee",
+    "location": "Location",
+    "yes": "Yes",
+    "no": "No",
+    "closed": "Closed",
+    "lunchWeek": "Lunch break (weekdays)",
+    "lunchSat": "Lunch break (Sat)",
+    "rcvWeek": "Reception (weekdays)",
+    "rcvSat": "Reception (Sat)"
+  }
 }

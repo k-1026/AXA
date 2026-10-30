@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { DepartmentKey } from '../hospital/types';
-import { DEPARTMENTS } from './departments';
+import { DEPARTMENTS } from '../hospital/filters';
 
 interface Props {
   selected: DepartmentKey | null;
@@ -20,18 +20,15 @@ export function DepartmentFilter({ selected, onSelect }: Props) {
       >
         {t('dept.all')}
       </button>
-      {DEPARTMENTS.map(({ key, ready }) => (
+      {DEPARTMENTS.map((key) => (
         <button
           key={key}
           type="button"
           className="dept-chip"
           aria-pressed={selected === key}
-          disabled={!ready}
-          title={ready ? undefined : t('dept.notReady')}
           onClick={() => onSelect(selected === key ? null : key)}
         >
           {t(`dept.${key}`)}
-          {!ready && <small>{t('dept.notReady')}</small>}
         </button>
       ))}
     </div>

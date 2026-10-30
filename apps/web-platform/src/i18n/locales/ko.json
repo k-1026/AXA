@@ -1,5 +1,10 @@
 {
-  "header": { "language": "언어", "currency": "통화", "login": "로그인 / 회원가입" },
+  "header": {
+    "language": "언어",
+    "currency": "통화",
+    "login": "로그인 / 회원가입",
+    "chatbot": "챗봇"
+  },
   "nav": {
     "title": "메뉴",
     "main": "메인",
@@ -44,11 +49,61 @@
     "보건지소": "보건지소",
     "보건진료소": "보건진료소"
   },
-  "ad": { "label": "광고" },
+  "ad": {
+    "label": "광고"
+  },
   "footer": {
     "notice": "공공데이터 기반 병원 정보 안내입니다. 병원 추천이나 의료 상담이 아닙니다.",
     "source": "데이터: 건강보험심사평가원 병원정보서비스·의료기관별상세정보서비스 (공공데이터포털)",
     "emergency": "응급 상황에서는 119에 전화하세요."
   },
-  "placeholder": { "comingSoon": "준비 중인 페이지입니다." }
+  "placeholder": {
+    "comingSoon": "준비 중인 페이지입니다."
+  },
+  "district": {
+    "label": "지역 필터",
+    "all": "전체",
+    "중구": "중구",
+    "동구": "동구",
+    "서구": "서구",
+    "남구": "남구",
+    "북구": "북구",
+    "수성구": "수성구",
+    "달서구": "달서구",
+    "달성군": "달성군",
+    "군위군": "군위군"
+  },
+  "day": {
+    "mon": "월",
+    "tue": "화",
+    "wed": "수",
+    "thu": "목",
+    "fri": "금",
+    "sat": "토",
+    "sun": "일",
+    "holiday": "공휴일"
+  },
+  "hospital": {
+    "homepage": "홈페이지",
+    "more": "더 보기 ({{count}}곳 남음)",
+    "empty": "조건에 맞는 병원이 없어요.",
+    "back": "병원 목록",
+    "notFound": "병원을 찾을 수 없어요.",
+    "hours": "진료시간",
+    "hoursNote": "진료시간은 바뀔 수 있으니 방문 전에 병원에 전화로 확인하세요.",
+    "facilities": "응급실·주차",
+    "emergencyDay": "주간 응급실",
+    "emergencyNight": "야간 응급실",
+    "parking": "주차",
+    "parkingSpaces": "{{count}}대",
+    "parkingFee": "주차 요금",
+    "location": "위치",
+    "yes": "있음",
+    "no": "없음",
+    "closed": "휴진",
+    "lunchWeek": "점심시간 (평일)",
+    "lunchSat": "점심시간 (토)",
+    "rcvWeek": "접수시간 (평일)",
+    "rcvSat": "접수시간 (토)"
+  }
 }

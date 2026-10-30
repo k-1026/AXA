@@ -6,6 +6,8 @@ import './styles.css';
 import { CurrencyProvider } from './components/currency';
 import { Layout } from './layout/Layout';
 import { MainPage } from './pages/MainPage';
+import { HospitalsPage } from './pages/HospitalsPage';
+import { HospitalDetailPage } from './pages/HospitalDetailPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 
 createRoot(document.getElementById('root')!).render(
@@ -15,7 +17,8 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<MainPage />} />
-            <Route path="hospitals" element={<PlaceholderPage titleKey="nav.hospitals" />} />
+            <Route path="hospitals" element={<HospitalsPage />} />
+            <Route path="hospitals/:id" element={<HospitalDetailPage />} />
             <Route path="prices" element={<PlaceholderPage titleKey="nav.prices" />} />
             <Route path="chatbot" element={<PlaceholderPage titleKey="nav.chatbot" />} />
             <Route path="about" element={<PlaceholderPage titleKey="nav.about" />} />

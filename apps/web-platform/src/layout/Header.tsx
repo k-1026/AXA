@@ -13,6 +13,9 @@ export function Header() {
         MediDaegu
       </Link>
       <div className="header-actions">
+        <Link to="/chatbot" className="header-chatbot">
+          {t('header.chatbot')}
+        </Link>
         <label className="header-select">
           <span className="visually-hidden">{t('header.language')}</span>
           <select value={i18n.language} onChange={(e) => i18n.changeLanguage(e.target.value)}>

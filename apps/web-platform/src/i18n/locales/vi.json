@@ -1,5 +1,10 @@
 {
-  "header": { "language": "Ngôn ngữ", "currency": "Tiền tệ", "login": "Đăng nhập / Đăng ký" },
+  "header": {
+    "language": "Ngôn ngữ",
+    "currency": "Tiền tệ",
+    "login": "Đăng nhập / Đăng ký",
+    "chatbot": "Chatbot"
+  },
   "nav": {
     "title": "Menu",
     "main": "Trang chủ",
@@ -44,11 +49,61 @@
     "보건지소": "Chi nhánh y tế công cộng",
     "보건진료소": "Trạm y tế"
   },
-  "ad": { "label": "Quảng cáo" },
+  "ad": {
+    "label": "Quảng cáo"
+  },
   "footer": {
     "notice": "Thông tin bệnh viện dựa trên dữ liệu công của Hàn Quốc. Đây không phải là giới thiệu bệnh viện hay tư vấn y tế.",
     "source": "Dữ liệu: Dịch vụ thông tin bệnh viện của HIRA (data.go.kr)",
     "emergency": "Trường hợp khẩn cấp, hãy gọi 119."
   },
-  "placeholder": { "comingSoon": "Trang đang được chuẩn bị." }
+  "placeholder": {
+    "comingSoon": "Trang đang được chuẩn bị."
+  },
+  "district": {
+    "label": "Lọc theo quận",
+    "all": "Tất cả",
+    "중구": "Jung-gu",
+    "동구": "Dong-gu",
+    "서구": "Seo-gu",
+    "남구": "Nam-gu",
+    "북구": "Buk-gu",
+    "수성구": "Suseong-gu",
+    "달서구": "Dalseo-gu",
+    "달성군": "Dalseong-gun",
+    "군위군": "Gunwi-gun"
+  },
+  "day": {
+    "mon": "Thứ 2",
+    "tue": "Thứ 3",
+    "wed": "Thứ 4",
+    "thu": "Thứ 5",
+    "fri": "Thứ 6",
+    "sat": "Thứ 7",
+    "sun": "Chủ nhật",
+    "holiday": "Ngày lễ"
+  },
+  "hospital": {
+    "homepage": "Trang web",
+    "more": "Xem thêm (còn {{count}} cơ sở)",
+    "empty": "Không có bệnh viện phù hợp.",
+    "back": "Danh sách bệnh viện",
+    "notFound": "Không tìm thấy bệnh viện.",
+    "hours": "Giờ khám",
+    "hoursNote": "Giờ khám có thể thay đổi. Vui lòng gọi điện cho bệnh viện trước khi đến.",
+    "facilities": "Cấp cứu & bãi đỗ xe",
+    "emergencyDay": "Cấp cứu ban ngày",
+    "emergencyNight": "Cấp cứu ban đêm",
+    "parking": "Bãi đỗ xe",
+    "parkingSpaces": "{{count}} chỗ",
+    "parkingFee": "Phí đỗ xe",
+    "location": "Vị trí",
+    "yes": "Có",
+    "no": "Không",
+    "closed": "Nghỉ",
+    "lunchWeek": "Nghỉ trưa (ngày thường)",
+    "lunchSat": "Nghỉ trưa (Thứ 7)",
+    "rcvWeek": "Giờ tiếp nhận (ngày thường)",
+    "rcvSat": "Giờ tiếp nhận (Thứ 7)"
+  }
 }
