@@ -1,0 +1,54 @@
+{
+  "header": { "language": "Ngôn ngữ", "currency": "Tiền tệ", "login": "Đăng nhập / Đăng ký" },
+  "nav": {
+    "title": "Menu",
+    "main": "Trang chủ",
+    "hospitals": "Thông tin bệnh viện",
+    "prices": "Hướng dẫn giá",
+    "chatbot": "Chatbot (Câu hỏi thường gặp)",
+    "about": "Giới thiệu dịch vụ"
+  },
+  "map": {
+    "title": "Bản đồ bệnh viện Daegu",
+    "count": "Đang hiển thị {{count}} cơ sở",
+    "loading": "Đang tải dữ liệu bệnh viện…",
+    "error": "Không thể tải dữ liệu bệnh viện."
+  },
+  "dept": {
+    "label": "Lọc theo chuyên khoa",
+    "all": "Tất cả",
+    "dermatology": "Da liễu",
+    "plastic": "Phẫu thuật thẩm mỹ",
+    "internal": "Nội khoa",
+    "dental": "Nha khoa",
+    "notReady": "Đang chuẩn bị dữ liệu"
+  },
+  "popup": {
+    "type": "Loại",
+    "addr": "Địa chỉ",
+    "tel": "Điện thoại",
+    "source": "Nguồn: HIRA (thu thập {{date}})"
+  },
+  "hospitalType": {
+    "상급종합": "Bệnh viện tuyến cuối",
+    "종합병원": "Bệnh viện đa khoa",
+    "병원": "Bệnh viện",
+    "요양병원": "Bệnh viện điều dưỡng",
+    "정신병원": "Bệnh viện tâm thần",
+    "의원": "Phòng khám",
+    "치과병원": "Bệnh viện nha khoa",
+    "치과의원": "Phòng khám nha khoa",
+    "한방병원": "Bệnh viện y học cổ truyền Hàn Quốc",
+    "한의원": "Phòng khám y học cổ truyền Hàn Quốc",
+    "보건소": "Trung tâm y tế công cộng",
+    "보건지소": "Chi nhánh y tế công cộng",
+    "보건진료소": "Trạm y tế"
+  },
+  "ad": { "label": "Quảng cáo" },
+  "footer": {
+    "notice": "Thông tin bệnh viện dựa trên dữ liệu công của Hàn Quốc. Đây không phải là giới thiệu bệnh viện hay tư vấn y tế.",
+    "source": "Dữ liệu: Dịch vụ thông tin bệnh viện của HIRA (data.go.kr)",
+    "emergency": "Trường hợp khẩn cấp, hãy gọi 119."
+  },
+  "placeholder": { "comingSoon": "Trang đang được chuẩn bị." }
+}

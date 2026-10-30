@@ -1,0 +1,54 @@
+{
+  "header": { "language": "Language", "currency": "Currency", "login": "Log in / Sign up" },
+  "nav": {
+    "title": "Menu",
+    "main": "Home",
+    "hospitals": "Hospitals",
+    "prices": "Price guide",
+    "chatbot": "Chatbot (FAQ)",
+    "about": "About"
+  },
+  "map": {
+    "title": "Daegu hospital map",
+    "count": "Showing {{count}}",
+    "loading": "Loading hospital data…",
+    "error": "Couldn't load hospital data."
+  },
+  "dept": {
+    "label": "Department filter",
+    "all": "All",
+    "dermatology": "Dermatology",
+    "plastic": "Plastic surgery",
+    "internal": "Internal medicine",
+    "dental": "Dentistry",
+    "notReady": "Data coming soon"
+  },
+  "popup": {
+    "type": "Type",
+    "addr": "Address",
+    "tel": "Phone",
+    "source": "Source: HIRA (collected {{date}})"
+  },
+  "hospitalType": {
+    "상급종합": "Tertiary hospital",
+    "종합병원": "General hospital",
+    "병원": "Hospital",
+    "요양병원": "Long-term care hospital",
+    "정신병원": "Psychiatric hospital",
+    "의원": "Clinic",
+    "치과병원": "Dental hospital",
+    "치과의원": "Dental clinic",
+    "한방병원": "Korean medicine hospital",
+    "한의원": "Korean medicine clinic",
+    "보건소": "Public health center",
+    "보건지소": "Public health branch",
+    "보건진료소": "Rural health post"
+  },
+  "ad": { "label": "Advertisement" },
+  "footer": {
+    "notice": "Hospital information based on Korean public data. This is not a recommendation or medical advice.",
+    "source": "Data: Health Insurance Review & Assessment Service (HIRA) hospital information APIs, via data.go.kr",
+    "emergency": "In an emergency, call 119."
+  },
+  "placeholder": { "comingSoon": "This page is coming soon." }
+}

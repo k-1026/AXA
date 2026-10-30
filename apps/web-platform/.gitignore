@@ -1,0 +1,4 @@
+dist/
+*.tsbuildinfo
+# scripts/build-hospitals.mjs 가 data/interim 에서 만드는 파일
+public/data/
