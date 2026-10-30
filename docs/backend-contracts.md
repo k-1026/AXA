@@ -97,6 +97,8 @@
 | `health_info` | str | X | 있으면 `health` 동의 필수 |
 | `consents` | list[{kind, version}] | O | `privacy` 필수, `health`·`overseas_transfer` 조건부 |
 
+- 요청서의 `privacy` 동의 = **이 요청서 내용을 고른 병원에 전달**하는 데 대한 동의 (가입 때 `privacy`와 별개로 요청서마다). 법적 구조가 제3자 제공(개인정보보호법 제17조 제1항 제1호)인지 처리 위탁(제26조)인지는 **개인정보위 질의 8번 회신 후** 문구 확정 ([plan.md](../subject/plan.md) 11절)
+
 ## 7. 변경 이력
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |

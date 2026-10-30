@@ -39,6 +39,7 @@ main ←(PR, 리더 승인)─ backend ←(PR, 상대 리뷰)─ backend/A-<기�
 ## 5. 코드 규칙
 
 - 모듈 구조: `router.py`(HTTP) · `schemas.py`(Pydantic) · `models.py`(SQLAlchemy) · `service.py`(규칙) · `repository.py`(선택)
+  - 예외: `booking/`은 router를 둘로 나눔 → `router_patient.py`(A) · `router_tenant.py`(B)
 - **규칙은 `service.py`에**, router는 얇게. 상대 모듈은 contracts에 적힌 `service` 함수로만 호출
 - 경로는 `/api/v1/...`, 응답 값은 **코드**(`"pending"`)로, 문장 번역은 프론트 i18n
 - 시간은 UTC(`timestamptz`)로 저장
@@ -48,7 +49,7 @@ main ←(PR, 리더 승인)─ backend ←(PR, 상대 리뷰)─ backend/A-<기�
 ## 6. 하면 안 되는 것 (규제·보안, `docs/compliance.md` 요약)
 
 - 병원 목록 정렬에 구독·제휴·"요청 가능" 여부 반영 X (정렬은 `distance`·`name`만)
-- 환자 쪽 코드에서 상태를 `confirmed`·`rejected`·`proposed`로 바꾸기 X (병원 직원만)
+- 환자 쪽 코드에서 상태를 `confirmed`·`rejected`·`proposed`로 바꾸기 X (병원 직원만). 예외는 병원이 제안한 시간을 환자가 수락하는 `patient_accept()`(`proposed → confirmed`) 하나
 - AI 답장을 직원 승인 없이 환자에게 보이기·보내기 X
 - 병원 API에서 다른 병원(tenant) 데이터 조회 X — tenant 필터는 공통 의존성으로
 - 건강정보를 `health` 동의 없이 저장 X, 환자 계정에 건강정보 저장 X

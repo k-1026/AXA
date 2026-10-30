@@ -65,6 +65,7 @@ modules/booking/
 ├── service.py      # 규칙 (상태 변경 가능 여부, 권한, 동의 확인)
 └── repository.py   # DB 읽기·쓰기 (선택, 작으면 service에 합침)
 ```
+- 예외: `booking/`은 A·B가 같이 쓰므로 router를 `router_patient.py`(A)·`router_tenant.py`(B)로 나눔 ([backend-contracts.md](backend-contracts.md) 1절)
 - **규제 규칙은 `service.py`에** → 테스트가 쉬움 (예: "환자 쪽은 `confirmed`로 못 바꿈")
 
 ## 3. 제안 구조 (v2)
