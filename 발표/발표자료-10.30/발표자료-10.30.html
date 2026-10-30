@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대구 의료관광 플랫폼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#eef1f4; --paper:#ffffff; --ink:#14212b; --sub:#55636e; --line:#dde3e8;
+  --navy:#0f2a3d; --teal:#0f8b8d; --teal-soft:#e3f3f2; --amber:#c9781a; --amber-soft:#fbf0e1;
+  --red:#b3412f; --red-soft:#f8e7e3; --ok:#2e7d4f; --ok-soft:#e5f2ea;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);
+  font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;word-break:keep-all}
+.deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.slide{position:absolute;width:1280px;height:720px;background:var(--paper);border-radius:14px;
+  box-shadow:0 10px 40px rgba(15,42,61,.12);padding:56px 72px 48px;display:none;flex-direction:column;
+  transform-origin:center center}
+.slide.on{display:flex}
+.kicker{font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--teal);text-transform:uppercase}
+h1{font-size:46px;line-height:1.25;font-weight:800;color:var(--navy);margin-top:10px}
+h2{font-size:34px;line-height:1.3;font-weight:800;color:var(--navy);margin-top:6px}
+.lead{font-size:20px;color:var(--sub);margin-top:12px;line-height:1.55}
+.body{flex:1;margin-top:28px;display:flex;gap:28px;min-height:0}
+.col{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{border:1px solid var(--line);border-radius:12px;padding:20px 22px;background:#fff}
+.card h3{font-size:18px;color:var(--navy);margin-bottom:8px}
+.card p,.card li{font-size:16px;line-height:1.6;color:var(--ink)}
+.card ul{padding-left:18px}
+.muted{color:var(--sub)}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px}
+.t-teal{background:var(--teal-soft);color:var(--teal)}
+.t-amber{background:var(--amber-soft);color:var(--amber)}
+.t-red{background:var(--red-soft);color:var(--red)}
+.t-ok{background:var(--ok-soft);color:var(--ok)}
+.big{font-size:44px;font-weight:800;color:var(--navy);line-height:1.1;font-variant-numeric:tabular-nums}
+.big small{font-size:20px;font-weight:700;color:var(--sub);margin-left:4px}
+.stat .label{font-size:15px;color:var(--sub);margin-top:6px}
+.foot{font-size:12px;color:var(--sub);border-top:1px solid var(--line);padding-top:10px;margin-top:18px;line-height:1.5}
+.pg{position:absolute;right:28px;top:22px;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:16px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;line-height:1.45}
+th{font-size:14px;color:var(--sub);font-weight:700}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.tight .card{padding:12px 16px}.tight .card p,.tight .card li{font-size:15px;line-height:1.5}.tight{gap:12px!important}
+.arrow{font-size:28px;color:var(--teal);align-self:center}
+/* cover */
+.cover{background:linear-gradient(135deg,var(--navy) 0%,#123b52 60%,#0f6e70 100%);color:#fff;justify-content:center}
+.cover h1{color:#fff;font-size:58px}
+.cover .lead{color:#cfe3ea;font-size:24px}
+.cover .meta{margin-top:48px;font-size:18px;color:#a9c7d1}
+.cover .pills{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.cover .pills span{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;font-size:15px;color:#e6f2f5}
+.cover .pg{color:#a9c7d1}
+/* timeline */
+.steps{display:flex;gap:12px}
+.step{flex:1;border-radius:12px;padding:16px;background:var(--bg)}
+.step b{display:block;font-size:14px;color:var(--teal)}
+.step span{font-size:15px;line-height:1.5}
+.step.now{background:var(--teal-soft);outline:2px solid var(--teal)}
+.nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+.nav button{border:0;background:var(--navy);color:#fff;font:inherit;font-size:14px;padding:8px 14px;border-radius:8px;cursor:pointer}
+.nav button:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{background:#fff}
+  .deck{position:static;display:block}
+  .slide{display:flex!important;position:relative;transform:none!important;box-shadow:none;border-radius:0;page-break-after:always;break-after:page}
+  .nav{display:none}
+}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1. 표지 -->
+<section class="slide cover">
+  <div class="pg">1 / 7</div>
+  <div class="kicker" style="color:#8fd3d1">AX Native Bootcamp · 중간 발표 2</div>
+  <h1>대구 의료관광 정보 플랫폼<br>+ 병원용 예약 에이전트</h1>
+  <p class="lead">외국인 환자가 대구 병원을 자기 언어로 찾고, 고른 병원에 직접 예약 요청을 보내는 서비스</p>
+  <div class="pills"><span>주제 확정</span><span>문제 정의</span><span>규제 검토</span><span>비즈니스 모델 확장</span><span>타깃 국가·분야</span><span>데이터</span></div>
+  <div class="meta">AXA</div>
+</section>
+
+<!-- 2. 주제 확정 -->
+<section class="slide">
+  <div class="pg">2 / 7</div>
+  <div class="kicker">01 · 프로젝트 주제 확정</div>
+  <h2>지난 발표: 후보 3개 고민 → 이번: 외국인 의료관광으로 확정</h2>
+  <div class="body">
+    <div class="col">
+      <div class="card"><span class="tag t-amber">후보 1</span><h3 style="margin-top:8px">대구 청년 정책 원스톱 플랫폼</h3><p class="muted">조건 입력 → 맞는 청년 정책 찾기</p></div>
+      <div class="card" style="outline:2px solid var(--teal)"><span class="tag t-teal">확정</span><h3 style="margin-top:8px">메디시티 병원 신뢰·가격 비교 → 대구 의료관광객 늘리기</h3><p class="muted">외국인 환자에게 공식 정보를 다국어로</p></div>
+      <div class="card"><span class="tag t-amber">후보 3</span><h3 style="margin-top:8px">구·군별 청년 공간 &amp; 정책 비교</h3><p class="muted">9개 구·군 청년 공간·혜택 비교</p></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="col">
+      <div class="card"><h3>왜 의료관광인가</h3>
+        <ul>
+          <li><b>정책 방향과 일치</b> — 정부 2026년 유치 목표 200만 명, "수도권 편중"·"정보 플랫폼 부족"을 스스로 과제로 적음</li>
+          <li><b>데이터를 실제로 확보</b> — 심평원 API로 대구 병원 4,242곳의 주소·좌표·진료시간 수집 완료</li>
+          <li><b>대구만의 빈칸</b> — 공식 사이트(메디컬코리아)에 대구 병원 상세 정보가 거의 없음</li>
+        </ul>
+      </div>
+      <div class="card" style="background:var(--teal-soft);border-color:transparent">
+        <h3>지난 발표 이후 달라진 점</h3>
+        <p>주제 고민 → <b>주제 확정 + 규제 검토 + 비즈니스 모델 + 데이터 확보 + 프로토타입 설계</b></p>
+      </div>
+    </div>
+  </div>
+  <div class="foot">출처: 보건복지부 2026년 외국인환자 유치 지원 시행계획 · 건강보험심사평가원 병원정보서비스(2026-10-28 수집) · 메디컬코리아 사이트(2026-10-29 확인)</div>
+</section>
+
+<!-- 3. 문제 정의 -->
+<section class="slide">
+  <div class="pg">3 / 7</div>
+  <div class="kicker">02 · 문제점 정의</div>
+  <h2>대구 외국인 환자는 늘지만, 찾아볼 정보가 없다</h2>
+  <div class="body" style="flex-direction:column">
+    <div style="display:flex;gap:16px">
+      <div class="card stat" style="flex:1"><div class="big">19,243<small>명</small></div><div class="label">2025년 대구 외국인 환자 (전년 대비 +31.4%)</div></div>
+      <div class="card stat" style="flex:1"><div class="big">5.6% → 1.0%</div><div class="label">대구의 전국 비중 (2022 → 2025)</div></div>
+      <div class="card stat" style="flex:1"><div class="big">87.2%</div><div class="label">서울 한 곳의 전국 비중 (2025)</div></div>
+    </div>
+    <div style="display:flex;gap:16px;flex:1">
+      <div class="card" style="flex:1.2">
+        <h3>공식 사이트(메디컬코리아)에서 본 대구</h3>
+        <table>
+          <tr><th>항목</th><th style="text-align:right">대구</th></tr>
+          <tr><td>외국인환자 유치 등록 병원</td><td class="num">145곳</td></tr>
+          <tr><td>상세 정보(의사 수·통역 언어 등) 있는 곳</td><td class="num">13곳</td></tr>
+          <tr><td>복지부 유치기관 인증 병원</td><td class="num">1곳</td></tr>
+          <tr><td>진료시간 · 가격 정보</td><td class="num" style="color:var(--red)">없음</td></tr>
+        </table>
+      </div>
+      <div class="card" style="flex:1">
+        <h3>문제 정의</h3>
+        <p>외국인 환자는 <b>믿을 만한 병원인지, 언제 진료하는지, 얼마인지</b>를 자기 언어로 확인할 곳이 없다.</p>
+        <p style="margin-top:10px" class="muted">대구시 정책은 비즈니스 페어·웰니스 상품 등 <b>B2B 유치 행사 중심</b> → 외국인이 직접 병원을 비교하는 공공 도구는 비어 있음</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot">출처: 한국보건산업진흥원 2025 외국인환자 유치실적 통계분석 보고서(표 2.13, 3.73) · 보건복지부 2026년 시행계획(7쪽) · 메디컬코리아 Accredited Hospital 페이지·병원 데이터 CSV(공공데이터포털)</div>
+</section>
+
+<!-- 4. 규제 -->
+<section class="slide">
+  <div class="pg">4 / 7</div>
+  <div class="kicker">03 · 규제적 문제점과 대응</div>
+  <h2>"병원을 연결해 주는 순간" 법에 걸린다 → 서비스 경계를 먼저 정했다</h2>
+  <div class="body">
+    <div class="col tight" style="flex:1.05">
+      <div class="card"><span class="tag t-red">의료 해외진출법 제2조·제6조</span><p style="margin-top:8px">외국인환자 "유치" = <b>진료예약 대리, 진료정보 제공</b> 등 → 등록 없이 하면 3년 이하 징역 (제28조)</p></div>
+      <div class="card"><span class="tag t-red">의료법 제27조 제3항 · 판례</span><p style="margin-top:8px">영리 목적 환자 소개·알선 금지. 시술 쿠폰 + 병원 수수료 = 유죄 (대법원 2018도20928)</p></div>
+      <div class="card"><span class="tag t-red">의료법 제34조의2 (2026-10-02 시행)</span><p style="margin-top:8px">비대면진료에 <b>"상담 및 교육"</b> 포함 → 원격 사후관리 Q&amp;A는 불가</p></div>
+      <div class="card"><span class="tag t-amber">의료법 제56조 · 개인정보보호법 제23조</span><p style="margin-top:8px">이벤트가·순위·후기 = 광고 위험 / 건강정보는 별도 동의</p></div>
+    </div>
+    <div class="col">
+      <div class="card" style="padding:16px 18px">
+        <table>
+          <tr><th style="color:var(--ok)">한다</th><th style="color:var(--red)">하지 않는다</th></tr>
+          <tr><td>공공데이터 병원·진료시간 열람</td><td>병원 수수료·광고비</td></tr>
+          <tr><td>등록·인증 사실, 출처·기준일 표시</td><td>순위·추천·후기·이벤트가</td></tr>
+          <tr><td>환자가 고른 병원에 <b>요청서</b> 전달</td><td>예약 대행·통역 동행·픽업</td></tr>
+          <tr><td>원문 그대로 번역</td><td>사후관리 Q&amp;A, 진단·시술 추천</td></tr>
+        </table>
+      </div>
+      <div class="card" style="background:var(--teal-soft);border-color:transparent">
+        <h3>검증: 소관 기관에 직접 질의 (10/29 접수)</h3>
+        <p>보건복지부 — 공공정보 제공·예약 요청 전달·고정 구독료가 "유치·알선"인지<br>한국보건산업진흥원 — 외국인 참고 가격 표시, 진료비 실태조사 공개 여부</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot">출처: 국가법령정보센터 의료법(시행 2026-10-02) · 의료 해외진출 및 외국인환자 유치 지원에 관한 법률(시행 2026-05-12) · 개인정보 보호법(시행 2026-09-11) · 대법원 2019. 4. 25. 선고 2018도20928 · 멘토 피드백(사후관리 Q&amp;A 불가)</div>
+</section>
+
+<!-- 5. BM 확장 -->
+<section class="slide">
+  <div class="pg">5 / 7</div>
+  <div class="kicker">04 · 비즈니스 모델 확장 (강사님 피드백)</div>
+  <h2>정보 플랫폼으로 모으고, 병원에는 구독형 예약 에이전트를 판다</h2>
+  <div class="body" style="flex-direction:column;gap:18px">
+    <svg viewBox="0 0 1136 200" width="100%" height="200" role="img" aria-label="환자 정보 웹에서 병원 대시보드로 이어지는 예약 요청 흐름">
+      <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0f8b8d"/></marker></defs>
+      <rect x="0" y="30" width="250" height="140" rx="14" fill="#e3f3f2"/>
+      <text x="125" y="70" text-anchor="middle" font-size="19" font-weight="800" fill="#0f2a3d">① 환자용 정보 웹</text>
+      <text x="125" y="100" text-anchor="middle" font-size="15" fill="#14212b">병원 찾기 · 지도 · 진료시간</text>
+      <text x="125" y="124" text-anchor="middle" font-size="15" fill="#14212b">다국어 · 출처 기반 챗봇</text>
+      <text x="125" y="150" text-anchor="middle" font-size="14" fill="#55636e">무료 · 광고(애드센스)</text>
+      <line x1="258" y1="100" x2="438" y2="100" stroke="#0f8b8d" stroke-width="3" marker-end="url(#ar)"/>
+      <text x="348" y="88" text-anchor="middle" font-size="15" font-weight="700" fill="#0f8b8d">환자가 직접 고른 병원 1곳</text>
+      <text x="348" y="124" text-anchor="middle" font-size="14" fill="#55636e">상담·예약 요청서</text>
+      <rect x="446" y="30" width="244" height="140" rx="14" fill="#fff" stroke="#0f8b8d" stroke-width="2"/>
+      <text x="568" y="70" text-anchor="middle" font-size="19" font-weight="800" fill="#0f2a3d">AI 예약 에이전트</text>
+      <text x="568" y="100" text-anchor="middle" font-size="15" fill="#14212b">번역 · 요약 · 답장 초안</text>
+      <text x="568" y="124" text-anchor="middle" font-size="15" fill="#14212b">예약 가능 시간 제안</text>
+      <text x="568" y="150" text-anchor="middle" font-size="14" fill="#55636e">의료 판단 X</text>
+      <line x1="698" y1="100" x2="878" y2="100" stroke="#0f8b8d" stroke-width="3" marker-end="url(#ar)"/>
+      <text x="788" y="88" text-anchor="middle" font-size="15" font-weight="700" fill="#0f8b8d">캘린더에 "대기"</text>
+      <text x="788" y="124" text-anchor="middle" font-size="14" fill="#55636e">직원 승인 후 발송</text>
+      <rect x="886" y="30" width="250" height="140" rx="14" fill="#0f2a3d"/>
+      <text x="1011" y="70" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">② 병원용 대시보드</text>
+      <text x="1011" y="100" text-anchor="middle" font-size="15" fill="#cfe3ea">확정 · 거절 · 시간 제안</text>
+      <text x="1011" y="124" text-anchor="middle" font-size="15" fill="#cfe3ea">진료계약서·예상 진료비 안내</text>
+      <text x="1011" y="150" text-anchor="middle" font-size="14" fill="#8fd3d1">월 고정 구독료</text>
+    </svg>
+    <div style="display:flex;gap:16px;flex:1">
+      <div class="card" style="flex:1"><span class="tag t-teal">수익원 1</span><h3 style="margin-top:8px">병원용 예약 에이전트 구독</h3><p>등록 유치의료기관 대상 월 고정 요금. 요금 기준 = <b>기능·좌석·AI 사용량</b></p></div>
+      <div class="card" style="flex:1"><span class="tag t-teal">수익원 2</span><h3 style="margin-top:8px">정보 웹 광고</h3><p>목록·상세 옆에만. <b>건강·미용 광고 카테고리 차단</b>, 요청서·챗봇 화면엔 X</p></div>
+      <div class="card" style="flex:1;background:var(--amber-soft);border-color:transparent"><span class="tag t-amber">규제 조건</span><h3 style="margin-top:8px">수수료처럼 보이지 않게</h3><p>예약 건수·환자 수 연동 X · 구독 여부로 정렬 X · 확정은 병원</p></div>
+    </div>
+  </div>
+  <div class="foot">근거: research/의료관광/규제-예약에이전트-B2B.md, 규제-예약요청-캘린더.md · 대법원 2018도20928, 2021도10046(영리 목적 = 의료기관 이익 분배) · Google AdSense 고객센터(카테고리 차단, 완전 차단은 보장 안 함)</div>
+</section>
+
+<!-- 6. 타깃 국가·분야 -->
+<section class="slide">
+  <div class="pg">6 / 7</div>
+  <div class="kicker">05 · 타깃 국가 · 진료 분야</div>
+  <h2>1순위는 대만 · 피부·성형 — 대구가 이미 받고 있고, 빠르게 크는 시장</h2>
+  <div class="body">
+    <div class="col tight" style="flex:1.2">
+      <div class="card">
+        <h3>대구가 나라별 환자를 얼마나 가져가나 (2025, 대구 전체 점유율 1.0% 기준)</h3>
+        <table>
+          <tr><th>국적</th><th style="text-align:right">전국 환자</th><th style="text-align:right">전국 증가율</th><th style="text-align:right">대구</th><th style="text-align:right">대구 점유율</th></tr>
+          <tr><td><b>대만</b></td><td class="num">185,715</td><td class="num">+122.5%</td><td class="num">1,495</td><td class="num">0.81%</td></tr>
+          <tr><td>중국</td><td class="num">618,973</td><td class="num">+137.5%</td><td class="num">3,422</td><td class="num">0.55%</td></tr>
+          <tr><td>일본</td><td class="num">600,009</td><td class="num">+36.0%</td><td class="num">938</td><td class="num">0.16%</td></tr>
+          <tr style="background:var(--amber-soft)"><td><b>베트남</b></td><td class="num">23,133</td><td class="num">+13.5%</td><td class="num">2,225</td><td class="num" style="color:var(--amber)">9.62%</td></tr>
+          <tr><td class="muted">미국</td><td class="num muted">173,363</td><td class="num muted">+70.4%</td><td class="num muted">6,101</td><td class="num muted">3.52%</td></tr>
+        </table>
+        <p class="muted" style="margin-top:8px;font-size:14px">대만 환자가 찾는 지역: 서울 154,278 · 부산 28,373 · <b>대구 1,495 (전국 3위)</b> · 제주 1,071</p>
+      </div>
+      <div class="card" style="padding:12px 16px">
+        <p style="font-size:15px;line-height:1.5"><b>베트남: 대구 점유율 9.62% = 평균의 약 10배</b> — 전국 베트남 환자 10명 중 1명이 대구. 시장은 작지만(2.3만) 대구가 가장 강한 국가 (거주자·방문자 구성은 확인 필요)</p>
+        <p style="font-size:15px;line-height:1.5;margin-top:6px" class="muted"><b>미국은 제외</b> — 대구 1위 국적이나 입원 비율 12.9%, 거주자(주한미군 등)일 가능성 (추정)</p>
+      </div>
+    </div>
+    <div class="col tight">
+      <div class="card" style="background:var(--teal-soft);border-color:transparent">
+        <h3>MVP 분야: 피부·성형 ("미용의료")</h3>
+        <ul>
+          <li>대만 피부과 80.3%, 일본 성형외과 16.3% (전국)</li>
+          <li><b>베트남도 피부과 1순위·성형외과 3순위</b> (전국, 외래 93.3%)</li>
+          <li><b>성형외과는 대구 1위 진료과</b> — 5,786명, 대구 외국인 환자의 25.3% (전국 11.6%)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>2단계 트랙: 검진·중증 (상급종합병원)</h3>
+        <p>대구 상급종합병원 외국인 환자 <b>3,533명, 전국 3위</b> (서울·경기 다음), 점유율 5.8%. 몽골·중앙아시아 대상, 비교보다 <b>국제진료센터 연결</b>이 맞음</p>
+      </div>
+      <div class="card" style="padding:12px 16px"><p><b>MVP 언어</b>: 영어 + 중국어 번체(대만) + <b>베트남어</b> → 이후 간체·일본어·태국어 <span class="muted">— 베트남어 AI 답변은 품질 테스트 후</span></p></div>
+    </div>
+  </div>
+  <div class="foot">출처: 한국보건산업진흥원 2025 외국인환자 유치실적 통계분석 보고서 표 2.11·2.12·2.17·3.17·3.23·3.48·3.73~3.75·3.118·3.120 (data/interim/유입) · 점유율·배수는 보고서 수치로 계산 · 팀 분석 문서 data/raw/다국어/타깃_국가_분야_분석.md</div>
+</section>
+
+<!-- 7. 데이터 -->
+<section class="slide">
+  <div class="pg">7 / 7</div>
+  <div class="kicker">06 · 데이터</div>
+  <h2>병원 정보는 의원급까지 채우고, 가격은 "병원별"이 아니라 "지역 통계"로</h2>
+  <div class="body">
+    <div class="col tight" style="flex:1.1">
+      <div class="card">
+        <h3>raw 데이터 기준 등록 가능 기관 (대구 4,242곳 중)</h3>
+        <table>
+          <tr><th>등급</th><th>기준</th><th style="text-align:right">기관 수</th></tr>
+          <tr><td><span class="tag t-ok">A</span></td><td>이름·주소·전화·좌표</td><td class="num">4,225</td></tr>
+          <tr><td><span class="tag t-teal">B</span></td><td>A + 진료시간 (API 1,113 + 직접 채움 48)</td><td class="num">1,158</td></tr>
+          <tr><td></td><td class="muted">└ 의원·치과의원·한의원</td><td class="num">1,030</td></tr>
+          <tr><td><span class="tag t-amber">가격</span></td><td>공공 비급여 가격 있음 (전부 병원급)</td><td class="num">224</td></tr>
+          <tr><td></td><td class="muted">└ 의원급 3,971곳 중</td><td class="num" style="color:var(--red)">0</td></tr>
+        </table>
+      </div>
+      <div class="card" style="background:var(--red-soft);border-color:transparent;padding:14px 18px">
+        <p><b>한계</b> — 공개 의무는 병원급만(의료법 제45조의2), <b>보톡스·필러·쌍꺼풀 항목 없음</b> → MVP 분야(피부·성형)는 공공 가격 없음. 외국인 적용 금액은 미확인</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h3>가격 표시 원칙: 병원별 비교·정렬 X</h3>
+        <p>병원별 가격을 나란히 놓고 싼 순으로 정렬하면 공개 가격이라도 <b>"최저가 = 추천"</b> → 유인·알선 위험</p>
+        <table style="margin-top:8px">
+          <tr><th>예: 치과 임플란트(지르코니아)</th><th style="text-align:right">대구</th></tr>
+          <tr><td>중앙값 (기관 22곳)</td><td class="num">130만 원</td></tr>
+          <tr><td>가운데 절반 범위</td><td class="num">105만~150만 원</td></tr>
+          <tr><td>기준일</td><td class="num">2026-09-03</td></tr>
+        </table>
+        <p class="muted" style="margin-top:6px;font-size:14px">기관 수 · 기준일 · 산출 방식 함께 표시, 5곳 미만 항목은 숨김</p>
+      </div>
+      <div class="card" style="background:var(--teal-soft);border-color:transparent;padding:14px 18px">
+        <p><b>피부·성형은 숫자 대신 "권리" 안내</b> — 유치의료기관은 진료계약서·예상 진료비를 안내할 의무(해외진출법 제8조 제2항) → "예상 진료비를 서면으로 요청하세요" + 요청서 연결</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot">출처: 건강보험심사평가원 병원정보서비스·의료기관별상세정보서비스·비급여진료비정보조회서비스(2026-10-28 수집, 통계는 병원별 최저 금액 기준 계산) · 의료법 제45조의2 · 의료 해외진출법 제8조 · 대법원 2018도20928 · 멘토 피드백(가격 표시 조건)</div>
+</section>
+
+</div>
+<div class="nav"><button id="prev" aria-label="이전 슬라이드">← 이전</button><button id="next" aria-label="다음 슬라이드">다음 →</button></div>
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];let i=0;
+  const fromHash=parseInt(location.hash.slice(1),10);if(fromHash>=1&&fromHash<=slides.length)i=fromHash-1;
+  function fit(){const s=Math.min(innerWidth/1340,(innerHeight-60)/760);slides.forEach(el=>el.style.transform='scale('+s+')')}
+  function show(n){i=Math.max(0,Math.min(slides.length-1,n));slides.forEach((el,k)=>el.classList.toggle('on',k===i));history.replaceState(null,'','#'+(i+1))}
+  addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1)}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(slides.length-1)});
+  document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);
+  addEventListener('hashchange',()=>{const n=parseInt(location.hash.slice(1),10);if(n>=1&&n<=slides.length&&n-1!==i)show(n-1)});
+  addEventListener('resize',fit);fit();show(i);
+})();
+</script>
+</body>
+</html>
