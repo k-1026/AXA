@@ -629,6 +629,24 @@ a {
   display: block;
 }
 
+/* 태블릿 이하: 배너 2개를 한 자리에 겹쳐 5초마다 번갈아 보여줌 */
+@media (max-width: 860px) and (prefers-reduced-motion: no-preference) {
+  .ad-row:has(> .ad-slot.has-image:nth-child(2):last-child) > .ad-slot {
+    grid-area: 1 / 1;
+    animation: ad-rotate 10s infinite;
+  }
+
+  .ad-row:has(> .ad-slot.has-image:nth-child(2):last-child) > .ad-slot:nth-child(2) {
+    animation-delay: -5s;
+  }
+}
+
+@keyframes ad-rotate {
+  0%, 45% { opacity: 1; visibility: visible; }
+  50%, 95% { opacity: 0; visibility: hidden; }
+  100% { opacity: 1; visibility: visible; }
+}
+
 .placeholder-page {
   padding: 40px;
   background: var(--surface);
