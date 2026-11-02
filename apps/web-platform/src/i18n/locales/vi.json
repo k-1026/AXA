@@ -103,5 +103,10 @@
     "lunchSat": "Nghỉ trưa (Thứ 7)",
     "rcvWeek": "Giờ tiếp nhận (ngày thường)",
     "rcvSat": "Giờ tiếp nhận (Thứ 7)"
+  },
+  "prices": {
+    "pending": "Đang xác nhận giá",
+    "range": "{{min}}–{{max}} KRW",
+    "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản."
   }
 }

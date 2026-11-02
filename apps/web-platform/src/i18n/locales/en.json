@@ -103,5 +103,10 @@
     "lunchSat": "Lunch break (Sat)",
     "rcvWeek": "Reception (weekdays)",
     "rcvSat": "Reception (Sat)"
+  },
+  "prices": {
+    "pending": "Price being checked",
+    "range": "KRW {{min}}–{{max}}",
+    "notice": "Amounts shown are market price ranges. Actual costs vary by hospital and treatment, and procedures offered differ by hospital. This is not advertising, a recommendation, or medical advice. You can ask a hospital for a written cost estimate."
   }
 }

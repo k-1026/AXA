@@ -258,6 +258,59 @@ a {
   color: var(--accent);
 }
 
+/* 가격 가이드 */
+.procedure-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.procedure-dept {
+  margin: 8px 0 0;
+  font-size: 1.1rem;
+}
+
+.procedure-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.procedure-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.procedure-photo {
+  margin-bottom: 8px;
+  border-radius: 12px;
+}
+
+.procedure-card h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* 이름 길이가 달라도 가격 줄은 카드 아래에 맞춤 */
+.procedure-price {
+  margin: auto 0 0;
+  padding-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.procedure-price.is-pending {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
 /* 병원 상세 */
 .hospital-detail {
   display: flex;
@@ -626,6 +679,10 @@ a {
   .filter-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .procedure-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 560px) {
@@ -646,6 +703,10 @@ a {
   .hospital-map,
   .map-status {
     height: 360px;
+  }
+
+  .procedure-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .dept-chip {

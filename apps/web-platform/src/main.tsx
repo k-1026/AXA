@@ -8,6 +8,7 @@ import { Layout } from './layout/Layout';
 import { MainPage } from './pages/MainPage';
 import { HospitalsPage } from './pages/HospitalsPage';
 import { HospitalDetailPage } from './pages/HospitalDetailPage';
+import { PriceGuidePage } from './pages/PriceGuidePage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 
 createRoot(document.getElementById('root')!).render(
@@ -19,7 +20,7 @@ createRoot(document.getElementById('root')!).render(
             <Route index element={<MainPage />} />
             <Route path="hospitals" element={<HospitalsPage />} />
             <Route path="hospitals/:id" element={<HospitalDetailPage />} />
-            <Route path="prices" element={<PlaceholderPage titleKey="nav.prices" />} />
+            <Route path="prices" element={<PriceGuidePage />} />
             <Route path="chatbot" element={<PlaceholderPage titleKey="nav.chatbot" />} />
             <Route path="about" element={<PlaceholderPage titleKey="nav.about" />} />
             <Route path="login" element={<PlaceholderPage titleKey="header.login" />} />

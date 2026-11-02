@@ -19,13 +19,13 @@ npm run dev        # http://localhost:5173
 src/
 ├── main.tsx              라우트 (메인·병원 정보·가격 가이드·챗봇·서비스 소개·로그인)
 ├── layout/               Header(언어·통화·로그인) · Sidebar(메뉴) · Footer(고지·출처)
-├── pages/                MainPage(지도+진료과 필터+광고 자리), HospitalsPage(카드 목록), HospitalDetailPage, PlaceholderPage
+├── pages/                MainPage(지도+진료과 필터+광고 자리), HospitalsPage(카드 목록), HospitalDetailPage, PriceGuidePage, PlaceholderPage
 ├── components/           AdSlot, currency(통화 선택 상태), storage(설정 저장)
 ├── i18n/                 react-i18next, locales/ ko·en·zh-CN·zh-TW·vi
 └── features/
     ├── map/              HospitalMap, DepartmentFilter
     ├── hospital/         HospitalCard, FilterGrid, filters(진료과·구군 목록), 타입, useHospitals
-    ├── price-info/       (예정) 가격 가이드
+    ├── price-info/       가격 가이드 시술 목록·카드
     ├── chatbot/          (예정) 챗봇
     └── booking-request/  (예정) 예약 요청서
 scripts/build-hospitals.mjs   지도용 병원 JSON 생성
@@ -42,6 +42,7 @@ scripts/romanize.mjs          병원 이름 → 영어 이름
 | 병원 상세 (`/hospitals/:id`) | 진료시간·점심·접수·휴진, 응급실·주차, 위치 지도. **빈 값은 빈칸** |
 | 진료과 판정 | 피부과·성형외과 = 심평원 진료과목 코드, **내과·안과 = 임시로 의원·병원 이름에 '내과'·'안과'** (종합병원 내과·안과는 빠짐 → 진료과목 01·12 수집 후 교체) |
 | 병원 사진 | 데이터 없음 → 빈 자리 |
+| 가격 가이드 (`/prices`) | 진료과 필터, 시술 66개 카드 (`features/price-info/procedures.ts`, 팀 문서 "병원별 시술 모음" 기준). 이름은 한국어 외 언어에서 영어로 통일. **사진·가격은 비어 있음** (가격은 범위만, 출처·기준일과 함께 입력) |
 | 언어 | UI 문구 5개 언어. 병원 이름은 한국어 외 모든 언어에서 영어로 통일: 발음 표기 + 진료과·기관 종류 영어 번역 (`scripts/romanize.mjs`, 음절 단위 로마자 표기법). 주소는 아직 한국어 원문 |
 | 통화 | 선택값만 저장. 환산은 가격 가이드에서 (환율 출처 미정) |
 | 로그인·광고·나머지 메뉴 | 자리만 있음 |
