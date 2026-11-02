@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useHospitalName } from './name';
 import type { Hospital } from './types';
 
 export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
   const { t } = useTranslation();
+  const nameOf = useHospitalName();
 
   return (
     <article className="hospital-card">
@@ -18,7 +20,7 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
             state={{ fromList: true }}
             className="card-link"
           >
-            {h.name}
+            {nameOf(h)}
           </Link>
         </h2>
         <dl className="hospital-facts">

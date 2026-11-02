@@ -1,6 +1,7 @@
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
+import { useHospitalName } from '../hospital/name';
 import type { Hospital } from '../hospital/types';
 
 const DAEGU_CENTER: [number, number] = [35.8714, 128.6014];
@@ -12,6 +13,7 @@ interface Props {
 
 export function HospitalMap({ hospitals, fetchedAt }: Props) {
   const { t } = useTranslation();
+  const nameOf = useHospitalName();
 
   return (
     // preferCanvas: 병원 4천여 곳을 마커로 그려도 느려지지 않게
@@ -28,7 +30,7 @@ export function HospitalMap({ hospitals, fetchedAt }: Props) {
           pathOptions={{ color: '#ffffff', weight: 1, fillColor: '#1f6feb', fillOpacity: 0.85 }}
         >
           <Popup>
-            <strong>{h.name}</strong>
+            <strong>{nameOf(h)}</strong>
             <dl className="popup-info">
               <dt>{t('popup.type')}</dt>
               <dd>{t(`hospitalType.${h.type}`, { defaultValue: h.type })}</dd>

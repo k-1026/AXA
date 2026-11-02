@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { englishName } from './romanize.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '../../..');
@@ -77,6 +78,7 @@ const items = hours
   .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos)
   .map(({ r, depts }) => {
     const b = basics.get(r.ykiho) ?? {};
+    const name = r.yadmNm.replace(/&amp;/g, '&');
     const week = DAYS.map((d) => {
       const start = hhmm(r[`trmt${d}Start`]);
       const end = hhmm(r[`trmt${d}End`]);
@@ -85,7 +87,8 @@ const items = hours
     // 빈 값은 저장하지 않음 → 화면에서 빈칸
     return {
       id: r.ykiho,
-      name: r.yadmNm,
+      name,
+      nameEn: englishName(name),
       type: r.clCdNm,
       district: r.sgguCdNm.replace(/^대구/, ''),
       addr: r.addr,

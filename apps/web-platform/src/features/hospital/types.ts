@@ -4,6 +4,7 @@ export type DepartmentKey = 'dermatology' | 'plastic' | 'internal' | 'ophthalmol
 export interface Hospital {
   id: string;
   name: string;
+  nameEn: string; // 한국어 외 모든 언어에서 쓰는 영어 이름
   type: string;
   district: string;
   addr: string;

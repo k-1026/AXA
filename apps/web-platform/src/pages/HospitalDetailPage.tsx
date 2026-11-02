@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useHospitalName } from '../features/hospital/name';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
 
@@ -13,6 +14,7 @@ export function HospitalDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = useHospitals();
+  const nameOf = useHospitalName();
 
   if (state.status === 'loading') return <p className="list-status">{t('map.loading')}</p>;
   if (state.status === 'error') return <p className="list-status">{t('map.error')}</p>;
@@ -47,7 +49,7 @@ export function HospitalDetailPage() {
         <div className="hospital-photo detail-photo" aria-hidden="true" />
         <div>
           <p className="hospital-type">{t(`hospitalType.${h.type}`, { defaultValue: h.type })}</p>
-          <h1>{h.name}</h1>
+          <h1>{nameOf(h)}</h1>
           <ul className="dept-tags">
             {h.depts.map((d) => (
               <li key={d}>{t(`dept.${d}`)}</li>
