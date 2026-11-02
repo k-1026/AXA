@@ -1,17 +1,19 @@
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
+import { DEPARTMENT_COLORS } from '../hospital/filters';
 import { useHospitalName } from '../hospital/name';
-import type { Hospital } from '../hospital/types';
+import type { DepartmentKey, Hospital } from '../hospital/types';
 
 const DAEGU_CENTER: [number, number] = [35.8714, 128.6014];
 
 interface Props {
   hospitals: Hospital[];
   fetchedAt: string;
+  selectedDept: DepartmentKey | null;
 }
 
-export function HospitalMap({ hospitals, fetchedAt }: Props) {
+export function HospitalMap({ hospitals, fetchedAt, selectedDept }: Props) {
   const { t } = useTranslation();
   const nameOf = useHospitalName();
 
@@ -27,7 +29,13 @@ export function HospitalMap({ hospitals, fetchedAt }: Props) {
           key={h.id}
           center={[h.lat, h.lng]}
           radius={5}
-          pathOptions={{ color: '#ffffff', weight: 1, fillColor: '#1f6feb', fillOpacity: 0.85 }}
+          // 필터를 골랐으면 그 진료과 색, 전체 보기면 대표 진료과 색
+          pathOptions={{
+            color: '#ffffff',
+            weight: 1,
+            fillColor: DEPARTMENT_COLORS[selectedDept ?? h.depts[0]],
+            fillOpacity: 0.85,
+          }}
         >
           <Popup>
             <strong>{nameOf(h)}</strong>

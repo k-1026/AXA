@@ -514,6 +514,13 @@ a {
   text-align: center;
 }
 
+.dept-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #ffffff;
+}
+
 .dept-chip small {
   font-size: 0.65rem;
   color: var(--text-muted);

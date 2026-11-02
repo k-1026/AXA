@@ -43,6 +43,8 @@ const basics = new Map(readCsv('daegu_hospitals.csv').map((r) => [r.ykiho, r]));
 // - 피부과·성형외과: 심평원 진료과목 코드 (14, 08)
 // - 내과·안과: 진료과목 코드를 아직 수집하지 않아서 임시로 "의원·병원 이름에 '내과'·'안과'" 기준
 //   → 내과·안과가 있는 종합병원 등은 빠짐. 진료과목 01·12 수집 후 교체
+// 여러 진료과면 병원 이름에 들어 있는 진료과를 맨 앞에 둔다 (지도 색상 기준)
+const DEPT_NAMES = { dermatology: '피부과', plastic: '성형외과', internal: '내과', ophthalmology: '안과' };
 function departments(r) {
   const depts = [];
   if (r.has_dermatology === 'Y') depts.push('dermatology');
@@ -50,7 +52,7 @@ function departments(r) {
   const medical = !r.clCdNm.startsWith('치과') && !r.clCdNm.startsWith('한');
   if (medical && r.yadmNm.includes('내과')) depts.push('internal');
   if (medical && r.yadmNm.includes('안과')) depts.push('ophthalmology');
-  return depts;
+  return depts.sort((a, b) => r.yadmNm.includes(DEPT_NAMES[b]) - r.yadmNm.includes(DEPT_NAMES[a]));
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

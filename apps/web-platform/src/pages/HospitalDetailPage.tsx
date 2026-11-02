@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { DEPARTMENT_COLORS } from '../features/hospital/filters';
 import { useHospitalName } from '../features/hospital/name';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
@@ -103,7 +104,7 @@ export function HospitalDetailPage() {
             <CircleMarker
               center={[h.lat, h.lng]}
               radius={9}
-              pathOptions={{ color: '#ffffff', weight: 2, fillColor: '#1f6feb', fillOpacity: 1 }}
+              pathOptions={{ color: '#ffffff', weight: 2, fillColor: DEPARTMENT_COLORS[h.depts[0]], fillOpacity: 1 }}
             />
           </MapContainer>
         </section>

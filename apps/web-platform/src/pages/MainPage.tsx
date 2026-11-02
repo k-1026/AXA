@@ -29,7 +29,7 @@ export function MainPage() {
         {state.status === 'loading' && <p className="map-status">{t('map.loading')}</p>}
         {state.status === 'error' && <p className="map-status">{t('map.error')}</p>}
         {state.status === 'ready' && (
-          <HospitalMap hospitals={visible} fetchedAt={state.data.meta.fetchedAt} />
+          <HospitalMap hospitals={visible} fetchedAt={state.data.meta.fetchedAt} selectedDept={dept} />
         )}
       </section>
 

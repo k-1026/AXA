@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { DepartmentKey } from '../hospital/types';
-import { DEPARTMENTS } from '../hospital/filters';
+import { DEPARTMENT_COLORS, DEPARTMENTS } from '../hospital/filters';
 
 interface Props {
   selected: DepartmentKey | null;
@@ -28,6 +28,7 @@ export function DepartmentFilter({ selected, onSelect }: Props) {
           aria-pressed={selected === key}
           onClick={() => onSelect(selected === key ? null : key)}
         >
+          <span className="dept-dot" style={{ background: DEPARTMENT_COLORS[key] }} aria-hidden="true" />
           {t(`dept.${key}`)}
         </button>
       ))}
