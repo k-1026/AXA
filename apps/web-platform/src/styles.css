@@ -599,7 +599,7 @@ a {
 /* 광고 자리 */
 .ad-row {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
@@ -612,6 +612,21 @@ a {
   background: var(--surface-muted);
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+/* 배너 이미지: 두 칸 높이를 2000×716 비율로 맞추고 넘치는 부분은 잘라냄 */
+.ad-slot.has-image {
+  height: auto;
+  align-self: start;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.ad-slot.has-image img {
+  width: 100%;
+  aspect-ratio: 2000 / 716;
+  object-fit: cover;
+  display: block;
 }
 
 .placeholder-page {

@@ -36,8 +36,14 @@ export function MainPage() {
       <DepartmentFilter selected={dept} onSelect={setDept} />
 
       <div className="ad-row">
-        <AdSlot className="ad-wide" />
-        <AdSlot />
+        <AdSlot
+          image="/ads/hanbang-skincare.webp"
+          alt="Yakryeongsi — Hanbang skincare. Rooted in Daegu."
+        />
+        <AdSlot
+          image="/ads/biseulsan-ice-festival.webp"
+          alt="Biseulsan Ice Festival — Daegu, on ice. Dalseong, Daegu"
+        />
       </div>
     </div>
   );
