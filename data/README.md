@@ -70,6 +70,7 @@
 
 - `raw/영업정보/daegu_hospitals_20261102.json` 심평원 재조회 → `processed/daegu_hospital_status.csv` (병원별 정상/폐업/미확인)
 - 행안부 인허가 원본 `raw/영업정보/mois_hospitals_20261102.json`, `mois_clinics_20261102.json` (폐업 이력 포함)
+- 갱신 주기: 심평원 실시간, 행안부 일간·약 2일 전 기준 (11-02 수집본 최신 `DAT_UPDT_PNT` = 10-31) → 평소 주 1회, 발표·시연 2~3일 전과 전날 다시 실행
 - 직접 확인 시트 `interim/영업정보/hospital_status_manual.csv`, 스크립트 `etl/verify_hospital_status.py`
 - 표본 점검 시트 `interim/영업정보/hospital_status_sample.csv` (정상 30 + 폐업 9, 지도로 확인), 스크립트 `etl/sample_hospital_status.py`
 - 방법·결과: [research/의료관광/병원-폐업-교차검증.md](../research/의료관광/병원-폐업-교차검증.md)
