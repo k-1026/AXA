@@ -66,6 +66,15 @@
 
 → `processed/`에 만들 후보: **대구 병원 마스터** = 심평원 기본 + 진료시간(API·직접 채움) + 수성구 유치 등록 + 선도의료기관 + 가격 유무 (+ 메디컬코리아 등록 여부는 원본 다시 받은 뒤)
 
+## 폐업·미존재 교차검증 (2026-11-02)
+
+- `raw/영업정보/daegu_hospitals_20261102.json` 심평원 재조회 → `processed/daegu_hospital_status.csv` (병원별 정상/폐업/미확인)
+- 행안부 인허가 원본 `raw/영업정보/mois_hospitals_20261102.json`, `mois_clinics_20261102.json` (폐업 이력 포함)
+- 갱신 주기: 심평원 실시간, 행안부 일간·약 2일 전 기준 (11-02 수집본 최신 `DAT_UPDT_PNT` = 10-31) → 평소 주 1회, 발표·시연 2~3일 전과 전날 다시 실행
+- 직접 확인 시트 `interim/영업정보/hospital_status_manual.csv`, 스크립트 `etl/verify_hospital_status.py`
+- 표본 점검 시트 `interim/영업정보/hospital_status_sample.csv` (정상 30 + 폐업 9, 지도로 확인), 스크립트 `etl/sample_hospital_status.py`
+- 방법·결과: [research/의료관광/병원-폐업-교차검증.md](../research/의료관광/병원-폐업-교차검증.md)
+
 ## 저장소에 올리지 않는 파일 (로컬에만, `.gitignore`)
 - **대표자 실명이 든 원본 2개**: 수성구 유치 등록 의료기관 원본, 서울시 의료관광허가 기관 한국어판 원본 → 가공본(`interim/`)을 쓰세요
 - **외부 사이트 크롤링 3개**: `raw/비급여진료/강남언니_*.csv`, `모두닥_*.csv` → 사이트 약관 확인 전까지 공개 저장소에 올리지 않음. 필요하면 팀 내부로 따로 공유
