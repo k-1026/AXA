@@ -25,7 +25,7 @@
     "dermatology": "Dermatology",
     "plastic": "Plastic surgery",
     "internal": "Internal medicine",
-    "dental": "Dentistry",
+    "ophthalmology": "Ophthalmology",
     "notReady": "Data coming soon"
   },
   "popup": {
@@ -41,8 +41,6 @@
     "요양병원": "Long-term care hospital",
     "정신병원": "Psychiatric hospital",
     "의원": "Clinic",
-    "치과병원": "Dental hospital",
-    "치과의원": "Dental clinic",
     "한방병원": "Korean medicine hospital",
     "한의원": "Korean medicine clinic",
     "보건소": "Public health center",

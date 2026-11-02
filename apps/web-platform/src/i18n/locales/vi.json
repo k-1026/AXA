@@ -25,7 +25,7 @@
     "dermatology": "Da liễu",
     "plastic": "Phẫu thuật thẩm mỹ",
     "internal": "Nội khoa",
-    "dental": "Nha khoa",
+    "ophthalmology": "Nhãn khoa",
     "notReady": "Đang chuẩn bị dữ liệu"
   },
   "popup": {
@@ -41,8 +41,6 @@
     "요양병원": "Bệnh viện điều dưỡng",
     "정신병원": "Bệnh viện tâm thần",
     "의원": "Phòng khám",
-    "치과병원": "Bệnh viện nha khoa",
-    "치과의원": "Phòng khám nha khoa",
     "한방병원": "Bệnh viện y học cổ truyền Hàn Quốc",
     "한의원": "Phòng khám y học cổ truyền Hàn Quốc",
     "보건소": "Trung tâm y tế công cộng",

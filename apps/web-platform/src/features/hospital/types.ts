@@ -1,4 +1,4 @@
-export type DepartmentKey = 'dermatology' | 'plastic' | 'internal' | 'dental';
+export type DepartmentKey = 'dermatology' | 'plastic' | 'internal' | 'ophthalmology';
 
 // 빈 값은 데이터에서 빠져 있음 (undefined) → 화면에서 빈칸
 export interface Hospital {

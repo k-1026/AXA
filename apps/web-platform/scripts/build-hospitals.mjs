@@ -1,5 +1,5 @@
 // data/interim/영업정보/*.csv → public/data/hospitals.json
-// 피부과·성형외과·내과·치과 병원만, 한국어 가나다순으로 저장한다. 원본 데이터는 수정하지 않는다.
+// 피부과·성형외과·내과·안과 병원만, 한국어 가나다순으로 저장한다. 원본 데이터는 수정하지 않는다.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,16 +40,15 @@ const basics = new Map(readCsv('daegu_hospitals.csv').map((r) => [r.ykiho, r]));
 
 // 진료과 판정
 // - 피부과·성형외과: 심평원 진료과목 코드 (14, 08)
-// - 치과: 종별이 치과병원·치과의원
-// - 내과: 진료과목 코드를 아직 수집하지 않아서 임시로 "의원·병원 이름에 '내과'" 기준
-//   → 내과가 있는 종합병원 등은 빠짐. 진료과목 01 수집 후 교체
+// - 내과·안과: 진료과목 코드를 아직 수집하지 않아서 임시로 "의원·병원 이름에 '내과'·'안과'" 기준
+//   → 내과·안과가 있는 종합병원 등은 빠짐. 진료과목 01·12 수집 후 교체
 function departments(r) {
   const depts = [];
   if (r.has_dermatology === 'Y') depts.push('dermatology');
   if (r.has_plastic_surgery === 'Y') depts.push('plastic');
   const medical = !r.clCdNm.startsWith('치과') && !r.clCdNm.startsWith('한');
   if (medical && r.yadmNm.includes('내과')) depts.push('internal');
-  if (r.clCdNm.startsWith('치과')) depts.push('dental');
+  if (medical && r.yadmNm.includes('안과')) depts.push('ophthalmology');
   return depts;
 }
 
