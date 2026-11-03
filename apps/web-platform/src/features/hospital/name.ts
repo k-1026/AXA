@@ -6,3 +6,7 @@ export function useHospitalName() {
   const { i18n } = useTranslation();
   return (h: Hospital) => (i18n.language === 'ko' ? h.name : h.nameEn);
 }
+
+// https://www.instagram.com/abc/ → @abc
+export const instagramHandle = (url: string) =>
+  url.replace(/^https?:\/\/(www\.)?instagram\.com\//, '@').replace(/\/$/, '');

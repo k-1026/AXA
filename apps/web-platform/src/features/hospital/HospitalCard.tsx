@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useHospitalName } from './name';
+import { instagramHandle, useHospitalName } from './name';
 import type { Hospital } from './types';
 
 export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
@@ -33,6 +33,14 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
             {h.url && (
               <a href={h.url} target="_blank" rel="noopener noreferrer">
                 {h.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+              </a>
+            )}
+          </dd>
+          <dt>{t('hospital.instagram')}</dt>
+          <dd>
+            {h.instagram && (
+              <a href={h.instagram} target="_blank" rel="noopener noreferrer">
+                {instagramHandle(h.instagram)}
               </a>
             )}
           </dd>

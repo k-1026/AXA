@@ -84,6 +84,7 @@
   },
   "hospital": {
     "homepage": "홈페이지",
+    "instagram": "인스타그램",
     "more": "더 보기 ({{count}}곳 남음)",
     "empty": "조건에 맞는 병원이 없어요.",
     "back": "병원 목록",

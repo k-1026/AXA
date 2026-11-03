@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { DEPARTMENT_COLORS } from '../features/hospital/filters';
-import { useHospitalName } from '../features/hospital/name';
+import { instagramHandle, useHospitalName } from '../features/hospital/name';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
 
@@ -66,6 +66,14 @@ export function HospitalDetailPage() {
               {h.url && (
                 <a href={h.url} target="_blank" rel="noopener noreferrer">
                   {h.url}
+                </a>
+              )}
+            </dd>
+            <dt>{t('hospital.instagram')}</dt>
+            <dd>
+              {h.instagram && (
+                <a href={h.instagram} target="_blank" rel="noopener noreferrer">
+                  {instagramHandle(h.instagram)}
                 </a>
               )}
             </dd>

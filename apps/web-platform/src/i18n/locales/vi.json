@@ -84,6 +84,7 @@
   },
   "hospital": {
     "homepage": "Trang web",
+    "instagram": "Instagram",
     "more": "Xem thêm (còn {{count}} cơ sở)",
     "empty": "Không có bệnh viện phù hợp.",
     "back": "Danh sách bệnh viện",

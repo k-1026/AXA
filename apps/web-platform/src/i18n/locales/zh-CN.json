@@ -84,6 +84,7 @@
   },
   "hospital": {
     "homepage": "官网",
+    "instagram": "Instagram",
     "more": "查看更多（剩余 {{count}} 家）",
     "empty": "没有符合条件的医院。",
     "back": "医院列表",

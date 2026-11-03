@@ -84,6 +84,7 @@
   },
   "hospital": {
     "homepage": "官網",
+    "instagram": "Instagram",
     "more": "查看更多（剩餘 {{count}} 家）",
     "empty": "沒有符合條件的醫院。",
     "back": "醫院列表",

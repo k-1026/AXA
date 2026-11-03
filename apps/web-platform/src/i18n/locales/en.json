@@ -84,6 +84,7 @@
   },
   "hospital": {
     "homepage": "Website",
+    "instagram": "Instagram",
     "more": "Show more ({{count}} left)",
     "empty": "No hospitals match these filters.",
     "back": "Hospital list",

@@ -45,6 +45,8 @@ const excluded = new Set(
     .filter((r) => r.verdict !== '정상')
     .map((r) => r.ykiho),
 );
+// 홈페이지·인스타그램 (팀 수집 파일에서 사이트 병원과 맞는 곳만, 블로그·네이버 제외)
+const links = new Map(readCsv('daegu_hospital_links.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r]));
 
 // 진료과 판정
 // - 피부과·성형외과: 심평원 진료과목 코드 (14, 08)
@@ -73,9 +75,10 @@ const closedNote = (v) => {
   return /^(전부|종일)?(휴진|휴무)$/.test(s) ? 'closed' : v.trim();
 };
 const yn = (v) => (v === 'Y' ? true : v === 'N' ? false : undefined);
+// 심평원 홈페이지 값 중 네이버 블로그·카페·모두는 홈페이지로 넣지 않는다
 const url = (v) => {
   const s = v.trim();
-  if (!s) return undefined;
+  if (!s || /naver\.com|modoo\.at/i.test(s)) return undefined;
   return /^https?:\/\//i.test(s) ? s : `http://${s}`;
 };
 
@@ -87,6 +90,7 @@ const items = hours
   .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos && !excluded.has(r.ykiho))
   .map(({ r, depts }) => {
     const b = basics.get(r.ykiho) ?? {};
+    const link = links.get(r.ykiho);
     const name = r.yadmNm.replace(/&amp;/g, '&');
     const week = DAYS.map((d) => {
       const start = hhmm(r[`trmt${d}Start`]);
@@ -102,7 +106,8 @@ const items = hours
       district: r.sgguCdNm.replace(/^대구/, ''),
       addr: r.addr,
       tel: r.telno || undefined,
-      url: url(b.hospUrl ?? ''),
+      url: link?.homepage || url(b.hospUrl ?? ''),
+      instagram: link?.instagram || undefined,
       lat: Number(r.YPos),
       lng: Number(r.XPos),
       depts,
