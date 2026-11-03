@@ -18,7 +18,12 @@
     "title": "Daegu hospital map",
     "count": "Showing {{count}}",
     "loading": "Loading hospital data…",
-    "error": "Couldn't load hospital data."
+    "error": "Couldn't load hospital data.",
+    "searchPlaceholder": "Search hospital name",
+    "searchLabel": "Search by hospital name",
+    "searchClear": "Clear search",
+    "searchEmpty": "No matching hospitals",
+    "searchMore": "Showing 8 of {{count}}. Press Enter to show all on the map"
   },
   "dept": {
     "label": "Department filter",

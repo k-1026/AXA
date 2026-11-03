@@ -18,7 +18,12 @@
     "title": "대구 병원 지도",
     "count": "{{count}}곳 표시",
     "loading": "병원 데이터를 불러오는 중…",
-    "error": "병원 데이터를 불러오지 못했어요."
+    "error": "병원 데이터를 불러오지 못했어요.",
+    "searchPlaceholder": "병원 이름 검색",
+    "searchLabel": "병원 이름으로 검색",
+    "searchClear": "검색어 지우기",
+    "searchEmpty": "일치하는 병원이 없어요",
+    "searchMore": "{{count}}곳 중 8곳만 보여요. Enter를 누르면 전부 지도에 표시돼요"
   },
   "dept": {
     "label": "진료과 필터",

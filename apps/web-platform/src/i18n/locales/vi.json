@@ -18,7 +18,12 @@
     "title": "Bản đồ bệnh viện Daegu",
     "count": "Đang hiển thị {{count}} cơ sở",
     "loading": "Đang tải dữ liệu bệnh viện…",
-    "error": "Không thể tải dữ liệu bệnh viện."
+    "error": "Không thể tải dữ liệu bệnh viện.",
+    "searchPlaceholder": "Tìm tên bệnh viện",
+    "searchLabel": "Tìm theo tên bệnh viện",
+    "searchClear": "Xóa tìm kiếm",
+    "searchEmpty": "Không có bệnh viện phù hợp",
+    "searchMore": "Hiển thị 8 trên {{count}}. Nhấn Enter để hiện tất cả trên bản đồ"
   },
   "dept": {
     "label": "Lọc theo chuyên khoa",

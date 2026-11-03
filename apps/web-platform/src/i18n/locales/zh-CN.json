@@ -18,7 +18,12 @@
     "title": "大邱医院地图",
     "count": "显示 {{count}} 家",
     "loading": "正在加载医院数据…",
-    "error": "无法加载医院数据。"
+    "error": "无法加载医院数据。",
+    "searchPlaceholder": "搜索医院名称",
+    "searchLabel": "按医院名称搜索",
+    "searchClear": "清除搜索",
+    "searchEmpty": "没有匹配的医院",
+    "searchMore": "共 {{count}} 家，仅显示 8 家。按 Enter 在地图上显示全部"
   },
   "dept": {
     "label": "科室筛选",
