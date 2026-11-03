@@ -7,6 +7,7 @@ export const NAV_ITEMS = [
   { to: '/prices', key: 'prices' },
   { to: '/chatbot', key: 'chatbot' },
   { to: '/about', key: 'about' },
+  { to: '/mypage', key: 'mypage' },
 ] as const;
 
 export function Sidebar() {

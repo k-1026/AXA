@@ -11,7 +11,8 @@
     "hospitals": "医院信息",
     "prices": "价格指南",
     "chatbot": "聊天机器人（常见问题）",
-    "about": "服务介绍"
+    "about": "服务介绍",
+    "mypage": "我的页面"
   },
   "map": {
     "title": "大邱医院地图",
@@ -108,5 +109,45 @@
     "pending": "价格确认中",
     "range": "{{min}}–{{max}} 韩元",
     "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。"
+  },
+  "mypage": {
+    "home": "首页",
+    "kst": "韩国时间 KST",
+    "greeting": "{{name}}，准备好您的大邱之旅吧。",
+    "subtitle": "在一个地方管理收藏的医院、就诊日程和旅行准备。",
+    "stats": {
+      "saved": "收藏的医院",
+      "visits": "就诊记录",
+      "recent": "最近浏览"
+    },
+    "schedule": {
+      "title": "我的大邱日程",
+      "edit": "编辑日程",
+      "add": "添加日程",
+      "directions": "路线",
+      "more": "日程菜单",
+      "tag": {
+        "userAdded": "自行登记",
+        "experience": "体验",
+        "tour": "观光"
+      }
+    },
+    "checklist": {
+      "title": "就诊准备清单",
+      "progress": "共 {{total}} 项，已完成 {{done}} 项",
+      "viewAll": "查看完整清单",
+      "items": {
+        "saveAddress": "保存医院地址",
+        "setLanguage": "设置使用语言",
+        "checkHours": "确认就诊时间",
+        "checkInterpreter": "确认翻译支持",
+        "checkNotice": "确认医院须知"
+      }
+    },
+    "account": {
+      "title": "我的账户",
+      "desc": "个人资料和语言设置",
+      "manage": "管理账户"
+    }
   }
 }

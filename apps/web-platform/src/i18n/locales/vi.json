@@ -11,7 +11,8 @@
     "hospitals": "Thông tin bệnh viện",
     "prices": "Hướng dẫn giá",
     "chatbot": "Chatbot (Câu hỏi thường gặp)",
-    "about": "Giới thiệu dịch vụ"
+    "about": "Giới thiệu dịch vụ",
+    "mypage": "Trang của tôi"
   },
   "map": {
     "title": "Bản đồ bệnh viện Daegu",
@@ -108,5 +109,45 @@
     "pending": "Đang xác nhận giá",
     "range": "{{min}}–{{max}} KRW",
     "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản."
+  },
+  "mypage": {
+    "home": "Trang chủ",
+    "kst": "Giờ Hàn Quốc (KST)",
+    "greeting": "{{name}}, hãy chuẩn bị cho chuyến đi Daegu của bạn.",
+    "subtitle": "Quản lý bệnh viện đã lưu, lịch khám và chuẩn bị chuyến đi tại một nơi.",
+    "stats": {
+      "saved": "Bệnh viện đã lưu",
+      "visits": "Lịch sử khám",
+      "recent": "Đã xem gần đây"
+    },
+    "schedule": {
+      "title": "Lịch trình Daegu của tôi",
+      "edit": "Sửa lịch",
+      "add": "Thêm lịch",
+      "directions": "Chỉ đường",
+      "more": "Tùy chọn lịch",
+      "tag": {
+        "userAdded": "Bạn tự thêm",
+        "experience": "Trải nghiệm",
+        "tour": "Tham quan"
+      }
+    },
+    "checklist": {
+      "title": "Danh sách chuẩn bị",
+      "progress": "Đã xong {{done}}/{{total}}",
+      "viewAll": "Xem toàn bộ danh sách",
+      "items": {
+        "saveAddress": "Lưu địa chỉ bệnh viện",
+        "setLanguage": "Chọn ngôn ngữ",
+        "checkHours": "Kiểm tra giờ khám",
+        "checkInterpreter": "Kiểm tra hỗ trợ phiên dịch",
+        "checkNotice": "Đọc lưu ý của bệnh viện"
+      }
+    },
+    "account": {
+      "title": "Tài khoản của tôi",
+      "desc": "Hồ sơ và cài đặt ngôn ngữ",
+      "manage": "Quản lý tài khoản"
+    }
   }
 }

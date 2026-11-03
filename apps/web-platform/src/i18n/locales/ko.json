@@ -11,7 +11,8 @@
     "hospitals": "병원 정보",
     "prices": "가격 가이드",
     "chatbot": "챗봇 (자주 하는 질문)",
-    "about": "서비스 소개"
+    "about": "서비스 소개",
+    "mypage": "마이페이지"
   },
   "map": {
     "title": "대구 병원 지도",
@@ -108,5 +109,45 @@
     "pending": "가격 확인 중",
     "range": "{{min}}~{{max}}원",
     "notice": "표시 금액은 시중 가격 범위로, 실제 비용은 병원과 진료 내용에 따라 다릅니다. 병원별 제공 시술도 다를 수 있습니다. 광고·추천·의료 상담이 아니며, 예상 진료비는 병원에 서면으로 요청할 수 있습니다."
+  },
+  "mypage": {
+    "home": "홈",
+    "kst": "한국 시간 KST",
+    "greeting": "{{name}}님, 대구에서의 여정을 준비해 보세요.",
+    "subtitle": "관심 병원과 방문 일정, 여행 준비를 한곳에서 관리하세요.",
+    "stats": {
+      "saved": "저장한 병원",
+      "visits": "방문 기록",
+      "recent": "최근 조회 기록"
+    },
+    "schedule": {
+      "title": "나의 대구 일정",
+      "edit": "일정 수정",
+      "add": "일정 추가",
+      "directions": "길찾기",
+      "more": "일정 메뉴",
+      "tag": {
+        "userAdded": "직접 등록",
+        "experience": "체험",
+        "tour": "관광"
+      }
+    },
+    "checklist": {
+      "title": "방문 준비 체크리스트",
+      "progress": "{{total}}개 중 {{done}}개 완료",
+      "viewAll": "체크리스트 전체 보기",
+      "items": {
+        "saveAddress": "병원 주소 저장",
+        "setLanguage": "사용 언어 설정",
+        "checkHours": "방문 시간 확인",
+        "checkInterpreter": "통역 지원 확인",
+        "checkNotice": "병원 안내사항 확인"
+      }
+    },
+    "account": {
+      "title": "내 계정",
+      "desc": "프로필 및 언어 설정",
+      "manage": "계정 관리"
+    }
   }
 }

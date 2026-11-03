@@ -10,6 +10,7 @@ import { HospitalsPage } from './pages/HospitalsPage';
 import { HospitalDetailPage } from './pages/HospitalDetailPage';
 import { PriceGuidePage } from './pages/PriceGuidePage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { MyPage } from './pages/MyPage';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -24,6 +25,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="chatbot" element={<PlaceholderPage titleKey="nav.chatbot" />} />
             <Route path="about" element={<PlaceholderPage titleKey="nav.about" />} />
             <Route path="login" element={<PlaceholderPage titleKey="header.login" />} />
+            <Route path="mypage" element={<MyPage />} />
+            <Route path="mypage/:section" element={<PlaceholderPage titleKey="nav.mypage" />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -11,7 +11,8 @@
     "hospitals": "Hospitals",
     "prices": "Price guide",
     "chatbot": "Chatbot (FAQ)",
-    "about": "About"
+    "about": "About",
+    "mypage": "My page"
   },
   "map": {
     "title": "Daegu hospital map",
@@ -108,5 +109,45 @@
     "pending": "Price being checked",
     "range": "KRW {{min}}–{{max}}",
     "notice": "Amounts shown are market price ranges. Actual costs vary by hospital and treatment, and procedures offered differ by hospital. This is not advertising, a recommendation, or medical advice. You can ask a hospital for a written cost estimate."
+  },
+  "mypage": {
+    "home": "Home",
+    "kst": "Korea time (KST)",
+    "greeting": "{{name}}, get ready for your trip to Daegu.",
+    "subtitle": "Manage saved hospitals, visit plans and trip prep in one place.",
+    "stats": {
+      "saved": "Saved hospitals",
+      "visits": "Visit history",
+      "recent": "Recently viewed"
+    },
+    "schedule": {
+      "title": "My Daegu schedule",
+      "edit": "Edit",
+      "add": "Add plan",
+      "directions": "Directions",
+      "more": "Plan options",
+      "tag": {
+        "userAdded": "Added by you",
+        "experience": "Experience",
+        "tour": "Sightseeing"
+      }
+    },
+    "checklist": {
+      "title": "Visit checklist",
+      "progress": "{{done}} of {{total}} done",
+      "viewAll": "View full checklist",
+      "items": {
+        "saveAddress": "Save hospital address",
+        "setLanguage": "Set your language",
+        "checkHours": "Check visiting hours",
+        "checkInterpreter": "Check interpreter support",
+        "checkNotice": "Read hospital notices"
+      }
+    },
+    "account": {
+      "title": "My account",
+      "desc": "Profile and language settings",
+      "manage": "Manage account"
+    }
   }
 }
