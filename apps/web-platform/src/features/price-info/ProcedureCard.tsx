@@ -13,8 +13,10 @@ export function ProcedureCard({ procedure: p, category }: Props) {
 
   return (
     <article className="procedure-card">
-      {/* 시술 사진은 나중에 첨부 (전후 사진은 쓰지 않음, docs/compliance.md) */}
-      <div className="hospital-photo procedure-photo" aria-hidden="true" />
+      {/* 팀에서 만든 일러스트만 쓴다 (전후 사진은 쓰지 않음, docs/compliance.md). 없으면 빈 자리 */}
+      <div className={`hospital-photo procedure-photo ${p.image ? 'has-image' : ''}`} aria-hidden="true">
+        {p.image && <img src={`/procedures/${p.image}.jpg`} alt="" loading="lazy" />}
+      </div>
       <p className="hospital-type">{label(category)}</p>
       <h2>{label(p)}</h2>
       <p className={p.price ? 'procedure-price' : 'procedure-price is-pending'}>

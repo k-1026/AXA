@@ -2,3 +2,5 @@ dist/
 *.tsbuildinfo
 # scripts/build-hospitals.mjs 가 data/interim 에서 만드는 파일
 public/data/
+# 시술 일러스트 원본 (사이트에는 public/procedures/ 의 축소본을 씀)
+assets/medical_illustrations_*/**/*.png
