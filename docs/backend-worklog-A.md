@@ -17,6 +17,16 @@
 
 ## 기록
 
+### 2026-11-03 · backend-A-auth · Claude
+- 한 일: 전체 DB 스키마 초안 v3 [backend-db-schema.md](backend-db-schema.md) — 마이페이지(찜·방문 기록(리뷰 X)·여행 여러 개·일정 항목·알림함, 조회 기록·체크리스트 체크 상태는 브라우저 localStorage만), 챗봇 대화(로그인 시만), `patients.display_name`, `price_stats.scope` 추가. 프론트 마이페이지 코드(`origin/frontend` f8da9c6)에 맞춤
+- 바뀐 계약: 없음 (제안 단계. 확정되면 contracts 1절 주인에 새 모듈 `favorite/trip/chatbot` 추가 PR)
+- 테스트: 없음 (문서만)
+- 다음 할 일: B 검토 후 `models.py` 작성, 마이페이지 API
+- B에게 요청:
+  1. 스키마 6절 `booking_requests.id`를 uuid로 (알림 FK)
+  2. 확정되면 마이그레이션 생성
+- 막힌 것·질문: 챗봇 대화 저장이 "환자 계정에 건강정보 저장 X"와 부딪힐 수 있음 → 팀 확인 (스키마 5절)
+
 ### 2026-10-30 · backend-A-auth · Claude
 - 한 일:
   - 파이썬 환경: 루트 `pyproject.toml`(uv), `.python-version` = 3.12, `uv.lock`
