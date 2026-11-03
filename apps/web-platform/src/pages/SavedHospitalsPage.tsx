@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SavedHospitalCard } from '../features/mypage/SavedHospitalCard';
-import { ArrowLeftIcon, InfoIcon } from '../features/mypage/icons';
+import { ArrowLeftIcon } from '../features/mypage/icons';
 import { SAVED_DEPTS, type SavedDept } from '../features/mypage/sampleData';
 import { useMyPageData } from '../features/mypage/useMyPageData';
 import { LegalLinks } from '../features/legal/LegalLinks';
@@ -15,7 +15,7 @@ export function SavedHospitalsPage() {
   const [dept, setDept] = useState<SavedDept | null>(null);
   const [sort, setSort] = useState<Sort>('recent');
   const lang = i18n.language === 'ko' ? 'ko' : 'en';
-  const { saved, demo } = useMyPageData();
+  const { saved } = useMyPageData();
 
   const items = saved.filter((h) => !dept || h.dept === dept).sort((a, b) =>
     sort === 'recent' ? b.savedAt.localeCompare(a.savedAt) : a.name[lang].localeCompare(b.name[lang], lang),
@@ -66,7 +66,6 @@ export function SavedHospitalsPage() {
             </button>
           ))}
         </div>
-        {demo && <span className="mp-sample-label">{t('mypage.saved.sampleData')}</span>}
       </div>
 
       <div className="mp-saved-list">
@@ -77,12 +76,6 @@ export function SavedHospitalsPage() {
         )}
       </div>
 
-      {demo && (
-        <p className="mp-saved-footnote">
-          <InfoIcon />
-          {t('mypage.saved.footnote')}
-        </p>
-      )}
 
       <LegalLinks />
     </div>

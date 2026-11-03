@@ -1555,12 +1555,6 @@ a {
   font-weight: 700;
 }
 
-.mp-sample-label {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-
 .mp-saved-list {
   display: flex;
   flex-direction: column;
@@ -1610,11 +1604,6 @@ a {
   font-size: 1.25rem;
 }
 
-.mp-saved-sample {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-}
-
 .mp-saved-name-en {
   margin: 4px 0 0;
   color: var(--text-muted);
@@ -1624,11 +1613,6 @@ a {
 .mp-tag.dept-dermatology {
   background: #e3edfd;
   color: var(--accent);
-}
-
-.mp-tag.dept-dental {
-  background: #e3f5ec;
-  color: #2b8a5e;
 }
 
 .mp-tag.dept-plastic {
@@ -1793,20 +1777,6 @@ a {
   padding: 40px 0;
   color: var(--text-muted);
   text-align: center;
-}
-
-.mp-saved-footnote {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: -4px 0 0;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-}
-
-.mp-saved-footnote svg {
-  width: 16px;
-  height: 16px;
 }
 
 /* 태블릿 이하: 사진은 카드 위로 */

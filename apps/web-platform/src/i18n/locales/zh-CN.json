@@ -157,12 +157,10 @@
     },
     "saved": {
       "title": "已保存的医院",
-      "subtitle": "一目了然地查看您保存的医院信息和项目价格。",
+      "subtitle": "一目了然地查看您感兴趣的医院信息。",
       "sortLabel": "排序",
       "sortRecent": "最近保存",
       "sortName": "按名称",
-      "sampleData": "示例数据",
-      "sampleHospital": "示例医院",
       "photo": "医院照片",
       "saved": "已保存",
       "save": "保存",
@@ -170,7 +168,6 @@
       "priceTitle": "各项目价格信息",
       "detail": "查看详情",
       "priceNote": "实际费用请向医院确认。",
-      "footnote": "医院名称、图片和价格仅为界面示例。",
       "empty": "该科室没有已保存的医院。",
       "none": "还没有保存的医院。"
     }

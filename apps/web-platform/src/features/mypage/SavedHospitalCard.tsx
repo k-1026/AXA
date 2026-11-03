@@ -1,17 +1,14 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSavedHospitals } from '../hospital/savedHospitals';
 import { ArrowRightIcon, GlobeIcon, HeartIcon, PinIcon } from './icons';
 import { SAVED_DEPTS, type Localized, type SavedHospital } from './sampleData';
 
-// 저장한 병원 카드. 예시 병원의 하트는 화면 안에서만 토글, 실제로 찜한 병원은 누르면 찜 해제
+// 저장한 병원 카드. 하트를 누르면 찜 해제
 export function SavedHospitalCard({ hospital: h }: { hospital: SavedHospital }) {
   const { t, i18n } = useTranslation();
   const label = (x: Localized) => (i18n.language === 'ko' ? x.ko : x.en);
-  const [sampleSaved, setSampleSaved] = useState(true);
   const { toggle } = useSavedHospitals();
-  const saved = h.real || sampleSaved;
   const dept = SAVED_DEPTS.find((d) => d.key === h.dept)!;
 
   return (
@@ -25,20 +22,19 @@ export function SavedHospitalCard({ hospital: h }: { hospital: SavedHospital }) 
             <p className="mp-saved-name">
               <span className={`mp-tag dept-${h.dept}`}>{label(dept.label)}</span>
               <strong>{label(h.name)}</strong>
-              {!h.real && <span className="mp-saved-sample">{t('mypage.saved.sampleHospital')}</span>}
             </p>
             {i18n.language === 'ko' && <p className="mp-saved-name-en">{h.name.en}</p>}
           </div>
           <button
             type="button"
-            className={saved ? 'mp-heart is-saved' : 'mp-heart'}
-            aria-pressed={saved}
-            onClick={() => (h.real ? toggle(h.id) : setSampleSaved(!sampleSaved))}
+            className="mp-heart is-saved"
+            aria-pressed="true"
+            onClick={() => toggle(h.id)}
           >
             <span className="mp-heart-circle">
-              <HeartIcon filled={saved} />
+              <HeartIcon filled />
             </span>
-            {t(saved ? 'mypage.saved.saved' : 'mypage.saved.save')}
+            {t('mypage.saved.saved')}
           </button>
         </div>
 

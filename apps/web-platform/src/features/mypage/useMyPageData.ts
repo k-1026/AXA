@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../components/auth';
 import { useSavedHospitals } from '../hospital/savedHospitals';
 import { useHospitals } from '../hospital/useHospitals';
-import { SAMPLE_MYPAGE, SAMPLE_SAVED_HOSPITALS, type MyPageData, type SavedHospital } from './sampleData';
+import { SAMPLE_MYPAGE, type MyPageData, type SavedHospital } from './sampleData';
 
 // 데모 계정은 예시 데이터, 실제 회원은 (백엔드 연결 전까지) 빈 상태에서 시작
 const EMPTY: MyPageData = {
@@ -36,14 +36,12 @@ export function useMyPageData(): { data: MyPageData; saved: SavedHospital[]; dem
         languages: [],
         prices: [],
         detailTo: `/hospitals/${encodeURIComponent(h.id)}`,
-        real: true,
       },
     ];
   });
 
   if (user?.demo) {
-    const saved = [...mine, ...SAMPLE_SAVED_HOSPITALS];
-    return { data: { ...SAMPLE_MYPAGE, stats: { ...SAMPLE_MYPAGE.stats, saved: saved.length } }, saved, demo: true };
+    return { data: { ...SAMPLE_MYPAGE, stats: { ...SAMPLE_MYPAGE.stats, saved: mine.length } }, saved: mine, demo: true };
   }
   return {
     data: { ...EMPTY, user: { name: user?.name ?? '' }, stats: { ...EMPTY.stats, saved: mine.length } },
