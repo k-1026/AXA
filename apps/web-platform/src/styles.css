@@ -179,6 +179,132 @@ a {
   padding: 14px 16px 16px;
 }
 
+/* 마지막 줄(인스타그램)이 길어도 하트와 겹치지 않게 */
+.hospital-card .hospital-facts dd:last-child {
+  padding-right: 32px;
+}
+
+/* 찜 하트: 카드 오른쪽 아래. 카드 전체 링크보다 위에 둔다 */
+.save-heart {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+  perspective: 120px;
+}
+
+.save-heart:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.save-heart svg {
+  width: 26px;
+  height: 26px;
+  overflow: visible;
+}
+
+.save-heart-line {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+  transition: stroke 0.2s;
+}
+
+.save-heart:hover .save-heart-line {
+  stroke: #e11d48;
+}
+
+.save-heart.is-saved .save-heart-line {
+  stroke: #be123c;
+}
+
+.save-heart-color {
+  clip-path: inset(100% 0 0 0);
+}
+
+.save-heart.is-saved .save-heart-color {
+  clip-path: inset(0 0 0 0);
+}
+
+.save-heart-shine {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+.save-heart.is-saved .save-heart-shine {
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* 떠오름(입체) → 떠 있는 동안 색칠 → 내려앉음 */
+  .save-heart.is-popping svg {
+    animation: save-heart-float 0.75s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .save-heart.is-popping .save-heart-color {
+    animation: save-heart-paint 0.75s ease-in-out;
+  }
+
+  .save-heart.is-popping .save-heart-shine {
+    animation: save-heart-shine 0.75s linear;
+  }
+}
+
+@keyframes save-heart-float {
+  0% {
+    transform: translateY(0) scale(1) rotateX(0);
+    filter: drop-shadow(0 0 0 rgb(225 29 72 / 0));
+  }
+  35%,
+  65% {
+    transform: translateY(-10px) scale(1.25) rotateX(22deg);
+    filter: drop-shadow(0 9px 5px rgb(225 29 72 / 0.35));
+  }
+  85% {
+    transform: translateY(1px) scale(0.96) rotateX(0);
+    filter: drop-shadow(0 1px 1px rgb(225 29 72 / 0.2));
+  }
+  100% {
+    transform: translateY(0) scale(1) rotateX(0);
+    filter: drop-shadow(0 0 0 rgb(225 29 72 / 0));
+  }
+}
+
+@keyframes save-heart-paint {
+  0%,
+  30% {
+    clip-path: inset(100% 0 0 0);
+  }
+  70%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes save-heart-shine {
+  0%,
+  65% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.85;
+  }
+}
+
 .hospital-card h2 {
   margin: 2px 0 10px;
   font-size: 1rem;
@@ -1508,6 +1634,16 @@ a {
 .mp-tag.dept-plastic {
   background: #f1e8fd;
   color: #7a3fd1;
+}
+
+.mp-tag.dept-internal {
+  background: #fdf5d3;
+  color: #8a6d00;
+}
+
+.mp-tag.dept-ophthalmology {
+  background: #e0ebfd;
+  color: #2563eb;
 }
 
 .mp-heart {

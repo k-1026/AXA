@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { SaveHeart } from './SaveHeart';
 import { instagramHandle, useHospitalName } from './name';
 import type { Hospital } from './types';
 
@@ -46,6 +47,7 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
           </dd>
         </dl>
       </div>
+      <SaveHeart id={h.id} name={nameOf(h)} />
     </article>
   );
 }

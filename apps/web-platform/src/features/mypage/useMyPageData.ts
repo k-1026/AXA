@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../components/auth';
+import { useSavedHospitals } from '../hospital/savedHospitals';
+import { useHospitals } from '../hospital/useHospitals';
 import { SAMPLE_MYPAGE, SAMPLE_SAVED_HOSPITALS, type MyPageData, type SavedHospital } from './sampleData';
 
 // 데모 계정은 예시 데이터, 실제 회원은 (백엔드 연결 전까지) 빈 상태에서 시작
@@ -12,6 +15,39 @@ const EMPTY: MyPageData = {
 
 export function useMyPageData(): { data: MyPageData; saved: SavedHospital[]; demo: boolean } {
   const { user } = useAuth();
-  if (user?.demo) return { data: SAMPLE_MYPAGE, saved: SAMPLE_SAVED_HOSPITALS, demo: true };
-  return { data: { ...EMPTY, user: { name: user?.name ?? '' } }, saved: [], demo: false };
+  const { t } = useTranslation();
+  const { saved: entries } = useSavedHospitals();
+  const hospitals = useHospitals();
+
+  // 병원 정보 페이지에서 찜한 병원. 데이터에서 빠진 병원(폐업 등)은 보여주지 않는다
+  const items = hospitals.status === 'ready' ? hospitals.data.items : [];
+  const mine = entries.flatMap((e): SavedHospital[] => {
+    const h = items.find((x) => x.id === e.id);
+    if (!h) return [];
+    const area = t(`district.${h.district}`);
+    return [
+      {
+        id: h.id,
+        savedAt: e.savedAt,
+        dept: h.depts[0],
+        name: { ko: h.name, en: h.nameEn },
+        area: { ko: area, en: area },
+        treatments: [],
+        languages: [],
+        prices: [],
+        detailTo: `/hospitals/${encodeURIComponent(h.id)}`,
+        real: true,
+      },
+    ];
+  });
+
+  if (user?.demo) {
+    const saved = [...mine, ...SAMPLE_SAVED_HOSPITALS];
+    return { data: { ...SAMPLE_MYPAGE, stats: { ...SAMPLE_MYPAGE.stats, saved: saved.length } }, saved, demo: true };
+  }
+  return {
+    data: { ...EMPTY, user: { name: user?.name ?? '' }, stats: { ...EMPTY.stats, saved: mine.length } },
+    saved: mine,
+    demo: false,
+  };
 }

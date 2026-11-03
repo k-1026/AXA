@@ -25,12 +25,14 @@ export interface ChecklistItem {
 }
 
 // 저장한 병원. 진료과는 마이페이지 필터용 (치과는 병원 데이터 진료과에 아직 없음)
-export type SavedDept = 'dermatology' | 'dental' | 'plastic';
+export type SavedDept = 'dermatology' | 'dental' | 'plastic' | 'internal' | 'ophthalmology';
 
 export const SAVED_DEPTS: { key: SavedDept; label: Localized }[] = [
   { key: 'dermatology', label: { ko: '피부과', en: 'Dermatology' } },
   { key: 'dental', label: { ko: '치과', en: 'Dentistry' } },
   { key: 'plastic', label: { ko: '성형외과', en: 'Plastic Surgery' } },
+  { key: 'internal', label: { ko: '내과', en: 'Internal Medicine' } },
+  { key: 'ophthalmology', label: { ko: '안과', en: 'Ophthalmology' } },
 ];
 
 export interface SavedHospital {
@@ -44,6 +46,7 @@ export interface SavedHospital {
   // 가격은 출처 있는 숫자만 넣는다. 없으면 "가격 확인 중"
   prices: { name: Localized; range?: string }[];
   detailTo: string;
+  real?: boolean; // 병원 정보 페이지에서 직접 찜한 실제 병원 (없으면 예시)
 }
 
 export interface MyPageData {
