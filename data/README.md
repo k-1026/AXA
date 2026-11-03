@@ -81,6 +81,8 @@
 - `processed/daegu_nonpay_price_stats.csv`: 내과·안과 12개 항목 × 의원/병원급/전체 기관 수·최소·최대·평균·중앙값 (기관별 최저 금액 기준), 스크립트 `etl/nonpay_price_stats.py`
 - `interim/비급여진료/nonpay_api_crosscheck.csv`: 누리집 vs API 같은 기관·코드 10,824건 대조 (98.7% 일치, 나머지는 9/3 이후 가격 변경)
 - `interim/비급여진료/시술가격_수집.csv`: 피부·성형·안과 시술 가격 홈페이지 수집 양식
+- 원본 `raw/비급여진료/대구_피부과_홈페이지_정가.xlsx`: 피부과 301곳 홈페이지 가격 수집본 (가격 있는 88곳 4,785행, 2026-11-03). `대구_피부과_홈페이지.xlsx`는 같은 파일 첫 시트(이전 버전)
+- `processed/daegu_derm_homepage_price_stats.csv`: 피부과 표준 시술 11개(단위 고정) 기관 수·최소·최대·평균·중앙값, 5곳 미만 `usable=N`. 검수표 `interim/비급여진료/derm_homepage_price_matched.csv`, 스크립트 `etl/derm_homepage_price_stats.py`
 - 방법·결과: [research/의료관광/가격표-docx-검증.md](../research/의료관광/가격표-docx-검증.md)
 
 ## 저장소에 올리지 않는 파일 (로컬에만, `.gitignore`)
