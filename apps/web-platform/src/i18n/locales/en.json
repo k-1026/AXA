@@ -170,6 +170,29 @@
       "priceNote": "Please confirm actual costs with the hospital.",
       "empty": "No saved hospitals in this department.",
       "none": "No saved hospitals yet."
+    },
+    "visits": {
+      "title": "Visit log",
+      "subtitle": "Your private diary of the hospitals you visited and how it went.",
+      "private": "Only you can see this",
+      "formTitle": "Add an entry",
+      "hospital": "Hospital",
+      "hospitalPlaceholder": "Search or type a hospital name",
+      "date": "Visit date",
+      "note": "Your experience",
+      "notePlaceholder": "Write about the care you received, how you felt, or what to ask next time.",
+      "save": "Save entry",
+      "update": "Save changes",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this entry? This can't be undone.",
+      "listTitle": "Saved entries",
+      "none": "No entries yet.",
+      "deviceNote": "Entries aren't sent to a server. They stay in this browser only, so clearing browser data removes them, and anyone using this device can see them. Be careful on shared devices.",
+      "errHospital": "Enter a hospital.",
+      "errDate": "Choose a visit date that is today or earlier.",
+      "errNote": "Enter your experience."
     }
   },
   "legal": {
@@ -185,7 +208,7 @@
     "requiredDesc": "Your saved hospitals, visit history, recently viewed and Daegu schedule are available after you log in.",
     "comingSoon": "Member login is coming soon. For now you can look around with a demo account.",
     "demo": "Try the demo account",
-    "demoNote": "The demo account shows sample data only. Nothing you enter is saved.",
+    "demoNote": "The demo account also shows sample data. Saved hospitals and your visit log stay in this browser only.",
     "demoBadge": "Demo",
     "loggedInAs": "Logged in as {{name}}.",
     "logout": "Log out"

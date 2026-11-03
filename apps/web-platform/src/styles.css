@@ -3022,3 +3022,160 @@ body.chat-open {
     transition: none;
   }
 }
+
+/* 방문 기록 (개인 다이어리) */
+.visit-private {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.visit-private svg {
+  width: 15px;
+  height: 15px;
+}
+
+.visit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+.visit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.visit-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.visit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.visit-field input,
+.visit-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+.visit-field textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.visit-hospital {
+  position: relative;
+}
+
+.visit-error {
+  margin: 0;
+  color: #c62828;
+  font-size: 0.85rem;
+}
+
+.visit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.visit-button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.visit-button:hover {
+  border-color: var(--accent);
+}
+
+.visit-button.is-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.visit-device-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.visit-list-title {
+  margin: 8px 0 0;
+  font-size: 1.2rem;
+}
+
+.visit-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.visit-head h3 {
+  margin: 0;
+  min-width: 0;
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+.visit-head h3 a {
+  color: inherit;
+}
+
+.visit-head time {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.visit-note {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .visit-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mp-saved-top:has(.visit-private) {
+    flex-direction: column;
+  }
+}

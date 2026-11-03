@@ -17,6 +17,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RequireLogin } from './features/mypage/RequireLogin';
 import { LegalPage } from './pages/LegalPage';
 import { ChatbotPage } from './pages/ChatbotPage';
+import { VisitsPage } from './pages/VisitsPage';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -34,6 +35,7 @@ createRoot(document.getElementById('root')!).render(
             {/* 마이페이지는 로그인 후에만 */}
             <Route path="mypage" element={<RequireLogin><MyPage /></RequireLogin>} />
             <Route path="mypage/saved" element={<RequireLogin><SavedHospitalsPage /></RequireLogin>} />
+            <Route path="mypage/visits" element={<RequireLogin><VisitsPage /></RequireLogin>} />
             <Route path="mypage/:section" element={<RequireLogin><PlaceholderPage titleKey="nav.mypage" /></RequireLogin>} />
             <Route path="legal/:slug" element={<LegalPage />} />
             {/* 챗봇도 사이트 헤더·메뉴는 그대로, 대화 목록은 챗봇 영역 안에 따로 */}

@@ -170,6 +170,29 @@
       "priceNote": "Vui lòng xác nhận chi phí thực tế với bệnh viện.",
       "empty": "Không có bệnh viện đã lưu thuộc chuyên khoa này.",
       "none": "Chưa có bệnh viện đã lưu."
+    },
+    "visits": {
+      "title": "Nhật ký khám",
+      "subtitle": "Nhật ký riêng về các bệnh viện bạn đã đến và trải nghiệm của bạn.",
+      "private": "Chỉ mình bạn xem được",
+      "formTitle": "Viết nhật ký mới",
+      "hospital": "Bệnh viện",
+      "hospitalPlaceholder": "Tìm hoặc nhập tên bệnh viện",
+      "date": "Ngày khám",
+      "note": "Trải nghiệm của tôi",
+      "notePlaceholder": "Ghi lại việc khám chữa, cảm nhận hoặc điều muốn hỏi lần sau.",
+      "save": "Lưu nhật ký",
+      "update": "Lưu thay đổi",
+      "cancel": "Hủy",
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "deleteConfirm": "Xóa nhật ký này? Không thể hoàn tác.",
+      "listTitle": "Nhật ký đã lưu",
+      "none": "Chưa có nhật ký nào.",
+      "deviceNote": "Nhật ký không gửi lên máy chủ mà chỉ lưu trong trình duyệt này. Xóa dữ liệu trình duyệt sẽ mất nhật ký, và người dùng chung thiết bị có thể xem được, nên hãy cẩn thận trên thiết bị công cộng.",
+      "errHospital": "Hãy nhập bệnh viện.",
+      "errDate": "Hãy chọn ngày khám từ hôm nay trở về trước.",
+      "errNote": "Hãy nhập trải nghiệm của bạn."
     }
   },
   "legal": {
@@ -185,7 +208,7 @@
     "requiredDesc": "Bệnh viện đã lưu, lịch sử khám, mục xem gần đây và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
     "comingSoon": "Đăng nhập thành viên sắp ra mắt. Hiện tại bạn có thể xem thử bằng tài khoản demo.",
     "demo": "Xem thử bằng tài khoản demo",
-    "demoNote": "Tài khoản demo chỉ hiển thị dữ liệu mẫu, nội dung bạn nhập sẽ không được lưu.",
+    "demoNote": "Tài khoản demo cũng hiển thị dữ liệu mẫu. Bệnh viện đã lưu và nhật ký khám chỉ lưu trong trình duyệt này.",
     "demoBadge": "Demo",
     "loggedInAs": "Đã đăng nhập bằng tài khoản {{name}}.",
     "logout": "Đăng xuất"
