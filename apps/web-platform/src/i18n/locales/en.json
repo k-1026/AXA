@@ -189,5 +189,72 @@
     "demoBadge": "Demo",
     "loggedInAs": "Logged in as {{name}}.",
     "logout": "Log out"
+  },
+  "chat": {
+    "title": "Medi Chatbot",
+    "subtitle": "Find Daegu medical and travel information together.",
+    "openMenu": "Open conversation list",
+    "closeMenu": "Close conversation list",
+    "new": "New chat",
+    "search": "Search chats",
+    "history": "Chat history",
+    "group": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    },
+    "noHistory": "No chats yet.",
+    "noResults": "No results.",
+    "sample": "Sample",
+    "sampleNote": "This is a sample chat, not a real consultation record.",
+    "more": "Menu for chat {{title}}",
+    "delete": "Delete chat",
+    "confirmDelete": "Delete the chat from {{title}}? This cannot be undone.",
+    "saveNote": {
+      "guest": "Log in to save your chats",
+      "demo": "Demo chats are not saved",
+      "member": "Chats are saved automatically"
+    },
+    "login": "Log in",
+    "settings": "Settings",
+    "summary": {
+      "none": "New chat",
+      "hospital": "Hospital info",
+      "price": "Price info",
+      "interpret": "Interpretation",
+      "tour": "Travel info"
+    },
+    "topic": {
+      "hospital": "Find hospitals",
+      "price": "Prices",
+      "interpret": "Interpretation",
+      "tour": "Daegu travel"
+    },
+    "region": {
+      "junggu": "Jung-gu · Dongseong-ro",
+      "suseong": "Suseong-gu",
+      "any": "Any area"
+    },
+    "link": {
+      "hospitals": "View in Hospital Info",
+      "prices": "Open Price Guide"
+    },
+    "bot": {
+      "askDept": "Which department are you looking for?",
+      "askRegion": "Which area should we look in?\nPick an area and I'll show hospital information and official contact channels.",
+      "hospitals": "In Hospital Info you can see matching hospitals sorted by distance or name. Please check each hospital’s official contacts and opening hours.",
+      "price": "You can see price ranges by treatment in the Price Guide. Actual costs vary, so please confirm with the hospital.",
+      "interpret": "Interpreter support varies by hospital. Please check supported languages through the hospital’s official contact before visiting. For travel interpretation, you can call the 1330 Korea Travel Hotline.",
+      "tour": "Daegu travel information is coming soon. Avoid a heavy schedule right after treatment, and check recovery advice with your hospital.",
+      "emergency": "This may be an emergency. Call 119 now or go to the nearest emergency room. 119 offers foreign-language interpretation.",
+      "fallback": "This is a demo and AI chat isn't connected yet. Please pick a topic below."
+    },
+    "copy": "Copy answer",
+    "copied": "Copied",
+    "like": "Helpful",
+    "quickMenu": "Show or hide quick menu",
+    "placeholder": "Type your question",
+    "send": "Send",
+    "disclaimer": "AI answers are for information only. Please confirm treatment and bookings with the hospital."
   }
 }

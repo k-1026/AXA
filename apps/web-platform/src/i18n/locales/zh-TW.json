@@ -189,5 +189,72 @@
     "demoBadge": "示範",
     "loggedInAs": "已以 {{name}} 帳號登入。",
     "logout": "登出"
+  },
+  "chat": {
+    "title": "Medi 聊天機器人",
+    "subtitle": "一起查找大邱醫療與旅遊資訊。",
+    "openMenu": "開啟對話列表",
+    "closeMenu": "關閉對話列表",
+    "new": "新對話",
+    "search": "搜尋對話",
+    "history": "對話紀錄",
+    "group": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "earlier": "更早"
+    },
+    "noHistory": "還沒有對話。",
+    "noResults": "沒有搜尋結果。",
+    "sample": "範例",
+    "sampleNote": "這是範例對話，並非真實諮詢紀錄。",
+    "more": "{{title}} 對話選單",
+    "delete": "刪除對話",
+    "confirmDelete": "要刪除 {{title}} 的對話嗎？刪除後無法復原。",
+    "saveNote": {
+      "guest": "登入後可儲存對話",
+      "demo": "示範對話不會被儲存",
+      "member": "對話會自動儲存"
+    },
+    "login": "登入",
+    "settings": "設定",
+    "summary": {
+      "none": "新對話",
+      "hospital": "醫院資訊",
+      "price": "價格資訊",
+      "interpret": "翻譯服務",
+      "tour": "旅遊資訊"
+    },
+    "topic": {
+      "hospital": "查找醫院",
+      "price": "價格資訊",
+      "interpret": "翻譯服務",
+      "tour": "大邱旅遊"
+    },
+    "region": {
+      "junggu": "中區 · 東城路",
+      "suseong": "壽城區",
+      "any": "不限地區"
+    },
+    "link": {
+      "hospitals": "在醫院資訊中查看",
+      "prices": "查看價格指南"
+    },
+    "bot": {
+      "askDept": "您要找哪個科別？",
+      "askRegion": "要在哪個地區查找？\n選擇地區後，我會為您介紹醫院資訊與官方諮詢管道。",
+      "hospitals": "在醫院資訊中可依距離或名稱查看符合條件的醫院。請確認各醫院的官方聯絡方式與看診時間。",
+      "price": "各項目的價格範圍可在價格指南中查看。實際費用因醫院而異，請務必向醫院確認。",
+      "interpret": "各醫院的翻譯服務不同。就診前請透過醫院官方聯絡方式確認支援的語言。如需旅遊翻譯，可撥打 1330 旅遊諮詢專線。",
+      "tour": "大邱旅遊資訊正在準備中。治療後請避免安排過多行程，並向醫院確認恢復注意事項。",
+      "emergency": "這可能是緊急情況。請立即撥打 119 或前往最近的急診室。119 提供外語翻譯。",
+      "fallback": "這是示範版本，尚未連接 AI 諮詢。請在下方選擇想了解的主題。"
+    },
+    "copy": "複製回答",
+    "copied": "已複製",
+    "like": "有幫助",
+    "quickMenu": "顯示或隱藏快捷選單",
+    "placeholder": "請輸入您的問題",
+    "send": "傳送",
+    "disclaimer": "AI 回答僅供參考。看診與預約請向相關醫院確認。"
   }
 }

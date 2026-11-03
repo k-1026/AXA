@@ -189,5 +189,72 @@
     "demoBadge": "Demo",
     "loggedInAs": "Đã đăng nhập bằng tài khoản {{name}}.",
     "logout": "Đăng xuất"
+  },
+  "chat": {
+    "title": "Medi Chatbot",
+    "subtitle": "Cùng tìm thông tin y tế và du lịch Daegu.",
+    "openMenu": "Mở danh sách hội thoại",
+    "closeMenu": "Đóng danh sách hội thoại",
+    "new": "Hội thoại mới",
+    "search": "Tìm hội thoại",
+    "history": "Lịch sử hội thoại",
+    "group": {
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
+      "earlier": "Trước đó"
+    },
+    "noHistory": "Chưa có hội thoại.",
+    "noResults": "Không có kết quả.",
+    "sample": "Mẫu",
+    "sampleNote": "Đây là hội thoại mẫu, không phải hồ sơ tư vấn thật.",
+    "more": "Menu hội thoại {{title}}",
+    "delete": "Xóa hội thoại",
+    "confirmDelete": "Xóa hội thoại ngày {{title}}? Không thể hoàn tác.",
+    "saveNote": {
+      "guest": "Đăng nhập để lưu hội thoại",
+      "demo": "Hội thoại demo không được lưu",
+      "member": "Hội thoại được lưu tự động"
+    },
+    "login": "Đăng nhập",
+    "settings": "Cài đặt",
+    "summary": {
+      "none": "Hội thoại mới",
+      "hospital": "Thông tin bệnh viện",
+      "price": "Thông tin giá",
+      "interpret": "Phiên dịch",
+      "tour": "Thông tin du lịch"
+    },
+    "topic": {
+      "hospital": "Tìm bệnh viện",
+      "price": "Thông tin giá",
+      "interpret": "Phiên dịch",
+      "tour": "Du lịch Daegu"
+    },
+    "region": {
+      "junggu": "Jung-gu · Dongseong-ro",
+      "suseong": "Suseong-gu",
+      "any": "Khu vực nào cũng được"
+    },
+    "link": {
+      "hospitals": "Xem trong Thông tin bệnh viện",
+      "prices": "Mở Hướng dẫn giá"
+    },
+    "bot": {
+      "askDept": "Bạn đang tìm chuyên khoa nào?",
+      "askRegion": "Bạn muốn tìm ở khu vực nào?\nChọn khu vực để xem thông tin bệnh viện và kênh liên hệ chính thức.",
+      "hospitals": "Trong Thông tin bệnh viện, bạn có thể xem các bệnh viện phù hợp theo khoảng cách hoặc tên. Vui lòng kiểm tra liên hệ chính thức và giờ khám của từng bệnh viện.",
+      "price": "Bạn có thể xem khoảng giá theo dịch vụ trong Hướng dẫn giá. Chi phí thực tế khác nhau, vui lòng xác nhận với bệnh viện.",
+      "interpret": "Hỗ trợ phiên dịch khác nhau tùy bệnh viện. Vui lòng kiểm tra ngôn ngữ hỗ trợ qua liên hệ chính thức của bệnh viện trước khi đến. Nếu cần phiên dịch du lịch, hãy gọi đường dây 1330.",
+      "tour": "Thông tin du lịch Daegu đang được chuẩn bị. Tránh lịch trình dày ngay sau điều trị và hỏi bệnh viện về hướng dẫn hồi phục.",
+      "emergency": "Đây có thể là tình huống khẩn cấp. Hãy gọi 119 ngay hoặc đến phòng cấp cứu gần nhất. 119 hỗ trợ phiên dịch tiếng nước ngoài.",
+      "fallback": "Đây là bản demo, chưa kết nối tư vấn AI. Vui lòng chọn chủ đề bên dưới."
+    },
+    "copy": "Sao chép câu trả lời",
+    "copied": "Đã sao chép",
+    "like": "Hữu ích",
+    "quickMenu": "Hiện hoặc ẩn menu nhanh",
+    "placeholder": "Nhập câu hỏi của bạn",
+    "send": "Gửi",
+    "disclaimer": "Câu trả lời AI chỉ mang tính thông tin. Vui lòng xác nhận việc khám và đặt lịch với bệnh viện."
   }
 }
