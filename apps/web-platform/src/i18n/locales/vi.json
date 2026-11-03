@@ -166,7 +166,8 @@
       "detail": "Xem chi tiết",
       "priceNote": "Vui lòng xác nhận chi phí thực tế với bệnh viện.",
       "footnote": "Tên bệnh viện, hình ảnh và giá chỉ là mẫu để minh họa giao diện.",
-      "empty": "Không có bệnh viện đã lưu thuộc chuyên khoa này."
+      "empty": "Không có bệnh viện đã lưu thuộc chuyên khoa này.",
+      "none": "Chưa có bệnh viện đã lưu."
     }
   },
   "legal": {
@@ -176,5 +177,15 @@
     "back": "Trang của tôi",
     "notFound": "Không tìm thấy tài liệu.",
     "koreanOnly": "Tài liệu này hiện chỉ có bản tiếng Hàn."
+  },
+  "auth": {
+    "requiredTitle": "Vui lòng đăng nhập",
+    "requiredDesc": "Bệnh viện đã lưu, lịch sử khám, mục xem gần đây và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
+    "comingSoon": "Đăng nhập thành viên sắp ra mắt. Hiện tại bạn có thể xem thử bằng tài khoản demo.",
+    "demo": "Xem thử bằng tài khoản demo",
+    "demoNote": "Tài khoản demo chỉ hiển thị dữ liệu mẫu, nội dung bạn nhập sẽ không được lưu.",
+    "demoBadge": "Demo",
+    "loggedInAs": "Đã đăng nhập bằng tài khoản {{name}}.",
+    "logout": "Đăng xuất"
   }
 }

@@ -6,12 +6,12 @@ import { ChecklistCard } from '../features/mypage/ChecklistCard';
 import { AccountBar } from '../features/mypage/AccountBar';
 import { LegalLinks } from '../features/legal/LegalLinks';
 import { CalendarCheckIcon, ClockIcon, HistoryIcon, HospitalHeartIcon } from '../features/mypage/icons';
-import { SAMPLE_MYPAGE } from '../features/mypage/sampleData';
+import { useMyPageData } from '../features/mypage/useMyPageData';
 
-// 로그인 후 마이페이지. 지금은 예시 데이터로 표시
+// 로그인 후 마이페이지. 데모 계정은 예시 데이터로 표시
 export function MyPage() {
   const { t } = useTranslation();
-  const data = SAMPLE_MYPAGE;
+  const { data, demo } = useMyPageData();
 
   return (
     <div className="mypage">
@@ -22,7 +22,10 @@ export function MyPage() {
       </nav>
 
       <div className="mp-title-row">
-        <h1>{t('nav.mypage')}</h1>
+        <h1>
+          {t('nav.mypage')}
+          {demo && <span className="mp-demo-badge">{t('auth.demoBadge')}</span>}
+        </h1>
         <span className="mp-kst">
           <ClockIcon />
           {t('mypage.kst')}

@@ -166,7 +166,8 @@
       "detail": "Details",
       "priceNote": "Please confirm actual costs with the hospital.",
       "footnote": "Hospital names, images and prices are samples for layout only.",
-      "empty": "No saved hospitals in this department."
+      "empty": "No saved hospitals in this department.",
+      "none": "No saved hospitals yet."
     }
   },
   "legal": {
@@ -176,5 +177,15 @@
     "back": "My page",
     "notFound": "We couldn't find this document.",
     "koreanOnly": "This document is currently available in Korean only."
+  },
+  "auth": {
+    "requiredTitle": "Please log in",
+    "requiredDesc": "Your saved hospitals, visit history, recently viewed and Daegu schedule are available after you log in.",
+    "comingSoon": "Member login is coming soon. For now you can look around with a demo account.",
+    "demo": "Try the demo account",
+    "demoNote": "The demo account shows sample data only. Nothing you enter is saved.",
+    "demoBadge": "Demo",
+    "loggedInAs": "Logged in as {{name}}.",
+    "logout": "Log out"
   }
 }

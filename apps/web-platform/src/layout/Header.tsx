@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n';
 import { CURRENCIES, useCurrency, type Currency } from '../components/currency';
 import { ChatbotIcon } from '../components/ChatbotIcon';
+import { useAuth } from '../components/auth';
 
 export function Header() {
   const { t, i18n } = useTranslation();
   const { currency, setCurrency } = useCurrency();
+  const { user, logout } = useAuth();
 
   return (
     <header className="site-header">
@@ -39,9 +41,15 @@ export function Header() {
             ))}
           </select>
         </label>
-        <Link to="/login" className="header-button">
-          {t('header.login')}
-        </Link>
+        {user ? (
+          <button type="button" className="header-button" onClick={logout}>
+            {t('auth.logout')}
+          </button>
+        ) : (
+          <Link to="/login" className="header-button">
+            {t('header.login')}
+          </Link>
+        )}
       </div>
     </header>
   );

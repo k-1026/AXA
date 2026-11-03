@@ -1150,6 +1150,75 @@ a {
   color: var(--text-muted);
 }
 
+/* 로그인 안내·데모 로그인 */
+.mp-login-required {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 560px;
+  margin: 24px auto;
+  padding: 40px 28px;
+  text-align: center;
+}
+
+.mp-login-required h1 {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+}
+
+.mp-login-required p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.mp-login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mp-login-button,
+.mp-login-secondary {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  margin-top: 8px;
+  padding: 0 24px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mp-login-button {
+  background: var(--accent);
+  color: #fff;
+}
+
+.mp-login-secondary {
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.mp-login-required .mp-login-note {
+  font-size: 0.8rem;
+}
+
+.mp-demo-badge {
+  margin-left: 10px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: #fff6e5;
+  color: #8a5a00;
+  font-size: 0.8rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
 /* 마이페이지 > 저장한 병원 */
 .mp-breadcrumb .is-current {
   color: var(--accent);

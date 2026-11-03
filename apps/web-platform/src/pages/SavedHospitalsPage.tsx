@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SavedHospitalCard } from '../features/mypage/SavedHospitalCard';
 import { ArrowLeftIcon, InfoIcon } from '../features/mypage/icons';
-import { SAMPLE_SAVED_HOSPITALS, SAVED_DEPTS, type SavedDept } from '../features/mypage/sampleData';
+import { SAVED_DEPTS, type SavedDept } from '../features/mypage/sampleData';
+import { useMyPageData } from '../features/mypage/useMyPageData';
 import { LegalLinks } from '../features/legal/LegalLinks';
 
 type Sort = 'recent' | 'name';
@@ -14,8 +15,9 @@ export function SavedHospitalsPage() {
   const [dept, setDept] = useState<SavedDept | null>(null);
   const [sort, setSort] = useState<Sort>('recent');
   const lang = i18n.language === 'ko' ? 'ko' : 'en';
+  const { saved, demo } = useMyPageData();
 
-  const items = SAMPLE_SAVED_HOSPITALS.filter((h) => !dept || h.dept === dept).sort((a, b) =>
+  const items = saved.filter((h) => !dept || h.dept === dept).sort((a, b) =>
     sort === 'recent' ? b.savedAt.localeCompare(a.savedAt) : a.name[lang].localeCompare(b.name[lang], lang),
   );
 
@@ -38,7 +40,7 @@ export function SavedHospitalsPage() {
             {t('nav.mypage')}
           </Link>
           <h1 className="mp-saved-title">
-            {t('mypage.saved.title')} <span>{SAMPLE_SAVED_HOSPITALS.length}</span>
+            {t('mypage.saved.title')} <span>{saved.length}</span>
           </h1>
           <p className="mp-greeting-sub">{t('mypage.saved.subtitle')}</p>
         </div>
@@ -64,21 +66,23 @@ export function SavedHospitalsPage() {
             </button>
           ))}
         </div>
-        <span className="mp-sample-label">{t('mypage.saved.sampleData')}</span>
+        {demo && <span className="mp-sample-label">{t('mypage.saved.sampleData')}</span>}
       </div>
 
       <div className="mp-saved-list">
         {items.length ? (
           items.map((h) => <SavedHospitalCard key={h.id} hospital={h} />)
         ) : (
-          <p className="mp-saved-empty">{t('mypage.saved.empty')}</p>
+          <p className="mp-saved-empty">{t(saved.length ? 'mypage.saved.empty' : 'mypage.saved.none')}</p>
         )}
       </div>
 
-      <p className="mp-saved-footnote">
-        <InfoIcon />
-        {t('mypage.saved.footnote')}
-      </p>
+      {demo && (
+        <p className="mp-saved-footnote">
+          <InfoIcon />
+          {t('mypage.saved.footnote')}
+        </p>
+      )}
 
       <LegalLinks />
     </div>
