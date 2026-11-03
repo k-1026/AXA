@@ -16,6 +16,7 @@ export function ChatbotPage() {
   const { t } = useTranslation();
   const chat = useConversations();
   const [drawer, setDrawer] = useState(false);
+  const [deleting, setDeleting] = useState<Conversation | null>(null);
   useVisualViewport();
 
   // 모바일 서랍: Esc로 닫기
@@ -26,8 +27,10 @@ export function ChatbotPage() {
     return () => document.removeEventListener('keydown', onKey);
   }, [drawer]);
 
+  // 브라우저 확인창(window.confirm)은 앱 내 브라우저 등에서 막힐 수 있어 화면 안에서 확인
   const remove = (c: Conversation) => {
-    if (window.confirm(t('chat.confirmDelete', { title: dotDate(c.createdAt) }))) chat.remove(c.id);
+    setDeleting(c);
+    setDrawer(false); // 모바일 서랍에 가려지지 않게
   };
 
   const active = chat.active;
@@ -79,6 +82,25 @@ export function ChatbotPage() {
             </>
           )}
         </div>
+
+        {deleting && (
+          <div className="chat-delete-confirm" role="alert">
+            <p>{t('chat.confirmDelete', { title: dotDate(deleting.createdAt) })}</p>
+            <button type="button" onClick={() => setDeleting(null)}>
+              {t('chat.cancel')}
+            </button>
+            <button
+              type="button"
+              className="is-danger"
+              onClick={() => {
+                chat.remove(deleting.id);
+                setDeleting(null);
+              }}
+            >
+              {t('chat.delete')}
+            </button>
+          </div>
+        )}
 
         {active && <ChatMessages conversation={active} onChip={(c) => chat.choose(c.label, c.action)} />}
 

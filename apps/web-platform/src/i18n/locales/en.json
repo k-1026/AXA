@@ -278,6 +278,7 @@
     "quickMenu": "Show or hide quick menu",
     "placeholder": "Type your question",
     "send": "Send",
-    "disclaimer": "AI answers are for information only. Please confirm treatment and bookings with the hospital."
+    "disclaimer": "AI answers are for information only. Please confirm treatment and bookings with the hospital.",
+    "cancel": "Cancel"
   }
 }

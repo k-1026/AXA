@@ -278,6 +278,7 @@
     "quickMenu": "显示或隐藏快捷菜单",
     "placeholder": "请输入您的问题",
     "send": "发送",
-    "disclaimer": "AI 回答仅供参考。诊疗和预约请向相关医院确认。"
+    "disclaimer": "AI 回答仅供参考。诊疗和预约请向相关医院确认。",
+    "cancel": "取消"
   }
 }

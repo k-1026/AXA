@@ -15,6 +15,7 @@ export function VisitsPage() {
   const state = useHospitals();
   const { visits, add, update, remove } = useVisitLog();
   const [editing, setEditing] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const hospitals = state.status === 'ready' ? state.data.items : [];
   const sorted = [...visits].sort(
@@ -86,20 +87,41 @@ export function VisitsPage() {
                     <time dateTime={v.date}>{v.date}</time>
                   </div>
                   <p className="visit-note">{v.note}</p>
-                  <div className="visit-actions">
-                    <button type="button" className="visit-button" onClick={() => setEditing(v.id)}>
-                      {t('mypage.visits.edit')}
-                    </button>
-                    <button
-                      type="button"
-                      className="visit-button"
-                      onClick={() => {
-                        if (window.confirm(t('mypage.visits.deleteConfirm'))) remove(v.id);
-                      }}
-                    >
-                      {t('mypage.visits.delete')}
-                    </button>
-                  </div>
+                  {/* 브라우저 확인창(window.confirm)은 앱 내 브라우저 등에서 막힐 수 있어 카드 안에서 확인 */}
+                  {deleting === v.id ? (
+                    <div className="visit-actions visit-delete-confirm" role="group">
+                      <p role="alert">{t('mypage.visits.deleteConfirm')}</p>
+                      <button type="button" className="visit-button" onClick={() => setDeleting(null)}>
+                        {t('mypage.visits.cancel')}
+                      </button>
+                      <button
+                        type="button"
+                        className="visit-button is-danger"
+                        onClick={() => {
+                          remove(v.id);
+                          setDeleting(null);
+                        }}
+                      >
+                        {t('mypage.visits.delete')}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="visit-actions">
+                      <button
+                        type="button"
+                        className="visit-button"
+                        onClick={() => {
+                          setDeleting(null);
+                          setEditing(v.id);
+                        }}
+                      >
+                        {t('mypage.visits.edit')}
+                      </button>
+                      <button type="button" className="visit-button" onClick={() => setDeleting(v.id)}>
+                        {t('mypage.visits.delete')}
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </article>

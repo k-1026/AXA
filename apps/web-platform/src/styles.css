@@ -3128,6 +3128,25 @@ body.chat-open {
   font-weight: 600;
 }
 
+.visit-button.is-danger {
+  border-color: #c62828;
+  background: #c62828;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.visit-delete-confirm {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.visit-delete-confirm p {
+  flex: 1 1 200px;
+  margin: 0;
+  color: #c62828;
+  font-size: 0.85rem;
+}
+
 .visit-device-note {
   margin: 0;
   color: var(--text-muted);
@@ -3178,4 +3197,41 @@ body.chat-open {
   .mp-saved-top:has(.visit-private) {
     flex-direction: column;
   }
+}
+
+/* 챗봇 대화 삭제 확인 */
+.chat-delete-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fdecec;
+}
+
+.chat-delete-confirm p {
+  flex: 1 1 200px;
+  margin: 0;
+  color: #b71c1c;
+  font-size: 0.85rem;
+}
+
+.chat-delete-confirm button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chat-delete-confirm button.is-danger {
+  border-color: #c62828;
+  background: #c62828;
+  color: #ffffff;
+  font-weight: 600;
 }

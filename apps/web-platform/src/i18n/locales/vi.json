@@ -278,6 +278,7 @@
     "quickMenu": "Hiện hoặc ẩn menu nhanh",
     "placeholder": "Nhập câu hỏi của bạn",
     "send": "Gửi",
-    "disclaimer": "Câu trả lời AI chỉ mang tính thông tin. Vui lòng xác nhận việc khám và đặt lịch với bệnh viện."
+    "disclaimer": "Câu trả lời AI chỉ mang tính thông tin. Vui lòng xác nhận việc khám và đặt lịch với bệnh viện.",
+    "cancel": "Hủy"
   }
 }
