@@ -33,11 +33,18 @@ function parseCsv(text) {
   return body.map((r) => Object.fromEntries(header.map((h, i) => [h, r[i] ?? ''])));
 }
 
-const readCsv = (name) => parseCsv(readFileSync(resolve(interim, name), 'utf8').replace(/^﻿/, ''));
+const readCsv = (name, dir = interim) => parseCsv(readFileSync(resolve(dir, name), 'utf8').replace(/^﻿/, ''));
 const readMeta = (name) => JSON.parse(readFileSync(resolve(raw, name), 'utf8')).meta;
 
 const hours = readCsv('daegu_hospital_hours.csv');
 const basics = new Map(readCsv('daegu_hospitals.csv').map((r) => [r.ykiho, r]));
+// 폐업 교차검증(심평원·행안부) 결과가 '정상'이 아닌 곳(폐업·미확인)은 뺀다
+// 방법: research/의료관광/병원-폐업-교차검증.md
+const excluded = new Set(
+  readCsv('daegu_hospital_status.csv', resolve(repo, 'data/processed'))
+    .filter((r) => r.verdict !== '정상')
+    .map((r) => r.ykiho),
+);
 
 // 진료과 판정
 // - 피부과·성형외과: 심평원 진료과목 코드 (14, 08)
@@ -77,7 +84,7 @@ const collator = new Intl.Collator('ko', { ignorePunctuation: true });
 
 const items = hours
   .map((r) => ({ r, depts: departments(r) }))
-  .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos)
+  .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos && !excluded.has(r.ykiho))
   .map(({ r, depts }) => {
     const b = basics.get(r.ykiho) ?? {};
     const name = r.yadmNm.replace(/&amp;/g, '&');
