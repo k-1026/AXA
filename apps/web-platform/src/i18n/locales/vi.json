@@ -150,5 +150,13 @@
       "desc": "Hồ sơ và cài đặt ngôn ngữ",
       "manage": "Quản lý tài khoản"
     }
+  },
+  "legal": {
+    "label": "Điều khoản và chính sách",
+    "updated": "Cập nhật lần cuối {{date}}",
+    "draft": "Đây là bản nháp chưa được rà soát pháp lý và có thể thay đổi.",
+    "back": "Trang của tôi",
+    "notFound": "Không tìm thấy tài liệu.",
+    "koreanOnly": "Tài liệu này hiện chỉ có bản tiếng Hàn."
   }
 }

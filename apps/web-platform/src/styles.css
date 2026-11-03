@@ -1150,6 +1150,135 @@ a {
   color: var(--text-muted);
 }
 
+/* 약관·정책 링크 (개인정보 처리방침 | 쿠키 정책 | ...) */
+.legal-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 6px;
+}
+
+.legal-links li + li::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  margin: 0 14px;
+  background: var(--border);
+  vertical-align: middle;
+}
+
+.legal-links a {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.legal-links a:hover,
+.legal-links a[aria-current='page'] {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* 약관·정책 문서 */
+.legal-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.legal-doc {
+  padding: 32px 36px;
+  background: var(--surface);
+  border: 1px solid #e4e8ee;
+  border-radius: var(--radius);
+  line-height: 1.7;
+}
+
+.legal-doc h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.legal-meta {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.legal-draft {
+  margin: 16px 0 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff6e5;
+  color: #8a5a00;
+  font-size: 0.9rem;
+}
+
+.legal-doc h2 {
+  margin: 24px 0 6px;
+  font-size: 1.1rem;
+}
+
+/* 4칸 이상 표는 좁은 화면에서 가로 스크롤 */
+.legal-table.wide {
+  min-width: 680px;
+}
+
+.legal-doc h3 {
+  margin: 16px 0 6px;
+  font-size: 1rem;
+}
+
+.legal-doc p {
+  margin: 0 0 8px;
+}
+
+.legal-list {
+  margin: 0 0 8px;
+  padding-left: 22px;
+}
+
+.legal-list li + li {
+  margin-top: 4px;
+}
+
+.legal-table-wrap {
+  overflow-x: auto;
+}
+
+.legal-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.legal-table th,
+.legal-table td {
+  padding: 10px 14px;
+  border: 1px solid #e4e8ee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal-table th {
+  background: var(--surface-muted);
+}
+
+.legal-sources {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+}
+
+.legal-sources a {
+  color: var(--accent);
+}
+
 /* 태블릿 이하: 마이페이지 세로 배치 */
 @media (max-width: 860px) {
   .mp-stats,
@@ -1225,6 +1354,10 @@ a {
   .mp-account p {
     flex-basis: 100%;
     padding-left: 0;
+  }
+
+  .legal-doc {
+    padding: 20px 18px;
   }
 }
 

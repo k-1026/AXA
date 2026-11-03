@@ -4,6 +4,7 @@ import { StatCard } from '../features/mypage/StatCard';
 import { ScheduleCard } from '../features/mypage/ScheduleCard';
 import { ChecklistCard } from '../features/mypage/ChecklistCard';
 import { AccountBar } from '../features/mypage/AccountBar';
+import { LegalLinks } from '../features/legal/LegalLinks';
 import { CalendarCheckIcon, ClockIcon, HistoryIcon, HospitalHeartIcon } from '../features/mypage/icons';
 import { SAMPLE_MYPAGE } from '../features/mypage/sampleData';
 
@@ -45,6 +46,7 @@ export function MyPage() {
       </div>
 
       <AccountBar />
+      <LegalLinks />
     </div>
   );
 }

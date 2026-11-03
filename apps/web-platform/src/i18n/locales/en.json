@@ -150,5 +150,13 @@
       "desc": "Profile and language settings",
       "manage": "Manage account"
     }
+  },
+  "legal": {
+    "label": "Terms and policies",
+    "updated": "Last updated {{date}}",
+    "draft": "This is a draft that has not yet had legal review. It may change.",
+    "back": "My page",
+    "notFound": "We couldn't find this document.",
+    "koreanOnly": "This document is currently available in Korean only."
   }
 }
