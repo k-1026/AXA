@@ -24,8 +24,26 @@ export interface ProcedureCategory {
   items: Procedure[];
 }
 
-const list = (...rows: [string, string, string?][]): Procedure[] =>
-  rows.map(([ko, en, image]) => ({ ko, en, image }));
+const list = (...rows: [string, string, string?, PriceRange?][]): Procedure[] =>
+  rows.map(([ko, en, image, price]) => ({ ko, en, image, price }));
+
+// 출처: data/processed/daegu_derm_homepage_price_stats.csv (research-data 브랜치)
+// 스킨보톡스만 usable=Y(기관 8곳), 나머지는 기관 5곳 미만(usable=N)
+// 프로토타입 구현을 위한 임시 값 (2026-11-03 팀 결정). 정식 공개 전에 근거를 확인해 교체
+const priceRange = (min: number, max: number): PriceRange => ({
+  min,
+  max,
+  source: '대구 피부과 병원 홈페이지 가격표 (팀원 수집)',
+  date: '2026-11-03',
+});
+const PRICES = {
+  botox: priceRange(15000, 250000), // 스킨보톡스 얼굴전체 (국산) 1회, 8곳
+  filler: priceRange(100000, 148000), // 필러 (국산, 일반 부위) 1cc, 2곳
+  picoToning: priceRange(200000, 250000), // 피코토닝 1회, 2곳
+  lifting: priceRange(167200, 1700000), // 300샷 기준 슈링크 2곳·울쎄라 3곳·써마지 FLX 1곳
+  aquaPeel: priceRange(30000, 70000), // 아쿠아필 (얼굴) 1회, 4곳
+  rejuran: priceRange(240000, 420000), // 리쥬란 힐러 2cc 1회, 3곳
+};
 
 export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
   // 피부과
@@ -33,14 +51,14 @@ export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
     dept: 'dermatology',
     ko: '주사·쁘띠 시술',
     en: 'Injectables',
-    items: list(['보톡스', 'Botox', '01_botox'], ['필러', 'Filler', '02_dermal_fillers'], ['윤곽주사', 'Contouring Injection', '03_facial_contouring_injections']),
+    items: list(['보톡스', 'Botox', '01_botox', PRICES.botox], ['필러', 'Filler', '02_dermal_fillers', PRICES.filler], ['윤곽주사', 'Contouring Injection', '03_facial_contouring_injections']),
   },
   {
     dept: 'dermatology',
     ko: '색소·홍조',
     en: 'Pigmentation & Redness',
     items: list(
-      ['기미·잡티·색소침착 치료', 'Melasma, Spot & Pigmentation Treatment', '04_pigmentation_treatment'],
+      ['기미·잡티·색소침착 치료', 'Melasma, Spot & Pigmentation Treatment', '04_pigmentation_treatment', PRICES.picoToning],
       ['홍조·혈관 레이저', 'Redness & Vascular Laser', '05_redness_vascular_laser'],
     ),
   },
@@ -55,7 +73,7 @@ export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
     ko: '탄력·비수술 리프팅',
     en: 'Firming & Non-surgical Lifting',
     items: list(
-      ['초음파·고주파 리프팅', 'Ultrasound & Radiofrequency Lifting', '08_ultrasound_rf_lifting'],
+      ['초음파·고주파 리프팅', 'Ultrasound & Radiofrequency Lifting', '08_ultrasound_rf_lifting', PRICES.lifting],
       ['피부 탄력 관리', 'Skin Firming Care', '09_skin_firming'],
     ),
   },
@@ -63,7 +81,7 @@ export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
     dept: 'dermatology',
     ko: '피부관리·스킨부스터',
     en: 'Skin Care & Skin Boosters',
-    items: list(['피부관리', 'Skin Care', '10_skin_care'], ['스킨부스터', 'Skin Booster', '11_skin_boosters']),
+    items: list(['피부관리', 'Skin Care', '10_skin_care', PRICES.aquaPeel], ['스킨부스터', 'Skin Booster', '11_skin_boosters', PRICES.rejuran]),
   },
   {
     dept: 'dermatology',
