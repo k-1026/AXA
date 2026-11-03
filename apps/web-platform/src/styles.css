@@ -1150,6 +1150,389 @@ a {
   color: var(--text-muted);
 }
 
+/* 마이페이지 > 저장한 병원 */
+.mp-breadcrumb .is-current {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.mp-saved-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: -8px;
+}
+
+.mp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.mp-back svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mp-saved-title {
+  margin: 8px 0 4px;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.mp-saved-title span {
+  color: var(--accent);
+}
+
+.mp-sort {
+  min-width: 132px;
+  height: 40px;
+  margin-top: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.mp-saved-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -4px;
+}
+
+.mp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mp-pills button {
+  height: 36px;
+  padding: 0 22px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.mp-pills button[aria-pressed='true'] {
+  border-color: var(--accent-soft);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.mp-sample-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.mp-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mp-saved-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  padding: 16px 20px 16px 16px;
+}
+
+.mp-saved-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.mp-saved-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.mp-saved-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mp-saved-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0;
+}
+
+.mp-saved-name strong {
+  font-size: 1.25rem;
+}
+
+.mp-saved-sample {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.mp-saved-name-en {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.mp-tag.dept-dermatology {
+  background: #e3edfd;
+  color: var(--accent);
+}
+
+.mp-tag.dept-dental {
+  background: #e3f5ec;
+  color: #2b8a5e;
+}
+
+.mp-tag.dept-plastic {
+  background: #f1e8fd;
+  color: #7a3fd1;
+}
+
+.mp-heart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.mp-heart-circle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+}
+
+.mp-heart.is-saved .mp-heart-circle {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.mp-heart svg {
+  width: 20px;
+  height: 20px;
+}
+
+.mp-saved-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  font-size: 0.85rem;
+}
+
+.mp-saved-area,
+.mp-saved-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mp-saved-lang strong {
+  margin-left: 4px;
+}
+
+.mp-saved-meta svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.mp-saved-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0 14px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  list-style: none;
+}
+
+.mp-saved-chips li {
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  font-size: 0.78rem;
+}
+
+.mp-saved-price {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 16px 8px;
+  border-radius: 12px;
+  background: #f1f5fc;
+}
+
+.mp-saved-price-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.mp-saved-price-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--surface);
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.mp-saved-price-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mp-saved-price-list .is-pending {
+  color: var(--text-muted);
+}
+
+.mp-saved-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mp-saved-detail svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mp-saved-price-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.mp-saved-empty {
+  padding: 40px 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.mp-saved-footnote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.mp-saved-footnote svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 태블릿 이하: 사진은 카드 위로 */
+@media (max-width: 860px) {
+  .mp-saved-card {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .mp-saved-photo {
+    min-height: 140px;
+  }
+}
+
+/* 모바일: 가격 영역 세로 배치 */
+@media (max-width: 560px) {
+  .mp-saved-top {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mp-saved-title {
+    font-size: 1.6rem;
+  }
+
+  .mp-sort {
+    margin-top: 0;
+  }
+
+  .mp-saved-filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mp-pills button {
+    padding: 0 16px;
+  }
+
+  .mp-saved-chips {
+    padding: 0;
+    border: 0;
+  }
+
+  .mp-saved-price {
+    grid-template-columns: 1fr;
+  }
+
+  .mp-saved-detail {
+    justify-content: center;
+  }
+
+  .mp-saved-price-note {
+    text-align: left;
+  }
+}
+
 /* 약관·정책 링크 (개인정보 처리방침 | 쿠키 정책 | ...) */
 .legal-links ul {
   list-style: none;

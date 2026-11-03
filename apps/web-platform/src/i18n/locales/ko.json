@@ -149,6 +149,24 @@
       "title": "내 계정",
       "desc": "프로필 및 언어 설정",
       "manage": "계정 관리"
+    },
+    "saved": {
+      "title": "저장한 병원",
+      "subtitle": "관심 있는 병원의 정보와 시술 가격을 한눈에 확인하세요.",
+      "sortLabel": "정렬",
+      "sortRecent": "최근 저장순",
+      "sortName": "가나다순",
+      "sampleData": "예시 데이터",
+      "sampleHospital": "예시 병원",
+      "photo": "병원 사진",
+      "saved": "저장됨",
+      "save": "저장",
+      "languages": "상담 언어",
+      "priceTitle": "시술별 가격 정보",
+      "detail": "상세보기",
+      "priceNote": "실제 비용은 병원에 확인해 주세요.",
+      "footnote": "병원명·이미지·가격은 화면 구성을 위한 예시입니다.",
+      "empty": "이 진료과에 저장한 병원이 없습니다."
     }
   },
   "legal": {

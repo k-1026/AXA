@@ -149,6 +149,24 @@
       "title": "我的帳戶",
       "desc": "個人資料與語言設定",
       "manage": "管理帳戶"
+    },
+    "saved": {
+      "title": "已儲存的醫院",
+      "subtitle": "一目了然地查看您儲存的醫院資訊與項目價格。",
+      "sortLabel": "排序",
+      "sortRecent": "最近儲存",
+      "sortName": "依名稱",
+      "sampleData": "範例資料",
+      "sampleHospital": "範例醫院",
+      "photo": "醫院照片",
+      "saved": "已儲存",
+      "save": "儲存",
+      "languages": "諮詢語言",
+      "priceTitle": "各項目價格資訊",
+      "detail": "查看詳情",
+      "priceNote": "實際費用請向醫院確認。",
+      "footnote": "醫院名稱、圖片與價格僅為畫面範例。",
+      "empty": "此科別沒有已儲存的醫院。"
     }
   },
   "legal": {

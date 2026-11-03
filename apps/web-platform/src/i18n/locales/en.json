@@ -149,6 +149,24 @@
       "title": "My account",
       "desc": "Profile and language settings",
       "manage": "Manage account"
+    },
+    "saved": {
+      "title": "Saved hospitals",
+      "subtitle": "See information and treatment prices for the hospitals you saved, all in one place.",
+      "sortLabel": "Sort",
+      "sortRecent": "Recently saved",
+      "sortName": "A–Z",
+      "sampleData": "Sample data",
+      "sampleHospital": "Sample",
+      "photo": "Hospital photo",
+      "saved": "Saved",
+      "save": "Save",
+      "languages": "Languages",
+      "priceTitle": "Treatment prices",
+      "detail": "Details",
+      "priceNote": "Please confirm actual costs with the hospital.",
+      "footnote": "Hospital names, images and prices are samples for layout only.",
+      "empty": "No saved hospitals in this department."
     }
   },
   "legal": {

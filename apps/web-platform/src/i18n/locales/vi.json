@@ -149,6 +149,24 @@
       "title": "Tài khoản của tôi",
       "desc": "Hồ sơ và cài đặt ngôn ngữ",
       "manage": "Quản lý tài khoản"
+    },
+    "saved": {
+      "title": "Bệnh viện đã lưu",
+      "subtitle": "Xem thông tin và giá dịch vụ của các bệnh viện bạn đã lưu tại một nơi.",
+      "sortLabel": "Sắp xếp",
+      "sortRecent": "Lưu gần đây",
+      "sortName": "Theo tên",
+      "sampleData": "Dữ liệu mẫu",
+      "sampleHospital": "Mẫu",
+      "photo": "Ảnh bệnh viện",
+      "saved": "Đã lưu",
+      "save": "Lưu",
+      "languages": "Ngôn ngữ tư vấn",
+      "priceTitle": "Giá theo dịch vụ",
+      "detail": "Xem chi tiết",
+      "priceNote": "Vui lòng xác nhận chi phí thực tế với bệnh viện.",
+      "footnote": "Tên bệnh viện, hình ảnh và giá chỉ là mẫu để minh họa giao diện.",
+      "empty": "Không có bệnh viện đã lưu thuộc chuyên khoa này."
     }
   },
   "legal": {
