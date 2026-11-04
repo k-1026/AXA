@@ -17,7 +17,7 @@ export function ProcedureCard({ procedure: p, category }: Props) {
     <article className="procedure-card">
       {/* 팀에서 만든 일러스트만 쓴다 (전후 사진은 쓰지 않음, docs/compliance.md). 없으면 빈 자리 */}
       <div className={`hospital-photo procedure-photo ${p.image ? 'has-image' : ''}`} aria-hidden="true">
-        {p.image && <img src={`/procedures/${p.image}.jpg`} alt="" loading="lazy" />}
+        {p.image && <img src={`/procedures/${p.image}`} alt="" loading="lazy" />}
       </div>
       <p className="hospital-type" lang={labelLang}>{label(category)}</p>
       <h2 lang={labelLang}>{label(p)}</h2>
