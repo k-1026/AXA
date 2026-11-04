@@ -16,7 +16,7 @@
 | 모듈 | 주인 | 내용 | 비고 |
 |---|---|---|---|
 | `core/` (config·db·security·errors) | **A+B 같이** (첫 주) | 앱 진입점, DB 연결, 토큰 검증 의존성, 에러 형식 | 이후 수정은 PR + 상대 리뷰 필수 |
-| `docker-compose.yml`, `alembic/` | **B** | PostgreSQL+pgvector, 마이그레이션 | 마이그레이션 파일은 **B만 생성** (충돌 방지). A는 모델 변경을 PR로 요청 |
+| `alembic/` | **A** (2026-11-04 결정 12·13으로 변경, Docker 안 씀 → Supabase) | 마이그레이션 | 마이그레이션 파일은 **A만 생성** (충돌 방지). B는 모델 변경을 A에게 요청 |
 | `auth/` | **A** | 환자 인증코드, 직원 로그인, JWT(`role: patient/staff`) | 직원 로그인도 A (토큰 발급 로직을 한 곳에) |
 | `patient/` | A | 환자 계정·`/me`·탈퇴 | |
 | `consent/` | A | 동의 저장·필수 동의 확인 함수 | B는 이 함수를 가져다 씀 |
