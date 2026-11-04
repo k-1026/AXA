@@ -109,7 +109,8 @@
     "lunchWeek": "점심시간 (평일)",
     "lunchSat": "점심시간 (토)",
     "rcvWeek": "접수시간 (평일)",
-    "rcvSat": "접수시간 (토)"
+    "rcvSat": "접수시간 (토)",
+    "noPhoto": "대표사진 없음"
   },
   "prices": {
     "pending": "가격 확인 중",

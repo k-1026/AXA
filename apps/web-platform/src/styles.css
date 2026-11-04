@@ -221,13 +221,33 @@ a {
   background: var(--surface-muted);
 }
 
-.hospital-card-body {
-  padding: 14px 16px 16px;
+.hospital-photo.is-empty {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
 }
 
-/* 마지막 줄(인스타그램)이 길어도 하트와 겹치지 않게 */
-.hospital-card .hospital-facts dd:last-child {
-  padding-right: 32px;
+/* 세로로 긴 사진도 칸 크기(4:3)는 그대로, 넘치는 부분은 잘림 */
+.hospital-photo:has(> img) {
+  position: relative;
+  overflow: hidden;
+}
+
+.hospital-photo > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 아래쪽은 찜 하트 자리: 긴 홈페이지 주소가 하트에 가려지지 않게 */
+.hospital-card-body {
+  padding: 14px 16px 50px;
 }
 
 /* 찜 하트: 카드 오른쪽 아래. 카드 전체 링크보다 위에 둔다 */
@@ -511,6 +531,7 @@ a {
 }
 
 .detail-photo {
+  overflow: hidden;
   border-radius: 16px;
 }
 

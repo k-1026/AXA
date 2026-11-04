@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { DEPARTMENT_COLORS } from '../features/hospital/filters';
+import { HospitalPhoto } from '../features/hospital/HospitalPhoto';
 import { instagramHandle, useHospitalName } from '../features/hospital/name';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
@@ -47,7 +48,7 @@ export function HospitalDetailPage() {
       </Link>
 
       <header className="detail-head">
-        <div className="hospital-photo detail-photo" aria-hidden="true" />
+        <HospitalPhoto src={h.photo} className="detail-photo" />
         <div>
           <p className="hospital-type">{t(`hospitalType.${h.type}`, { defaultValue: h.type })}</p>
           <h1>{nameOf(h)}</h1>

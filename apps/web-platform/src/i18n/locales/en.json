@@ -109,7 +109,8 @@
     "lunchWeek": "Lunch break (weekdays)",
     "lunchSat": "Lunch break (Sat)",
     "rcvWeek": "Reception (weekdays)",
-    "rcvSat": "Reception (Sat)"
+    "rcvSat": "Reception (Sat)",
+    "noPhoto": "No photo available"
   },
   "prices": {
     "pending": "Price being checked",

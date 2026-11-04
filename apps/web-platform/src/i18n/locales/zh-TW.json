@@ -109,7 +109,8 @@
     "lunchWeek": "午休（平日）",
     "lunchSat": "午休（週六）",
     "rcvWeek": "掛號時間（平日）",
-    "rcvSat": "掛號時間（週六）"
+    "rcvSat": "掛號時間（週六）",
+    "noPhoto": "暫無代表照片"
   },
   "prices": {
     "pending": "價格確認中",

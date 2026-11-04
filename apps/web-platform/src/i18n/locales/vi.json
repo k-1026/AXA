@@ -109,7 +109,8 @@
     "lunchWeek": "Nghỉ trưa (ngày thường)",
     "lunchSat": "Nghỉ trưa (Thứ 7)",
     "rcvWeek": "Giờ tiếp nhận (ngày thường)",
-    "rcvSat": "Giờ tiếp nhận (Thứ 7)"
+    "rcvSat": "Giờ tiếp nhận (Thứ 7)",
+    "noPhoto": "Chưa có ảnh đại diện"
   },
   "prices": {
     "pending": "Đang xác nhận giá",
