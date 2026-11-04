@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>진행 발표 11.04</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#eef1f4; --paper:#ffffff; --ink:#14212b; --sub:#55636e; --line:#dde3e8;
+  --navy:#0f2a3d; --teal:#0f8b8d; --teal-soft:#e3f3f2; --amber:#c9781a; --amber-soft:#fbf0e1;
+  --red:#b3412f; --red-soft:#f8e7e3; --ok:#2e7d4f; --ok-soft:#e5f2ea;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);
+  font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;word-break:keep-all}
+.deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.slide{position:absolute;width:1280px;height:720px;background:var(--paper);border-radius:14px;
+  box-shadow:0 10px 40px rgba(15,42,61,.12);padding:56px 72px 48px;display:none;flex-direction:column;
+  transform-origin:center center}
+.slide.on{display:flex}
+.kicker{font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--teal);text-transform:uppercase}
+h1{font-size:46px;line-height:1.25;font-weight:800;color:var(--navy);margin-top:10px}
+h2{font-size:34px;line-height:1.3;font-weight:800;color:var(--navy);margin-top:6px}
+.lead{font-size:20px;color:var(--sub);margin-top:12px;line-height:1.55}
+.body{flex:1;margin-top:28px;display:flex;gap:28px;min-height:0}
+.col{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{border:1px solid var(--line);border-radius:12px;padding:20px 22px;background:#fff}
+.card h3{font-size:18px;color:var(--navy);margin-bottom:8px}
+.card p,.card li{font-size:16px;line-height:1.6;color:var(--ink)}
+.card ul{padding-left:18px}
+.muted{color:var(--sub)}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px}
+.t-teal{background:var(--teal-soft);color:var(--teal)}
+.t-amber{background:var(--amber-soft);color:var(--amber)}
+.t-red{background:var(--red-soft);color:var(--red)}
+.t-ok{background:var(--ok-soft);color:var(--ok)}
+.big{font-size:44px;font-weight:800;color:var(--navy);line-height:1.1;font-variant-numeric:tabular-nums}
+.big small{font-size:20px;font-weight:700;color:var(--sub);margin-left:4px}
+.stat .label{font-size:15px;color:var(--sub);margin-top:6px}
+.foot{font-size:12px;color:var(--sub);border-top:1px solid var(--line);padding-top:10px;margin-top:18px;line-height:1.5}
+.pg{position:absolute;right:28px;top:22px;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:16px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;line-height:1.45}
+th{font-size:14px;color:var(--sub);font-weight:700}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.tight .card{padding:12px 16px}.tight .card p,.tight .card li{font-size:15px;line-height:1.5}.tight{gap:12px!important}
+.arrow{font-size:28px;color:var(--teal);align-self:center}
+/* cover */
+.cover{background:linear-gradient(135deg,var(--navy) 0%,#123b52 60%,#0f6e70 100%);color:#fff;justify-content:center}
+.cover h1{color:#fff;font-size:58px}
+.cover .lead{color:#cfe3ea;font-size:24px}
+.cover .meta{margin-top:48px;font-size:18px;color:#a9c7d1}
+.cover .pills{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.cover .pills span{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;font-size:15px;color:#e6f2f5}
+.cover .pg{color:#a9c7d1}
+/* timeline */
+.steps{display:flex;gap:12px}
+.step{flex:1;border-radius:12px;padding:16px;background:var(--bg)}
+.step b{display:block;font-size:14px;color:var(--teal)}
+.step span{font-size:15px;line-height:1.5}
+.step.now{background:var(--teal-soft);outline:2px solid var(--teal)}
+.nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+.nav button{border:0;background:var(--navy);color:#fff;font:inherit;font-size:14px;padding:8px 14px;border-radius:8px;cursor:pointer}
+.nav button:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{background:#fff}
+  .deck{position:static;display:block}
+  .slide{display:flex!important;position:relative;transform:none!important;box-shadow:none;border-radius:0;page-break-after:always;break-after:page}
+  .nav{display:none}
+}
+
+/* 광고 칸 미리보기 */
+.mock{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:12px}
+.mock-map{height:150px;border-radius:10px;background:repeating-linear-gradient(45deg,#dfe7ec,#dfe7ec 10px,#e8eef2 10px,#e8eef2 20px);display:grid;place-items:center;color:var(--sub);font-size:15px;font-weight:700}
+.mock-ads{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mock-ads figure{margin:0}
+.mock-ads img{width:100%;aspect-ratio:2000/716;object-fit:cover;border-radius:8px;display:block;border:1px solid var(--line)}
+.mock-ads figcaption{font-size:13px;color:var(--sub);margin-top:4px}
+.mock-empty{aspect-ratio:2000/716;border:2px dashed var(--teal);border-radius:8px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--teal)}
+.mock-empty b{font-size:17px}.mock-empty span{font-size:13px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1. 표지 -->
+<section class="slide cover">
+  <div class="pg">1 / 7</div>
+  <div class="kicker" style="color:#8fd3d1">AX Native Bootcamp · 진행 발표</div>
+  <h1>화면·데이터 검증과<br>플랫폼 설계</h1>
+  <p class="lead">10/30 이후: 환자용 웹 화면을 만들고, 지도에 보이는 병원과 가격 숫자가 맞는지 확인하고, 플랫폼 저장 구조를 정함</p>
+  <div class="pills"><span>환자용 웹 화면</span><span>폐업 교차검증</span><span>비급여 가격 통계</span><span>마이페이지 설계</span><span>광고 칸 함께 쓰기</span></div>
+  <div class="meta">AXA</div>
+</section>
+
+<!-- 2. 환자용 웹 화면 -->
+<section class="slide">
+  <div class="pg">2 / 7</div>
+  <div class="kicker">01 · 환자용 웹 화면</div>
+  <h2>메인 · 병원 정보 · 가격 가이드 · 마이페이지 · 약관까지 화면 완성</h2>
+  <div class="body">
+    <div class="col">
+      <div class="steps">
+        <div class="step"><b>10/30</b><span>메인(지도·진료과 필터), 병원 목록·상세, <b>5개 언어</b></span></div>
+        <div class="step"><b>11/2</b><span>치과 → 안과, 진료과별 지도 색, 가격 가이드(시술 카드 66개), 광고 배너</span></div>
+        <div class="step now"><b>11/3</b><span>마이페이지·저장한 병원, 로그인 안내, 병원 검색, 약관·정책 4종</span></div>
+      </div>
+      <div class="card tight">
+        <h3>데이터와 연결된 부분</h3>
+        <p><span class="tag t-ok">반영</span> 폐업 교차검증 → <b>정상 판정 병원만</b> 지도·목록에 표시</p>
+        <p><span class="tag t-amber">임시</span> 가격 가이드 피부과 카드 6개는 <b>임시 값</b> → 검증 통계로 바꿀 곳</p>
+      </div>
+    </div>
+    <div class="col" style="flex:.8">
+      <table>
+        <tr><th>메뉴</th><th>지금 상태</th></tr>
+        <tr><td>메인</td><td>지도 + 진료과 필터 + 병원 검색</td></tr>
+        <tr><td>병원 정보</td><td>피부·성형·내과·안과 목록·상세</td></tr>
+        <tr><td>가격 가이드</td><td>시술 카드 66개</td></tr>
+        <tr><td>마이페이지</td><td>요약·일정·체크리스트·저장한 병원 (예시 데이터)</td></tr>
+        <tr><td>약관·정책</td><td>개인정보 처리방침·이용약관·AI 안내·의료 법령</td></tr>
+      </table>
+      <p class="muted" style="font-size:14px">언어: 한국어·영어·중국어(간체·번체)·베트남어 · 챗봇은 메뉴만 (준비 중)</p>
+    </div>
+  </div>
+  <div class="foot">기준: frontend 브랜치 커밋 18개 (2026-10-30~11-03) · apps/web-platform · 마이페이지는 백엔드 연결 전 예시 데이터</div>
+</section>
+
+<!-- 3. 폐업 교차검증 -->
+<section class="slide">
+  <div class="pg">3 / 7</div>
+  <div class="kicker">02 · 폐업 교차검증</div>
+  <h2>지도에 폐업한 병원이 보이면 안 된다 → 두 기관 자료로 대조</h2>
+  <div class="body">
+    <div class="col" style="flex:1.15">
+      <div class="steps">
+        <div class="step"><b>출처 A · 심평원</b><span>목록 다시 받기<br>10/28 4,242곳 → 11/2 4,232곳 (10곳 빠짐)</span></div>
+        <div class="step"><b>출처 B · 행안부</b><span>지자체 인허가 영업상태<br>이름 + 도로명주소로 매칭</span></div>
+        <div class="step now"><b>판정</b><span>두 출처가 같을 때만 정상·폐업, 엇갈리면 <b>미확인</b></span></div>
+      </div>
+      <div class="card tight">
+        <p><b>갱신</b>: 심평원 실시간, 행안부 매일·약 2일 전 기준 → 평소 주 1회, 발표·시연 2~3일 전과 전날 다시 실행</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="display:flex;gap:18px;justify-content:space-between">
+        <div class="stat"><div class="big">4,211</div><div class="label">정상</div></div>
+        <div class="stat"><div class="big" style="color:var(--red)">9</div><div class="label">폐업</div></div>
+        <div class="stat"><div class="big" style="color:var(--amber)">22</div><div class="label">미확인</div></div>
+      </div>
+      <div class="card tight">
+        <p><b>폐업 9</b>: 심평원에서 빠짐 + 행안부 '폐업'</p>
+        <p><b>미확인 22</b>: 행안부 '휴업' 13 · 매칭 안 됨 7 · 기타 2</p>
+      </div>
+      <div class="card" style="background:var(--teal-soft);border-color:var(--teal-soft)"><p><b>반영</b>: 정상이 아닌 병원은 지도·목록에서 제외 · 다음: 표본 39곳 지도 점검</p></div>
+    </div>
+  </div>
+  <div class="foot">출처: 건강보험심사평가원 병원정보서비스 (2026-10-28·11-02 조회) · 행정안전부 건강_병원·건강_의원 조회서비스 (2026-11-02 조회) · data/processed/daegu_hospital_status.csv</div>
+</section>
+
+<!-- 4. 내과·안과 가격 통계 -->
+<section class="slide">
+  <div class="pg">4 / 7</div>
+  <div class="kicker">03 · 비급여 가격 통계</div>
+  <h2>의원급까지 넣어 내과·안과 가격 통계 (대구 의원 기준)</h2>
+  <div class="body" style="flex-direction:column;gap:14px">
+    <table>
+      <tr><th>항목</th><th class="num">기관 수</th><th class="num">최소~최대 (원)</th><th class="num">평균</th><th class="num">중앙값</th></tr>
+      <tr><td>수면내시경 관리료 Ⅱ</td><td class="num">301</td><td class="num">20,000~95,000</td><td class="num">44,323</td><td class="num">40,000</td></tr>
+      <tr><td>갑상선 초음파</td><td class="num">456</td><td class="num">15,000~150,000</td><td class="num">52,139</td><td class="num">50,000</td></tr>
+      <tr><td>HPV 가다실9</td><td class="num">431</td><td class="num">160,000~300,000</td><td class="num">216,545</td><td class="num">210,000</td></tr>
+      <tr><td>안구광학단층촬영 (OCT)</td><td class="num">53</td><td class="num">10,000~350,000</td><td class="num">37,765</td><td class="num">30,000</td></tr>
+      <tr><td>라식 / 라섹</td><td class="num">16 / 21</td><td class="num">110만~280만 / 90만~250만</td><td class="num">190만 / 152만</td><td class="num">185만 / 140만</td></tr>
+    </table>
+    <div style="display:flex;gap:14px">
+      <div class="card tight" style="flex:1"><p><b>검증</b>: API(병원급 224곳)와 누리집(의원급 포함 4,003곳) 같은 항목 <b>98.7% 일치</b>. 팀 가격표(docx)는 5개 일치·2개 다름</p></div>
+      <div class="card tight" style="flex:1"><p><b>기준은 중앙값</b>: 평균은 튀는 값에 흔들림. 의원·병원급도 나눠서 (갑상선 중앙값 의원 5만 / 병원급 9만)</p></div>
+    </div>
+  </div>
+  <div class="foot">출처: 심평원 누리집 비급여 진료비 정보 대구 전체 (공개기준 2026-08) · 심평원 비급여진료비정보서비스 API (2026-10-28) · 기관별 최저 금액으로 계산, 폐업 판정 기관 제외 · data/processed/daegu_nonpay_price_stats.csv (12개 항목)</div>
+</section>
+
+<!-- 5. 가격 데이터의 빈칸 -->
+<section class="slide">
+  <div class="pg">5 / 7</div>
+  <div class="kicker">04 · 가격 데이터의 빈칸</div>
+  <h2>피부·성형 가격은 공공 데이터에 없고, 홈페이지 자료는 단위가 제각각</h2>
+  <div class="body">
+    <div class="col">
+      <table>
+        <tr><th>진료과 (누리집 의원)</th><th class="num">의원</th><th class="num">가격 있음</th><th></th></tr>
+        <tr><td>내과</td><td class="num">387</td><td class="num">386</td><td><span class="tag t-ok">충분</span></td></tr>
+        <tr><td>안과</td><td class="num">111</td><td class="num">94</td><td><span class="tag t-ok">충분</span></td></tr>
+        <tr><td>피부과</td><td class="num">79</td><td class="num">53</td><td><span class="tag t-amber">미용 시술 없음</span></td></tr>
+        <tr><td>성형외과</td><td class="num">46</td><td class="num">14</td><td><span class="tag t-red">미용 수술 없음</span></td></tr>
+      </table>
+      <div class="card tight" style="background:var(--amber-soft);border-color:var(--amber-soft)"><p><b>팀 결정</b>: 가격이 없다 ≠ 진료를 안 한다 → 필터에서 숨기지 말고 <b>'가격 정보 없음'</b>으로 표시할지</p></div>
+    </div>
+    <div class="col">
+      <div class="card tight">
+        <h3>피부과 홈페이지 수집본 (88곳 4,785행)</h3>
+        <p>"보톡스" 한 칸에 시작가·1+1·부위별이 섞임 → 그대로 계산하면 1,000~480,000원</p>
+        <p>단위를 고정하고 이벤트가를 빼면 <b>5곳 이상 모인 시술은 스킨보톡스 1개</b> (8곳, 중앙값 98,000원)</p>
+      </div>
+      <div class="card tight"><p><b>다음</b>: 시술마다 단위를 먼저 정하고, 병원 의무 게시표(비급여 고지가) 우선으로 5곳 이상 수집 · 수집 방법이 팀 규칙에 맞는지 확인</p></div>
+    </div>
+  </div>
+  <div class="foot">출처: 심평원 누리집 비급여 진료비 정보 대구 전체 (공개기준 2026-08, 제증명 수수료 제외) · 대구 피부과 병원 홈페이지 가격표 팀 수집본 (2026-11-03) · 병원별 가격은 공개하지 않음</div>
+</section>
+
+<!-- 6. 마이페이지 -->
+<section class="slide">
+  <div class="pg">6 / 7</div>
+  <div class="kicker">05 · 마이페이지 설계</div>
+  <h2>화면의 칸마다 "어디에 저장하나"를 정함</h2>
+  <div class="body">
+    <div class="col" style="flex:1.3">
+      <table>
+        <tr><th>화면</th><th>저장 위치</th><th>규칙</th></tr>
+        <tr><td>저장한 병원 (찜)</td><td><span class="tag t-teal">계정</span></td><td>병원별 찜 수는 모으지 않음</td></tr>
+        <tr><td>방문 기록</td><td><span class="tag t-teal">계정</span></td><td>병원·날짜만, <b>리뷰·메모 칸 없음</b></td></tr>
+        <tr><td>나의 대구 일정</td><td><span class="tag t-teal">계정</span></td><td>여행 여러 개, 직접 추가, 한국 시간 표시</td></tr>
+        <tr><td>알림 · 챗봇 대화</td><td><span class="tag t-teal">계정</span></td><td>알림 90일, 챗봇은 로그인 시만 30일</td></tr>
+        <tr><td>조회 기록</td><td><span class="tag t-amber">브라우저</span></td><td>서버로 안 보냄, 30일·쿠키 삭제 시 사라짐</td></tr>
+        <tr><td>방문 체크리스트</td><td><span class="tag t-amber">브라우저</span></td><td>모두 같은 5개 항목, 체크만 내 기기에</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <div class="card tight"><h3>왜 나눴나</h3><p>서버에 쌓는 개인정보를 줄이려고 → 기기 간 연결이 필요 없는 것은 브라우저에</p></div>
+      <div class="card tight"><h3>건강정보는 계정에 안 둠</h3><p>일정·방문 기록에 증상 칸 없음. 건강정보는 예약 요청서에서만</p></div>
+      <div class="card tight" style="background:var(--amber-soft);border-color:var(--amber-soft)"><p><b>팀 확인</b>: 챗봇에 증상을 쓰면 계정에 저장됨 → 안내 + 가리기 + 짧은 보관으로 될지</p></div>
+    </div>
+  </div>
+  <div class="foot">근거: 프론트 마이페이지 화면 · docs/backend-db-schema.md v3 · 개인정보 보호법 제23조(민감정보) · 보관 기간은 제안값 · 다음: 백엔드 B 검토 후 테이블 생성</div>
+</section>
+
+<!-- 7. 광고 칸 -->
+<section class="slide">
+  <div class="pg">7 / 7</div>
+  <div class="kicker">06 · 광고 칸 함께 쓰기</div>
+  <h2>메인 지도 아래 광고 칸에 교육생 팀의 제품을 실어 드려요</h2>
+  <p class="lead">지금 다른 팀 제품 광고 2개가 들어가 있습니다. 함께 실어 보고 싶은 팀은 AXA에 알려 주세요</p>
+  <div class="body">
+    <div class="col">
+      <div class="mock">
+        <div class="mock-map">지도 · 진료과 필터 · 병원 검색</div>
+        <div class="mock-ads">
+          <figure><img src="ads/hanbang-skincare.webp" alt="한방 스킨케어 배너"><figcaption>교육생 팀 제품 광고</figcaption></figure>
+          <figure><img src="ads/biseulsan-ice-festival.webp" alt="비슬산 얼음축제 배너"><figcaption>교육생 팀 제품 광고</figcaption></figure>
+        </div>
+      </div>
+      <p class="muted" style="font-size:14px">칸마다 "광고" 표시 · 태블릿·모바일은 배너가 5초마다 번갈아 나옴</p>
+    </div>
+    <div class="col">
+      <div class="card tight" style="background:var(--ok-soft);border-color:var(--ok-soft)"><h3>이런 광고면 좋아요</h3><p>대구를 찾는 외국인 방문객이 쓸 만한 제품·서비스 (관광·축제·맛집·숙박·교통·문화 등)</p></div>
+      <div class="card tight" style="background:var(--red-soft);border-color:var(--red-soft)"><h3>실을 수 없는 것</h3><p>병원·시술 광고, 할인·이벤트가 (의료광고·유인 규제) · 예약 요청서·동의·챗봇 화면에는 광고 없음</p></div>
+      <div class="card tight"><h3>보내 주실 것</h3><p>배너 이미지 (가로:세로 2000×716) · 눌렀을 때 갈 주소 · 보여 줄 언어</p></div>
+    </div>
+  </div>
+  <div class="foot">근거: apps/web-platform AdSlot (메인 화면 2칸, 배너 비율 2000×716) · docs/compliance.md 광고 규칙</div>
+</section>
+
+</div>
+<div class="nav"><button id="prev" aria-label="이전 슬라이드">← 이전</button><button id="next" aria-label="다음 슬라이드">다음 →</button></div>
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];let i=0;
+  const fromHash=parseInt(location.hash.slice(1),10);if(fromHash>=1&&fromHash<=slides.length)i=fromHash-1;
+  function fit(){const s=Math.min(innerWidth/1340,(innerHeight-60)/760);slides.forEach(el=>el.style.transform='scale('+s+')')}
+  function show(n){i=Math.max(0,Math.min(slides.length-1,n));slides.forEach((el,k)=>el.classList.toggle('on',k===i));history.replaceState(null,'','#'+(i+1))}
+  addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1)}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(slides.length-1)});
+  document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);
+  addEventListener('hashchange',()=>{const n=parseInt(location.hash.slice(1),10);if(n>=1&&n<=slides.length&&n-1!==i)show(n-1)});
+  addEventListener('resize',fit);fit();show(i);
+})();
+</script>
+</body>
+</html>
