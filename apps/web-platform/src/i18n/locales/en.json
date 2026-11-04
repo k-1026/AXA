@@ -127,8 +127,7 @@
     "subtitle": "Manage saved hospitals, visit plans and trip prep in one place.",
     "stats": {
       "saved": "Saved hospitals",
-      "visits": "Visit history",
-      "recent": "Recently viewed"
+      "visits": "Visit history"
     },
     "schedule": {
       "title": "My Daegu schedule",
@@ -210,7 +209,7 @@
   },
   "auth": {
     "requiredTitle": "Please log in",
-    "requiredDesc": "Your saved hospitals, visit history, recently viewed and Daegu schedule are available after you log in.",
+    "requiredDesc": "Your saved hospitals, visit history and Daegu schedule are available after you log in.",
     "comingSoon": "Member login is coming soon. For now you can look around with a demo account.",
     "demo": "Try the demo account",
     "demoNote": "The demo account also shows sample data. Saved hospitals and your visit log stay in this browser only.",

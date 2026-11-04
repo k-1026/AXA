@@ -127,8 +127,7 @@
     "subtitle": "Quản lý bệnh viện đã lưu, lịch khám và chuẩn bị chuyến đi tại một nơi.",
     "stats": {
       "saved": "Bệnh viện đã lưu",
-      "visits": "Lịch sử khám",
-      "recent": "Đã xem gần đây"
+      "visits": "Lịch sử khám"
     },
     "schedule": {
       "title": "Lịch trình Daegu của tôi",
@@ -210,7 +209,7 @@
   },
   "auth": {
     "requiredTitle": "Vui lòng đăng nhập",
-    "requiredDesc": "Bệnh viện đã lưu, lịch sử khám, mục xem gần đây và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
+    "requiredDesc": "Bệnh viện đã lưu, lịch sử khám và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
     "comingSoon": "Đăng nhập thành viên sắp ra mắt. Hiện tại bạn có thể xem thử bằng tài khoản demo.",
     "demo": "Xem thử bằng tài khoản demo",
     "demoNote": "Tài khoản demo cũng hiển thị dữ liệu mẫu. Bệnh viện đã lưu và nhật ký khám chỉ lưu trong trình duyệt này.",
