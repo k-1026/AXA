@@ -1,0 +1,67 @@
+﻿ID,Category,Original item,English name,Status,Image file
+01,Dermatology,보톡스,Botox,Complete,01_dermatology/01_botox.png
+02,Dermatology,필러,Dermal Fillers,Complete,01_dermatology/02_dermal_fillers.png
+03,Dermatology,윤곽주사,Facial Contouring Injections,Complete,01_dermatology/03_facial_contouring_injections.png
+04,Dermatology,기미·잡티·색소침착 치료,Pigmentation Treatment,Complete,01_dermatology/04_pigmentation_treatment.png
+05,Dermatology,홍조·혈관 레이저,Redness & Vascular Laser,Complete,01_dermatology/05_redness_vascular_laser.png
+06,Dermatology,여드름 진료,Acne Care,Complete,01_dermatology/06_acne_care.png
+07,Dermatology,모공·여드름 흉터 레이저,Pore & Acne Scar Laser,Complete,01_dermatology/07_pore_acne_scar_laser.png
+08,Dermatology,초음파·고주파 리프팅,Ultrasound & RF Lifting,Complete,01_dermatology/08_ultrasound_rf_lifting.png
+09,Dermatology,피부 탄력 관리,Skin Firming,Complete,01_dermatology/09_skin_firming.png
+10,Dermatology,피부관리,Skin Care,Complete,01_dermatology/10_skin_care.png
+11,Dermatology,스킨부스터,Skin Boosters,Complete,01_dermatology/11_skin_boosters.png
+12,Dermatology,점 제거,Mole Removal,Complete,01_dermatology/12_mole_removal.png
+13,Dermatology,양성 피부병변 진료,Benign Skin Lesion Care,Pending,
+14,Dermatology,여성·남성 레이저 제모,Laser Hair Removal,Complete,01_dermatology/14_laser_hair_removal.png
+15,Dermatology,바디주사,Body Contouring Injections,Complete,01_dermatology/15_body_contouring_injections.png
+16,Dermatology,비수술 체형관리,Non-Surgical Body Contouring,Complete,01_dermatology/16_non_surgical_body_contouring.png
+17,Plastic Surgery,쌍꺼풀 수술,Double Eyelid Surgery,Complete,02_plastic_surgery/17_double_eyelid_surgery.png
+18,Plastic Surgery,눈매교정,Ptosis Correction,Complete,02_plastic_surgery/18_ptosis_correction.png
+19,Plastic Surgery,눈밑지방 재배치,Under-Eye Fat Repositioning,Complete,02_plastic_surgery/19_under_eye_fat_repositioning.png
+20,Plastic Surgery,융비술,Nasal Bridge Augmentation,Complete,02_plastic_surgery/20_nasal_bridge_augmentation.png
+21,Plastic Surgery,코끝 성형,Nose Tip Reshaping,Complete,02_plastic_surgery/21_nose_tip_reshaping.png
+22,Plastic Surgery,코 재수술,Revision Rhinoplasty,Complete,02_plastic_surgery/22_revision_rhinoplasty.png
+23,Plastic Surgery,광대·턱 윤곽 성형,Cheekbone & Jaw Contouring,Complete,02_plastic_surgery/23_cheekbone_jaw_contouring.png
+24,Plastic Surgery,안면거상,Facelift,Complete,02_plastic_surgery/24_facelift.png
+25,Plastic Surgery,이마거상,Forehead Lift,Complete,02_plastic_surgery/25_forehead_lift.png
+26,Plastic Surgery,실리프팅,Thread Lift,Complete,02_plastic_surgery/26_thread_lift.png
+27,Plastic Surgery,유방확대·축소·거상,Breast Reshaping,Complete,02_plastic_surgery/27_breast_reshaping.png
+28,Plastic Surgery,지방흡입,Liposuction,Complete,02_plastic_surgery/28_liposuction.png
+29,Plastic Surgery,지방이식,Fat Grafting,Complete,02_plastic_surgery/29_fat_grafting.png
+30,Plastic Surgery,복부성형,Tummy Tuck,Complete,02_plastic_surgery/30_tummy_tuck.png
+31,Plastic Surgery,바디필러 상담,Body Filler Consultation,Complete,02_plastic_surgery/31_body_filler_consultation.png
+32,Plastic Surgery,흉터 성형,Scar Revision,Complete,02_plastic_surgery/32_scar_revision.png
+33,Plastic Surgery,외상·화상 후 재건,Trauma & Burn Reconstruction,Complete,02_plastic_surgery/33_trauma_burn_reconstruction.png
+34,Plastic Surgery,유방재건,Breast Reconstruction,Pending,
+35,Internal Medicine,기본·종합 건강검진,General Health Checkup,Pending,
+36,Internal Medicine,혈액·소변검사,Blood & Urine Tests,Pending,
+37,Internal Medicine,결과 상담,Test Results Consultation,Pending,
+38,Internal Medicine,위염·역류성 식도염·장질환 진료,Digestive Disease Care,Pending,
+39,Internal Medicine,위·대장내시경,Gastroscopy & Colonoscopy,Pending,
+40,Internal Medicine,지방간·간염 진료,Fatty Liver & Hepatitis Care,Pending,
+41,Internal Medicine,간기능검사,Liver Function Tests,Pending,
+42,Internal Medicine,복부초음파,Abdominal Ultrasound,Pending,
+43,Internal Medicine,고혈압·이상지질혈증·부정맥 진료,Cardiovascular Care,Pending,
+44,Internal Medicine,당뇨병·갑상선질환·비만·골다공증 진료,Endocrine & Metabolic Care,Pending,
+45,Internal Medicine,기침·천식·폐질환·알레르기 진료,Respiratory & Allergy Care,Pending,
+46,Internal Medicine,신장기능 이상·단백뇨 진료,Kidney Care,Pending,
+47,Internal Medicine,독감·간염·HPV 백신 접종 상담,Vaccination Consultation,Pending,
+48,Internal Medicine,영양상태 평가,Nutritional Assessment,Pending,
+49,Internal Medicine,필요에 따른 영양·수액 치료,IV & Nutritional Therapy,Pending,
+50,Ophthalmology,라식,LASIK,Pending,
+51,Ophthalmology,라섹,LASEK,Pending,
+52,Ophthalmology,스마일,SMILE Vision Correction,Pending,
+53,Ophthalmology,안내렌즈삽입술,Implantable Contact Lens,Pending,
+54,Ophthalmology,노안 검사·교정 상담,Presbyopia Consultation,Pending,
+55,Ophthalmology,백내장 수술·인공수정체 상담,Cataract Surgery Consultation,Pending,
+56,Ophthalmology,안구건조증,Dry Eye Care,Pending,
+57,Ophthalmology,결막염,Conjunctivitis Care,Pending,
+58,Ophthalmology,눈꺼풀염 진료,Blepharitis Care,Pending,
+59,Ophthalmology,안압·시신경·시야 검사,Glaucoma Screening,Pending,
+60,Ophthalmology,약물·레이저·수술 치료,"Eye Medication, Laser & Surgery",Pending,
+61,Ophthalmology,황반변성·당뇨망막병증·망막열공·망막박리 진료,Retinal & Macular Care,Pending,
+62,Ophthalmology,각막염·원추각막 진료,Corneal Disease Care,Pending,
+63,Ophthalmology,각막이식 상담,Corneal Transplant Consultation,Pending,
+64,Ophthalmology,사시·약시 진료,Strabismus & Amblyopia Care,Pending,
+65,Ophthalmology,소아 시력·굴절검사,Children's Vision Screening,Pending,
+66,Ophthalmology,안검하수·눈꺼풀 이상·눈물길 질환 진료,Eyelid & Tear Duct Care,Pending,
