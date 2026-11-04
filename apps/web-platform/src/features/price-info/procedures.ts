@@ -254,26 +254,23 @@ export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
     ko: '녹내장',
     en: 'Glaucoma',
     items: list(
-      ['안압·시신경·시야 검사', 'Eye Pressure, Optic Nerve & Visual Field Tests'],
-      ['약물·레이저·수술 치료', 'Medication, Laser & Surgical Treatment'],
+      ['안압·시신경·시야 검사', 'Eye Pressure, Optic Nerve & Visual Field Tests', '59_glaucoma_screening.jpg'],
+      ['약물·레이저·수술 치료', 'Medication, Laser & Surgical Treatment', '60_eye_medication_laser_and_surgery.jpg'],
     ),
   },
   {
     dept: 'ophthalmology',
     ko: '망막·황반',
     en: 'Retina & Macula',
-    items: list([
-      '황반변성·당뇨망막병증·망막열공·망막박리 진료',
-      'Macular Degeneration, Diabetic Retinopathy, Retinal Tear & Detachment Care',
-    ]),
+    items: list(['황반변성·당뇨망막병증·망막열공·망막박리 진료', 'Macular Degeneration, Diabetic Retinopathy, Retinal Tear & Detachment Care', '61_retinal_and_macular_care.jpg']),
   },
   {
     dept: 'ophthalmology',
     ko: '각막',
     en: 'Cornea',
     items: list(
-      ['각막염·원추각막 진료', 'Keratitis & Keratoconus Care'],
-      ['각막이식 상담', 'Corneal Transplant Consultation'],
+      ['각막염·원추각막 진료', 'Keratitis & Keratoconus Care', '62_corneal_disease_care.jpg'],
+      ['각막이식 상담', 'Corneal Transplant Consultation', '63_corneal_transplant_consultation.jpg'],
     ),
   },
   {
@@ -281,14 +278,14 @@ export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
     ko: '사시·소아안과',
     en: 'Strabismus & Pediatric Eye Care',
     items: list(
-      ['사시·약시 진료', 'Strabismus & Amblyopia Care'],
-      ['소아 시력·굴절검사', 'Pediatric Vision & Refraction Tests'],
+      ['사시·약시 진료', 'Strabismus & Amblyopia Care', '64_strabismus_and_amblyopia_care.jpg'],
+      ['소아 시력·굴절검사', 'Pediatric Vision & Refraction Tests', '65_childrens_vision_screening.jpg'],
     ),
   },
   {
     dept: 'ophthalmology',
     ko: '눈꺼풀·눈물길',
     en: 'Eyelid & Tear Duct',
-    items: list(['안검하수·눈꺼풀 이상·눈물길 질환 진료', 'Ptosis, Eyelid & Tear Duct Disorder Care']),
+    items: list(['안검하수·눈꺼풀 이상·눈물길 질환 진료', 'Ptosis, Eyelid & Tear Duct Disorder Care', '66_eyelid_and_tear_duct_care.jpg']),
   },
 ];
