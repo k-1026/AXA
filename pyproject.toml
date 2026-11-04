@@ -8,6 +8,10 @@ dependencies = [
     "pydantic-settings",
     "pyjwt",
     "pwdlib[argon2]",
+    "sqlalchemy>=2.1.8",
+    "psycopg[binary]>=3.3.7",
+    "alembic>=1.20.1",
+    "tzdata>=2026.6",
 ]
 
 [dependency-groups]
