@@ -2118,21 +2118,54 @@ a {
 
 /* 푸터 */
 .site-footer {
-  padding: 24px;
+  padding: 32px 24px 24px;
   background: var(--surface);
   border-top: 1px solid var(--border);
-  text-align: center;
   font-size: 0.8rem;
+  line-height: 1.6;
   color: var(--text-muted);
 }
 
 .site-footer p {
-  margin: 4px 0;
+  margin: 0 0 6px;
+}
+
+/* 왼쪽: 팀·서비스 소개 / 오른쪽: 문의·안내 */
+.footer-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 48px;
+}
+
+.footer-team-name {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.footer-contact a {
+  color: var(--accent);
 }
 
 .footer-notice {
   font-weight: 600;
   color: var(--text);
+}
+
+.site-footer .footer-team {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .footer-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* 태블릿 이하: 사이드바를 위쪽 가로 메뉴로 */

@@ -57,7 +57,10 @@
     "label": "廣告"
   },
   "footer": {
-    "notice": "基於韓國公共資料的醫院資訊，並非醫院推薦或醫療諮詢。",
+    "about": "AXA 是一支協助外國人更輕鬆、更安全地體驗大邱醫療與觀光的團隊。",
+    "service": "MediDaegu 是運用公共資料與 AI，以多種語言提供醫院與診療項目資訊、簽證及觀光資訊的醫療觀光資訊平台。",
+    "contact": "廣告・橫幅合作洽詢",
+    "disclaimer": "本平台提供基於公共資料的資訊，不推薦特定醫院，也不提供醫療諮詢。診療、療程及預約相關事項請直接向該醫院確認。",
     "source": "資料：韓國健康保險審查評價院 醫院資訊服務（公共資料入口網 data.go.kr）",
     "emergency": "緊急情況請撥打 119。"
   },
@@ -143,11 +146,13 @@
       "title": "就診準備清單",
       "progress": "共 {{total}} 項，已完成 {{done}} 項",
       "items": {
-        "saveAddress": "儲存醫院地址",
-        "setLanguage": "設定使用語言",
-        "checkHours": "確認就診時間",
-        "checkInterpreter": "確認翻譯支援",
-        "checkNotice": "確認醫院須知"
+        "visitDateTime": "確認就診日期與時間",
+        "route": "確認醫院位置與交通路線",
+        "documents": "準備身分證件與所需文件",
+        "language": "確認諮詢語言與口譯支援",
+        "medication": "整理正在服用的藥物與過敏資訊",
+        "cost": "確認預估費用與付款方式",
+        "hospitalNotice": "確認醫院告知的準備事項"
       }
     },
     "account": {

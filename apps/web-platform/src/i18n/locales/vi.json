@@ -57,7 +57,10 @@
     "label": "Quảng cáo"
   },
   "footer": {
-    "notice": "Thông tin bệnh viện dựa trên dữ liệu công của Hàn Quốc. Đây không phải là giới thiệu bệnh viện hay tư vấn y tế.",
+    "about": "AXA là nhóm giúp người nước ngoài trải nghiệm dịch vụ y tế và du lịch tại Daegu dễ dàng và an toàn hơn.",
+    "service": "MediDaegu là nền tảng thông tin du lịch y tế sử dụng dữ liệu công và AI để cung cấp thông tin bệnh viện, thủ thuật, thị thực và du lịch bằng nhiều ngôn ngữ.",
+    "contact": "Liên hệ quảng cáo/banner",
+    "disclaimer": "Nền tảng này cung cấp thông tin dựa trên dữ liệu công, không giới thiệu bệnh viện cụ thể và không tư vấn y tế. Vui lòng xác nhận trực tiếp với bệnh viện về khám chữa bệnh, thủ thuật và đặt lịch.",
     "source": "Dữ liệu: Dịch vụ thông tin bệnh viện của HIRA (data.go.kr)",
     "emergency": "Trường hợp khẩn cấp, hãy gọi 119."
   },
@@ -143,11 +146,13 @@
       "title": "Danh sách chuẩn bị",
       "progress": "Đã xong {{done}}/{{total}}",
       "items": {
-        "saveAddress": "Lưu địa chỉ bệnh viện",
-        "setLanguage": "Chọn ngôn ngữ",
-        "checkHours": "Kiểm tra giờ khám",
-        "checkInterpreter": "Kiểm tra hỗ trợ phiên dịch",
-        "checkNotice": "Đọc lưu ý của bệnh viện"
+        "visitDateTime": "Kiểm tra ngày và giờ khám",
+        "route": "Kiểm tra vị trí bệnh viện và đường đi",
+        "documents": "Chuẩn bị giấy tờ tùy thân và hồ sơ cần thiết",
+        "language": "Kiểm tra ngôn ngữ tư vấn và hỗ trợ phiên dịch",
+        "medication": "Ghi lại thuốc đang dùng và thông tin dị ứng",
+        "cost": "Kiểm tra chi phí dự kiến và phương thức thanh toán",
+        "hospitalNotice": "Kiểm tra hướng dẫn chuẩn bị từ bệnh viện"
       }
     },
     "account": {

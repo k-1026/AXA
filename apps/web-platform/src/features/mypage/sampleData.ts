@@ -93,10 +93,12 @@ export const SAMPLE_MYPAGE: MyPageData = {
     },
   ],
   checklist: [
-    { key: 'saveAddress', done: true },
-    { key: 'setLanguage', done: true },
-    { key: 'checkHours', done: false },
-    { key: 'checkInterpreter', done: false },
-    { key: 'checkNotice', done: false },
+    { key: 'visitDateTime', done: true },
+    { key: 'route', done: true },
+    { key: 'documents', done: false },
+    { key: 'language', done: false },
+    { key: 'medication', done: false },
+    { key: 'cost', done: false },
+    { key: 'hospitalNotice', done: false },
   ],
 };

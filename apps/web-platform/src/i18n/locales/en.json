@@ -57,7 +57,10 @@
     "label": "Advertisement"
   },
   "footer": {
-    "notice": "Hospital information based on Korean public data. This is not a recommendation or medical advice.",
+    "about": "AXA is a team that helps international visitors experience medical care and travel in Daegu more easily and safely.",
+    "service": "MediDaegu is a medical tourism information platform that uses public data and AI to provide hospital and procedure information, as well as visa and travel information, in multiple languages.",
+    "contact": "Advertising & banner inquiries",
+    "disclaimer": "This platform provides information based on public data and does not recommend specific hospitals or provide medical consultation. Please confirm treatments, procedures and reservations directly with the hospital.",
     "source": "Data: Health Insurance Review & Assessment Service (HIRA) hospital information APIs, via data.go.kr",
     "emergency": "In an emergency, call 119."
   },
@@ -143,11 +146,13 @@
       "title": "Visit checklist",
       "progress": "{{done}} of {{total}} done",
       "items": {
-        "saveAddress": "Save hospital address",
-        "setLanguage": "Set your language",
-        "checkHours": "Check visiting hours",
-        "checkInterpreter": "Check interpreter support",
-        "checkNotice": "Read hospital notices"
+        "visitDateTime": "Check visit date & time",
+        "route": "Check hospital location & route",
+        "documents": "Prepare ID & required documents",
+        "language": "Check consultation language & interpreter support",
+        "medication": "List your medications & allergies",
+        "cost": "Check estimated costs & payment methods",
+        "hospitalNotice": "Check the hospital's preparation instructions"
       }
     },
     "account": {
