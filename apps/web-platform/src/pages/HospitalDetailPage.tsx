@@ -58,7 +58,7 @@ export function HospitalDetailPage() {
           </ul>
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
-            <dd>{h.addr}</dd>
+            <dd lang="ko">{h.addr}</dd>
             <dt>{t('popup.tel')}</dt>
             <dd>{h.tel && <a href={`tel:${h.tel}`}>{h.tel}</a>}</dd>
             <dt>{t('hospital.homepage')}</dt>

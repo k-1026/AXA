@@ -9,9 +9,53 @@
   --accent-soft: #e3edfd;
   --radius: 16px;
   --header-h: 64px;
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  /* 한국어 글꼴: 외국어 화면 안의 한국어(주소 등)도 이 글꼴로 */
+  --font-ko: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  font-family: system-ui, var(--font-ko);
   color: var(--text);
   background: var(--bg);
+  /* 줄에 안 들어가는 긴 단어·URL만 잘라서 칸 밖으로 안 나가게 */
+  overflow-wrap: break-word;
+}
+
+/* 언어별 글꼴·줄바꿈. 글꼴은 각 나라 기기 기본 글꼴만 써서 외부 다운로드가 없다 (중국에서는 구글 폰트가 막힘) */
+/* 한국어: 단어 중간에서 줄이 바뀌지 않게 띄어쓰기 단위로 */
+html:lang(ko),
+[lang='ko'] {
+  font-family: var(--font-ko);
+  word-break: keep-all;
+}
+
+/* 영어·베트남어: 성조 기호가 겹치지 않게 베트남어 지원 글꼴 + 줄 간격 여유 */
+html:lang(en),
+html:lang(vi),
+[lang='en'] {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', var(--font-ko);
+}
+
+/* 다른 언어 화면 속 영어 이름(시술·병원): 좁은 칸에서는 음절에서 하이픈으로 나눔 */
+[lang='en'] {
+  hyphens: auto;
+}
+
+html:lang(vi) {
+  line-height: 1.5;
+}
+
+/* 중국어: 한국어 글꼴로 한자가 그려지지 않게 간체·번체 글꼴을 따로, 문장부호가 줄 맨 앞에 오지 않게 */
+html:lang(zh-CN) {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', var(--font-ko);
+  line-break: strict;
+}
+
+html:lang(zh-TW) {
+  font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', 'Source Han Sans TC', var(--font-ko);
+  line-break: strict;
+}
+
+/* 지도 팝업도 Leaflet 기본 글꼴(Helvetica) 대신 언어별 글꼴 (leaflet.css가 나중에 불러와져도 이기게 html 붙임) */
+html .leaflet-container {
+  font-family: inherit;
 }
 
 * {
@@ -114,6 +158,8 @@ a {
 }
 
 .filter-grid button {
+  /* 긴 이름(영어·베트남어)은 칸 밖으로 잘리지 않고 다음 줄로 */
+  min-width: 0;
   min-height: 48px;
   padding: 0 16px;
   border: 0;
@@ -388,6 +434,8 @@ a {
 }
 
 .procedure-card {
+  /* 한국어는 단어 단위로만 줄을 바꿔서, 긴 단어가 칸을 밀어내지 않게 줄어들 수 있게 */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -2133,6 +2181,17 @@ a {
     width: 76px;
     height: 76px;
     font-size: 0.8rem;
+  }
+
+  .filter-grid button {
+    padding: 0 12px;
+  }
+}
+
+/* 아주 작은 폰: 3칸이면 영어·베트남어 이름이 너무 좁아짐 */
+@media (max-width: 360px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

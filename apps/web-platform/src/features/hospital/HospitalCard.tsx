@@ -26,7 +26,7 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
         </h2>
         <dl className="hospital-facts">
           <dt>{t('popup.addr')}</dt>
-          <dd>{h.addr}</dd>
+          <dd lang="ko">{h.addr}</dd>
           <dt>{t('popup.tel')}</dt>
           <dd>{h.tel && <a href={`tel:${h.tel}`}>{h.tel}</a>}</dd>
           <dt>{t('hospital.homepage')}</dt>
