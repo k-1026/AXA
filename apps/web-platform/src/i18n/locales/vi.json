@@ -142,7 +142,6 @@
     "checklist": {
       "title": "Danh sách chuẩn bị",
       "progress": "Đã xong {{done}}/{{total}}",
-      "viewAll": "Xem toàn bộ danh sách",
       "items": {
         "saveAddress": "Lưu địa chỉ bệnh viện",
         "setLanguage": "Chọn ngôn ngữ",

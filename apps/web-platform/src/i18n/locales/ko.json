@@ -142,7 +142,6 @@
     "checklist": {
       "title": "방문 준비 체크리스트",
       "progress": "{{total}}개 중 {{done}}개 완료",
-      "viewAll": "체크리스트 전체 보기",
       "items": {
         "saveAddress": "병원 주소 저장",
         "setLanguage": "사용 언어 설정",

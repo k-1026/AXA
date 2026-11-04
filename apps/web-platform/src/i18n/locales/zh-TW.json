@@ -142,7 +142,6 @@
     "checklist": {
       "title": "就診準備清單",
       "progress": "共 {{total}} 項，已完成 {{done}} 項",
-      "viewAll": "查看完整清單",
       "items": {
         "saveAddress": "儲存醫院地址",
         "setLanguage": "設定使用語言",

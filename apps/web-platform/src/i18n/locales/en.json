@@ -142,7 +142,6 @@
     "checklist": {
       "title": "Visit checklist",
       "progress": "{{done}} of {{total}} done",
-      "viewAll": "View full checklist",
       "items": {
         "saveAddress": "Save hospital address",
         "setLanguage": "Set your language",
