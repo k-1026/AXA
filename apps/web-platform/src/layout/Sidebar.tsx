@@ -6,7 +6,6 @@ export const NAV_ITEMS = [
   { to: '/hospitals', key: 'hospitals' },
   { to: '/prices', key: 'prices' },
   { to: '/chatbot', key: 'chatbot' },
-  { to: '/about', key: 'about' },
   { to: '/mypage', key: 'mypage' },
 ] as const;
 
