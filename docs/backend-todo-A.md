@@ -19,27 +19,30 @@
 - [ ] B와 `docs/backend-contracts.md` 초안 확정 (상태 코드, 토큰, 에러 코드, 함수 10개, `BookingCreate`)
 - [ ] `proposed` 거절 후 상태 결정 → `backend-decisions.md`
 - [ ] `backend/src/main.py`, `core/` 구조 같이 잡기 (B: `db.py`, A: `security.py`)
-- [ ] `core/security.py`: JWT 발급·검증, `current_patient()`·`current_staff()` 의존성
-- [ ] `core/errors.py`: `{code, message, detail}` 형식 (같이)
-- [ ] 로컬에서 `docker compose up` + 서버 실행, `GET /api/v1/health` 확인 (B가 compose 준비)
+- [x] `core/security.py`: JWT 발급·검증, `current_patient()`·`current_staff()` 의존성
+- [x] `core/errors.py`: `{code, message, detail}` 형식 (초안, B 확인 필요)
+- [x] ~~로컬 `docker compose up`~~ → Supabase로 변경 (결정 12). `core/db.py`·Alembic `0001`·`0002` **Supabase에 적용 완료** (2026-11-04)
 
 ## 11/5~8 · 로그인 → 요청서 (11/9 시연)
 
 **auth (로그인)**
-- [ ] `POST /auth/patient/code` — 이메일로 인증코드 발송 (데모: 콘솔 출력)
-- [ ] `POST /auth/patient/verify` — 코드 확인 → 환자 토큰. 처음이면 계정 생성
-- [ ] `login_codes`: 코드는 **해시로 저장**, 짧은 만료, 시도 횟수 제한 → `auth.code_invalid`, `auth.too_many_attempts`
+- [x] ~~이메일 인증코드~~ → **이메일 + 비밀번호 회원가입**으로 변경 (결정 11)
+- [x] `POST /auth/patient/signup` — 가입(14세 확인·`terms`·`privacy` 동의) → 바로 환자 토큰
+- [x] `POST /auth/patient/login` — 이메일·비밀번호 → 환자 토큰. 실패는 `auth.invalid_credentials` 하나로
+- [x] `POST /auth/patient/logout` — 서버 세션 종료, 그 토큰 즉시 401 (결정 14)
+- [ ] 로그인 시도 횟수 제한 (`auth.too_many_attempts`) → 11/17~ 남용 방지 때
+- [ ] 비밀번호 변경·재설정 (재설정은 메일 발송 결정 후)
 - [ ] `POST /auth/staff/login` — 직원 비밀번호 로그인 → 직원 토큰(`tenant_id` 포함). 직원 계정 테이블은 B(`tenant`)
-- [ ] 가입 시 "만 14세 이상" 확인 칸 (미만 가입 불가, 개인정보보호법 제22조의2)
+- [x] 가입 시 "만 14세 이상" 확인 칸 (미만 가입 불가, 개인정보보호법 제22조의2)
 
 **patient (계정)**
-- [ ] `patients` 모델: 이메일·선호 언어·시간대·14세 확인·가입/탈퇴 시각만 (건강정보·이름 X)
-- [ ] `GET /me`, `PATCH /me` (언어·시간대 변경)
-- [ ] 로그인 전 브라우저에서 고른 언어를 가입 때 받아서 저장 (프론트와 약속)
+- [x] `patients` 모델: 이메일·선호 언어·시간대·14세 확인·가입/탈퇴 시각만 (건강정보·이름 X)
+- [x] `GET /me`, `PATCH /me` (언어·시간대 변경)
+- [x] 로그인 전 브라우저에서 고른 언어를 가입 때 받아서 저장 (`signup.preferred_lang`·`timezone`, 프론트에 알릴 것)
 
 **consent (동의)**
-- [ ] `consents` 모델: 종류(`terms/privacy/health/overseas_transfer`)·문구 버전·언어·시각·철회
-- [ ] `consent.service.record()`, `consent.service.require()` (B도 사용)
+- [x] `consents` 모델: 종류(`terms/privacy/health/overseas_transfer`)·문구 버전·언어·시각·철회
+- [x] `consent.service.record()`, `consent.service.require()` (B도 사용)
 - [ ] 가입 시 `terms`·`privacy`, 요청서 제출 시 `health`(건강정보 칸 있을 때)·`overseas_transfer`(해외 LLM 쓸 때) **각각 따로**
 
 **booking 환자용 router** (service는 B)
@@ -51,7 +54,7 @@
 - [ ] 로그인 없이 제출 → 401
 - [ ] 건강정보 있는데 `health` 동의 없음 → 422 `consent.required`
 - [ ] 환자 A가 환자 B 요청 조회 → 404
-- [ ] 인증코드 틀림·만료·시도 초과
+- [x] 가입(중복·14세·필수 동의·입력 오류), 로그인 실패 같은 응답, 탈퇴 후 로그인 X
 - [ ] (교차) B 모듈: 환자 토큰으로 `confirm` → 403
 
 **시연 확인 (B와)**
@@ -86,10 +89,10 @@
 
 | 무엇 | 필요한 때 |
 |---|---|
-| `docker-compose.yml`, `core/db.py`, 첫 마이그레이션 | ~11/4 |
+| ~~`docker-compose.yml`, `core/db.py`, 첫 마이그레이션~~ → A가 함 (결정 12·13) | — |
 | `booking.service` 함수 5개 (`create_request` 등) | 11/5~8 초반 |
 | 직원 계정 테이블(`staff_users`) | 직원 로그인 만들 때 |
-| 내 모델 변경의 마이그레이션 생성 | 모델 바꿀 때마다 (PR로 요청) |
+| (반대로) B 모델 변경 → A가 마이그레이션 생성 | B가 요청할 때 |
 
 ## 매번 지킬 것 (backend/AGENTS.md 요약)
 
