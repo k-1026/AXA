@@ -57,7 +57,10 @@
     "label": "광고"
   },
   "footer": {
-    "notice": "공공데이터 기반 병원 정보 안내입니다. 병원 추천이나 의료 상담이 아닙니다.",
+    "about": "AXA는 외국인이 대구의 의료와 관광을 더 쉽고 안전하게 경험할 수 있도록 돕는 팀입니다.",
+    "service": "MediDaegu는 공공데이터와 AI를 활용해 병원·시술 정보, 비자 및 관광 정보를 다국어로 제공하는 의료관광 정보 플랫폼입니다.",
+    "contact": "광고·배너 문의",
+    "disclaimer": "본 플랫폼은 공공데이터 기반의 정보를 제공하며, 특정 병원 추천이나 의료 상담을 제공하지 않습니다. 진료·시술 및 예약 관련 사항은 해당 병원에 직접 확인해 주세요.",
     "source": "데이터: 건강보험심사평가원 병원정보서비스·의료기관별상세정보서비스 (공공데이터포털)",
     "emergency": "응급 상황에서는 119에 전화하세요."
   },
@@ -109,12 +112,18 @@
     "lunchWeek": "점심시간 (평일)",
     "lunchSat": "점심시간 (토)",
     "rcvWeek": "접수시간 (평일)",
-    "rcvSat": "접수시간 (토)"
+    "rcvSat": "접수시간 (토)",
+    "noPhoto": "대표사진 없음"
   },
   "prices": {
     "pending": "가격 확인 중",
     "range": "{{min}}~{{max}}원",
-    "notice": "표시 금액은 시중 가격 범위로, 실제 비용은 병원과 진료 내용에 따라 다릅니다. 병원별 제공 시술도 다를 수 있습니다. 광고·추천·의료 상담이 아니며, 예상 진료비는 병원에 서면으로 요청할 수 있습니다."
+    "notice": "표시 금액은 시중 가격 범위로, 실제 비용은 병원과 진료 내용에 따라 다릅니다. 병원별 제공 시술도 다를 수 있습니다. 광고·추천·의료 상담이 아니며, 예상 진료비는 병원에 서면으로 요청할 수 있습니다.",
+    "approx": "약 {{min}}~{{max}}",
+    "krwNote": "{{min}}~{{max}}원",
+    "fxNotice": "환산 금액은 참고용이에요. 실제 비용은 원화 기준이며 병원 안내를 따라요. {{applied}} 적용 환율(한국은행 {{base}} 기준, 매일 오전 {{hour}}시 갱신) ·",
+    "fxProvider": "한국은행 경제통계시스템",
+    "fxFallback": "환율을 불러오지 못해 원화로 표시해요."
   },
   "mypage": {
     "home": "홈",
@@ -123,8 +132,7 @@
     "subtitle": "관심 병원과 방문 일정, 여행 준비를 한곳에서 관리하세요.",
     "stats": {
       "saved": "저장한 병원",
-      "visits": "방문 기록",
-      "recent": "최근 조회 기록"
+      "visits": "방문 기록"
     },
     "schedule": {
       "title": "나의 대구 일정",
@@ -141,19 +149,26 @@
     "checklist": {
       "title": "방문 준비 체크리스트",
       "progress": "{{total}}개 중 {{done}}개 완료",
-      "viewAll": "체크리스트 전체 보기",
       "items": {
-        "saveAddress": "병원 주소 저장",
-        "setLanguage": "사용 언어 설정",
-        "checkHours": "방문 시간 확인",
-        "checkInterpreter": "통역 지원 확인",
-        "checkNotice": "병원 안내사항 확인"
+        "visitDateTime": "방문 날짜·시간 확인",
+        "route": "병원 위치·이동 경로 확인",
+        "documents": "신분증·필요 서류 준비",
+        "language": "상담 언어·통역 지원 확인",
+        "medication": "복용약·알레르기 정보 정리",
+        "cost": "예상 비용·결제 방법 확인",
+        "hospitalNotice": "병원에서 안내한 준비사항 확인"
       }
     },
     "account": {
       "title": "내 계정",
-      "desc": "프로필 및 언어 설정",
-      "manage": "계정 관리"
+      "withdraw": "탈퇴하기",
+      "withdrawTitle": "정말 탈퇴할까요?",
+      "withdrawDesc": "탈퇴하면 이 계정으로 로그인할 수 없고 모든 기기에서 로그아웃돼요. 같은 이메일로 다시 가입할 수 있어요.",
+      "withdrawPassword": "비밀번호 확인",
+      "withdrawConfirm": "탈퇴하기",
+      "cancel": "취소",
+      "withdrawWrongPassword": "비밀번호가 맞지 않아요.",
+      "withdrawDemo": "데모 계정은 탈퇴할 수 없어요."
     },
     "saved": {
       "title": "저장한 병원",
@@ -205,13 +220,41 @@
   },
   "auth": {
     "requiredTitle": "로그인이 필요해요",
-    "requiredDesc": "저장한 병원, 방문 기록, 최근 조회 기록, 나의 대구 일정은 로그인한 뒤에 볼 수 있어요.",
+    "requiredDesc": "저장한 병원, 방문 기록, 나의 대구 일정은 로그인한 뒤에 볼 수 있어요.",
     "comingSoon": "회원 로그인은 준비 중이에요. 지금은 데모 계정으로 화면을 둘러볼 수 있어요.",
     "demo": "데모 계정으로 둘러보기",
     "demoNote": "데모 계정은 예시 데이터를 함께 보여주며, 찜과 방문 기록은 이 브라우저에만 저장돼요.",
     "demoBadge": "데모",
     "loggedInAs": "{{name}} 계정으로 로그인했어요.",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "tabLogin": "로그인",
+    "tabSignup": "회원가입",
+    "email": "이메일",
+    "password": "비밀번호",
+    "passwordConfirm": "비밀번호 확인",
+    "passwordHint": "{{n}}자 이상",
+    "passwordMismatch": "비밀번호가 서로 달라요.",
+    "displayName": "표시 이름",
+    "optional": "(선택)",
+    "displayNameHint": "마이페이지 인사말에 보여요. 실명이 아니어도 돼요. 비우면 이메일 앞부분을 써요.",
+    "language": "사용 언어",
+    "timezone": "시간대",
+    "consentsTitle": "동의 (필수)",
+    "age14": "만 14세 이상입니다.",
+    "agreeTerms": "이용약관에 동의합니다.",
+    "agreePrivacy": "개인정보 수집·이용에 동의합니다.",
+    "viewDoc": "보기",
+    "submitLogin": "로그인",
+    "submitSignup": "가입하기",
+    "submitting": "처리 중…",
+    "err": {
+      "invalidCredentials": "이메일 또는 비밀번호가 맞지 않아요.",
+      "emailTaken": "이미 가입된 이메일이에요. 로그인해 주세요.",
+      "consent": "만 14세 이상 확인과 필수 동의가 필요해요.",
+      "validation": "입력한 내용을 다시 확인해 주세요.",
+      "network": "서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요.",
+      "unknown": "문제가 생겼어요. 잠시 후 다시 시도해 주세요."
+    }
   },
   "chat": {
     "title": "메디 챗봇",

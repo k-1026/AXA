@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { HospitalPhoto } from './HospitalPhoto';
 import { SaveHeart } from './SaveHeart';
 import { instagramHandle, useHospitalName } from './name';
 import type { Hospital } from './types';
@@ -10,8 +11,7 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
 
   return (
     <article className="hospital-card">
-      {/* 병원 사진 데이터가 아직 없어서 빈 자리 */}
-      <div className="hospital-photo" aria-hidden="true" />
+      <HospitalPhoto src={h.photo} />
       <div className="hospital-card-body">
         <p className="hospital-type">{t(`hospitalType.${h.type}`, { defaultValue: h.type })}</p>
         <h2>
@@ -26,7 +26,7 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
         </h2>
         <dl className="hospital-facts">
           <dt>{t('popup.addr')}</dt>
-          <dd>{h.addr}</dd>
+          <dd lang="ko">{h.addr}</dd>
           <dt>{t('popup.tel')}</dt>
           <dd>{h.tel && <a href={`tel:${h.tel}`}>{h.tel}</a>}</dd>
           <dt>{t('hospital.homepage')}</dt>

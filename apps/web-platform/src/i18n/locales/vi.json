@@ -57,7 +57,10 @@
     "label": "Quảng cáo"
   },
   "footer": {
-    "notice": "Thông tin bệnh viện dựa trên dữ liệu công của Hàn Quốc. Đây không phải là giới thiệu bệnh viện hay tư vấn y tế.",
+    "about": "AXA là nhóm giúp người nước ngoài trải nghiệm dịch vụ y tế và du lịch tại Daegu dễ dàng và an toàn hơn.",
+    "service": "MediDaegu là nền tảng thông tin du lịch y tế sử dụng dữ liệu công và AI để cung cấp thông tin bệnh viện, thủ thuật, thị thực và du lịch bằng nhiều ngôn ngữ.",
+    "contact": "Liên hệ quảng cáo/banner",
+    "disclaimer": "Nền tảng này cung cấp thông tin dựa trên dữ liệu công, không giới thiệu bệnh viện cụ thể và không tư vấn y tế. Vui lòng xác nhận trực tiếp với bệnh viện về khám chữa bệnh, thủ thuật và đặt lịch.",
     "source": "Dữ liệu: Dịch vụ thông tin bệnh viện của HIRA (data.go.kr)",
     "emergency": "Trường hợp khẩn cấp, hãy gọi 119."
   },
@@ -109,12 +112,18 @@
     "lunchWeek": "Nghỉ trưa (ngày thường)",
     "lunchSat": "Nghỉ trưa (Thứ 7)",
     "rcvWeek": "Giờ tiếp nhận (ngày thường)",
-    "rcvSat": "Giờ tiếp nhận (Thứ 7)"
+    "rcvSat": "Giờ tiếp nhận (Thứ 7)",
+    "noPhoto": "Chưa có ảnh đại diện"
   },
   "prices": {
     "pending": "Đang xác nhận giá",
     "range": "{{min}}–{{max}} KRW",
-    "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản."
+    "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản.",
+    "approx": "≈ {{min}}–{{max}}",
+    "krwNote": "{{min}}–{{max}} KRW",
+    "fxNotice": "Số tiền quy đổi chỉ để tham khảo. Chi phí thực tế tính bằng won Hàn Quốc theo báo giá của bệnh viện. Tỷ giá áp dụng ngày {{applied}} (Ngân hàng Trung ương Hàn Quốc, số liệu ngày {{base}}; cập nhật lúc {{hour}}:00 giờ Hàn Quốc mỗi ngày) ·",
+    "fxProvider": "Bank of Korea ECOS",
+    "fxFallback": "Không tải được tỷ giá, giá được hiển thị bằng won Hàn Quốc."
   },
   "mypage": {
     "home": "Trang chủ",
@@ -123,8 +132,7 @@
     "subtitle": "Quản lý bệnh viện đã lưu, lịch khám và chuẩn bị chuyến đi tại một nơi.",
     "stats": {
       "saved": "Bệnh viện đã lưu",
-      "visits": "Lịch sử khám",
-      "recent": "Đã xem gần đây"
+      "visits": "Lịch sử khám"
     },
     "schedule": {
       "title": "Lịch trình Daegu của tôi",
@@ -141,19 +149,26 @@
     "checklist": {
       "title": "Danh sách chuẩn bị",
       "progress": "Đã xong {{done}}/{{total}}",
-      "viewAll": "Xem toàn bộ danh sách",
       "items": {
-        "saveAddress": "Lưu địa chỉ bệnh viện",
-        "setLanguage": "Chọn ngôn ngữ",
-        "checkHours": "Kiểm tra giờ khám",
-        "checkInterpreter": "Kiểm tra hỗ trợ phiên dịch",
-        "checkNotice": "Đọc lưu ý của bệnh viện"
+        "visitDateTime": "Kiểm tra ngày và giờ khám",
+        "route": "Kiểm tra vị trí bệnh viện và đường đi",
+        "documents": "Chuẩn bị giấy tờ tùy thân và hồ sơ cần thiết",
+        "language": "Kiểm tra ngôn ngữ tư vấn và hỗ trợ phiên dịch",
+        "medication": "Ghi lại thuốc đang dùng và thông tin dị ứng",
+        "cost": "Kiểm tra chi phí dự kiến và phương thức thanh toán",
+        "hospitalNotice": "Kiểm tra hướng dẫn chuẩn bị từ bệnh viện"
       }
     },
     "account": {
       "title": "Tài khoản của tôi",
-      "desc": "Hồ sơ và cài đặt ngôn ngữ",
-      "manage": "Quản lý tài khoản"
+      "withdraw": "Xóa tài khoản",
+      "withdrawTitle": "Bạn chắc chắn muốn xóa tài khoản?",
+      "withdrawDesc": "Sau khi xóa, bạn sẽ không thể đăng nhập bằng tài khoản này và sẽ bị đăng xuất trên mọi thiết bị. Bạn có thể đăng ký lại bằng cùng email.",
+      "withdrawPassword": "Xác nhận mật khẩu",
+      "withdrawConfirm": "Xóa tài khoản",
+      "cancel": "Hủy",
+      "withdrawWrongPassword": "Mật khẩu không đúng.",
+      "withdrawDemo": "Không thể xóa tài khoản demo."
     },
     "saved": {
       "title": "Bệnh viện đã lưu",
@@ -205,13 +220,41 @@
   },
   "auth": {
     "requiredTitle": "Vui lòng đăng nhập",
-    "requiredDesc": "Bệnh viện đã lưu, lịch sử khám, mục xem gần đây và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
+    "requiredDesc": "Bệnh viện đã lưu, lịch sử khám và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
     "comingSoon": "Đăng nhập thành viên sắp ra mắt. Hiện tại bạn có thể xem thử bằng tài khoản demo.",
     "demo": "Xem thử bằng tài khoản demo",
     "demoNote": "Tài khoản demo cũng hiển thị dữ liệu mẫu. Bệnh viện đã lưu và nhật ký khám chỉ lưu trong trình duyệt này.",
     "demoBadge": "Demo",
     "loggedInAs": "Đã đăng nhập bằng tài khoản {{name}}.",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "tabLogin": "Đăng nhập",
+    "tabSignup": "Đăng ký",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "passwordConfirm": "Xác nhận mật khẩu",
+    "passwordHint": "Ít nhất {{n}} ký tự",
+    "passwordMismatch": "Mật khẩu không khớp.",
+    "displayName": "Tên hiển thị",
+    "optional": "(không bắt buộc)",
+    "displayNameHint": "Hiển thị trong lời chào ở Trang của tôi, không cần là tên thật. Nếu để trống, phần trước @ của email sẽ được dùng.",
+    "language": "Ngôn ngữ",
+    "timezone": "Múi giờ",
+    "consentsTitle": "Đồng ý (bắt buộc)",
+    "age14": "Tôi từ 14 tuổi trở lên.",
+    "agreeTerms": "Tôi đồng ý với Điều khoản dịch vụ.",
+    "agreePrivacy": "Tôi đồng ý với việc thu thập và sử dụng thông tin cá nhân.",
+    "viewDoc": "Xem",
+    "submitLogin": "Đăng nhập",
+    "submitSignup": "Tạo tài khoản",
+    "submitting": "Đang xử lý…",
+    "err": {
+      "invalidCredentials": "Email hoặc mật khẩu không đúng.",
+      "emailTaken": "Email này đã được đăng ký. Vui lòng đăng nhập.",
+      "consent": "Vui lòng xác nhận độ tuổi và đồng ý các mục bắt buộc.",
+      "validation": "Vui lòng kiểm tra lại thông tin đã nhập.",
+      "network": "Không thể kết nối máy chủ. Vui lòng thử lại sau.",
+      "unknown": "Đã có lỗi xảy ra. Vui lòng thử lại sau."
+    }
   },
   "chat": {
     "title": "Medi Chatbot",

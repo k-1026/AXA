@@ -11,6 +11,7 @@ export interface Hospital {
   tel?: string;
   url?: string;
   instagram?: string;
+  photo?: string;
   lat: number;
   lng: number;
   depts: DepartmentKey[];

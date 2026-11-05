@@ -89,7 +89,7 @@ export function VisitForm({ hospitals, initial, onSubmit, onCancel }: Props) {
                     }}
                   >
                     <strong>{nameOf(h)}</strong>
-                    <span>{h.addr}</span>
+                    <span lang="ko">{h.addr}</span>
                   </button>
                 </li>
               ))}

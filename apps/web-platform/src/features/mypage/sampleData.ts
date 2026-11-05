@@ -49,7 +49,7 @@ export interface SavedHospital {
 
 export interface MyPageData {
   user: { name: string };
-  stats: { saved: number; visits: number; recent: number };
+  stats: { saved: number; visits: number };
   trip: { start: string; end: string };
   schedule: ScheduleItem[];
   checklist: ChecklistItem[];
@@ -57,7 +57,7 @@ export interface MyPageData {
 
 export const SAMPLE_MYPAGE: MyPageData = {
   user: { name: 'Emma' },
-  stats: { saved: 2, visits: 2, recent: 8 },
+  stats: { saved: 2, visits: 2 },
   trip: { start: '2026-11-20', end: '2026-11-22' },
   schedule: [
     {
@@ -93,10 +93,12 @@ export const SAMPLE_MYPAGE: MyPageData = {
     },
   ],
   checklist: [
-    { key: 'saveAddress', done: true },
-    { key: 'setLanguage', done: true },
-    { key: 'checkHours', done: false },
-    { key: 'checkInterpreter', done: false },
-    { key: 'checkNotice', done: false },
+    { key: 'visitDateTime', done: true },
+    { key: 'route', done: true },
+    { key: 'documents', done: false },
+    { key: 'language', done: false },
+    { key: 'medication', done: false },
+    { key: 'cost', done: false },
+    { key: 'hospitalNotice', done: false },
   ],
 };

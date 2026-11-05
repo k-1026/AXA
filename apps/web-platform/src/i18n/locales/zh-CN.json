@@ -57,7 +57,10 @@
     "label": "广告"
   },
   "footer": {
-    "notice": "基于韩国公共数据的医院信息，并非医院推荐或医疗咨询。",
+    "about": "AXA 是一支帮助外国人更轻松、更安全地体验大邱医疗与旅游的团队。",
+    "service": "MediDaegu 是一个利用公共数据和 AI，以多种语言提供医院与诊疗项目信息、签证及旅游信息的医疗旅游信息平台。",
+    "contact": "广告·横幅合作咨询",
+    "disclaimer": "本平台提供基于公共数据的信息，不推荐特定医院，也不提供医疗咨询。诊疗、项目及预约相关事项请直接向相关医院确认。",
     "source": "数据：韩国健康保险审查评价院 医院信息服务（公共数据门户 data.go.kr）",
     "emergency": "紧急情况请拨打 119。"
   },
@@ -109,12 +112,18 @@
     "lunchWeek": "午休（工作日）",
     "lunchSat": "午休（周六）",
     "rcvWeek": "挂号时间（工作日）",
-    "rcvSat": "挂号时间（周六）"
+    "rcvSat": "挂号时间（周六）",
+    "noPhoto": "暂无代表照片"
   },
   "prices": {
     "pending": "价格确认中",
     "range": "{{min}}–{{max}} 韩元",
-    "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。"
+    "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。",
+    "approx": "约 {{min}}~{{max}}",
+    "krwNote": "{{min}}~{{max}} 韩元",
+    "fxNotice": "换算金额仅供参考，实际费用以医院告知的韩元金额为准。{{applied}} 适用汇率（韩国银行 {{base}} 数据，每天韩国时间 {{hour}}:00 更新）·",
+    "fxProvider": "韩国银行经济统计系统",
+    "fxFallback": "无法获取汇率，以韩元显示。"
   },
   "mypage": {
     "home": "首页",
@@ -123,8 +132,7 @@
     "subtitle": "在一个地方管理收藏的医院、就诊日程和旅行准备。",
     "stats": {
       "saved": "收藏的医院",
-      "visits": "就诊记录",
-      "recent": "最近浏览"
+      "visits": "就诊记录"
     },
     "schedule": {
       "title": "我的大邱日程",
@@ -141,19 +149,26 @@
     "checklist": {
       "title": "就诊准备清单",
       "progress": "共 {{total}} 项，已完成 {{done}} 项",
-      "viewAll": "查看完整清单",
       "items": {
-        "saveAddress": "保存医院地址",
-        "setLanguage": "设置使用语言",
-        "checkHours": "确认就诊时间",
-        "checkInterpreter": "确认翻译支持",
-        "checkNotice": "确认医院须知"
+        "visitDateTime": "确认就诊日期和时间",
+        "route": "确认医院位置和交通路线",
+        "documents": "准备身份证件和所需材料",
+        "language": "确认咨询语言和翻译支持",
+        "medication": "整理正在服用的药物和过敏信息",
+        "cost": "确认预计费用和付款方式",
+        "hospitalNotice": "确认医院告知的准备事项"
       }
     },
     "account": {
       "title": "我的账户",
-      "desc": "个人资料和语言设置",
-      "manage": "管理账户"
+      "withdraw": "注销账号",
+      "withdrawTitle": "确定要注销账号吗？",
+      "withdrawDesc": "注销后将无法使用此账号登录，所有设备都会退出登录。可以使用同一邮箱重新注册。",
+      "withdrawPassword": "确认密码",
+      "withdrawConfirm": "注销账号",
+      "cancel": "取消",
+      "withdrawWrongPassword": "密码不正确。",
+      "withdrawDemo": "演示账号无法注销。"
     },
     "saved": {
       "title": "已保存的医院",
@@ -205,13 +220,41 @@
   },
   "auth": {
     "requiredTitle": "请先登录",
-    "requiredDesc": "已保存的医院、就诊记录、最近浏览和大邱行程需登录后查看。",
+    "requiredDesc": "已保存的医院、就诊记录和大邱行程需登录后查看。",
     "comingSoon": "会员登录即将推出。目前可以使用演示账号浏览。",
     "demo": "使用演示账号浏览",
     "demoNote": "演示账号也会显示示例数据，收藏和就诊记录仅保存在此浏览器中。",
     "demoBadge": "演示",
     "loggedInAs": "已以 {{name}} 账号登录。",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "tabLogin": "登录",
+    "tabSignup": "注册",
+    "email": "电子邮箱",
+    "password": "密码",
+    "passwordConfirm": "确认密码",
+    "passwordHint": "至少 {{n}} 个字符",
+    "passwordMismatch": "两次输入的密码不一致。",
+    "displayName": "显示名称",
+    "optional": "（选填）",
+    "displayNameHint": "显示在\"我的页面\"的问候语中，不必是真实姓名。留空则使用邮箱 @ 前的部分。",
+    "language": "使用语言",
+    "timezone": "时区",
+    "consentsTitle": "同意事项（必填）",
+    "age14": "我已年满 14 周岁。",
+    "agreeTerms": "我同意服务条款。",
+    "agreePrivacy": "我同意收集和使用个人信息。",
+    "viewDoc": "查看",
+    "submitLogin": "登录",
+    "submitSignup": "注册",
+    "submitting": "处理中…",
+    "err": {
+      "invalidCredentials": "邮箱或密码不正确。",
+      "emailTaken": "该邮箱已注册，请直接登录。",
+      "consent": "请确认年满 14 周岁并勾选必填同意事项。",
+      "validation": "请检查输入的内容。",
+      "network": "无法连接服务器，请稍后再试。",
+      "unknown": "出现问题，请稍后再试。"
+    }
   },
   "chat": {
     "title": "Medi 聊天机器人",

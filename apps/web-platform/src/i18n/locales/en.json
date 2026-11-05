@@ -57,7 +57,10 @@
     "label": "Advertisement"
   },
   "footer": {
-    "notice": "Hospital information based on Korean public data. This is not a recommendation or medical advice.",
+    "about": "AXA is a team that helps international visitors experience medical care and travel in Daegu more easily and safely.",
+    "service": "MediDaegu is a medical tourism information platform that uses public data and AI to provide hospital and procedure information, as well as visa and travel information, in multiple languages.",
+    "contact": "Advertising & banner inquiries",
+    "disclaimer": "This platform provides information based on public data and does not recommend specific hospitals or provide medical consultation. Please confirm treatments, procedures and reservations directly with the hospital.",
     "source": "Data: Health Insurance Review & Assessment Service (HIRA) hospital information APIs, via data.go.kr",
     "emergency": "In an emergency, call 119."
   },
@@ -109,12 +112,18 @@
     "lunchWeek": "Lunch break (weekdays)",
     "lunchSat": "Lunch break (Sat)",
     "rcvWeek": "Reception (weekdays)",
-    "rcvSat": "Reception (Sat)"
+    "rcvSat": "Reception (Sat)",
+    "noPhoto": "No photo available"
   },
   "prices": {
     "pending": "Price being checked",
     "range": "KRW {{min}}–{{max}}",
-    "notice": "Amounts shown are market price ranges. Actual costs vary by hospital and treatment, and procedures offered differ by hospital. This is not advertising, a recommendation, or medical advice. You can ask a hospital for a written cost estimate."
+    "notice": "Amounts shown are market price ranges. Actual costs vary by hospital and treatment, and procedures offered differ by hospital. This is not advertising, a recommendation, or medical advice. You can ask a hospital for a written cost estimate.",
+    "approx": "≈ {{min}}–{{max}}",
+    "krwNote": "KRW {{min}}–{{max}}",
+    "fxNotice": "Converted amounts are for reference only. Actual costs are in Korean won as quoted by the hospital. Rates applied on {{applied}} (Bank of Korea, as of {{base}}; updated daily at {{hour}}:00 KST) ·",
+    "fxProvider": "Bank of Korea ECOS",
+    "fxFallback": "Could not load exchange rates, so prices are shown in Korean won."
   },
   "mypage": {
     "home": "Home",
@@ -123,8 +132,7 @@
     "subtitle": "Manage saved hospitals, visit plans and trip prep in one place.",
     "stats": {
       "saved": "Saved hospitals",
-      "visits": "Visit history",
-      "recent": "Recently viewed"
+      "visits": "Visit history"
     },
     "schedule": {
       "title": "My Daegu schedule",
@@ -141,19 +149,26 @@
     "checklist": {
       "title": "Visit checklist",
       "progress": "{{done}} of {{total}} done",
-      "viewAll": "View full checklist",
       "items": {
-        "saveAddress": "Save hospital address",
-        "setLanguage": "Set your language",
-        "checkHours": "Check visiting hours",
-        "checkInterpreter": "Check interpreter support",
-        "checkNotice": "Read hospital notices"
+        "visitDateTime": "Check visit date & time",
+        "route": "Check hospital location & route",
+        "documents": "Prepare ID & required documents",
+        "language": "Check consultation language & interpreter support",
+        "medication": "List your medications & allergies",
+        "cost": "Check estimated costs & payment methods",
+        "hospitalNotice": "Check the hospital's preparation instructions"
       }
     },
     "account": {
       "title": "My account",
-      "desc": "Profile and language settings",
-      "manage": "Manage account"
+      "withdraw": "Delete account",
+      "withdrawTitle": "Delete your account?",
+      "withdrawDesc": "You will no longer be able to log in with this account, and you will be logged out on all devices. You can sign up again with the same email.",
+      "withdrawPassword": "Confirm password",
+      "withdrawConfirm": "Delete account",
+      "cancel": "Cancel",
+      "withdrawWrongPassword": "Incorrect password.",
+      "withdrawDemo": "The demo account cannot be deleted."
     },
     "saved": {
       "title": "Saved hospitals",
@@ -205,13 +220,41 @@
   },
   "auth": {
     "requiredTitle": "Please log in",
-    "requiredDesc": "Your saved hospitals, visit history, recently viewed and Daegu schedule are available after you log in.",
+    "requiredDesc": "Your saved hospitals, visit history and Daegu schedule are available after you log in.",
     "comingSoon": "Member login is coming soon. For now you can look around with a demo account.",
     "demo": "Try the demo account",
     "demoNote": "The demo account also shows sample data. Saved hospitals and your visit log stay in this browser only.",
     "demoBadge": "Demo",
     "loggedInAs": "Logged in as {{name}}.",
-    "logout": "Log out"
+    "logout": "Log out",
+    "tabLogin": "Log in",
+    "tabSignup": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "passwordConfirm": "Confirm password",
+    "passwordHint": "At least {{n}} characters",
+    "passwordMismatch": "Passwords do not match.",
+    "displayName": "Display name",
+    "optional": "(optional)",
+    "displayNameHint": "Shown in your My Page greeting. It does not have to be your real name. If empty, the first part of your email is used.",
+    "language": "Language",
+    "timezone": "Time zone",
+    "consentsTitle": "Agreements (required)",
+    "age14": "I am 14 years of age or older.",
+    "agreeTerms": "I agree to the Terms of Service.",
+    "agreePrivacy": "I agree to the collection and use of my personal information.",
+    "viewDoc": "View",
+    "submitLogin": "Log in",
+    "submitSignup": "Create account",
+    "submitting": "Please wait…",
+    "err": {
+      "invalidCredentials": "Incorrect email or password.",
+      "emailTaken": "This email is already registered. Please log in.",
+      "consent": "Please confirm your age and accept the required agreements.",
+      "validation": "Please check what you entered.",
+      "network": "Cannot reach the server. Please try again shortly.",
+      "unknown": "Something went wrong. Please try again shortly."
+    }
   },
   "chat": {
     "title": "Medi Chatbot",

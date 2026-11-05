@@ -57,7 +57,10 @@
     "label": "廣告"
   },
   "footer": {
-    "notice": "基於韓國公共資料的醫院資訊，並非醫院推薦或醫療諮詢。",
+    "about": "AXA 是一支協助外國人更輕鬆、更安全地體驗大邱醫療與觀光的團隊。",
+    "service": "MediDaegu 是運用公共資料與 AI，以多種語言提供醫院與診療項目資訊、簽證及觀光資訊的醫療觀光資訊平台。",
+    "contact": "廣告・橫幅合作洽詢",
+    "disclaimer": "本平台提供基於公共資料的資訊，不推薦特定醫院，也不提供醫療諮詢。診療、療程及預約相關事項請直接向該醫院確認。",
     "source": "資料：韓國健康保險審查評價院 醫院資訊服務（公共資料入口網 data.go.kr）",
     "emergency": "緊急情況請撥打 119。"
   },
@@ -109,12 +112,18 @@
     "lunchWeek": "午休（平日）",
     "lunchSat": "午休（週六）",
     "rcvWeek": "掛號時間（平日）",
-    "rcvSat": "掛號時間（週六）"
+    "rcvSat": "掛號時間（週六）",
+    "noPhoto": "暫無代表照片"
   },
   "prices": {
     "pending": "價格確認中",
     "range": "{{min}}–{{max}} 韓元",
-    "notice": "所示金額為市場價格範圍，實際費用因醫院和診療內容而異，各醫院提供的項目也可能不同。本頁面不構成廣告、推薦或醫療諮詢。您可以向醫院書面申請預估診療費用。"
+    "notice": "所示金額為市場價格範圍，實際費用因醫院和診療內容而異，各醫院提供的項目也可能不同。本頁面不構成廣告、推薦或醫療諮詢。您可以向醫院書面申請預估診療費用。",
+    "approx": "約 {{min}}~{{max}}",
+    "krwNote": "{{min}}~{{max}} 韓元",
+    "fxNotice": "換算金額僅供參考，實際費用以醫院告知的韓元金額為準。{{applied}} 適用匯率（韓國銀行 {{base}} 資料，每天韓國時間 {{hour}}:00 更新）·",
+    "fxProvider": "韓國銀行經濟統計系統",
+    "fxFallback": "無法取得匯率，以韓元顯示。"
   },
   "mypage": {
     "home": "首頁",
@@ -123,8 +132,7 @@
     "subtitle": "在一個地方管理收藏的醫院、就診行程和旅行準備。",
     "stats": {
       "saved": "收藏的醫院",
-      "visits": "就診紀錄",
-      "recent": "最近瀏覽"
+      "visits": "就診紀錄"
     },
     "schedule": {
       "title": "我的大邱行程",
@@ -141,19 +149,26 @@
     "checklist": {
       "title": "就診準備清單",
       "progress": "共 {{total}} 項，已完成 {{done}} 項",
-      "viewAll": "查看完整清單",
       "items": {
-        "saveAddress": "儲存醫院地址",
-        "setLanguage": "設定使用語言",
-        "checkHours": "確認就診時間",
-        "checkInterpreter": "確認翻譯支援",
-        "checkNotice": "確認醫院須知"
+        "visitDateTime": "確認就診日期與時間",
+        "route": "確認醫院位置與交通路線",
+        "documents": "準備身分證件與所需文件",
+        "language": "確認諮詢語言與口譯支援",
+        "medication": "整理正在服用的藥物與過敏資訊",
+        "cost": "確認預估費用與付款方式",
+        "hospitalNotice": "確認醫院告知的準備事項"
       }
     },
     "account": {
       "title": "我的帳戶",
-      "desc": "個人資料與語言設定",
-      "manage": "管理帳戶"
+      "withdraw": "刪除帳號",
+      "withdrawTitle": "確定要刪除帳號嗎？",
+      "withdrawDesc": "刪除後將無法使用此帳號登入，所有裝置都會登出。可以使用同一個電子郵件重新註冊。",
+      "withdrawPassword": "確認密碼",
+      "withdrawConfirm": "刪除帳號",
+      "cancel": "取消",
+      "withdrawWrongPassword": "密碼不正確。",
+      "withdrawDemo": "示範帳號無法刪除。"
     },
     "saved": {
       "title": "已儲存的醫院",
@@ -205,13 +220,41 @@
   },
   "auth": {
     "requiredTitle": "請先登入",
-    "requiredDesc": "已儲存的醫院、就診紀錄、最近瀏覽與大邱行程需登入後查看。",
+    "requiredDesc": "已儲存的醫院、就診紀錄與大邱行程需登入後查看。",
     "comingSoon": "會員登入即將推出。目前可以使用示範帳號瀏覽。",
     "demo": "使用示範帳號瀏覽",
     "demoNote": "示範帳號也會顯示範例資料，收藏和就診紀錄僅儲存在此瀏覽器中。",
     "demoBadge": "示範",
     "loggedInAs": "已以 {{name}} 帳號登入。",
-    "logout": "登出"
+    "logout": "登出",
+    "tabLogin": "登入",
+    "tabSignup": "註冊",
+    "email": "電子郵件",
+    "password": "密碼",
+    "passwordConfirm": "確認密碼",
+    "passwordHint": "至少 {{n}} 個字元",
+    "passwordMismatch": "兩次輸入的密碼不一致。",
+    "displayName": "顯示名稱",
+    "optional": "（選填）",
+    "displayNameHint": "會顯示在「我的頁面」的問候語中，不必是真實姓名。留空則使用電子郵件 @ 前的部分。",
+    "language": "使用語言",
+    "timezone": "時區",
+    "consentsTitle": "同意事項（必填）",
+    "age14": "我已年滿 14 歲。",
+    "agreeTerms": "我同意服務條款。",
+    "agreePrivacy": "我同意蒐集及使用個人資料。",
+    "viewDoc": "查看",
+    "submitLogin": "登入",
+    "submitSignup": "註冊",
+    "submitting": "處理中…",
+    "err": {
+      "invalidCredentials": "電子郵件或密碼不正確。",
+      "emailTaken": "此電子郵件已註冊，請直接登入。",
+      "consent": "請確認年滿 14 歲並勾選必填同意事項。",
+      "validation": "請檢查輸入的內容。",
+      "network": "無法連線到伺服器，請稍後再試。",
+      "unknown": "發生問題，請稍後再試。"
+    }
   },
   "chat": {
     "title": "Medi 聊天機器人",

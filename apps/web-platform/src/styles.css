@@ -9,9 +9,53 @@
   --accent-soft: #e3edfd;
   --radius: 16px;
   --header-h: 64px;
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  /* 한국어 글꼴: 외국어 화면 안의 한국어(주소 등)도 이 글꼴로 */
+  --font-ko: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  font-family: system-ui, var(--font-ko);
   color: var(--text);
   background: var(--bg);
+  /* 줄에 안 들어가는 긴 단어·URL만 잘라서 칸 밖으로 안 나가게 */
+  overflow-wrap: break-word;
+}
+
+/* 언어별 글꼴·줄바꿈. 글꼴은 각 나라 기기 기본 글꼴만 써서 외부 다운로드가 없다 (중국에서는 구글 폰트가 막힘) */
+/* 한국어: 단어 중간에서 줄이 바뀌지 않게 띄어쓰기 단위로 */
+html:lang(ko),
+[lang='ko'] {
+  font-family: var(--font-ko);
+  word-break: keep-all;
+}
+
+/* 영어·베트남어: 성조 기호가 겹치지 않게 베트남어 지원 글꼴 + 줄 간격 여유 */
+html:lang(en),
+html:lang(vi),
+[lang='en'] {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', var(--font-ko);
+}
+
+/* 다른 언어 화면 속 영어 이름(시술·병원): 좁은 칸에서는 음절에서 하이픈으로 나눔 */
+[lang='en'] {
+  hyphens: auto;
+}
+
+html:lang(vi) {
+  line-height: 1.5;
+}
+
+/* 중국어: 한국어 글꼴로 한자가 그려지지 않게 간체·번체 글꼴을 따로, 문장부호가 줄 맨 앞에 오지 않게 */
+html:lang(zh-CN) {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', var(--font-ko);
+  line-break: strict;
+}
+
+html:lang(zh-TW) {
+  font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', 'Source Han Sans TC', var(--font-ko);
+  line-break: strict;
+}
+
+/* 지도 팝업도 Leaflet 기본 글꼴(Helvetica) 대신 언어별 글꼴 (leaflet.css가 나중에 불러와져도 이기게 html 붙임) */
+html .leaflet-container {
+  font-family: inherit;
 }
 
 * {
@@ -114,6 +158,8 @@ a {
 }
 
 .filter-grid button {
+  /* 긴 이름(영어·베트남어)은 칸 밖으로 잘리지 않고 다음 줄로 */
+  min-width: 0;
   min-height: 48px;
   padding: 0 16px;
   border: 0;
@@ -175,13 +221,33 @@ a {
   background: var(--surface-muted);
 }
 
-.hospital-card-body {
-  padding: 14px 16px 16px;
+.hospital-photo.is-empty {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
 }
 
-/* 마지막 줄(인스타그램)이 길어도 하트와 겹치지 않게 */
-.hospital-card .hospital-facts dd:last-child {
-  padding-right: 32px;
+/* 세로로 긴 사진도 칸 크기(4:3)는 그대로, 넘치는 부분은 잘림 */
+.hospital-photo:has(> img) {
+  position: relative;
+  overflow: hidden;
+}
+
+.hospital-photo > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 아래쪽은 찜 하트 자리: 긴 홈페이지 주소가 하트에 가려지지 않게 */
+.hospital-card-body {
+  padding: 14px 16px 50px;
 }
 
 /* 찜 하트: 카드 오른쪽 아래. 카드 전체 링크보다 위에 둔다 */
@@ -388,6 +454,8 @@ a {
 }
 
 .procedure-card {
+  /* 한국어는 단어 단위로만 줄을 바꿔서, 긴 단어가 칸을 밀어내지 않게 줄어들 수 있게 */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -463,6 +531,7 @@ a {
 }
 
 .detail-photo {
+  overflow: hidden;
   border-radius: 16px;
 }
 
@@ -819,9 +888,11 @@ a {
   gap: 16px;
 }
 
+/* 크기는 모든 언어 공통. 가장 긴 한 단어(Ophthalmology)가 한 줄에 들어가는 크기 */
 .dept-chip {
-  width: 104px;
-  height: 104px;
+  width: 128px;
+  height: 128px;
+  hyphens: none;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -1012,7 +1083,7 @@ a {
 /* 요약 카드 3개 */
 .mp-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
@@ -2047,21 +2118,54 @@ a {
 
 /* 푸터 */
 .site-footer {
-  padding: 24px;
+  padding: 32px 24px 24px;
   background: var(--surface);
   border-top: 1px solid var(--border);
-  text-align: center;
   font-size: 0.8rem;
+  line-height: 1.6;
   color: var(--text-muted);
 }
 
 .site-footer p {
-  margin: 4px 0;
+  margin: 0 0 6px;
+}
+
+/* 왼쪽: 팀·서비스 소개 / 오른쪽: 문의·안내 */
+.footer-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 48px;
+}
+
+.footer-team-name {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.footer-contact a {
+  color: var(--accent);
 }
 
 .footer-notice {
   font-weight: 600;
   color: var(--text);
+}
+
+.site-footer .footer-team {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .footer-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* 태블릿 이하: 사이드바를 위쪽 가로 메뉴로 */
@@ -2129,10 +2233,26 @@ a {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .dept-filter {
+    gap: 10px;
+  }
+
   .dept-chip {
-    width: 76px;
-    height: 76px;
+    width: 104px;
+    height: 104px;
+    padding: 6px;
     font-size: 0.8rem;
+  }
+
+  .filter-grid button {
+    padding: 0 12px;
+  }
+}
+
+/* 아주 작은 폰: 3칸이면 영어·베트남어 이름이 너무 좁아짐 */
+@media (max-width: 360px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -2368,7 +2488,7 @@ body.chat-open {
   color: var(--c-blue);
 }
 
-.chat-history-icon svg {
+.chat-history-icon .chat-bot-icon {
   width: 26px;
   height: 26px;
 }
@@ -2519,7 +2639,7 @@ body.chat-open {
   color: var(--c-blue);
 }
 
-.chat-title-icon svg {
+.chat-title-icon .chat-bot-icon {
   width: 40px;
   height: 40px;
 }
@@ -2598,7 +2718,7 @@ body.chat-open {
   color: var(--c-blue);
 }
 
-.chat-avatar svg {
+.chat-avatar .chat-bot-icon {
   width: 48px;
   height: 48px;
 }
@@ -2891,7 +3011,7 @@ body.chat-open {
     border-radius: 10px;
   }
 
-  .chat-title-icon svg {
+  .chat-title-icon .chat-bot-icon {
     width: 28px;
     height: 28px;
   }
@@ -2927,7 +3047,7 @@ body.chat-open {
   }
 
   .chat-avatar,
-  .chat-avatar svg {
+  .chat-avatar .chat-bot-icon {
     width: 34px;
     height: 34px;
   }
@@ -3234,4 +3354,290 @@ body.chat-open {
   background: #c62828;
   color: #ffffff;
   font-weight: 600;
+}
+
+/* 챗봇 캐릭터 이미지: 그림 둘레 여백만큼 키워서 표시 */
+.chat-bot-icon {
+  display: block;
+  object-fit: contain;
+  transform: scale(1.3);
+}
+
+/* 로그인·회원가입 폼 */
+.auth-card {
+  max-width: 520px;
+  margin: 24px auto;
+  padding: 28px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.auth-tab {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-tab.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.08);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.auth-field em {
+  color: var(--text-muted);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.auth-field input,
+.auth-field select {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.auth-field input:focus-visible,
+.auth-field select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.auth-field input[aria-invalid='true'] {
+  border-color: #c4320a;
+}
+
+.auth-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.auth-hint.bad {
+  color: #c4320a;
+}
+
+.auth-row {
+  display: flex;
+  gap: 12px;
+}
+
+.auth-consents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.auth-consents legend {
+  padding: 0 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.auth-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.auth-check input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  flex: none;
+  accent-color: var(--accent);
+}
+
+.auth-check a {
+  color: var(--accent);
+}
+
+.auth-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fdeceb;
+  color: #a5280a;
+  font-size: 0.9rem;
+}
+
+.auth-submit {
+  justify-content: center;
+  width: 100%;
+}
+
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.auth-demo .mp-login-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 20px 16px;
+  }
+
+  .auth-row {
+    flex-direction: column;
+  }
+}
+
+/* 내 계정 > 탈퇴하기 */
+.mp-account-spacer {
+  flex: 1;
+}
+
+.mp-account-note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.mp-withdraw {
+  padding: 8px 14px;
+  border: 1px solid #f0c4bd;
+  border-radius: 10px;
+  background: var(--surface);
+  color: #b42318;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mp-withdraw:hover:not(:disabled) {
+  background: #fdeceb;
+}
+
+.mp-withdraw:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mp-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(16 24 40 / 0.45);
+}
+
+.mp-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgb(16 24 40 / 0.2);
+}
+
+.mp-dialog h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.mp-dialog > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.mp-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.mp-dialog-actions .mp-login-secondary {
+  margin-top: 0;
+}
+
+.mp-withdraw-confirm {
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: #b42318;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mp-withdraw-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 가격 가이드 > 통화 환산 */
+.procedure-price-krw {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.detail-source a {
+  color: var(--accent);
 }

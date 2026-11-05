@@ -77,7 +77,7 @@ export function HospitalMap({ hospitals, fetchedAt, selectedDept, focus = null }
               <dt>{t('popup.type')}</dt>
               <dd>{t(`hospitalType.${h.type}`, { defaultValue: h.type })}</dd>
               <dt>{t('popup.addr')}</dt>
-              <dd>{h.addr}</dd>
+              <dd lang="ko">{h.addr}</dd>
               {h.tel && (
                 <>
                   <dt>{t('popup.tel')}</dt>
