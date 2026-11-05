@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, Index, String, Text, text
+from sqlalchemy import CheckConstraint, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.db import Base, utcnow
@@ -24,18 +24,12 @@ class Patient(Base):
     age14_confirmed_at: Mapped[datetime]
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=utcnow, onupdate=utcnow)
-    deleted_at: Mapped[datetime | None]
+    # 탈퇴하면 행을 바로 삭제 (결정 15) → deleted_at 없음
 
     __table_args__ = (
         CheckConstraint(
             "preferred_lang IN (" + ", ".join(f"'{x}'" for x in LANGS) + ")", name="lang"
         ),
-        # 탈퇴하지 않은 계정끼리만 이메일 중복 X (탈퇴 후 같은 메일로 재가입 가능)
-        Index(
-            "uq_patients_email_live",
-            "email",
-            unique=True,
-            postgresql_where=text("deleted_at IS NULL"),
-            sqlite_where=text("deleted_at IS NULL"),
-        ),
+        # 이메일 중복 X. 탈퇴하면 행이 지워지므로 같은 메일로 바로 재가입 가능
+        Index("uq_patients_email", "email", unique=True),
     )

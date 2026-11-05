@@ -47,7 +47,7 @@
 | 11/5~8 | 환자 인증코드 로그인, `patient`, `consent`, 요청서 제출 API | `booking` 모델·상태 흐름, 확정·거절·제안 API, `tenant` 최소, `seed_demo.py` | **11/9 시연 흐름 연결 테스트** (로그인 → 제출 → 캘린더 대기 → 확정 → 환자 화면) |
 | 11/10~16 | `hospital` 검색·필터·거리 정렬, `load_hospitals.py`, `price` | `availability`, tenant 격리 의존성 정리, 직원 계정 관리 | `shared-types` 첫 생성, 프론트와 API 점검 |
 | 11/17~23 | `notification`(상태 변경 알림), 남용 방지(횟수 제한) | `agent` API(번역·요약·답장 초안·시간 제안), 승인 흐름, `audit` | AI 담당과 `ai/llm/client.py` 호출 방식 맞추기 |
-| 11/24~30 | `chatbot` API + pgvector 검색, 탈퇴·파기 스크립트 | `subscription`·`usage` 목업, `llm_usage` 기록 | 교차 테스트(상대 모듈의 권한·격리 테스트 작성) |
+| 11/24~30 | `chatbot` API + pgvector 검색, 정기 삭제 스크립트 (탈퇴는 즉시 삭제로 완료, 결정 15) | `subscription`·`usage` 목업, `llm_usage` 기록 | 교차 테스트(상대 모듈의 권한·격리 테스트 작성) |
 | 12/1~7 | 통합 테스트, OpenAPI 최종 | 통합 테스트, 시연 데이터 정리 | 시연 시나리오 리허설 |
 
 ## 3. 같이 정해야 하는 "약속" (11/4 전에)

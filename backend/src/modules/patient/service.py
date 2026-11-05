@@ -1,4 +1,4 @@
-"""환자 계정 규칙. 탈퇴(deleted_at)한 계정은 모든 조회에서 제외."""
+"""환자 계정 규칙. 탈퇴하면 행을 바로 삭제 (auth.service.withdraw, 결정 15)."""
 
 import uuid
 from datetime import datetime
@@ -15,18 +15,12 @@ def normalize_email(email: str) -> str:
     return email.strip().lower()
 
 
-def get_live_by_email(db: Session, email: str) -> Patient | None:
-    return db.scalar(
-        select(Patient).where(
-            Patient.email == normalize_email(email), Patient.deleted_at.is_(None)
-        )
-    )
+def get_by_email(db: Session, email: str) -> Patient | None:
+    return db.scalar(select(Patient).where(Patient.email == normalize_email(email)))
 
 
-def get_live(db: Session, patient_id: uuid.UUID) -> Patient:
-    patient = db.scalar(
-        select(Patient).where(Patient.id == patient_id, Patient.deleted_at.is_(None))
-    )
+def get(db: Session, patient_id: uuid.UUID) -> Patient:
+    patient = db.get(Patient, patient_id)
     if patient is None:
         raise AppError(404, "not_found", "계정이 없습니다")
     return patient
@@ -56,7 +50,7 @@ def create(
 
 
 def update(db: Session, patient_id: uuid.UUID, data: PatientUpdate) -> Patient:
-    patient = get_live(db, patient_id)
+    patient = get(db, patient_id)
     changes = data.model_dump(exclude_unset=True)
     for field in ("preferred_lang", "timezone"):  # 필수 칸은 null로 지울 수 없음
         if field in changes and changes[field] is None:

@@ -1,12 +1,14 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
 from core.db import get_db
 from core.errors import AppError
 from core.security import PatientPrincipal, current_patient
+from modules.auth import service as auth_service
+from modules.auth.schemas import WithdrawRequest
 from modules.patient import service
 from modules.patient.schemas import PatientOut, PatientUpdate
 
@@ -25,9 +27,16 @@ def patient_uuid(me: PatientPrincipal) -> uuid.UUID:
 
 @router.get("", response_model=PatientOut)
 def get_me(db: Db, me: Me):
-    return service.get_live(db, patient_uuid(me))
+    return service.get(db, patient_uuid(me))
 
 
 @router.patch("", response_model=PatientOut)
 def update_me(data: PatientUpdate, db: Db, me: Me):
     return service.update(db, patient_uuid(me), data)
+
+
+@router.delete("", status_code=204)
+def withdraw(data: WithdrawRequest, db: Db, me: Me) -> Response:
+    """탈퇴. 비밀번호가 틀리면 401 auth.invalid_credentials. 성공하면 모든 기기 로그아웃."""
+    auth_service.withdraw(db, patient_uuid(me), data.password)
+    return Response(status_code=204)

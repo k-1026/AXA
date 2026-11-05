@@ -1,7 +1,7 @@
 """환자 회원가입·로그인·/me. 이메일·비밀번호는 가상 값만 (example.com)."""
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from core.db import utcnow
@@ -125,16 +125,6 @@ def test_login_failure_same_response(client, email, password):
     assert r.json()["message"] == "이메일 또는 비밀번호가 맞지 않습니다"
 
 
-def test_deleted_patient_cannot_login_and_can_rejoin(client, db_engine):
-    token = signup(client)
-    with Session(db_engine) as db:
-        db.scalar(select(Patient)).deleted_at = utcnow()
-        db.commit()
-    assert login(client).status_code == 401
-    assert client.get("/api/v1/me", headers=auth(token)).status_code == 401  # 세션도 무효
-    signup(client)  # 같은 메일로 새 계정
-
-
 # --- 로그아웃 ---
 
 
@@ -167,6 +157,44 @@ def test_login_again_after_logout(client):
 
 def test_logout_requires_login(client):
     assert client.post("/api/v1/auth/patient/logout").status_code == 401
+
+
+def test_login_purges_dead_sessions_of_that_patient(client, db_engine):
+    from datetime import timedelta
+
+    from modules.auth.models import AuthSession
+
+    old = signup(client)  # 1: 로그아웃할 세션
+    client.post("/api/v1/auth/patient/logout", headers=auth(old))
+    live = login(client).json()["access_token"]  # 2: 살아 있는 세션
+    other = signup(client, email="patient2@example.com")  # 다른 환자
+    client.post("/api/v1/auth/patient/logout", headers=auth(other))
+    with Session(db_engine) as db:  # 2번을 만료된 것으로
+        pid = db.scalar(select(Patient.id).where(Patient.email == EMAIL))
+        first_live = db.scalars(select(AuthSession).where(AuthSession.patient_id == pid, AuthSession.revoked_at.is_(None))).one()
+        first_live.expires_at = utcnow() - timedelta(minutes=1)
+        db.commit()
+
+    new = login(client).json()["access_token"]
+    with Session(db_engine) as db:
+        mine = db.scalars(select(AuthSession).where(AuthSession.patient_id == pid)).all()
+        assert len(mine) == 1  # 로그아웃한 것·만료된 것 삭제, 새 세션만
+        assert db.scalar(select(func.count()).select_from(AuthSession).where(AuthSession.patient_id != pid)) == 1  # 다른 환자 것은 그대로
+    assert client.get("/api/v1/me", headers=auth(new)).status_code == 200
+    for t in (old, live):
+        assert client.get("/api/v1/me", headers=auth(t)).status_code == 401
+
+
+def test_purge_dead_all(client, db_engine):
+    from modules.auth import sessions
+
+    a = signup(client)
+    b = login(client).json()["access_token"]
+    client.post("/api/v1/auth/patient/logout", headers=auth(a))  # 로그인 뒤 로그아웃 → 남아 있음
+    with Session(db_engine) as db:
+        assert sessions.purge_dead(db) == 1
+        db.commit()
+    assert client.get("/api/v1/me", headers=auth(b)).status_code == 200
 
 
 def test_revoke_all_logs_out_every_device(client, db_engine):
@@ -274,3 +302,44 @@ def test_cors_allows_frontend_origin(client):
 def test_cors_blocks_unknown_origin(client):
     r = client.get("/api/v1/health", headers={"Origin": "https://evil.example.com"})
     assert "access-control-allow-origin" not in r.headers
+
+
+# --- 탈퇴 ---
+
+
+def withdraw(client, token, password=PASSWORD):
+    return client.request("DELETE", "/api/v1/me", headers=auth(token), json={"password": password})
+
+
+def test_withdraw_deletes_account_immediately(client, db_engine):
+    from modules.auth.models import AuthSession
+
+    a = signup(client)
+    b = login(client).json()["access_token"]
+    other = signup(client, email="patient2@example.com")
+    assert withdraw(client, a).status_code == 204
+    for t in (a, b):
+        assert client.get("/api/v1/me", headers=auth(t)).status_code == 401
+    assert login(client).status_code == 401
+    with Session(db_engine) as db:
+        emails = db.scalars(select(Patient.email)).all()
+        assert emails == ["patient2@example.com"]  # 내 계정 행은 없음
+        assert db.scalar(select(func.count()).select_from(AuthSession)) == 1  # 다른 환자 세션만
+        consents = db.scalars(select(Consent)).all()
+        assert len(consents) == 4  # 동의 기록은 남김 (증명)
+        assert sum(c.patient_id is None for c in consents) == 2  # 내 것은 누구 것인지 비움
+    assert client.get("/api/v1/me", headers=auth(other)).status_code == 200
+    signup(client)  # 같은 메일로 바로 재가입
+
+
+def test_withdraw_wrong_password(client):
+    token = signup(client)
+    r = withdraw(client, token, "wrong-password-99")
+    assert r.status_code == 401
+    assert r.json()["code"] == "auth.invalid_credentials"
+    assert client.get("/api/v1/me", headers=auth(token)).status_code == 200  # 그대로
+
+
+def test_withdraw_requires_login(client):
+    r = client.request("DELETE", "/api/v1/me", json={"password": PASSWORD})
+    assert r.status_code == 401

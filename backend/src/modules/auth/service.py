@@ -29,7 +29,7 @@ _DUMMY_HASH = password_hash.hash("not-a-real-password")
 
 def signup(db: Session, data: SignupRequest) -> TokenOut:
     _check_signup(data)
-    if patient_service.get_live_by_email(db, data.email) is not None:
+    if patient_service.get_by_email(db, data.email) is not None:
         raise AppError(409, "auth.email_taken", "이미 가입된 이메일입니다")
 
     patient = patient_service.create(
@@ -50,7 +50,7 @@ def signup(db: Session, data: SignupRequest) -> TokenOut:
 
 
 def login(db: Session, data: LoginRequest) -> TokenOut:
-    patient = patient_service.get_live_by_email(db, data.email)
+    patient = patient_service.get_by_email(db, data.email)
     if patient is None:
         password_hash.verify(data.password, _DUMMY_HASH)
         raise _invalid()
@@ -64,11 +64,29 @@ def login(db: Session, data: LoginRequest) -> TokenOut:
     return token
 
 
+def withdraw(db: Session, patient_id: uuid.UUID, password: str) -> None:
+    """탈퇴: 비밀번호 확인 → 계정 행을 바로 삭제 (결정 15). 되돌릴 수 없음
+
+    - 세션 전부 삭제 → 모든 기기에서 그 토큰은 바로 401
+    - 동의 기록은 동의 증명이라 남기되 patient_id를 비움 (누구 것인지 알 수 없게, 스키마 3절)
+    - DB의 FK(CASCADE·SET NULL)에 기대지 않고 직접 지움 (SQLite 테스트에서도 같게)
+    - 같은 메일로 바로 다시 가입 가능
+    """
+    patient = patient_service.get(db, patient_id)
+    if not password_hash.verify(password, patient.password_hash):
+        raise _invalid()
+    sessions.delete_all(db, patient.id)
+    consent_service.detach_patient(db, patient.id)
+    db.delete(patient)
+    db.commit()
+
+
 def logout(db: Session, session_id: str) -> None:
     sessions.revoke(db, uuid.UUID(session_id))
 
 
 def _start_session(db: Session, patient_id: uuid.UUID) -> TokenOut:
+    sessions.purge_dead(db, patient_id)  # 쌓이지 않게 이 환자의 죽은 세션 정리
     expires_at = token_expires_at("patient")
     row = sessions.create(db, patient_id, expires_at)
     return TokenOut(

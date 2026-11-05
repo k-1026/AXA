@@ -5,7 +5,7 @@ record()는 commit하지 않음 → 호출한 쪽이 계정 생성·요청서 �
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from core.errors import AppError
@@ -47,3 +47,8 @@ def require(
     missing = [k for k in kinds if k not in have]
     if missing:
         raise AppError(422, "consent.required", "필수 동의가 없습니다", {"missing": missing})
+
+
+def detach_patient(db: Session, patient_id: uuid.UUID) -> None:
+    """탈퇴할 때: 동의 기록은 증명용으로 남기고 누구 것인지(patient_id)만 비움. commit하지 않음."""
+    db.execute(update(Consent).where(Consent.patient_id == patient_id).values(patient_id=None))
