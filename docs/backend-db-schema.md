@@ -37,7 +37,6 @@ erDiagram
     varchar preferred_lang
     varchar timezone
     timestamptz age14_confirmed_at
-    timestamptz deleted_at "탈퇴 요청"
   }
   login_codes {
     uuid id PK
@@ -131,7 +130,7 @@ erDiagram
 ```
 
 - `login_codes`는 가입 전 이메일에도 쓰므로 `patients`와 FK로 묶지 않음 (선이 없는 이유)
-- 탈퇴 → `patients` 삭제 시 `consents`를 뺀 환자 쪽 테이블은 전부 같이 삭제(CASCADE). `consents`는 동의 증명이라 보관 규칙 따로 (10절)
+- 탈퇴 → `patients` 행을 **바로 삭제** (결정 15). `consents`를 뺀 환자 쪽 테이블은 전부 같이 삭제(CASCADE). `consents`는 동의 증명이라 남기고 `patient_id`만 비움(SET NULL)
 
 ### 1-2. 공공 정보 + 병원 쪽 (B) 연결
 
@@ -239,16 +238,16 @@ erDiagram
 |---|---|---|---|
 | `id` | uuid PK | O | **유저 id**. 토큰 `sub`. 순번이 아니라 추측 불가 |
 | `password_hash` | text | O | argon2id 해시만 (원문 X). 2026-11-04 추가 (결정 11) |
-| `email` | citext | O | 로그인. **`deleted_at IS NULL`인 계정끼리만 UNIQUE** (부분 인덱스) → 탈퇴 후 파기 전에도 같은 메일로 재가입 가능 |
+| `email` | citext | O | 로그인. **UNIQUE** (탈퇴하면 행이 지워지므로 같은 메일로 바로 재가입 가능) |
 | `display_name` | varchar(30) | X | 인사말. 실명 아니어도 됨, 비우면 이메일 앞부분 |
 | `preferred_lang` | varchar(8) | O | `ko/en/zh-TW/zh-CN/vi` |
 | `timezone` | varchar(64) | O | IANA |
 | `age14_confirmed_at` | timestamptz | O | 만 14세 이상 체크 시각 |
 | `created_at`, `updated_at` | timestamptz | O | `updated_at`은 SQLAlchemy `onupdate` |
-| `deleted_at` | timestamptz | X | 탈퇴 요청. 이후 모든 조회에서 제외, 파기 스크립트가 매일 삭제 |
 
 - 국적·연락처·건강정보는 계정에 두지 않음 → 요청서에서만
 - 구현 (2026-11-04, 결정 11): `email`은 citext 대신 소문자로 바꿔 `varchar(254)`, 로그인은 이메일+비밀번호(`password_hash`, `login_codes` 없음), `consents.booking_request_id`는 `booking_requests`가 생길 때까지 FK 없음, 테이블마다 Supabase RLS 켬 → 리비전 `0001`
+- 2026-11-05 (결정 15): 탈퇴 = 즉시 삭제 → `deleted_at` 칸과 부분 UNIQUE 삭제, 이메일 일반 UNIQUE `uq_patients_email` → 리비전 `0004`
 
 ### `auth_sessions` — 로그인 세션 (결정 14)
 
@@ -388,18 +387,18 @@ erDiagram
 | id | 사람·사용자 데이터는 **uuid** (추측 방지), 공공·로그성 대량 데이터는 bigint |
 | 코드 값 | PostgreSQL `ENUM` 대신 `varchar + CHECK` → 값 추가가 마이그레이션 한 줄 |
 | 남의 데이터 | 모든 `/me/...` 조회는 `patient_id = 토큰 sub` 조건, 없으면 **404** |
-| 정기 삭제 | 매일 1회: 만료 인증코드, 알림 90일, 챗봇 30일, 탈퇴 계정 파기 → `backend/scripts/purge.py` (A). 조회 기록 30일은 프론트가 브라우저에서 |
+| 정기 삭제 | 매일 1회(Vercel cron 1개): 만료·로그아웃 세션, 알림 90일, 챗봇 30일 → `backend/scripts/purge.py`. 탈퇴 계정은 탈퇴할 때 바로 삭제라 없음 (결정 15). 조회 기록 30일은 프론트가 브라우저에서 |
 | 인덱스 | FK로 자주 거는 쪽 + 정기 삭제 기준 시각 칸 (8절 SQL) |
 
 ## 8. 개인정보처리방침 페이지에 넘길 목록
 
 | 수집 항목 | 언제 | 목적 | 보관 (제안) |
 |---|---|---|---|
-| 이메일 | 가입 | 로그인·알림 | 탈퇴 시 파기 |
-| 비밀번호 (해시만) | 가입 | 로그인 | 탈퇴 시 파기 |
-| 로그인 세션 (시각만, IP·기기 X) | 로그인 | 로그아웃 처리 | 만료 후 삭제 |
-| 표시 이름(선택) | 마이페이지 | 인사말 | 탈퇴 시 |
-| 사용 언어·시간대 | 가입·설정 | 화면 언어·시간 | 탈퇴 시 |
+| 이메일 | 가입 | 로그인·알림 | 탈퇴 즉시 삭제 |
+| 비밀번호 (해시만) | 가입 | 로그인 | 탈퇴 즉시 삭제 |
+| 로그인 세션 (시각만, IP·기기 X) | 로그인 | 로그아웃 처리 | 만료·로그아웃 후 삭제, 탈퇴 즉시 삭제 |
+| 표시 이름(선택) | 마이페이지 | 인사말 | 탈퇴 즉시 삭제 |
+| 사용 언어·시간대 | 가입·설정 | 화면 언어·시간 | 탈퇴 즉시 삭제 |
 | 만 14세 이상 확인 시각 | 가입 | 법정대리인 동의 대상 확인 | 탈퇴 시 |
 | 찜한 병원 | 이용 중 | 마이페이지 | 탈퇴 시 |
 | 방문 기록 (병원·날짜, 리뷰 없음) | 사용자가 "방문 완료" | 마이페이지 | 탈퇴 시 |
@@ -424,10 +423,9 @@ CREATE TABLE patients (
   timezone           varchar(64) NOT NULL DEFAULT 'Asia/Seoul',
   age14_confirmed_at timestamptz NOT NULL,
   created_at         timestamptz NOT NULL DEFAULT now(),
-  updated_at         timestamptz NOT NULL DEFAULT now(),
-  deleted_at         timestamptz
+  updated_at         timestamptz NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX patients_email_live ON patients (email) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX uq_patients_email ON patients (email);  -- 결정 15: 탈퇴 = 행 삭제
 
 CREATE TABLE login_codes (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -574,7 +572,7 @@ CREATE INDEX ON chat_messages (session_id, id);
 | `departments` 표 추가 | 진료과 코드를 프론트 키·심평원 코드와 맞추는 곳이 없었음 |
 | `hospitals` 행 삭제 금지 + `ykiho` upsert | 재적재 때 `id`가 바뀌면 찜·일정 FK가 깨짐 |
 | `hospital_hours` PK(`hospital_id`, `day`) | v1엔 PK 없음 |
-| `patients.email` 부분 UNIQUE | 탈퇴 후 파기 전 재가입이 막힘 |
+| `patients.email` 부분 UNIQUE (2026-11-05 결정 15로 일반 UNIQUE로 되돌림, 탈퇴 = 즉시 삭제) | 탈퇴 후 파기 전 재가입이 막힘 |
 | `trip_items.sort_order`, `hospital_id`는 `kind=hospital`일 때만 | 같은 시각 순서, 잘못된 연결 방지 |
 | `trip_checklist_items` UNIQUE(`trip_id`, `preset_key`) | 기본 항목 중복 생성 방지 |
 | `notifications.kind` CHECK, 마이그레이션 순서 명시 | 코드 값 고정, FK 의존 |

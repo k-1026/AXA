@@ -29,7 +29,7 @@ _DUMMY_HASH = password_hash.hash("not-a-real-password")
 
 def signup(db: Session, data: SignupRequest) -> TokenOut:
     _check_signup(data)
-    if patient_service.get_live_by_email(db, data.email) is not None:
+    if patient_service.get_by_email(db, data.email) is not None:
         raise AppError(409, "auth.email_taken", "이미 가입된 이메일입니다")
 
     patient = patient_service.create(
@@ -50,7 +50,7 @@ def signup(db: Session, data: SignupRequest) -> TokenOut:
 
 
 def login(db: Session, data: LoginRequest) -> TokenOut:
-    patient = patient_service.get_live_by_email(db, data.email)
+    patient = patient_service.get_by_email(db, data.email)
     if patient is None:
         password_hash.verify(data.password, _DUMMY_HASH)
         raise _invalid()
@@ -65,18 +65,20 @@ def login(db: Session, data: LoginRequest) -> TokenOut:
 
 
 def withdraw(db: Session, patient_id: uuid.UUID, password: str) -> None:
-    """탈퇴: 비밀번호 확인 → deleted_at 표시 + 모든 기기 로그아웃.
+    """탈퇴: 비밀번호 확인 → 계정 행을 바로 삭제 (결정 15). 되돌릴 수 없음
 
-    - 이후 모든 조회에서 빠지고 같은 메일로 다시 가입 가능 (patients 부분 UNIQUE)
-    - 실제 행 삭제(파기)는 정기 삭제 스크립트가 (backend-split.md, B)
-    - 동의 기록은 동의 증명이라 남김 (스키마 3절)
+    - 세션 전부 삭제 → 모든 기기에서 그 토큰은 바로 401
+    - 동의 기록은 동의 증명이라 남기되 patient_id를 비움 (누구 것인지 알 수 없게, 스키마 3절)
+    - DB의 FK(CASCADE·SET NULL)에 기대지 않고 직접 지움 (SQLite 테스트에서도 같게)
+    - 같은 메일로 바로 다시 가입 가능
     """
-    patient = patient_service.get_live(db, patient_id)
+    patient = patient_service.get(db, patient_id)
     if not password_hash.verify(password, patient.password_hash):
         raise _invalid()
-    patient.deleted_at = utcnow()
-    db.flush()
-    sessions.revoke_all(db, patient.id)  # commit 포함
+    sessions.delete_all(db, patient.id)
+    consent_service.detach_patient(db, patient.id)
+    db.delete(patient)
+    db.commit()
 
 
 def logout(db: Session, session_id: str) -> None:

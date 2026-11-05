@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 
 from core.db import utcnow
 from modules.auth.models import AuthSession
-from modules.patient.models import Patient
 
 
 def create(db: Session, patient_id: uuid.UUID, expires_at: datetime) -> AuthSession:
@@ -20,20 +19,17 @@ def create(db: Session, patient_id: uuid.UUID, expires_at: datetime) -> AuthSess
 
 
 def is_active(db: Session, session_id: str, patient_id: str) -> bool:
-    """로그아웃 안 함 + 만료 전 + 토큰의 환자와 같음 + 탈퇴하지 않은 계정."""
+    """로그아웃 안 함 + 만료 전 + 토큰의 환자와 같음. 탈퇴하면 세션 행이 지워져 False."""
     try:
         sid, pid = uuid.UUID(session_id), uuid.UUID(patient_id)
     except ValueError:
         return False
     found = db.scalar(
-        select(AuthSession.id)
-        .join(Patient, Patient.id == AuthSession.patient_id)
-        .where(
+        select(AuthSession.id).where(
             AuthSession.id == sid,
             AuthSession.patient_id == pid,
             AuthSession.revoked_at.is_(None),
             AuthSession.expires_at > utcnow(),
-            Patient.deleted_at.is_(None),
         )
     )
     return found is not None
@@ -56,6 +52,11 @@ def revoke_all(db: Session, patient_id: uuid.UUID) -> None:
         .values(revoked_at=utcnow())
     )
     db.commit()
+
+
+def delete_all(db: Session, patient_id: uuid.UUID) -> None:
+    """탈퇴할 때 그 환자의 세션 행 전부 삭제. commit하지 않음."""
+    db.execute(delete(AuthSession).where(AuthSession.patient_id == patient_id))
 
 
 def purge_dead(db: Session, patient_id: uuid.UUID | None = None) -> int:

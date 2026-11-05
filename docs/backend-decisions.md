@@ -5,6 +5,7 @@
 
 | # | 날짜 | 결정 | 이유 | 누가 | 링크 |
 |---|---|---|---|---|---|
+| 15 | 2026-11-05 | 탈퇴 = **즉시 삭제**: 마이페이지 탈퇴 → 확인 창(비밀번호) → `patients` 행과 세션을 바로 삭제. 동의 기록은 남기고 `patient_id`만 비움. `deleted_at`·탈퇴 계정 파기 정기 작업 없음 (리비전 `0004`). 끝난 세션은 로그인할 때 정리(`purge_dead`), 배포 후엔 매일 cron 1개에서 전체 정리 | 사용자(A) 결정: 개인정보를 남기지 않음, 보관 기간을 따로 정할 필요 없음 | A (B 확인 필요) | `modules/auth/service.py` |
 | 14 | 2026-11-04 | 환자 로그인 = **서버 세션 + JWT**: 로그인마다 `auth_sessions` 한 줄, 토큰 `sid`로 요청마다 확인. 로그아웃하면 `revoked_at` → 그 토큰 즉시 401. 탈퇴·비밀번호 변경 때는 모든 세션 종료(`revoke_all`) | 사용자 결정: 로그아웃하면 토큰이 바로 없어져야 함. JWT만으로는 만료(24시간) 전까지 못 막음 | A (B 확인 필요) | `modules/auth/sessions.py` |
 | 13 | 2026-11-04 | **이전 결정 7 변경**: 마이그레이션 파일은 **A가 생성** (B는 모델 변경을 A에게 요청). 첫 리비전 `0001` = 환자 계정·로그인 세션·동의 | 사용자(A) 결정. 한 사람만 만들어 리비전 충돌 방지라는 이유는 그대로 | A (B 확인 필요) | `backend/alembic/` |
 | 12 | 2026-11-04 | **이전 결정 2 일부 변경**: 로컬 Docker Compose 안 씀 → DB는 **Supabase PostgreSQL**(+pgvector), 배포는 **Vercel**. DB 연결은 SQLAlchemy 2 동기 + psycopg 3, `NullPool`, prepared statement 끔(트랜잭션 풀러). 테이블마다 RLS 켜고 정책 없음(Supabase 공개 API 차단) | Vercel 서버리스 배포, 팀원 PC Docker 불필요 | A (B 확인 필요) | `backend/src/core/db.py` |

@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-05 (2) · backend-A-account · Claude
+- 한 일: **탈퇴 = 즉시 삭제** (결정 15). `DELETE /me` → 비밀번호 확인 → 세션 전부·`patients` 행 삭제, 동의 기록은 남기고 `patient_id`만 비움(`consent.detach_patient`). `deleted_at` 칸·부분 UNIQUE 제거 → 이메일 일반 UNIQUE, `patient.get_live*` → `get`·`get_by_email`. 마이그레이션 `0004`(예전 탈퇴 표시 행 정리 후 칸 삭제) — **Supabase 미적용** (`0003`과 같이)
+- 바뀐 계약: 없음 (응답 그대로, 변경 이력에 한 줄)
+- 테스트: 78개 통과 (탈퇴: 내 행·세션 삭제, 다른 환자 그대로, 동의 4개 중 내 것 2개 `patient_id` 비움, 바로 재가입). SQLite로 `0004` 올리기·내리기·다시 올리기 확인
+- 다음 할 일: Supabase에 `0003`·`0004` 적용, 찜·방문 기록 API
+- B에게 요청: 11/4 요청 중 "정기 삭제에 탈퇴 계정 파기"는 **취소** (탈퇴 즉시 삭제). 정기 삭제는 만료 세션(`sessions.purge_dead(db)`)·알림 90일 등만
+- 막힌 것·질문: 없음
+
 ### 2026-11-05 · backend-A-account · Claude
 - 한 일: `auth_sessions`가 계속 쌓이지 않게 `sessions.purge_dead()` 추가 — 만료됐거나 로그아웃한 세션 행 삭제. 로그인·가입할 때 그 환자 것만 정리, `patient_id` 없이 부르면 전체 (배포 후 cron용)
 - 바뀐 계약: 없음

@@ -125,16 +125,6 @@ def test_login_failure_same_response(client, email, password):
     assert r.json()["message"] == "이메일 또는 비밀번호가 맞지 않습니다"
 
 
-def test_deleted_patient_cannot_login_and_can_rejoin(client, db_engine):
-    token = signup(client)
-    with Session(db_engine) as db:
-        db.scalar(select(Patient)).deleted_at = utcnow()
-        db.commit()
-    assert login(client).status_code == 401
-    assert client.get("/api/v1/me", headers=auth(token)).status_code == 401  # 세션도 무효
-    signup(client)  # 같은 메일로 새 계정
-
-
 # --- 로그아웃 ---
 
 
@@ -321,18 +311,25 @@ def withdraw(client, token, password=PASSWORD):
     return client.request("DELETE", "/api/v1/me", headers=auth(token), json={"password": password})
 
 
-def test_withdraw_logs_out_everywhere_and_allows_rejoin(client, db_engine):
+def test_withdraw_deletes_account_immediately(client, db_engine):
+    from modules.auth.models import AuthSession
+
     a = signup(client)
     b = login(client).json()["access_token"]
+    other = signup(client, email="patient2@example.com")
     assert withdraw(client, a).status_code == 204
     for t in (a, b):
         assert client.get("/api/v1/me", headers=auth(t)).status_code == 401
     assert login(client).status_code == 401
     with Session(db_engine) as db:
-        p = db.scalar(select(Patient))
-        assert p.deleted_at is not None
-        assert len(db.scalars(select(Consent)).all()) == 2  # 동의 기록은 남김
-    signup(client)  # 같은 메일로 재가입
+        emails = db.scalars(select(Patient.email)).all()
+        assert emails == ["patient2@example.com"]  # 내 계정 행은 없음
+        assert db.scalar(select(func.count()).select_from(AuthSession)) == 1  # 다른 환자 세션만
+        consents = db.scalars(select(Consent)).all()
+        assert len(consents) == 4  # 동의 기록은 남김 (증명)
+        assert sum(c.patient_id is None for c in consents) == 2  # 내 것은 누구 것인지 비움
+    assert client.get("/api/v1/me", headers=auth(other)).status_code == 200
+    signup(client)  # 같은 메일로 바로 재가입
 
 
 def test_withdraw_wrong_password(client):

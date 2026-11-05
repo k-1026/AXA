@@ -27,7 +27,7 @@ def patient_uuid(me: PatientPrincipal) -> uuid.UUID:
 
 @router.get("", response_model=PatientOut)
 def get_me(db: Db, me: Me):
-    return service.get_live(db, patient_uuid(me))
+    return service.get(db, patient_uuid(me))
 
 
 @router.patch("", response_model=PatientOut)
