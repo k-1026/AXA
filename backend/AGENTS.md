@@ -14,7 +14,7 @@
 ## 2. 내가 A인지 B인지
 
 - 사용자가 말한 값 → 없으면 브랜치 이름(`backend-A-…`, `backend-B-…`) → 그래도 모르면 **사용자에게 묻기**
-- A = 환자 쪽 API, B = 병원 쪽 API + `booking` 주인 + 마이그레이션 ([contracts 1절](../docs/backend-contracts.md))
+- A = 환자 쪽 API + 마이그레이션, B = 병원 쪽 API + `booking` 주인 ([contracts 1절](../docs/backend-contracts.md), 결정 13)
 
 ## 3. 브랜치
 
@@ -33,8 +33,15 @@ main ←(PR, 리더 승인)─ backend ←(PR, 상대 리뷰)─ backend-A-<기�
 |---|---|
 | 상대 모듈 안을 고쳐야 함 | 고치지 말고 **내 worklog "상대에게 요청"**에 적기 |
 | 공유 함수·스키마·상태 코드·토큰·에러 코드 변경 | `docs/backend-contracts.md` 수정 **별도 PR** → 상대 승인 → `backend-decisions.md`에 한 줄 |
-| DB 테이블 변경 | 모델(`models.py`) 변경은 해도 됨, **마이그레이션 파일은 B만 생성** |
-| `core/`, `docker-compose.yml` 변경 | PR에 "공통 파일 변경" 표시, 상대 승인 필수 |
+| DB 테이블 변경 | 모델(`models.py`) 변경은 해도 됨, **마이그레이션 파일은 A만 생성** (B는 A에게 요청) |
+| `core/` 변경 | PR에 "공통 파일 변경" 표시, 상대 승인 필수 |
+
+## 4-1. DB·실행 (결정 12)
+
+- DB = Supabase PostgreSQL, 배포 = Vercel. Docker 안 씀. 주소는 루트 `.env`의 `DATABASE_URL`
+- 테스트는 메모리 SQLite (`backend/tests/conftest.py`) → DB 없이 `python -m pytest`
+- 새 모델 파일은 `core/db_models.py`에 import 한 줄 추가 (Alembic·테스트가 읽음)
+- 마이그레이션: `uv run alembic -c backend/alembic.ini upgrade head` (새 테이블에는 Supabase RLS 켜기)
 
 ## 5. 코드 규칙
 

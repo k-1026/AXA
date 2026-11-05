@@ -8,8 +8,8 @@
 | 경로 | 주인 | 상대가 고칠 때 |
 |---|---|---|
 | `backend/src/core/` | A+B 공동 | PR + 상대 승인 |
-| `docker-compose.yml`, `backend/alembic/` | B | 마이그레이션 생성은 B만 |
-| `modules/auth/`, `patient/`, `consent/`, `hospital/`, `price/`, `chatbot/`, `notification/` | A | 요청만 |
+| `backend/alembic/` | A | 마이그레이션 생성은 A만 (결정 13) |
+| `modules/auth/`, `patient/`, `consent/`, `hospital/`, `price/`, `chatbot/`, `notification/`, `fx/` | A | 요청만 |
 | `modules/booking/models.py`, `booking/service.py` | B | 요청만 |
 | `modules/booking/router_patient.py` | A | — |
 | `modules/booking/router_tenant.py` | B | — |
@@ -40,9 +40,11 @@
 | `sub` | patient id | staff id |
 | `role` | `patient` | `staff` |
 | `tenant_id` | 없음 | 병원 tenant id |
+| `sid` | 로그인 세션 id (`auth_sessions.id`) | 없음 (직원도 필요하면 B가 같은 방식으로) |
 | `exp` | 만료 시각 | 만료 시각 |
 
 - 발급: A(`auth`). 검증 의존성(`core/security.py`): `current_patient()`, `current_staff()` — 병원 API는 `current_staff()`로 받은 `tenant_id`로만 조회
+- `current_patient()`는 요청마다 DB에서 세션 확인: 로그아웃·만료·탈퇴(계정 삭제)면 401 `auth.required` → **로그아웃하면 그 토큰은 바로 못 씀** (`POST /auth/patient/logout`, 다른 기기 세션은 유지)
 
 ## 4. 에러 형식·코드
 
@@ -54,14 +56,16 @@
 |---|---|---|
 | `auth.required` | 401 | 로그인 필요 |
 | `auth.forbidden` | 403 | 역할이 다름 (환자 토큰으로 병원 API 등) |
-| `auth.code_invalid` | 400 | 인증코드 틀림·만료 |
-| `auth.too_many_attempts` | 429 | 시도 초과 |
+| `auth.invalid_credentials` | 401 | 이메일 또는 비밀번호가 맞지 않음 (어느 쪽인지 알려주지 않음) |
+| `auth.email_taken` | 409 | 이미 가입된 이메일 |
+| `auth.too_many_attempts` | 429 | 로그인 시도 초과 (아직 미구현, 11/17~ 남용 방지) |
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
 | `validation` | 422 | 입력 오류 |
 | `consent.required` | 422 | 필수 동의 없음 |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
 | `rate_limited` | 429 | 제출 횟수 초과 |
+| `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 
 - `code`는 프론트 i18n 키로 그대로 씀. 새 코드는 이 표에 먼저 추가
 
@@ -103,4 +107,9 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-04 | 1·4 | 새 모듈 `fx/`(A, 환율), 에러 `fx.unavailable`(503). `DELETE /me` 탈퇴(비밀번호 확인) | A | — |
+| 2026-11-05 | — | `DELETE /me` 탈퇴 = 계정 즉시 삭제(결정 15). 응답·코드는 그대로 | A | — |
+| 2026-11-04 | 3 | 환자 토큰에 `sid` 추가, `current_patient()`가 DB 세션 확인 (로그아웃 즉시 무효) | A (B 확인 필요) | — |
+| 2026-11-04 | 1 | `backend/alembic/` 주인 B → A, `docker-compose.yml` 삭제 (Supabase 사용) | A (B 확인 필요) | — |
+| 2026-11-04 | 4 | 입력 오류(FastAPI 기본 422)도 `{code: "validation", …, detail.errors}` 형식으로. `auth.code_invalid` 삭제(인증코드 로그인 안 함), `auth.invalid_credentials`·`auth.email_taken` 추가. 가입 시 14세·필수 동의 없으면 `consent.required` + `detail.age14_confirmed`·`missing` | A (B 확인 필요) | — |
 | 2026-10-30 | 전체 | 초안 작성 | — | — |
