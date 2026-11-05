@@ -118,7 +118,12 @@
   "prices": {
     "pending": "Price being checked",
     "range": "KRW {{min}}–{{max}}",
-    "notice": "Amounts shown are market price ranges. Actual costs vary by hospital and treatment, and procedures offered differ by hospital. This is not advertising, a recommendation, or medical advice. You can ask a hospital for a written cost estimate."
+    "notice": "Amounts shown are market price ranges. Actual costs vary by hospital and treatment, and procedures offered differ by hospital. This is not advertising, a recommendation, or medical advice. You can ask a hospital for a written cost estimate.",
+    "approx": "≈ {{min}}–{{max}}",
+    "krwNote": "KRW {{min}}–{{max}}",
+    "fxNotice": "Converted amounts are for reference only. Actual costs are in Korean won as quoted by the hospital. Rates applied on {{applied}} (Bank of Korea, as of {{base}}; updated daily at {{hour}}:00 KST) ·",
+    "fxProvider": "Bank of Korea ECOS",
+    "fxFallback": "Could not load exchange rates, so prices are shown in Korean won."
   },
   "mypage": {
     "home": "Home",
@@ -156,8 +161,14 @@
     },
     "account": {
       "title": "My account",
-      "desc": "Profile and language settings",
-      "manage": "Manage account"
+      "withdraw": "Delete account",
+      "withdrawTitle": "Delete your account?",
+      "withdrawDesc": "You will no longer be able to log in with this account, and you will be logged out on all devices. You can sign up again with the same email.",
+      "withdrawPassword": "Confirm password",
+      "withdrawConfirm": "Delete account",
+      "cancel": "Cancel",
+      "withdrawWrongPassword": "Incorrect password.",
+      "withdrawDemo": "The demo account cannot be deleted."
     },
     "saved": {
       "title": "Saved hospitals",

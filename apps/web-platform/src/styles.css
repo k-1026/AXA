@@ -3537,3 +3537,107 @@ body.chat-open {
     flex-direction: column;
   }
 }
+
+/* 내 계정 > 탈퇴하기 */
+.mp-account-spacer {
+  flex: 1;
+}
+
+.mp-account-note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.mp-withdraw {
+  padding: 8px 14px;
+  border: 1px solid #f0c4bd;
+  border-radius: 10px;
+  background: var(--surface);
+  color: #b42318;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mp-withdraw:hover:not(:disabled) {
+  background: #fdeceb;
+}
+
+.mp-withdraw:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mp-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(16 24 40 / 0.45);
+}
+
+.mp-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgb(16 24 40 / 0.2);
+}
+
+.mp-dialog h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.mp-dialog > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.mp-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.mp-dialog-actions .mp-login-secondary {
+  margin-top: 0;
+}
+
+.mp-withdraw-confirm {
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: #b42318;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mp-withdraw-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 가격 가이드 > 통화 환산 */
+.procedure-price-krw {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.detail-source a {
+  color: var(--accent);
+}

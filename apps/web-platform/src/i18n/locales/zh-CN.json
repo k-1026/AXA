@@ -118,7 +118,12 @@
   "prices": {
     "pending": "价格确认中",
     "range": "{{min}}–{{max}} 韩元",
-    "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。"
+    "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。",
+    "approx": "约 {{min}}~{{max}}",
+    "krwNote": "{{min}}~{{max}} 韩元",
+    "fxNotice": "换算金额仅供参考，实际费用以医院告知的韩元金额为准。{{applied}} 适用汇率（韩国银行 {{base}} 数据，每天韩国时间 {{hour}}:00 更新）·",
+    "fxProvider": "韩国银行经济统计系统",
+    "fxFallback": "无法获取汇率，以韩元显示。"
   },
   "mypage": {
     "home": "首页",
@@ -156,8 +161,14 @@
     },
     "account": {
       "title": "我的账户",
-      "desc": "个人资料和语言设置",
-      "manage": "管理账户"
+      "withdraw": "注销账号",
+      "withdrawTitle": "确定要注销账号吗？",
+      "withdrawDesc": "注销后将无法使用此账号登录，所有设备都会退出登录。可以使用同一邮箱重新注册。",
+      "withdrawPassword": "确认密码",
+      "withdrawConfirm": "注销账号",
+      "cancel": "取消",
+      "withdrawWrongPassword": "密码不正确。",
+      "withdrawDemo": "演示账号无法注销。"
     },
     "saved": {
       "title": "已保存的医院",
