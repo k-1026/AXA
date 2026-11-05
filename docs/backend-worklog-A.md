@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-05 (3) · backend-A-account · Claude
+- 한 일: **Supabase DB 초기화** — `alembic downgrade base` → `upgrade head`로 `0001`~`0004` 다시 적용 (현재 `0004`, 모든 테이블 비어 있음, RLS 켜짐). 기존 테스트 계정 3개·세션·동의 삭제. 아래 항목의 "Supabase 미적용"은 이걸로 처리
+- 바뀐 계약: 없음
+- 테스트: 78개 통과 (변경 없음). 테이블 목록·행 수·RLS 확인
+- 다음 할 일: 찜·방문 기록 API
+- B에게 요청: 공용 Supabase에는 `@example.com` 가짜 계정만 (실제 메일 X). DB가 비었으니 테스트 계정은 새로 가입
+- 막힌 것·질문: 없음
+
 ### 2026-11-05 (2) · backend-A-account · Claude
 - 한 일: **탈퇴 = 즉시 삭제** (결정 15). `DELETE /me` → 비밀번호 확인 → 세션 전부·`patients` 행 삭제, 동의 기록은 남기고 `patient_id`만 비움(`consent.detach_patient`). `deleted_at` 칸·부분 UNIQUE 제거 → 이메일 일반 UNIQUE, `patient.get_live*` → `get`·`get_by_email`. 마이그레이션 `0004`(예전 탈퇴 표시 행 정리 후 칸 삭제) — **Supabase 미적용** (`0003`과 같이)
 - 바뀐 계약: 없음 (응답 그대로, 변경 이력에 한 줄)
