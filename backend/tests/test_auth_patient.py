@@ -1,7 +1,7 @@
 """환자 회원가입·로그인·/me. 이메일·비밀번호는 가상 값만 (example.com)."""
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from core.db import utcnow
@@ -167,6 +167,44 @@ def test_login_again_after_logout(client):
 
 def test_logout_requires_login(client):
     assert client.post("/api/v1/auth/patient/logout").status_code == 401
+
+
+def test_login_purges_dead_sessions_of_that_patient(client, db_engine):
+    from datetime import timedelta
+
+    from modules.auth.models import AuthSession
+
+    old = signup(client)  # 1: 로그아웃할 세션
+    client.post("/api/v1/auth/patient/logout", headers=auth(old))
+    live = login(client).json()["access_token"]  # 2: 살아 있는 세션
+    other = signup(client, email="patient2@example.com")  # 다른 환자
+    client.post("/api/v1/auth/patient/logout", headers=auth(other))
+    with Session(db_engine) as db:  # 2번을 만료된 것으로
+        pid = db.scalar(select(Patient.id).where(Patient.email == EMAIL))
+        first_live = db.scalars(select(AuthSession).where(AuthSession.patient_id == pid, AuthSession.revoked_at.is_(None))).one()
+        first_live.expires_at = utcnow() - timedelta(minutes=1)
+        db.commit()
+
+    new = login(client).json()["access_token"]
+    with Session(db_engine) as db:
+        mine = db.scalars(select(AuthSession).where(AuthSession.patient_id == pid)).all()
+        assert len(mine) == 1  # 로그아웃한 것·만료된 것 삭제, 새 세션만
+        assert db.scalar(select(func.count()).select_from(AuthSession).where(AuthSession.patient_id != pid)) == 1  # 다른 환자 것은 그대로
+    assert client.get("/api/v1/me", headers=auth(new)).status_code == 200
+    for t in (old, live):
+        assert client.get("/api/v1/me", headers=auth(t)).status_code == 401
+
+
+def test_purge_dead_all(client, db_engine):
+    from modules.auth import sessions
+
+    a = signup(client)
+    b = login(client).json()["access_token"]
+    client.post("/api/v1/auth/patient/logout", headers=auth(a))  # 로그인 뒤 로그아웃 → 남아 있음
+    with Session(db_engine) as db:
+        assert sessions.purge_dead(db) == 1
+        db.commit()
+    assert client.get("/api/v1/me", headers=auth(b)).status_code == 200
 
 
 def test_revoke_all_logs_out_every_device(client, db_engine):

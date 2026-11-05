@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.orm import Session
 
 from core.db import utcnow
@@ -56,3 +56,18 @@ def revoke_all(db: Session, patient_id: uuid.UUID) -> None:
         .values(revoked_at=utcnow())
     )
     db.commit()
+
+
+def purge_dead(db: Session, patient_id: uuid.UUID | None = None) -> int:
+    """만료됐거나 로그아웃한 세션 행 삭제 (다시 쓸 일 없음). commit하지 않음.
+
+    - 로그인할 때 그 환자 것만 정리 (auth.service._start_session)
+    - patient_id=None이면 전체 → 배포 후 매일 cron 정리용
+    - 행이 없으면 is_active()가 False라 지워도 로그인 상태는 그대로
+    """
+    stmt = delete(AuthSession).where(
+        or_(AuthSession.expires_at <= utcnow(), AuthSession.revoked_at.is_not(None))
+    )
+    if patient_id is not None:
+        stmt = stmt.where(AuthSession.patient_id == patient_id)
+    return db.execute(stmt).rowcount

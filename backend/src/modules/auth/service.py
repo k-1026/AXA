@@ -84,6 +84,7 @@ def logout(db: Session, session_id: str) -> None:
 
 
 def _start_session(db: Session, patient_id: uuid.UUID) -> TokenOut:
+    sessions.purge_dead(db, patient_id)  # 쌓이지 않게 이 환자의 죽은 세션 정리
     expires_at = token_expires_at("patient")
     row = sessions.create(db, patient_id, expires_at)
     return TokenOut(
