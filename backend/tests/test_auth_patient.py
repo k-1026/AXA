@@ -274,3 +274,37 @@ def test_cors_allows_frontend_origin(client):
 def test_cors_blocks_unknown_origin(client):
     r = client.get("/api/v1/health", headers={"Origin": "https://evil.example.com"})
     assert "access-control-allow-origin" not in r.headers
+
+
+# --- 탈퇴 ---
+
+
+def withdraw(client, token, password=PASSWORD):
+    return client.request("DELETE", "/api/v1/me", headers=auth(token), json={"password": password})
+
+
+def test_withdraw_logs_out_everywhere_and_allows_rejoin(client, db_engine):
+    a = signup(client)
+    b = login(client).json()["access_token"]
+    assert withdraw(client, a).status_code == 204
+    for t in (a, b):
+        assert client.get("/api/v1/me", headers=auth(t)).status_code == 401
+    assert login(client).status_code == 401
+    with Session(db_engine) as db:
+        p = db.scalar(select(Patient))
+        assert p.deleted_at is not None
+        assert len(db.scalars(select(Consent)).all()) == 2  # 동의 기록은 남김
+    signup(client)  # 같은 메일로 재가입
+
+
+def test_withdraw_wrong_password(client):
+    token = signup(client)
+    r = withdraw(client, token, "wrong-password-99")
+    assert r.status_code == 401
+    assert r.json()["code"] == "auth.invalid_credentials"
+    assert client.get("/api/v1/me", headers=auth(token)).status_code == 200  # 그대로
+
+
+def test_withdraw_requires_login(client):
+    r = client.request("DELETE", "/api/v1/me", json={"password": PASSWORD})
+    assert r.status_code == 401

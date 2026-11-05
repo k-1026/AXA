@@ -17,6 +17,18 @@
 
 ## 기록
 
+### 2026-11-04 (2) · backend-A-account · Claude
+- 한 일:
+  - `DELETE /me` 탈퇴: 비밀번호 확인 → `deleted_at` + 모든 기기 로그아웃(`revoke_all`). 동의 기록은 남김, 같은 메일 재가입 가능. 실제 삭제(파기)는 정기 삭제 스크립트(B)
+  - `modules/fx`: 환율 `GET /exchange-rates` — **한국은행 ECOS 731Y001**(주요국통화의 대원화환율, 일별)에서 USD·CNY·TWD·VND(100동당) → 1원당 외화로 저장. **매일 오전 10시(KST) 기준 "적용일"**(10시 전이면 어제)로 하루 1번만 받고, 다음 날 10시 전까지 같은 값으로 안내. 주말·공휴일은 직전 영업일 값. 실패하면 저장값(`stale`), 없으면 503 `fx.unavailable`. 키는 `.env` `ECOS_API_KEY`, 시각은 `FX_SWITCH_HOUR_KST`(기본 10)
+  - 마이그레이션 `0003` `exchange_rates`(currency·rate·base_date·applied_on·fetched_at, +RLS) — **Supabase 미적용**
+  - 프론트(`frontend-mypage-currency`): 마이페이지 "내 계정"을 탈퇴하기로(프로필·언어 설정 문구 제거, 비밀번호 확인 창), 가격 가이드 통화별 참고 환산(원화 같이 표시, 출처·기준 시각)
+- 바뀐 계약: contracts 1절(`fx/` 주인 A)·4절(`fx.unavailable`)
+- 테스트: 77개 통과 (탈퇴 3, 환율 16: 10시 전후·적용일 하루 1번·주말·VND 100동·실패). 임시 SQLite로 화면 확인 (탈퇴·틀린 비밀번호·데모 비활성, USD·VND·TWD·CNY × 언어)
+- 다음 할 일: Supabase에 `0003` 적용, 찜·방문 기록 API
+- B에게 요청: 정기 삭제 스크립트에 "탈퇴 계정 파기" 포함 / 배포 시 Vercel cron `0 1 * * *`(UTC 01:00 = KST 10:00)으로 `GET /api/v1/exchange-rates` 미리 호출(선택, 무료 플랜 ±59분), Vercel 환경변수에 `ECOS_API_KEY`
+- 막힌 것·질문: ECOS에 당일 값이 몇 시에 들어오는지 미확인 (11/4 값은 오후 조회 시 있음) → 10시에 당일 값이 없으면 전 영업일 값, 화면에 기준일 표시
+
 ### 2026-11-04 · backend-A-auth · Claude
 - 한 일:
   - DB: Docker 대신 Supabase + Vercel (결정 12). `core/db.py`(SQLAlchemy 2 동기 + psycopg 3, NullPool, prepared statement 끔, UTC 강제 `UTCDateTime`), `core/db_models.py`(모델 등록), `.env.example`에 `DATABASE_URL`

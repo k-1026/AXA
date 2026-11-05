@@ -30,6 +30,12 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=PASSWORD_MAX)
 
 
+class WithdrawRequest(BaseModel):
+    """탈퇴 확인용 비밀번호 (토큰만 있으면 남이 대신 탈퇴시키지 못하게)."""
+
+    password: str = Field(min_length=1, max_length=PASSWORD_MAX)
+
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"

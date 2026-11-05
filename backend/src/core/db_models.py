@@ -5,4 +5,5 @@
 
 from modules.auth import models as auth_models  # noqa: F401
 from modules.consent import models as consent_models  # noqa: F401
+from modules.fx import models as fx_models  # noqa: F401
 from modules.patient import models as patient_models  # noqa: F401

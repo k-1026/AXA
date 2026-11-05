@@ -64,6 +64,21 @@ def login(db: Session, data: LoginRequest) -> TokenOut:
     return token
 
 
+def withdraw(db: Session, patient_id: uuid.UUID, password: str) -> None:
+    """탈퇴: 비밀번호 확인 → deleted_at 표시 + 모든 기기 로그아웃.
+
+    - 이후 모든 조회에서 빠지고 같은 메일로 다시 가입 가능 (patients 부분 UNIQUE)
+    - 실제 행 삭제(파기)는 정기 삭제 스크립트가 (backend-split.md, B)
+    - 동의 기록은 동의 증명이라 남김 (스키마 3절)
+    """
+    patient = patient_service.get_live(db, patient_id)
+    if not password_hash.verify(password, patient.password_hash):
+        raise _invalid()
+    patient.deleted_at = utcnow()
+    db.flush()
+    sessions.revoke_all(db, patient.id)  # commit 포함
+
+
 def logout(db: Session, session_id: str) -> None:
     sessions.revoke(db, uuid.UUID(session_id))
 
