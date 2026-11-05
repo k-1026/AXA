@@ -61,6 +61,7 @@ const AuthContext = createContext<{
   loginDemo: () => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (input: SignupInput) => Promise<void>;
+  withdraw: (password: string) => Promise<void>;
   logout: () => void;
 }>({
   user: null,
@@ -68,6 +69,7 @@ const AuthContext = createContext<{
   loginDemo: () => {},
   login: async () => {},
   signup: async () => {},
+  withdraw: async () => {},
   logout: () => {},
 });
 
@@ -135,8 +137,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  // 탈퇴: 비밀번호 확인 후 서버에서 계정 삭제 표시 + 모든 기기 로그아웃 → 이 브라우저도 로그아웃
+  const withdraw = async (password: string) => {
+    await api('/me', { method: 'DELETE', token, body: { password } });
+    clearToken();
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, ready, loginDemo, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, ready, loginDemo, login, signup, withdraw, logout }}>
       {children}
     </AuthContext.Provider>
   );

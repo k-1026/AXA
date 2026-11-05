@@ -118,7 +118,12 @@
   "prices": {
     "pending": "價格確認中",
     "range": "{{min}}–{{max}} 韓元",
-    "notice": "所示金額為市場價格範圍，實際費用因醫院和診療內容而異，各醫院提供的項目也可能不同。本頁面不構成廣告、推薦或醫療諮詢。您可以向醫院書面申請預估診療費用。"
+    "notice": "所示金額為市場價格範圍，實際費用因醫院和診療內容而異，各醫院提供的項目也可能不同。本頁面不構成廣告、推薦或醫療諮詢。您可以向醫院書面申請預估診療費用。",
+    "approx": "約 {{min}}~{{max}}",
+    "krwNote": "{{min}}~{{max}} 韓元",
+    "fxNotice": "換算金額僅供參考，實際費用以醫院告知的韓元金額為準。{{applied}} 適用匯率（韓國銀行 {{base}} 資料，每天韓國時間 {{hour}}:00 更新）·",
+    "fxProvider": "韓國銀行經濟統計系統",
+    "fxFallback": "無法取得匯率，以韓元顯示。"
   },
   "mypage": {
     "home": "首頁",
@@ -156,8 +161,14 @@
     },
     "account": {
       "title": "我的帳戶",
-      "desc": "個人資料與語言設定",
-      "manage": "管理帳戶"
+      "withdraw": "刪除帳號",
+      "withdrawTitle": "確定要刪除帳號嗎？",
+      "withdrawDesc": "刪除後將無法使用此帳號登入，所有裝置都會登出。可以使用同一個電子郵件重新註冊。",
+      "withdrawPassword": "確認密碼",
+      "withdrawConfirm": "刪除帳號",
+      "cancel": "取消",
+      "withdrawWrongPassword": "密碼不正確。",
+      "withdrawDemo": "示範帳號無法刪除。"
     },
     "saved": {
       "title": "已儲存的醫院",

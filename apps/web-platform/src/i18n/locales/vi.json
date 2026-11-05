@@ -118,7 +118,12 @@
   "prices": {
     "pending": "Đang xác nhận giá",
     "range": "{{min}}–{{max}} KRW",
-    "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản."
+    "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản.",
+    "approx": "≈ {{min}}–{{max}}",
+    "krwNote": "{{min}}–{{max}} KRW",
+    "fxNotice": "Số tiền quy đổi chỉ để tham khảo. Chi phí thực tế tính bằng won Hàn Quốc theo báo giá của bệnh viện. Tỷ giá áp dụng ngày {{applied}} (Ngân hàng Trung ương Hàn Quốc, số liệu ngày {{base}}; cập nhật lúc {{hour}}:00 giờ Hàn Quốc mỗi ngày) ·",
+    "fxProvider": "Bank of Korea ECOS",
+    "fxFallback": "Không tải được tỷ giá, giá được hiển thị bằng won Hàn Quốc."
   },
   "mypage": {
     "home": "Trang chủ",
@@ -156,8 +161,14 @@
     },
     "account": {
       "title": "Tài khoản của tôi",
-      "desc": "Hồ sơ và cài đặt ngôn ngữ",
-      "manage": "Quản lý tài khoản"
+      "withdraw": "Xóa tài khoản",
+      "withdrawTitle": "Bạn chắc chắn muốn xóa tài khoản?",
+      "withdrawDesc": "Sau khi xóa, bạn sẽ không thể đăng nhập bằng tài khoản này và sẽ bị đăng xuất trên mọi thiết bị. Bạn có thể đăng ký lại bằng cùng email.",
+      "withdrawPassword": "Xác nhận mật khẩu",
+      "withdrawConfirm": "Xóa tài khoản",
+      "cancel": "Hủy",
+      "withdrawWrongPassword": "Mật khẩu không đúng.",
+      "withdrawDemo": "Không thể xóa tài khoản demo."
     },
     "saved": {
       "title": "Bệnh viện đã lưu",
