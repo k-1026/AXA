@@ -1,0 +1,316 @@
+<title>MediDaegu 고객 여정지도</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 레이아웃: 위에서 고객 지도(이용자 4 · 운영 3) → 고객을 고르면 아래에 단계별 여정 격자 + 감정 곡선 */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #17212b;
+  --muted: #5d6875;
+  --line: #d9dfe6;
+  --accent: #1f6feb;
+  --accent-soft: #e4edfd;
+  --done: #15803d;
+  --done-soft: #e3f4e8;
+  --plan: #b45309;
+  --plan-soft: #fdf0dc;
+  --stop: #b42318;
+  --stop-soft: #fde7e5;
+  --curve: #1f6feb;
+  --font-display: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --font-body: 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151c; --surface: #17202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+    --accent: #6ea3ff; --accent-soft: #1c2c45; --done: #5fd08a; --done-soft: #16301f;
+    --plan: #f0b35a; --plan-soft: #352812; --stop: #ff8a7d; --stop-soft: #3a1c19; --curve: #6ea3ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151c; --surface: #17202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+  --accent: #6ea3ff; --accent-soft: #1c2c45; --done: #5fd08a; --done-soft: #16301f;
+  --plan: #f0b35a; --plan-soft: #352812; --stop: #ff8a7d; --stop-soft: #3a1c19; --curve: #6ea3ff;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; word-break: keep-all; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 36px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+.lead { max-width: 64ch; color: var(--muted); margin-top: 10px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 0.85rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+.chip.done { background: var(--done-soft); color: var(--done); }
+.chip.plan { background: var(--plan-soft); color: var(--plan); }
+.chip.stop { background: var(--stop-soft); color: var(--stop); }
+.chip.ref { background: var(--accent-soft); color: var(--accent); }
+
+.section-head { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.section-head p { color: var(--muted); font-size: 0.9rem; }
+.group-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; margin: 18px 0 10px; }
+
+.seg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+.seg { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-align: left; font: inherit; color: inherit; cursor: pointer; transition: border-color .15s; }
+.seg:hover { border-color: var(--accent); }
+.seg:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.seg .rank { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; color: var(--accent); }
+.seg .why { font-size: 0.85rem; color: var(--muted); }
+.seg .need { font-size: 0.88rem; }
+.seg .need b { font-weight: 700; }
+.seg.static { cursor: default; }
+.seg.static:hover { border-color: var(--line); }
+
+.journey { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.persona { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.persona p { color: var(--muted); font-size: 0.9rem; max-width: 70ch; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab { padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-size: 0.85rem; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+.scroller { overflow-x: auto; }
+.grid { display: grid; min-width: 860px; border-top: 1px solid var(--line); }
+.grid > div { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 0.86rem; min-width: 0; }
+.rowlabel { font-family: var(--font-display); font-weight: 600; color: var(--muted); font-size: 0.8rem !important; }
+.stage { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem !important; background: var(--accent-soft); color: var(--accent); }
+.touch { display: flex; flex-direction: column; gap: 5px; }
+.touch span.item { display: flex; flex-wrap: wrap; gap: 4px; align-items: baseline; }
+.pain { color: var(--stop); }
+.opp { color: var(--ink); }
+.curve-cell { grid-column: 2 / -1; padding: 4px 0 !important; }
+.curve-cell svg { display: block; width: 100%; height: 96px; }
+.curve-cell text { font-size: 11px; fill: var(--muted); font-family: var(--font-body); }
+
+.common { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.common article { padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; gap: 6px; }
+.common .k { font-size: 0.78rem; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; }
+.common p { font-size: 0.88rem; }
+.common .next { color: var(--muted); }
+
+.notes { font-size: 0.82rem; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.notes ul { margin: 0; padding-left: 18px; }
+.src { overflow-x: auto; }
+.src table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 0.8rem; }
+.src th, .src td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.src th { color: var(--muted); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">AXA · 대구 의료관광 · MediDaegu</p>
+    <h1>MediDaegu 고객 여정지도</h1>
+    <p class="lead">대구 병원을 자기 언어로 찾고 가격·진료시간까지 확인하는 서비스의 고객을 우선순위로 정리하고, 고객마다 인지부터 방문 후까지의 경험을 지금 만든 기능과 맞춰 봤어요. 고객 카드를 누르면 아래 여정지도가 바뀌어요.</p>
+    <div class="meta"><span>작성 2026-11-09</span><span>기준: <code>frontend</code> 브랜치 구현</span><span>페르소나는 설명용 가정</span></div>
+    <div class="legend" aria-label="기능 표시">
+      <span class="chip done">구현됨</span><span class="chip plan">계획</span><span class="chip stop">규제로 안 함</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="seg-title">
+    <div class="section-head">
+      <h2 id="seg-title">우리 고객</h2>
+      <p>숫자는 한국보건산업진흥원 2025년 외국인환자 통계 보고서(팀 정리본) 기준이에요.</p>
+    </div>
+    <p class="group-label">이용자 (B2C)</p>
+    <div class="seg-grid" id="seg-b2c"></div>
+    <p class="group-label">운영·수익 (B2B)</p>
+    <div class="seg-grid" id="seg-b2b"></div>
+  </section>
+
+  <section aria-labelledby="jr-title">
+    <div class="section-head">
+      <h2 id="jr-title">고객별 여정지도</h2>
+      <p>우리는 예약 전까지 스스로 알아보는 단계를 맡고, 예약 확정과 진료는 병원이 해요.</p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs" aria-label="고객 선택"></div>
+    <div class="journey" id="journey" role="tabpanel"></div>
+  </section>
+
+  <section aria-labelledby="common-title">
+    <div class="section-head">
+      <h2 id="common-title">여정에서 공통으로 보이는 것</h2>
+      <p>모든 고객의 여정에서 반복된 불편과 다음 할 일이에요.</p>
+    </div>
+    <div class="common">
+      <article><p class="k">비교·결정</p><h3>가격 정보가 가장 부족</h3><p>가격 범위가 있는 시술은 66개 중 6개이고, 그것도 프로토타입용 임시 값이에요.</p><p class="next">다음: 공공 비급여 통계처럼 근거 있는 범위만 반영</p></article>
+      <article><p class="k">문의·준비</p><h3>결국 한국어로 연락</h3><p>병원 연락처와 챗봇 데모는 있지만, 문의는 고객이 직접 해야 해요.</p><p class="next">다음: 예약 요청서 (고른 병원 1곳, 확정은 병원)</p></article>
+      <article><p class="k">신뢰</p><h3>어느 병원을 믿을지</h3><p>폐업 교차검증으로 정상 영업 병원만 보여 주고 있어요.</p><p class="next">다음: 유치기관 등록·인증 사실 표시</p></article>
+      <article><p class="k">언어</p><h3>일본어와 주소</h3><p>화면은 5개 언어지만 2순위 시장인 일본어가 없고, 병원 주소는 한국어 원문이에요.</p><p class="next">다음: 일본어 추가 검토, 주소 영어 표기</p></article>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <p><b>한계</b></p>
+    <ul>
+      <li>페르소나는 실제 사용자 조사가 아니라 통계에 맞춘 가정이에요.</li>
+      <li>숫자는 팀 정리본에서 옮겼고 보고서 원문은 다시 확인하지 않았어요.</li>
+      <li>감정 곡선은 불편 정도를 보여 주려는 설명용 표시예요.</li>
+    </ul>
+    <p><b>출처</b></p>
+    <div class="src">
+      <table>
+        <thead><tr><th>이름</th><th>위치</th><th>등급</th><th>기준 시점</th><th>확인일</th></tr></thead>
+        <tbody>
+          <tr><td>한국보건산업진흥원 「2025년 외국인환자 유치실적 통계분석 보고서」 표 2.11·2.12·3.8·3.14·3.17·3.23·3.41·3.54·3.74</td><td>팀 정리본 data/raw/다국어/타깃_국가_분야_분석.md</td><td>통계</td><td>2025년 실적</td><td>2026-11-09</td></tr>
+          <tr><td>서비스 흐름 법률검토 · 수익 모델 선택지 · 웹사이트 법적 점검</td><td>research/의료관광/</td><td>내부</td><td>2026-10-29 ~ 11-05</td><td>2026-11-09</td></tr>
+          <tr><td>현재 구현</td><td>apps/web-platform (frontend 브랜치)</td><td>내부</td><td>2026-11-09</td><td>2026-11-09</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </footer>
+</div>
+
+<script>
+const D = 'done', P = 'plan', S = 'stop';
+const STATUS = { done: '구현됨', plan: '계획', stop: '안 함' };
+const SEGMENTS = {
+  b2c: [
+    { id: 'taiwan', rank: '1순위', name: '대만 피부·안과 단기 의료관광객', why: '전국 +122.5%, 대구가 전국 3위 지역(1,495명), 피부과 비중 80.3%, 대구 입원 비율 0.3%', need: '짧은 일정에 믿을 만한 병원을 내 언어로 빨리 찾기' },
+    { id: 'jpcn', rank: '2순위', name: '일본·중국 피부·성형 관광객', why: '각 약 60만 명 시장, 대구 점유율 0.16%·0.55%, 일본 성형 비중 16.3%', need: '서울 대신 대구를 고를 이유' },
+    { id: 'checkup', rank: '2단계', name: '베트남·몽골·중앙아시아 검진·내과 환자와 보호자', why: '대구 베트남 환자 점유율 9.62%, 몽골·중앙아는 내과·검진 비중 큼', need: '큰 병원 진료과·검사 정보, 가족이 함께 준비' },
+    { id: 'resident', rank: '참고', name: '대구 거주 외국인', why: '대구 1위 국적 미국(6,101명), 입원 비율 12.9%로 거주자 가능성 (추정)', need: '가까운 병원과 진료시간, 전화' },
+  ],
+  b2b: [
+    { id: 'hospital', rank: '계획', name: '병원 국제팀 (등록 유치의료기관)', why: '환자가 고른 1곳으로 오는 예약 요청서, 다국어 응대 도구', need: '고정 이용료, 건당 수수료 없음' },
+    { id: null, rank: '수익 모델', name: '대구시·구청·진흥원', why: '외국인 대상 공공 의료관광 안내 채널 (공공 위탁)', need: '발표용 수익 그림' },
+    { id: null, rank: '광고 칸', name: '관광·지역 업체', why: '의료와 무관한 관광 홍보 자리', need: '병원 광고는 받지 않음' },
+  ],
+};
+const ALL6 = ['인지', '탐색', '비교·결정', '문의·준비', '방문', '방문 후'];
+const JOURNEYS = {
+  taiwan: {
+    label: '대만 1순위', title: '린 · 29세 · 타이베이 회사원', desc: '3박 4일 대구 여행 중 피부 레이저 시술과 라식 상담을 함께 알아봄 · 중국어(번체)',
+    stages: ALL6, mood: [0, 1, -1, -1, 0, 1],
+    does: ['SNS·여행 커뮤니티에서 대구 피부과 검색', '숙소 근처 피부과·안과 찾기', '가격 범위·진료시간 확인, 찜하기', '병원에 연락, 일정 정리', '길 찾아 방문', '경험을 나만 보게 기록'],
+    touch: [[['검색 유입', P], ['대구 관광 광고 칸', D]], [['지도 진료과 색 필터', D], ['병원 이름 검색', D], ['번체 화면', D]], [['가격 가이드', D], ['대만 달러 참고 환산', D], ['진료시간', D], ['찜', D]], [['전화·홈페이지·인스타 링크', D], ['챗봇 FAQ 데모', D], ['방문 준비 체크리스트', D]], [['길찾기 링크', D]], [['방문 기록 (비공개)', D]]],
+    pain: ['서울 정보만 많음', '병원 이름이 낯섦', '가격 대부분 "확인 중"', '병원 응답이 한국어', '주소가 한국어 원문', '기록이 이 브라우저에만'],
+    opp: [[['번체 검색 노출', P]], [['영어 병원 이름', D], ['대표사진 (임시)', D]], [['공공 고지가 기반 범위', P]], [['예약 요청서', P]], [['주소 영어 표기', P]], [['계정 저장', P], ['공개 후기·사후 의료 안내', S]]],
+  },
+  jpcn: {
+    label: '일본·중국 2순위', title: '사키 · 33세 · 오사카', desc: '서울 대신 덜 붐비는 도시에서 눈 성형 상담을 원함 · 일본어 미지원이라 영어로 이용',
+    stages: ALL6, mood: [0, 1, -1, -1, 0, 1],
+    does: ['서울 외 대안 도시 검색', '성형외과 위치·종류 확인', '시술 정보·가격 범위 보기', '상담 문의, 체류 확인', '상담·시술', '개인 기록'],
+    touch: [[['검색 유입', P]], [['지도 성형외과 필터', D], ['병원 목록', D]], [['성형 시술 카드·사진', D]], [['연락처 링크', D], ['챗봇 데모', D]], [], [['방문 기록', D]]],
+    pain: ['대구를 모름', '일본어 화면 없음', '성형 가격 정보 거의 없음', '상담 결과 비교 어려움', '', ''],
+    opp: [[['"대구에서 받는 이유" 공공 정보', P]], [['일본어 추가', P]], [['병원 고지가 수집 (5곳 이상만)', P]], [['문의 체크리스트', P]], [], [['전후 사진 공유', S]]],
+  },
+  checkup: {
+    label: '검진·내과 2단계', title: '투이 · 46세 · 하노이 (딸 22세 동행)', desc: '아버지 건강검진·내시경을 위해 가족이 함께 준비 · 베트남어',
+    stages: ALL6, mood: [-1, 1, -1, -2, 0, 1],
+    does: ['지인 소개·국제센터 정보', '내과·검진 병원 찾기', '검사 항목·비용 가늠', '예약 요청, 비자·서류 확인', '보호자 동행 방문', '결과 기록'],
+    touch: [[], [['지도 내과 필터', D], ['베트남어 화면', D]], [['내과 시술 카드', D], ['응급실·주차 정보', D]], [['연락처', D], ['체크리스트', D]], [['길찾기', D]], [['방문 기록', D]]],
+    pain: ['정보가 흩어져 있음', '종합병원 내과가 빠짐', '검진 비용 안내 없음', '비자·서류가 복잡', '', '가족과 공유 불가'],
+    opp: [[['공공 안내 채널 (위탁)', P]], [['진료과목 코드로 교체', P]], [['비급여 통계 반영', P]], [['비자 안내 링크', P], ['예약 요청서', P]], [], [['검사 결과 해석', S]]],
+  },
+  resident: {
+    label: '거주 외국인', title: '마이클 · 27세 · 대구 거주 영어 강사', desc: '감기·피부 트러블로 가까운 병원을 찾음 · 영어 · 법상 외국인환자가 아닐 수 있음',
+    stages: ['탐색', '결정', '방문 후'], mood: [1, 0, 1],
+    does: ['집 근처 지금 진료 중인 병원', '전화로 확인', '기록'],
+    touch: [[['지도', D], ['구군 필터', D], ['진료시간', D]], [['전화 링크', D]], [['방문 기록', D]]],
+    pain: ['"지금 진료 중" 필터 없음', '전화가 한국어', ''],
+    opp: [[['요일·시간 필터', P]], [['챗봇 기본 표현 안내', P]], [['예약 요청 기능은 열지 않음 검토', S]]],
+  },
+  hospital: {
+    label: '병원 국제팀', title: '박 실장 · 대구 피부과 의원 코디네이터', desc: '외국인 문의를 메신저로 받아 응대가 밀림 · B2B 계획 단계',
+    stages: ['인지', '가입', '운영', '분석'], mood: [0, 0, 1, 1],
+    does: ['대구시·진흥원 안내로 알게 됨', '병원 계정 등록', '요청서 확인, 일정 확정', '우리 병원 요청 현황'],
+    touch: [[['공공 위탁 채널', P]], [['병원 웹', P]], [['요청서 수신·캘린더', P]], [['병원별 통계', P]]],
+    pain: ['', '', '다국어 응대 부담', ''],
+    opp: [[['등록 유치의료기관만 참여', P]], [['고정 이용료', P], ['건당 수수료', S]], [['원문 병기 번역', P], ['답장은 직원 승인 후', P]], [['자기 병원 데이터만 조회', P]]],
+  },
+};
+const ORDER = ['taiwan', 'jpcn', 'checkup', 'resident', 'hospital'];
+
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const chips = (items) => {
+  const box = el('div', 'touch');
+  if (!items.length) { box.append(el('span', null, '—')); return box; }
+  for (const [t, s] of items) { const row = el('span', 'item'); row.append(el('span', null, t), el('span', 'chip ' + s, STATUS[s])); box.append(row); }
+  return box;
+};
+
+function curve(mood) {
+  const n = mood.length, w = 1000, h = 96, pad = 28, y = (m) => h / 2 - m * 18;
+  const x = (i) => (w / n) * (i + 0.5);
+  const pts = mood.map((m, i) => `${x(i).toFixed(1)},${y(m).toFixed(1)}`).join(' ');
+  const words = { 2: '매우 좋음', 1: '기대', 0: '보통', '-1': '불안', '-2': '막막' };
+  let s = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="단계별 감정 변화">`;
+  s += `<line x1="0" x2="${w}" y1="${h / 2}" y2="${h / 2}" stroke="var(--line)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
+  s += `<polyline points="${pts}" fill="none" stroke="var(--curve)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
+  s += '</svg>';
+  const wrap = el('div', 'curve-cell');
+  wrap.innerHTML = s;
+  const labels = el('div');
+  labels.style.cssText = `display:grid;grid-template-columns:repeat(${n},1fr);font-size:0.78rem;color:var(--muted);text-align:center;margin-top:-4px`;
+  mood.forEach((m) => labels.append(el('span', null, words[m])));
+  wrap.append(labels);
+  return wrap;
+}
+
+function renderJourney(id) {
+  const j = JOURNEYS[id];
+  const box = document.getElementById('journey');
+  box.replaceChildren();
+  const head = el('div', 'persona');
+  const left = el('div');
+  left.append(el('h3', null, j.title), el('p', null, j.desc));
+  head.append(left, el('span', 'chip ref', '가정 페르소나'));
+  const scroller = el('div', 'scroller');
+  const grid = el('div', 'grid');
+  grid.style.gridTemplateColumns = `110px repeat(${j.stages.length}, minmax(130px, 1fr))`;
+  grid.append(el('div', 'rowlabel', '단계'));
+  j.stages.forEach((s) => grid.append(el('div', 'stage', s)));
+  const row = (label, cells) => { grid.append(el('div', 'rowlabel', label)); cells.forEach((c) => grid.append(c)); };
+  row('하는 일', j.does.map((t) => el('div', null, t || '—')));
+  row('접점 (우리 기능)', j.touch.map((t) => { const d = el('div'); d.append(chips(t)); return d; }));
+  grid.append(el('div', 'rowlabel', '감정'));
+  grid.append(curve(j.mood));
+  row('불편', j.pain.map((t) => el('div', 'pain', t || '—')));
+  row('기회', j.opp.map((t) => { const d = el('div', 'opp'); d.append(chips(t)); return d; }));
+  scroller.append(grid);
+  box.append(head, scroller);
+  box.setAttribute('aria-labelledby', 'tab-' + id);
+  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.id === id)));
+  document.querySelectorAll('.seg[data-id]').forEach((s) => s.setAttribute('aria-pressed', String(s.dataset.id === id)));
+}
+
+function select(id) {
+  renderJourney(id);
+  try { history.replaceState(null, '', '#' + id); } catch (e) {}
+}
+
+function renderSegments() {
+  for (const key of ['b2c', 'b2b']) {
+    const host = document.getElementById('seg-' + key);
+    for (const s of SEGMENTS[key]) {
+      const card = el(s.id ? 'button' : 'div', 'seg' + (s.id ? '' : ' static'));
+      if (s.id) { card.type = 'button'; card.dataset.id = s.id; card.setAttribute('aria-pressed', 'false'); card.addEventListener('click', () => { select(s.id); document.getElementById('jr-title').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }); }
+      const need = el('p', 'need'); need.append(el('b', null, '니즈 '), document.createTextNode(s.need));
+      card.append(el('span', 'rank', s.rank), el('h3', null, s.name), el('p', 'why', s.why), need);
+      host.append(card);
+    }
+  }
+  const tabs = document.getElementById('tabs');
+  for (const id of ORDER) {
+    const t = el('button', 'tab', JOURNEYS[id].label);
+    t.type = 'button'; t.id = 'tab-' + id; t.dataset.id = id; t.setAttribute('role', 'tab');
+    t.addEventListener('click', () => select(id));
+    tabs.append(t);
+  }
+}
+
+renderSegments();
+const start = ORDER.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'taiwan';
+renderJourney(start);
+</script>
