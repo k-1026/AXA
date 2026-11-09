@@ -14,7 +14,7 @@ const base = {
 /** 메디 챗봇 얼굴 (말풍선 + 눈 두 개) */
 // 챗봇 캐릭터 (별 모양). 장식이라 alt는 비워 둔다
 export function BotIcon() {
-  return <img className="chat-bot-icon" src="/chatbot/medi-star.webp" alt="" />;
+  return <img className="chat-bot-icon" src="/chatbot/medi-star-doctor.webp" alt="" />;
 }
 
 const icon = (d: string | string[]) =>
