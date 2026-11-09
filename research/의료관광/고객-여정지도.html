@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
-/* 레이아웃: 위에서 고객 지도(이용자 4 · 운영 3) → 고객을 고르면 아래에 단계별 여정 격자 + 감정 곡선 */
+/* 레이아웃: 요약 → 고객층 A~F → 여정지도(이용자 A · 구매자 D) → 결정적 순간 → 페인 포인트 분석 → 확인할 것 */
 :root {
   --bg: #f4f6f9;
   --surface: #ffffff;
@@ -16,11 +16,12 @@
   --accent-soft: #e4edfd;
   --done: #15803d;
   --done-soft: #e3f4e8;
+  --part: #7c3aed;
+  --part-soft: #efe7fd;
   --plan: #b45309;
   --plan-soft: #fdf0dc;
   --stop: #b42318;
   --stop-soft: #fde7e5;
-  --curve: #1f6feb;
   --font-display: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   --font-body: 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
 }
@@ -28,81 +29,105 @@
   :root:not([data-theme="light"]) {
     --bg: #0f151c; --surface: #17202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
     --accent: #6ea3ff; --accent-soft: #1c2c45; --done: #5fd08a; --done-soft: #16301f;
-    --plan: #f0b35a; --plan-soft: #352812; --stop: #ff8a7d; --stop-soft: #3a1c19; --curve: #6ea3ff;
+    --part: #b79cff; --part-soft: #2a2140; --plan: #f0b35a; --plan-soft: #352812; --stop: #ff8a7d; --stop-soft: #3a1c19;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f151c; --surface: #17202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
   --accent: #6ea3ff; --accent-soft: #1c2c45; --done: #5fd08a; --done-soft: #16301f;
-  --plan: #f0b35a; --plan-soft: #352812; --stop: #ff8a7d; --stop-soft: #3a1c19; --curve: #6ea3ff;
+  --part: #b79cff; --part-soft: #2a2140; --plan: #f0b35a; --plan-soft: #352812; --stop: #ff8a7d; --stop-soft: #3a1c19;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; word-break: keep-all; }
-.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 36px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 40px; }
 h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
 h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 700; letter-spacing: -0.01em; }
 h2 { font-size: 1.3rem; font-weight: 700; }
 h3 { font-size: 1.05rem; font-weight: 600; }
 p { margin: 0; }
+code { font-size: 0.85em; }
 .eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
-.lead { max-width: 64ch; color: var(--muted); margin-top: 10px; }
+.lead { max-width: 66ch; color: var(--muted); margin-top: 10px; }
+.summary { margin-top: 18px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 24px; }
+.summary .k { font-size: 0.78rem; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; }
+.summary p { font-size: 0.92rem; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 0.85rem; color: var(--muted); }
-.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
-.chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+.chip { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
 .chip.done { background: var(--done-soft); color: var(--done); }
+.chip.part { background: var(--part-soft); color: var(--part); }
 .chip.plan { background: var(--plan-soft); color: var(--plan); }
 .chip.stop { background: var(--stop-soft); color: var(--stop); }
 .chip.ref { background: var(--accent-soft); color: var(--accent); }
+.chip.high { background: var(--stop-soft); color: var(--stop); }
+.chip.mid { background: var(--plan-soft); color: var(--plan); }
 
 .section-head { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-.section-head p { color: var(--muted); font-size: 0.9rem; }
+.section-head p { color: var(--muted); font-size: 0.9rem; max-width: 76ch; }
 .group-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; margin: 18px 0 10px; }
 
-.seg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
-.seg { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-align: left; font: inherit; color: inherit; cursor: pointer; transition: border-color .15s; }
-.seg:hover { border-color: var(--accent); }
+.seg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.seg { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-align: left; font: inherit; color: inherit; }
+button.seg { cursor: pointer; transition: border-color .15s; }
+button.seg:hover { border-color: var(--accent); }
 .seg:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .seg[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.seg .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .seg .rank { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; color: var(--accent); }
 .seg .why { font-size: 0.85rem; color: var(--muted); }
-.seg .need { font-size: 0.88rem; }
+.seg .need { font-size: 0.86rem; }
 .seg .need b { font-weight: 700; }
-.seg.static { cursor: default; }
-.seg.static:hover { border-color: var(--line); }
+.excluded { margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
 
 .journey { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 18px; }
-.persona { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
-.persona p { color: var(--muted); font-size: 0.9rem; max-width: 70ch; }
-.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.persona { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 20px; }
+.persona div { min-width: 0; }
+.persona .k { font-size: 0.75rem; font-weight: 700; color: var(--muted); }
+.persona p { font-size: 0.88rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .tab { padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-size: 0.85rem; cursor: pointer; }
 .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
 
 .scroller { overflow-x: auto; }
-.grid { display: grid; min-width: 860px; border-top: 1px solid var(--line); }
-.grid > div { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 0.86rem; min-width: 0; }
+.grid { display: grid; min-width: 900px; border-top: 1px solid var(--line); }
+.grid > div { padding: 9px 11px; border-bottom: 1px solid var(--line); font-size: 0.85rem; min-width: 0; }
 .rowlabel { font-family: var(--font-display); font-weight: 600; color: var(--muted); font-size: 0.8rem !important; }
-.stage { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem !important; background: var(--accent-soft); color: var(--accent); }
-.touch { display: flex; flex-direction: column; gap: 5px; }
-.touch span.item { display: flex; flex-wrap: wrap; gap: 4px; align-items: baseline; }
+.stage { font-family: var(--font-display); font-weight: 700; font-size: 0.92rem !important; background: var(--accent-soft); color: var(--accent); }
 .pain { color: var(--stop); }
-.opp { color: var(--ink); }
-.curve-cell { grid-column: 2 / -1; padding: 4px 0 !important; }
-.curve-cell svg { display: block; width: 100%; height: 96px; }
-.curve-cell text { font-size: 11px; fill: var(--muted); font-family: var(--font-body); }
+.dont { color: var(--stop); }
+.thought { font-style: italic; color: var(--muted); }
+.status { display: flex; flex-wrap: wrap; gap: 4px; }
+.curve-cell { padding: 4px 0 !important; }
+.curve-cell svg { display: block; width: 100%; height: 84px; }
+.mood-row { display: grid; font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: -2px; }
 
-.common { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-.common article { padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; gap: 6px; }
-.common .k { font-size: 0.78rem; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; }
-.common p { font-size: 0.88rem; }
-.common .next { color: var(--muted); }
+.moments { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.moments article { padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; gap: 6px; }
+.moments .k { font-size: 0.78rem; font-weight: 700; color: var(--stop); letter-spacing: 0.04em; }
+.moments p { font-size: 0.88rem; }
+.moments .next { color: var(--muted); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+table.pp { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 0.85rem; }
+table.pp th, table.pp td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.pp th { font-family: var(--font-display); font-size: 0.78rem; color: var(--muted); font-weight: 600; background: var(--bg); position: sticky; top: 0; }
+table.pp tr:last-child td { border-bottom: 0; }
+table.pp td.num { font-variant-numeric: tabular-nums; }
+.basis-fact { color: var(--ink); }
+.basis-guess { color: var(--muted); }
+
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.checks article { padding: 14px 16px; border: 1px dashed var(--line); border-radius: 12px; display: flex; flex-direction: column; gap: 4px; }
+.checks p { font-size: 0.86rem; color: var(--muted); }
 
 .notes { font-size: 0.82rem; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
 .notes ul { margin: 0; padding-left: 18px; }
 .src { overflow-x: auto; }
-.src table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 0.8rem; }
+.src table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.8rem; }
 .src th, .src td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .src th { color: var(--muted); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -112,61 +137,94 @@ p { margin: 0; }
   <header>
     <p class="eyebrow">AXA · 대구 의료관광 · MediDaegu</p>
     <h1>MediDaegu 고객 여정지도</h1>
-    <p class="lead">대구 병원을 자기 언어로 찾고 가격·진료시간까지 확인하는 서비스의 고객을 우선순위로 정리하고, 고객마다 인지부터 방문 후까지의 경험을 지금 만든 기능과 맞춰 봤어요. 고객 카드를 누르면 아래 여정지도가 바뀌어요.</p>
-    <div class="meta"><span>작성 2026-11-09</span><span>기준: <code>frontend</code> 브랜치 구현</span><span>페르소나는 설명용 가정</span></div>
-    <div class="legend" aria-label="기능 표시">
-      <span class="chip done">구현됨</span><span class="chip plan">계획</span><span class="chip stop">규제로 안 함</span>
+    <p class="lead">팀 문서 「고객층 · 고객 여정 지도」(research/11.09)를 기준으로 고객층, 여정, 결정적 순간을 정리하고, 불편을 근거·심각도와 함께 묶은 페인 포인트 분석을 더했어요.</p>
+    <div class="summary">
+      <div><p class="k">핵심</p><p>쓰는 사람(외국인 환자)과 돈 내는 사람(병원)이 달라요. 정보 웹은 무료, 수익은 병원 구독료와 관광 광고예요.</p></div>
+      <div><p class="k">1순위 이용자</p><p>대만에서 피부·성형 시술을 받으러 짧게 오는 방문객</p></div>
+      <div><p class="k">1순위 구매자</p><p>외국인환자 유치 등록 의원의 국제 코디네이터</p></div>
     </div>
+    <div class="meta"><span>작성 2026-11-09</span><span>페르소나·감정은 가정 (인터뷰로 확인 필요)</span></div>
+    <div class="legend" aria-label="지금 상태 표시"><span class="chip done">구현</span><span class="chip part">일부</span><span class="chip plan">계획</span><span class="chip stop">하면 안 됨</span></div>
   </header>
 
   <section aria-labelledby="seg-title">
     <div class="section-head">
-      <h2 id="seg-title">우리 고객</h2>
-      <p>숫자는 한국보건산업진흥원 2025년 외국인환자 통계 보고서(팀 정리본) 기준이에요.</p>
+      <h2 id="seg-title">고객층</h2>
+      <p>숫자는 한국보건산업진흥원 2025년 외국인환자 통계 보고서(팀 정리본) 등 팀 노트 기준이에요. A와 D를 누르면 아래 여정지도로 이동해요.</p>
     </div>
-    <p class="group-label">이용자 (B2C)</p>
-    <div class="seg-grid" id="seg-b2c"></div>
-    <p class="group-label">운영·수익 (B2B)</p>
-    <div class="seg-grid" id="seg-b2b"></div>
+    <p class="group-label">이용자 (무료)</p>
+    <div class="seg-grid" id="seg-user"></div>
+    <p class="group-label">구매자 · 광고주</p>
+    <div class="seg-grid" id="seg-buyer"></div>
+    <p class="excluded"><b>제외</b> 미국 환자는 대구 1위 국적(6,101명)이지만 거주자일 가능성이 높아 유입 타깃에서 뺐어요 (추정). 치과는 대구 2023년 967명에서 2025년 629명으로 줄었어요.</p>
   </section>
 
   <section aria-labelledby="jr-title">
     <div class="section-head">
-      <h2 id="jr-title">고객별 여정지도</h2>
-      <p>우리는 예약 전까지 스스로 알아보는 단계를 맡고, 예약 확정과 진료는 병원이 해요.</p>
+      <h2 id="jr-title">고객 여정지도</h2>
+      <p>이용자 A는 정보를 찾고 병원 1곳에 요청하기까지, 구매자 D는 외국어 문의를 받아 정산하기까지의 여정이에요.</p>
     </div>
-    <div class="tabs" role="tablist" id="tabs" aria-label="고객 선택"></div>
+    <div class="tabs" role="tablist" id="tabs" aria-label="여정 선택"></div>
     <div class="journey" id="journey" role="tabpanel"></div>
   </section>
 
-  <section aria-labelledby="common-title">
+  <section aria-labelledby="mt-title">
     <div class="section-head">
-      <h2 id="common-title">여정에서 공통으로 보이는 것</h2>
-      <p>모든 고객의 여정에서 반복된 불편과 다음 할 일이에요.</p>
+      <h2 id="mt-title">결정적 순간</h2>
+      <p>이용자 A의 여정에서 이탈이 일어날 것으로 보는 두 지점이에요 (가정).</p>
     </div>
-    <div class="common">
-      <article><p class="k">비교·결정</p><h3>가격 정보가 가장 부족</h3><p>가격 범위가 있는 시술은 66개 중 6개이고, 그것도 프로토타입용 임시 값이에요.</p><p class="next">다음: 공공 비급여 통계처럼 근거 있는 범위만 반영</p></article>
-      <article><p class="k">문의·준비</p><h3>결국 한국어로 연락</h3><p>병원 연락처와 챗봇 데모는 있지만, 문의는 고객이 직접 해야 해요.</p><p class="next">다음: 예약 요청서 (고른 병원 1곳, 확정은 병원)</p></article>
-      <article><p class="k">신뢰</p><h3>어느 병원을 믿을지</h3><p>폐업 교차검증으로 정상 영업 병원만 보여 주고 있어요.</p><p class="next">다음: 유치기관 등록·인증 사실 표시</p></article>
-      <article><p class="k">언어</p><h3>일본어와 주소</h3><p>화면은 5개 언어지만 2순위 시장인 일본어가 없고, 병원 주소는 한국어 원문이에요.</p><p class="next">다음: 일본어 추가 검토, 주소 영어 표기</p></article>
+    <div class="moments">
+      <article><p class="k">② 비교·결정 · 감정이 가장 낮음</p><h3>근거가 부족하면 여기서 떠나요</h3><p>진료시간은 26.1%만 채워졌고, 피부·성형 공공 가격은 의원급 0곳이에요.</p><p class="next">해결: 진료시간·가격 빈칸 채우기가 최우선</p></article>
+      <article><p class="k">③ 요청 후 기다림</p><h3>병원 답이 늦으면 다른 곳으로 가요</h3><p>언어 장벽과 응답 지연으로 다른 지역·플랫폼으로 옮길 수 있어요.</p><p class="next">해결: 병원 쪽 도구(D)로 응답 속도를 높이기</p></article>
+    </div>
+  </section>
+
+  <section aria-labelledby="pp-title">
+    <div class="section-head">
+      <h2 id="pp-title">페인 포인트 분석</h2>
+      <p>두 여정의 불편을 한곳에 모았어요. 근거가 숫자·서식으로 확인된 것과 가정인 것을 나눴고, 심각도는 결정적 순간에 걸리는지로 판단했어요 (판단).</p>
+    </div>
+    <div class="filters" role="group" aria-label="고객 필터">
+      <button type="button" class="tab" data-pp="all" aria-selected="true">전체</button>
+      <button type="button" class="tab" data-pp="A" aria-selected="false">이용자 A</button>
+      <button type="button" class="tab" data-pp="D" aria-selected="false">구매자 D</button>
+    </div>
+    <div class="table-wrap">
+      <table class="pp">
+        <thead><tr><th>고객</th><th>단계</th><th>불편</th><th>근거</th><th>심각도</th><th>우리 대응</th><th>지금 상태</th></tr></thead>
+        <tbody id="pp-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="ck-title">
+    <div class="section-head"><h2 id="ck-title">다음에 확인할 것</h2></div>
+    <div class="checks">
+      <article><h3>페르소나·감정 검증</h3><p>대구 체류 대만·베트남인 2~3명, 피부과 코디네이터 1~2명 인터뷰</p></article>
+      <article><h3>단계별 이탈 지점</h3><p>데모에서 단계별 클릭 기록 (② → ③ 넘어가는 비율)</p></article>
+      <article><h3>베트남 환자 성격</h3><p>거주자인지 방문자인지: 보고서 상세 표, 법무부 체류 통계 (미확인)</p></article>
+      <article><h3>대구공항 직항</h3><p>대만·일본 직항: 한국공항공사·항공사 발표 (미확인)</p></article>
     </div>
   </section>
 
   <footer class="notes">
     <p><b>한계</b></p>
     <ul>
-      <li>페르소나는 실제 사용자 조사가 아니라 통계에 맞춘 가정이에요.</li>
-      <li>숫자는 팀 정리본에서 옮겼고 보고서 원문은 다시 확인하지 않았어요.</li>
-      <li>감정 곡선은 불편 정도를 보여 주려는 설명용 표시예요.</li>
+      <li>페르소나, 생각, 감정은 가정이에요. 감정 곡선도 설명용 표시예요.</li>
+      <li>숫자는 팀 노트에서 옮겼고 보고서 원문은 다시 확인하지 않았어요.</li>
+      <li>"지금 상태"는 2026-11-09 frontend 브랜치 기준이에요.</li>
     </ul>
     <p><b>출처</b></p>
     <div class="src">
       <table>
         <thead><tr><th>이름</th><th>위치</th><th>등급</th><th>기준 시점</th><th>확인일</th></tr></thead>
         <tbody>
-          <tr><td>한국보건산업진흥원 「2025년 외국인환자 유치실적 통계분석 보고서」 표 2.11·2.12·3.8·3.14·3.17·3.23·3.41·3.54·3.74</td><td>팀 정리본 data/raw/다국어/타깃_국가_분야_분석.md</td><td>통계</td><td>2025년 실적</td><td>2026-11-09</td></tr>
-          <tr><td>서비스 흐름 법률검토 · 수익 모델 선택지 · 웹사이트 법적 점검</td><td>research/의료관광/</td><td>내부</td><td>2026-10-29 ~ 11-05</td><td>2026-11-09</td></tr>
-          <tr><td>현재 구현</td><td>apps/web-platform (frontend 브랜치)</td><td>내부</td><td>2026-11-09</td><td>2026-11-09</td></tr>
+          <tr><td>기준 문서 「고객층 · 고객 여정 지도」</td><td>research/11.09/고객층-고객여정지도.md</td><td>내부</td><td>2026-11-09</td><td>2026-11-09</td></tr>
+          <tr><td>한국보건산업진흥원 「2025년 외국인환자 유치실적 통계분석 보고서」</td><td>팀 정리본 data/raw/다국어/타깃_국가_분야_분석.md · https://www.khidi.or.kr/board?menuId=MENU00093</td><td>통계</td><td>2025</td><td>2026-11-09</td></tr>
+          <tr><td>대구 국적별 성장률 (대만 +500.4%)</td><td>research/의료관광/상위-데이터-확장-조사.md</td><td>통계</td><td>2025</td><td>2026-11-09</td></tr>
+          <tr><td>메디컬코리아 대구 등록 145곳·상세 13곳</td><td>research/의료관광/메디컬코리아-대구-비교.md</td><td>공식</td><td>2026-10</td><td>2026-11-09</td></tr>
+          <tr><td>진료시간 채움 비율, 공공 가격 의원급 0곳, 수성구 유치 등록 47곳</td><td>subject/subject.md</td><td>공식 (심평원 API·수성구 파일데이터)</td><td>2026-10-28</td><td>2026-11-09</td></tr>
+          <tr><td>KHIDI 「2025 외국인환자 다국어 서식집」 서식 25종</td><td>research/의료관광/서식집-병원업무-AI자동화.md</td><td>공식</td><td>2025</td><td>2026-11-04</td></tr>
         </tbody>
       </table>
     </div>
@@ -174,145 +232,154 @@ p { margin: 0; }
 </div>
 
 <script>
-const D = 'done', P = 'plan', S = 'stop';
-const STATUS = { done: '구현됨', plan: '계획', stop: '안 함' };
-const SEGMENTS = {
-  b2c: [
-    { id: 'taiwan', rank: '1순위', name: '대만 피부·안과 단기 의료관광객', why: '전국 +122.5%, 대구가 전국 3위 지역(1,495명), 피부과 비중 80.3%, 대구 입원 비율 0.3%', need: '짧은 일정에 믿을 만한 병원을 내 언어로 빨리 찾기' },
-    { id: 'jpcn', rank: '2순위', name: '일본·중국 피부·성형 관광객', why: '각 약 60만 명 시장, 대구 점유율 0.16%·0.55%, 일본 성형 비중 16.3%', need: '서울 대신 대구를 고를 이유' },
-    { id: 'checkup', rank: '2단계', name: '베트남·몽골·중앙아시아 검진·내과 환자와 보호자', why: '대구 베트남 환자 점유율 9.62%, 몽골·중앙아는 내과·검진 비중 큼', need: '큰 병원 진료과·검사 정보, 가족이 함께 준비' },
-    { id: 'resident', rank: '참고', name: '대구 거주 외국인', why: '대구 1위 국적 미국(6,101명), 입원 비율 12.9%로 거주자 가능성 (추정)', need: '가까운 병원과 진료시간, 전화' },
+const ST = { done: '구현', part: '일부', plan: '계획', stop: '하면 안 됨' };
+const SEG = {
+  user: [
+    { id: 'A', rank: '1순위', name: 'A. 미용의료 단기 방문객', sub: '대만 → 중국·일본', why: '대구 대만 환자 1,495명 (전국 지역 중 3위) · 대구 입원 비율 0.3% · 전국 대만 환자 피부과 80.3% · 대구 대만 환자 2025년 +500.4%', need: '믿을 병원, 가격 범위, 진료시간, 자기 언어, 짧은 일정' },
+    { rank: '2순위', name: 'B. 대구 거주 외국인', sub: '베트남 등', why: '베트남 2,225명, 대구 점유율 9.62% (전국 평균의 10배) · 미국 6,101명, 입원 12.9% (거주자 추정)', need: '가까운 병원, 진료시간·휴진, 자기 언어' },
+    { rank: '2단계', name: 'C. 치료·검진 목적 환자', sub: '몽골·중앙아시아 등', why: '대구 상급종합병원 외국인 환자 3,533명, 전국 3위 (점유율 5.8%) · 유치업체·병원 국제센터가 대신 결정', need: '국제진료센터, 통역, 비자' },
   ],
-  b2b: [
-    { id: 'hospital', rank: '계획', name: '병원 국제팀 (등록 유치의료기관)', why: '환자가 고른 1곳으로 오는 예약 요청서, 다국어 응대 도구', need: '고정 이용료, 건당 수수료 없음' },
-    { id: null, rank: '수익 모델', name: '대구시·구청·진흥원', why: '외국인 대상 공공 의료관광 안내 채널 (공공 위탁)', need: '발표용 수익 그림' },
-    { id: null, rank: '광고 칸', name: '관광·지역 업체', why: '의료와 무관한 관광 홍보 자리', need: '병원 광고는 받지 않음' },
+  buyer: [
+    { id: 'D', rank: '1순위 구매자', name: 'D. 등록 유치의료기관', sub: '의원급 피부·성형 코디네이터', why: '메디컬코리아 대구 등록 145곳 중 상세 정보 13곳 · 수성구 유치 등록 47곳 · 외국인환자 서식 25종, 환자정보 칸 15개 서식에 반복', need: '다국어 문의 처리, 예약 관리, 반복 서식 줄이기 (구독)' },
+    { rank: '검토', name: 'E. 외국인환자 유치사업자', sub: '서식·정산 도구', why: '매월 정산·수수료 청구 (서식 3-2·3-3) · 환자당 수수료로 받으면 유치업 등록 필요', need: '상담·의뢰·정산 서식 (건당 수수료 X)' },
+    { rank: '보조', name: 'F. 대구 관광 사업자', sub: '관광·숙박·교통·문화', why: '메인 광고 칸 2개 운영 중', need: '대구를 찾는 외국인에게 노출 (병원·시술 광고 불가)' },
   ],
 };
-const ALL6 = ['인지', '탐색', '비교·결정', '문의·준비', '방문', '방문 후'];
-const JOURNEYS = {
-  taiwan: {
-    label: '대만 1순위', title: '린 · 29세 · 타이베이 회사원', desc: '3박 4일 대구 여행 중 피부 레이저 시술과 라식 상담을 함께 알아봄 · 중국어(번체)',
-    stages: ALL6, mood: [0, 1, -1, -1, 0, 1],
-    does: ['SNS·여행 커뮤니티에서 대구 피부과 검색', '숙소 근처 피부과·안과 찾기', '가격 범위·진료시간 확인, 찜하기', '병원에 연락, 일정 정리', '길 찾아 방문', '경험을 나만 보게 기록'],
-    touch: [[['검색 유입', P], ['대구 관광 광고 칸', D]], [['지도 진료과 색 필터', D], ['병원 이름 검색', D], ['번체 화면', D]], [['가격 가이드', D], ['대만 달러 참고 환산', D], ['진료시간', D], ['찜', D]], [['전화·홈페이지·인스타 링크', D], ['챗봇 FAQ 데모', D], ['방문 준비 체크리스트', D]], [['길찾기 링크', D]], [['방문 기록 (비공개)', D]]],
-    pain: ['서울 정보만 많음', '병원 이름이 낯섦', '가격 대부분 "확인 중"', '병원 응답이 한국어', '주소가 한국어 원문', '기록이 이 브라우저에만'],
-    opp: [[['번체 검색 노출', P]], [['영어 병원 이름', D], ['대표사진 (임시)', D]], [['공공 고지가 기반 범위', P]], [['예약 요청서', P]], [['주소 영어 표기', P]], [['계정 저장', P], ['공개 후기·사후 의료 안내', S]]],
+
+const J = {
+  A: {
+    label: '이용자 A · 대만 미용의료 방문객',
+    persona: [['이름 (가상)', '린 (Lin)'], ['프로필', '29세 타이베이 직장인, 3박 4일 대구 여행에 피부 시술 1회'], ['언어', '중국어 번체, 영어 조금'], ['목표', '짧은 일정 안에 믿을 만한 곳에서 시술받고 관광'], ['걱정', '바가지·부작용, 말이 안 통함, 일요일 휴진']],
+    stages: ['① 알아보기', '② 비교·결정', '③ 문의·예약 요청', '④ 출발 준비', '⑤ 방문·진료', '⑥ 귀국·사후'],
+    rows: [
+      ['시점', ['출국 4~2주 전 (가정)', '출국 2주 전', '출국 1~2주 전', '출국 직전', '대구 체류 중', '귀국 후']],
+      ['목표', ['대구에 괜찮은 피부과가 있는지', '병원 1곳 고르기', '날짜 잡기', '빠뜨린 것 없이 출발', '시술 잘 받기', '회복·기록']],
+      ['행동', ['SNS·검색, 언어 선택', '지도·필터, 병원 상세, 가격 범위, 진료시간, 찜', '챗봇 질문, 요청서 작성, 동의', '일정 정리, 체크리스트', '길찾기, 접수, 동의서 서명', '방문 기록, 불만 시 상담처 찾기']],
+      ['터치포인트', ['검색·SNS → 메인 지도', '병원 정보, 가격 가이드, 저장한 병원', '챗봇, 예약 요청서, 회원가입', '마이페이지 일정·체크리스트', '병원, 통역, 길찾기', '방문 기록, 분쟁 안내']],
+      ['생각 (가정)', ['"대구도 괜찮을까? 정보가 다 한국어네"', '"이 가격 적정한가? 일요일에도 하나?"', '"답이 언제 오지? 뭘 적어야 하지?"', '"여권, 결제, 통역 다 됐나?"', '"동의서 내용을 이해할 수 있을까"', '"문제 생기면 어디에 물어보지"'], 'thought'],
+      ['MOOD'],
+      ['불편 (근거)', ['메디컬코리아 대구 145곳 중 상세 정보 13곳, 진료시간·가격 없음', '진료시간 채움 26.1% (피부 21.4%, 성형 14.1%) · 피부·성형 공공 가격 없음 (의원급 0곳)', '언어 장벽, 응답 지연 (가정)', '서류·비용·통역 확인할 곳이 흩어짐 (가정)', '동의서마다 통역 확인 필요 (서식 8종)', '사후 질문 창구 없음 (MVP 제외)'], 'pain'],
+      ['우리 기회', ['번체 UI, 공공정보 지도, "광고·추천 아님" 고지', '출처·확인일 붙은 진료시간, 지역 가격 범위 (병원별 비교 X), 찜', '출처 기반 챗봇, 빠진 정보 알려주는 입력 도우미, 병원 1곳에 직접 요청', '일정·7개 체크리스트, 예상 진료비 서면 요청 권리 안내', '길찾기, 응급 119 안내', '방문 기록, 분쟁 안내 (메디컬코리아 1577-7129)']],
+      ['STATUS', [[['5개 언어·지도', 'done']], [['가격 가이드 66개·찜', 'done'], ['진료시간 일부', 'part']], [['챗봇 데모·회원가입', 'part'], ['요청서', 'plan']], [['일정·체크리스트 (예시)', 'done']], [['길찾기 링크', 'part']], [['방문 기록', 'done'], ['사후 Q&A', 'plan']]]],
+    ],
+    mood: [[0, '기대'], [-1, '불안'], [0, '기다림'], [1, '안심'], [-1, '긴장'], [0, '만족 / 불안']],
   },
-  jpcn: {
-    label: '일본·중국 2순위', title: '사키 · 33세 · 오사카', desc: '서울 대신 덜 붐비는 도시에서 눈 성형 상담을 원함 · 일본어 미지원이라 영어로 이용',
-    stages: ALL6, mood: [0, 1, -1, -1, 0, 1],
-    does: ['서울 외 대안 도시 검색', '성형외과 위치·종류 확인', '시술 정보·가격 범위 보기', '상담 문의, 체류 확인', '상담·시술', '개인 기록'],
-    touch: [[['검색 유입', P]], [['지도 성형외과 필터', D], ['병원 목록', D]], [['성형 시술 카드·사진', D]], [['연락처 링크', D], ['챗봇 데모', D]], [], [['방문 기록', D]]],
-    pain: ['대구를 모름', '일본어 화면 없음', '성형 가격 정보 거의 없음', '상담 결과 비교 어려움', '', ''],
-    opp: [[['"대구에서 받는 이유" 공공 정보', P]], [['일본어 추가', P]], [['병원 고지가 수집 (5곳 이상만)', P]], [['문의 체크리스트', P]], [], [['전후 사진 공유', S]]],
-  },
-  checkup: {
-    label: '검진·내과 2단계', title: '투이 · 46세 · 하노이 (딸 22세 동행)', desc: '아버지 건강검진·내시경을 위해 가족이 함께 준비 · 베트남어',
-    stages: ALL6, mood: [-1, 1, -1, -2, 0, 1],
-    does: ['지인 소개·국제센터 정보', '내과·검진 병원 찾기', '검사 항목·비용 가늠', '예약 요청, 비자·서류 확인', '보호자 동행 방문', '결과 기록'],
-    touch: [[], [['지도 내과 필터', D], ['베트남어 화면', D]], [['내과 시술 카드', D], ['응급실·주차 정보', D]], [['연락처', D], ['체크리스트', D]], [['길찾기', D]], [['방문 기록', D]]],
-    pain: ['정보가 흩어져 있음', '종합병원 내과가 빠짐', '검진 비용 안내 없음', '비자·서류가 복잡', '', '가족과 공유 불가'],
-    opp: [[['공공 안내 채널 (위탁)', P]], [['진료과목 코드로 교체', P]], [['비급여 통계 반영', P]], [['비자 안내 링크', P], ['예약 요청서', P]], [], [['검사 결과 해석', S]]],
-  },
-  resident: {
-    label: '거주 외국인', title: '마이클 · 27세 · 대구 거주 영어 강사', desc: '감기·피부 트러블로 가까운 병원을 찾음 · 영어 · 법상 외국인환자가 아닐 수 있음',
-    stages: ['탐색', '결정', '방문 후'], mood: [1, 0, 1],
-    does: ['집 근처 지금 진료 중인 병원', '전화로 확인', '기록'],
-    touch: [[['지도', D], ['구군 필터', D], ['진료시간', D]], [['전화 링크', D]], [['방문 기록', D]]],
-    pain: ['"지금 진료 중" 필터 없음', '전화가 한국어', ''],
-    opp: [[['요일·시간 필터', P]], [['챗봇 기본 표현 안내', P]], [['예약 요청 기능은 열지 않음 검토', S]]],
-  },
-  hospital: {
-    label: '병원 국제팀', title: '박 실장 · 대구 피부과 의원 코디네이터', desc: '외국인 문의를 메신저로 받아 응대가 밀림 · B2B 계획 단계',
-    stages: ['인지', '가입', '운영', '분석'], mood: [0, 0, 1, 1],
-    does: ['대구시·진흥원 안내로 알게 됨', '병원 계정 등록', '요청서 확인, 일정 확정', '우리 병원 요청 현황'],
-    touch: [[['공공 위탁 채널', P]], [['병원 웹', P]], [['요청서 수신·캘린더', P]], [['병원별 통계', P]]],
-    pain: ['', '', '다국어 응대 부담', ''],
-    opp: [[['등록 유치의료기관만 참여', P]], [['고정 이용료', P], ['건당 수수료', S]], [['원문 병기 번역', P], ['답장은 직원 승인 후', P]], [['자기 병원 데이터만 조회', P]]],
+  D: {
+    label: '구매자 D · 유치의료기관 코디네이터',
+    persona: [['이름 (가상)', '김 코디네이터'], ['프로필', '수성구 피부과 의원 국제진료 담당 1명'], ['언어', '한국어, 영어·중국어 일부'], ['목표', '외국어 문의를 놓치지 않고 예약으로 잇기'], ['걱정', '메신저·메일로 흩어진 문의, 번역, 같은 정보 반복 입력']],
+    stages: ['① 문의 받기', '② 내용 파악', '③ 답장·견적', '④ 예약 확정', '⑤ 내원 준비', '⑥ 진료 후·정산'],
+    rows: [
+      ['행동', ['메일·메신저·전화로 외국어 문의 수신', '번역, 희망 시술·날짜·예산 정리', '가능 시간·예상 비용 안내', '예약금·취소 규정 안내', '계약서·동의서·서비스 선택 준비', '퇴원 안내, 유치업자 정산']],
+      ['불편 (서식집 근거)', ['채널이 흩어짐 (가정)', '상담지 칸을 손으로 채움 (서식 2-1·2-2)', '견적서 USD·환율 기준일·30일 유효 (서식 1-2)', '예약금 30%, 환불 4구간 계산 (서식 2-4)', '환자정보 15번 반복, 통역 서명 8종', '매월 정산, 익월 5일·15일 기한 (서식 3-1)'], 'pain'],
+      ['우리 기회', ['요청이 캘린더에 "대기"로 모임', 'AI 요약 (국적·언어·희망 진료·날짜·비자)', '환자 언어로 답장 초안 → 직원 승인 후 발송', '확정·거절·시간 제안', '환자정보 1번 입력 → 서식 자동 채움', '(확장) 정산표·기한 알림']],
+      ['하면 안 되는 것', ['자동 확정', '의료 판단', '가격 흥정', '직원 승인 없는 발송', '설명·동의 대행 (의사·통역사 몫)', '환자 수 연동 요금'], 'dont'],
+      ['STATUS', [[['대시보드', 'plan']], [['AI 요약', 'plan']], [['답장 초안', 'plan']], [['확정·거절', 'plan']], [['서식 자동 채움', 'plan']], [['정산표', 'plan']]]],
+    ],
   },
 };
-const ORDER = ['taiwan', 'jpcn', 'checkup', 'resident', 'hospital'];
+
+const PP = [
+  ['A', '① 알아보기', '믿을 만한 정보가 없음', '메디컬코리아 대구 145곳 중 상세 정보 13곳', true, 'mid', '공공정보 지도, 폐업 확인된 병원만', [['지도', 'done']]],
+  ['A', '② 비교·결정', '진료시간을 알 수 없음', '진료시간 채움 26.1% (피부 21.4%, 성형 14.1%)', true, 'high', '출처·확인일 붙은 진료시간 빈칸 채우기', [['일부', 'part']]],
+  ['A', '② 비교·결정', '가격이 적정한지 판단 못 함', '피부·성형 공공 가격 의원급 0곳 · 우리 가격 가이드도 66개 중 6개만 범위 (임시)', true, 'high', '지역 가격 범위 (병원별 비교 X)', [['일부', 'part']]],
+  ['A', '③ 문의·예약 요청', '말이 안 통하고 답이 늦음', '가정', false, 'high', '병원 1곳에 직접 요청, 병원 쪽 도구(D)로 응답 단축', [['요청서', 'plan']]],
+  ['A', '④ 출발 준비', '서류·비용·통역 확인할 곳이 흩어짐', '가정', false, 'mid', '7개 체크리스트, 예상 진료비 서면 요청 권리 안내', [['체크리스트', 'done']]],
+  ['A', '⑤ 방문·진료', '동의서 내용을 이해하기 어려움', '통역 확인이 필요한 동의서 8종 (서식집)', true, 'mid', '설명·동의는 병원·통역사 몫, 우리는 길찾기·119 안내', [['길찾기', 'part']]],
+  ['A', '⑥ 귀국·사후', '문제가 생기면 물어볼 곳이 없음', 'MVP 제외 (사후 의료 안내는 규제상 하지 않음)', false, 'mid', '방문 기록, 분쟁 안내 (메디컬코리아)', [['방문 기록', 'done'], ['사후 Q&A', 'stop']]],
+  ['D', '① 문의 받기', '문의 채널이 흩어짐', '가정', false, 'high', '요청이 캘린더에 "대기"로 모임', [['계획', 'plan']]],
+  ['D', '② 내용 파악', '상담지 칸을 손으로 채움', '서식 2-1·2-2', true, 'mid', 'AI 요약 (국적·언어·희망 진료·날짜·비자)', [['계획', 'plan']]],
+  ['D', '③ 답장·견적', '견적에 환율 기준일·유효기간을 매번 적음', '서식 1-2 (USD, 환율 기준일, 30일 유효)', true, 'high', '환자 언어 답장 초안, 직원 승인 후 발송', [['계획', 'plan']]],
+  ['D', '④ 예약 확정', '예약금·환불 계산이 복잡', '서식 2-4 (예약금 30%, 환불 4구간)', true, 'mid', '확정·거절·시간 제안', [['계획', 'plan']]],
+  ['D', '⑤ 내원 준비', '같은 환자정보를 반복 입력', '환자정보 칸 15개 서식에 반복, 통역 서명 8종', true, 'mid', '환자정보 1번 입력 → 서식 자동 채움', [['계획', 'plan']]],
+  ['D', '⑥ 진료 후·정산', '정산 기한 관리', '서식 3-1 (매월, 익월 5일·15일)', true, 'mid', '(확장) 정산표·기한 알림', [['계획', 'plan']]],
+];
 
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-const chips = (items) => {
-  const box = el('div', 'touch');
-  if (!items.length) { box.append(el('span', null, '—')); return box; }
-  for (const [t, s] of items) { const row = el('span', 'item'); row.append(el('span', null, t), el('span', 'chip ' + s, STATUS[s])); box.append(row); }
-  return box;
-};
+const chipList = (items) => { const d = el('div', 'status'); items.forEach(([t, s]) => d.append(el('span', 'chip ' + s, t))); return d; };
 
-function curve(mood) {
-  const n = mood.length, w = 1000, h = 96, pad = 28, y = (m) => h / 2 - m * 18;
-  const x = (i) => (w / n) * (i + 0.5);
-  const pts = mood.map((m, i) => `${x(i).toFixed(1)},${y(m).toFixed(1)}`).join(' ');
-  const words = { 2: '매우 좋음', 1: '기대', 0: '보통', '-1': '불안', '-2': '막막' };
-  let s = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="단계별 감정 변화">`;
-  s += `<line x1="0" x2="${w}" y1="${h / 2}" y2="${h / 2}" stroke="var(--line)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
-  s += `<polyline points="${pts}" fill="none" stroke="var(--curve)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
-  s += '</svg>';
-  const wrap = el('div', 'curve-cell');
-  wrap.innerHTML = s;
-  const labels = el('div');
-  labels.style.cssText = `display:grid;grid-template-columns:repeat(${n},1fr);font-size:0.78rem;color:var(--muted);text-align:center;margin-top:-4px`;
-  mood.forEach((m) => labels.append(el('span', null, words[m])));
-  wrap.append(labels);
-  return wrap;
+function moodCurve(mood, n) {
+  const w = 1000, h = 84, y = (m) => h / 2 - m * 22, x = (i) => (w / n) * (i + 0.5);
+  const pts = mood.map(([m], i) => `${x(i).toFixed(1)},${y(m).toFixed(1)}`).join(' ');
+  const cell = el('div', 'curve-cell');
+  cell.style.gridColumn = '2 / -1';
+  cell.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="단계별 감정 변화 (가정)"><line x1="0" x2="${w}" y1="${h / 2}" y2="${h / 2}" stroke="var(--line)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>`;
+  const labels = el('div', 'mood-row');
+  labels.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  mood.forEach(([, w]) => labels.append(el('span', null, w)));
+  cell.append(labels);
+  return cell;
 }
 
 function renderJourney(id) {
-  const j = JOURNEYS[id];
+  const j = J[id];
   const box = document.getElementById('journey');
   box.replaceChildren();
-  const head = el('div', 'persona');
-  const left = el('div');
-  left.append(el('h3', null, j.title), el('p', null, j.desc));
-  head.append(left, el('span', 'chip ref', '가정 페르소나'));
+  const persona = el('div', 'persona');
+  j.persona.forEach(([k, v]) => { const d = el('div'); d.append(el('p', 'k', k), el('p', null, v)); persona.append(d); });
   const scroller = el('div', 'scroller');
+  const n = j.stages.length;
   const grid = el('div', 'grid');
-  grid.style.gridTemplateColumns = `110px repeat(${j.stages.length}, minmax(130px, 1fr))`;
+  grid.style.gridTemplateColumns = `118px repeat(${n}, minmax(132px, 1fr))`;
   grid.append(el('div', 'rowlabel', '단계'));
   j.stages.forEach((s) => grid.append(el('div', 'stage', s)));
-  const row = (label, cells) => { grid.append(el('div', 'rowlabel', label)); cells.forEach((c) => grid.append(c)); };
-  row('하는 일', j.does.map((t) => el('div', null, t || '—')));
-  row('접점 (우리 기능)', j.touch.map((t) => { const d = el('div'); d.append(chips(t)); return d; }));
-  grid.append(el('div', 'rowlabel', '감정'));
-  grid.append(curve(j.mood));
-  row('불편', j.pain.map((t) => el('div', 'pain', t || '—')));
-  row('기회', j.opp.map((t) => { const d = el('div', 'opp'); d.append(chips(t)); return d; }));
+  for (const [label, cells, cls] of j.rows) {
+    if (label === 'MOOD') { grid.append(el('div', 'rowlabel', '감정 (가정)')); grid.append(moodCurve(j.mood, n)); continue; }
+    if (label === 'STATUS') { grid.append(el('div', 'rowlabel', '지금 상태')); cells.forEach((c) => { const d = el('div'); d.append(chipList(c)); grid.append(d); }); continue; }
+    grid.append(el('div', 'rowlabel', label));
+    cells.forEach((t) => grid.append(el('div', cls || null, t)));
+  }
   scroller.append(grid);
-  box.append(head, scroller);
+  box.append(persona, scroller);
   box.setAttribute('aria-labelledby', 'tab-' + id);
-  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.id === id)));
+  document.querySelectorAll('#tabs .tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.id === id)));
   document.querySelectorAll('.seg[data-id]').forEach((s) => s.setAttribute('aria-pressed', String(s.dataset.id === id)));
 }
 
-function select(id) {
+function select(id, scroll) {
   renderJourney(id);
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  if (scroll) document.getElementById('jr-title').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }
 
 function renderSegments() {
-  for (const key of ['b2c', 'b2b']) {
+  for (const key of ['user', 'buyer']) {
     const host = document.getElementById('seg-' + key);
-    for (const s of SEGMENTS[key]) {
-      const card = el(s.id ? 'button' : 'div', 'seg' + (s.id ? '' : ' static'));
-      if (s.id) { card.type = 'button'; card.dataset.id = s.id; card.setAttribute('aria-pressed', 'false'); card.addEventListener('click', () => { select(s.id); document.getElementById('jr-title').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }); }
+    for (const s of SEG[key]) {
+      const card = el(s.id ? 'button' : 'div', 'seg');
+      if (s.id) { card.type = 'button'; card.dataset.id = s.id; card.setAttribute('aria-pressed', 'false'); card.addEventListener('click', () => select(s.id, true)); }
+      const top = el('div', 'top'); top.append(el('span', 'rank', s.rank)); if (s.id) top.append(el('span', 'chip ref', '여정지도 보기'));
       const need = el('p', 'need'); need.append(el('b', null, '니즈 '), document.createTextNode(s.need));
-      card.append(el('span', 'rank', s.rank), el('h3', null, s.name), el('p', 'why', s.why), need);
+      card.append(top, el('h3', null, s.name), el('p', 'why', s.sub), el('p', 'why', s.why), need);
       host.append(card);
     }
   }
   const tabs = document.getElementById('tabs');
-  for (const id of ORDER) {
-    const t = el('button', 'tab', JOURNEYS[id].label);
+  for (const id of ['A', 'D']) {
+    const t = el('button', 'tab', J[id].label);
     t.type = 'button'; t.id = 'tab-' + id; t.dataset.id = id; t.setAttribute('role', 'tab');
-    t.addEventListener('click', () => select(id));
+    t.addEventListener('click', () => select(id, false));
     tabs.append(t);
   }
 }
 
+function renderPP(filter) {
+  const body = document.getElementById('pp-body');
+  body.replaceChildren();
+  for (const [who, stage, pain, basis, fact, sev, resp, status] of PP) {
+    if (filter !== 'all' && filter !== who) continue;
+    const tr = el('tr');
+    tr.append(el('td', null, who === 'A' ? '이용자 A' : '구매자 D'), el('td', null, stage), el('td', null, pain));
+    const b = el('td', fact ? 'basis-fact' : 'basis-guess'); b.append(el('span', 'chip ' + (fact ? 'done' : 'ref'), fact ? '근거' : '가정'), document.createTextNode(' ' + basis)); tr.append(b);
+    const s = el('td'); s.append(el('span', 'chip ' + sev, sev === 'high' ? '높음' : '보통')); tr.append(s);
+    tr.append(el('td', null, resp));
+    const st = el('td'); st.append(chipList(status)); tr.append(st);
+    body.append(tr);
+  }
+  document.querySelectorAll('[data-pp]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.pp === filter)));
+}
+
+document.querySelectorAll('[data-pp]').forEach((b) => b.addEventListener('click', () => renderPP(b.dataset.pp)));
 renderSegments();
-const start = ORDER.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'taiwan';
-renderJourney(start);
+renderPP('all');
+renderJourney(location.hash.slice(1) === 'D' ? 'D' : 'A');
 </script>
