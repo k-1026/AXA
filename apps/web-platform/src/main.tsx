@@ -40,6 +40,9 @@ createRoot(document.getElementById('root')!).render(
             <Route path="legal/:slug" element={<LegalPage />} />
             {/* 챗봇도 사이트 헤더·메뉴는 그대로, 대화 목록은 챗봇 영역 안에 따로 */}
             <Route path="chatbot" element={<ChatbotPage />} />
+            {/* 아직 화면 없음. 예약은 요청서만(확정은 병원), 사후 의료 안내는 하지 않음 (docs/compliance.md) */}
+            <Route path="booking" element={<PlaceholderPage titleKey="nav.booking" />} />
+            <Route path="aftercare" element={<PlaceholderPage titleKey="nav.aftercare" />} />
           </Route>
         </Routes>
       </BrowserRouter>
