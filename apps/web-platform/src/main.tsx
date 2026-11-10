@@ -18,6 +18,8 @@ import { RequireLogin } from './features/mypage/RequireLogin';
 import { LegalPage } from './pages/LegalPage';
 import { ChatbotPage } from './pages/ChatbotPage';
 import { VisitsPage } from './pages/VisitsPage';
+import { ConsultPage } from './pages/ConsultPage';
+import { BookingsPage } from './pages/BookingsPage';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -35,13 +37,14 @@ createRoot(document.getElementById('root')!).render(
             {/* 마이페이지는 로그인 후에만 */}
             <Route path="mypage" element={<RequireLogin><MyPage /></RequireLogin>} />
             <Route path="mypage/saved" element={<RequireLogin><SavedHospitalsPage /></RequireLogin>} />
+            <Route path="mypage/bookings" element={<RequireLogin><BookingsPage /></RequireLogin>} />
             <Route path="mypage/visits" element={<RequireLogin><VisitsPage /></RequireLogin>} />
             <Route path="mypage/:section" element={<RequireLogin><PlaceholderPage titleKey="nav.mypage" /></RequireLogin>} />
             <Route path="legal/:slug" element={<LegalPage />} />
             {/* 챗봇도 사이트 헤더·메뉴는 그대로, 대화 목록은 챗봇 영역 안에 따로 */}
             <Route path="chatbot" element={<ChatbotPage />} />
-            {/* 아직 화면 없음. 예약은 요청서만(확정은 병원), 사후 의료 안내는 하지 않음 (docs/compliance.md) */}
-            <Route path="booking" element={<PlaceholderPage titleKey="nav.booking" />} />
+            {/* 상담/예약: 병원별 1:1 상담 (로그인 필요, 확정은 병원). 사후관리는 아직 화면 없음 */}
+            <Route path="booking" element={<RequireLogin><ConsultPage /></RequireLogin>} />
             <Route path="aftercare" element={<PlaceholderPage titleKey="nav.aftercare" />} />
           </Route>
         </Routes>

@@ -57,6 +57,9 @@ export function HospitalDetailPage() {
               <li key={d}>{t(`dept.${d}`)}</li>
             ))}
           </ul>
+          <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult">
+            {t('consult.startWith')}
+          </Link>
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
             <dd lang="ko">{h.addr}</dd>

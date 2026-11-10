@@ -3641,3 +3641,788 @@ body.chat-open {
 .detail-source a {
   color: var(--accent);
 }
+
+/* 병원 상담·예약 (/booking): 챗봇 레이아웃 재사용 + 병원별 상담 목록·예약 카드 */
+.consult-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.consult-list li {
+  border-radius: 12px;
+}
+
+.consult-list li + li {
+  margin-top: 4px;
+}
+
+.consult-list li:hover {
+  background: var(--c-blue-08);
+}
+
+.consult-list li.is-active {
+  background: var(--c-blue-14);
+}
+
+.consult-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.consult-item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.consult-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.consult-item-row strong {
+  overflow: hidden;
+  font-size: 0.98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.consult-item-row time {
+  flex-shrink: 0;
+  color: var(--c-ink-55);
+  font-size: 0.78rem;
+}
+
+.consult-preview {
+  overflow: hidden;
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.consult-badge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--c-blue);
+  color: var(--c-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.consult-thumb {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-blue);
+}
+
+.consult-thumb.is-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+
+.consult-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.consult-thumb svg {
+  width: 26px;
+  height: 26px;
+}
+
+.consult-status {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.consult-status.is-pending {
+  background: #fdf0d5;
+  color: #9a5b00;
+}
+
+.consult-status.is-confirmed {
+  background: #e3f4e8;
+  color: #15803d;
+}
+
+.consult-status.is-declined {
+  background: #fde7e5;
+  color: #b42318;
+}
+
+.consult-title h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.consult-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 4px 0 0;
+  color: var(--c-ink-70);
+  font-size: 0.88rem;
+}
+
+.consult-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--c-ink-55);
+  font-weight: 600;
+}
+
+.consult-online::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.consult-online.is-on {
+  color: #15803d;
+}
+
+.consult-head-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.consult-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  background: var(--c-white);
+  color: var(--c-ink);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.consult-button:hover {
+  border-color: var(--c-blue);
+}
+
+.consult-button.is-primary {
+  border-color: var(--c-blue);
+  background: var(--c-blue);
+  color: var(--c-white);
+}
+
+.consult-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.consult-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin: 14px 28px 0 32px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-ink);
+  font-size: 0.92rem;
+}
+
+.consult-notice svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--c-blue);
+}
+
+.consult-staff {
+  border-radius: 50%;
+  background: var(--c-blue-08);
+}
+
+.consult-staff svg {
+  width: 26px;
+  height: 26px;
+}
+
+.consult-staff-name {
+  margin-bottom: 4px;
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+}
+
+.consult-empty {
+  margin: 24px auto;
+  max-width: 36ch;
+  color: var(--c-ink-55);
+  text-align: center;
+}
+
+.consult-booking-row {
+  margin: 0 0 18px 66px;
+}
+
+.consult-booking {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 560px;
+  padding: 16px 18px 12px;
+  border: 1px solid var(--c-blue-40);
+  border-radius: 14px;
+  background: var(--c-white);
+}
+
+.consult-booking header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.consult-booking h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.consult-booking-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-blue);
+}
+
+.consult-booking-icon svg,
+.consult-booking-line svg,
+.consult-booking footer svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.consult-booking-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.consult-booking-detail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--c-blue-04);
+  font-size: 0.85rem;
+}
+
+.consult-booking-detail dt {
+  color: var(--c-ink-55);
+}
+
+.consult-booking-detail dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.consult-booking footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--c-line);
+  color: var(--c-ink-70);
+  font-size: 0.85rem;
+}
+
+.consult-booking footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.consult-booking footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--c-blue);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.consult-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 14px;
+  background: var(--c-blue-04);
+}
+
+.consult-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.consult-form-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.consult-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.consult-form input,
+.consult-form select,
+.consult-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: var(--c-white);
+  color: var(--c-ink);
+  font-weight: 400;
+}
+
+.consult-form textarea {
+  resize: vertical;
+}
+
+.consult-form-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
+.consult-form-hint {
+  margin: 0;
+  color: var(--c-ink-55);
+  font-size: 0.8rem;
+}
+
+.consult-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.consult-form-actions button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: var(--c-white);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.consult-form-actions .is-primary {
+  border-color: var(--c-blue);
+  background: var(--c-blue);
+  color: var(--c-white);
+}
+
+.consult-start {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px 32px;
+}
+
+.consult-start h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.consult-start p {
+  margin: 0;
+  max-width: 48ch;
+  color: var(--c-ink-70);
+}
+
+/* 병원 상세의 "병원에 상담하기" (사이트 공통 색) */
+.detail-consult {
+  display: inline-flex;
+  align-items: center;
+  margin: 4px 0 12px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (max-width: 860px) {
+  .consult-title {
+    flex-wrap: wrap;
+  }
+
+  .consult-title .consult-thumb.is-lg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .consult-title h1 {
+    font-size: 1.1rem;
+  }
+
+  .consult-head-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .consult-button {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.88rem;
+  }
+
+  .consult-notice {
+    margin: 10px 14px 0;
+    font-size: 0.85rem;
+  }
+
+  .consult-booking-row {
+    margin-left: 42px;
+  }
+
+  .consult-form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .consult-start {
+    padding: 16px;
+  }
+}
+
+.consult-sidebar a.chat-new {
+  text-decoration: none;
+}
+
+.consult-status.is-cancelled {
+  background: #eceff3;
+  color: #5d6875;
+}
+
+/* 예약 관리 (/mypage/bookings) */
+.bk-list {
+  /* 카드 안 예약 변경 폼이 상담 화면과 같은 색을 쓰도록 */
+  --c-blue: var(--accent);
+  --c-white: #ffffff;
+  --c-ink: #172b4d;
+  --c-ink-70: rgb(23 43 77 / 0.7);
+  --c-ink-55: rgb(23 43 77 / 0.55);
+  --c-line: rgb(23 43 77 / 0.12);
+  --c-blue-04: rgb(31 111 235 / 0.04);
+  --c-blue-08: rgb(31 111 235 / 0.08);
+  --c-blue-25: rgb(31 111 235 / 0.25);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bk-top-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-top: 28px;
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bk-top-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+.bk-filter-row {
+  justify-content: space-between;
+}
+
+.bk-sort {
+  margin-top: 0;
+}
+
+.bk-card {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 0.8fr) minmax(0, 1.6fr);
+  gap: 20px;
+  align-items: start;
+  padding: 16px 20px 16px 16px;
+}
+
+.bk-card .consult-thumb.is-lg {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  max-width: 100%;
+}
+
+.bk-card .consult-thumb svg {
+  width: 40px;
+  height: 40px;
+}
+
+.bk-hospital {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.bk-hospital h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.bk-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.bk-place svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bk-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 0 0 20px;
+  border-left: 1px solid var(--border);
+}
+
+.bk-when {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bk-when svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+}
+
+.bk-when p {
+  flex: 1;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.bk-wish {
+  font-weight: 700;
+}
+
+.bk-sub,
+.bk-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.bk-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 1.4em;
+}
+
+.bk-meta svg {
+  width: 16px;
+  height: 16px;
+}
+
+.bk-actions,
+.bk-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.bk-actions button,
+.bk-confirm button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 128px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bk-actions button:hover,
+.bk-confirm button:hover {
+  border-color: var(--accent);
+}
+
+.bk-actions .is-primary {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.bk-actions svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bk-confirm {
+  align-items: center;
+}
+
+.bk-confirm p {
+  flex: 1 1 100%;
+  margin: 0;
+  color: #b42318;
+  font-size: 0.9rem;
+}
+
+.bk-confirm .is-danger {
+  border-color: #c62828;
+  background: #c62828;
+  color: #ffffff;
+}
+
+.bk-card .consult-form {
+  margin-top: 10px;
+}
+
+.bk-card.is-cancelled .bk-when p,
+.bk-card.is-cancelled .bk-hospital h2 {
+  color: var(--text-muted);
+}
+
+.bk-footnote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.bk-footnote svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 860px) {
+  .bk-card {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .bk-detail {
+    grid-column: 1 / -1;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .bk-when p {
+    font-size: 1rem;
+  }
+
+  .bk-actions button {
+    flex: 1 1 120px;
+    min-width: 0;
+  }
+
+  .bk-top-link {
+    margin-top: 0;
+  }
+
+  .mp-saved-top:has(.bk-top-link) {
+    flex-direction: column;
+  }
+}
