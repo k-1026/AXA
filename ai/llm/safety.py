@@ -87,7 +87,7 @@ GUARD_PATTERNS: dict[str, list[str]] = {
     # 시술 적합성·효과·부작용·안전성
     "treatment_judgment": [
         r"효과(가|는)?\s*(있|좋|어때|얼마)", r"부작용", r"안전한가", r"괜찮을까", r"받아도\s*(되|될)", r"(어떤|무슨)\s*시술(이|을)?\s*(좋|받|맞)",
-        r"side effects?", r"\bis\b.{0,40}\bsafe\b", r"does (it|this) work", r"how effective", r"(which|what) (treatment|procedure|laser) (is|should|would|do)",
+        r"side effects?", r"\bis\b.{0,40}\bsafe\b.{0,15}\bfor (me|my|someone|people|pregnan)", r"\b(laser|treatment|procedure|surgery|botox|filler|injection|medicine|drug|peel|implant)s?\b.{0,25}\bsafe\b", r"\bis (it|this|that) safe (to (get|have|do|take|use|undergo)|after|during)", r"does (it|this) work", r"(treatment|laser|procedure|surgery|botox|filler|injection)s?\b.{0,30}\bworks?\b", r"how effective", r"(which|what) (treatment|procedure|laser) (is|should|would|do)",
         r"should i (get|have|do|try) .{0,40}(surgery|laser|botox|filler|treatment|procedure|implant|injection|lift|peel)", r"is .{0,40}(right|suitable|good) for me",
         r"副作用", r"效果(好|怎么样|怎麼樣|如何)", r"安全吗", r"安全嗎", r"适合我", r"適合我", r"tác dụng phụ", r"có hiệu quả", r"có an toàn", r"効果(は|が)", r"安全ですか",
     ],
