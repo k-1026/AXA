@@ -11,8 +11,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# 어느 폴더에서 서버를 켜도 루트 .env를 읽도록 파일 위치 기준 (ai/llm/config.py → 저장소 루트). 백엔드 core/config.py와 같은 방식
+ROOT_ENV = Path(__file__).resolve().parents[2] / ".env"
 
 
 @dataclass(frozen=True)
@@ -25,7 +29,7 @@ class ProviderConfig:
 
 class LLMSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore", env_ignore_empty=True
+        env_file=ROOT_ENV, env_file_encoding="utf-8", extra="ignore", env_ignore_empty=True
     )  # 빈 값(GEMINI_MODEL= 등)은 기본값 사용
 
     llm_provider_order: str = "gemini,nemotron"

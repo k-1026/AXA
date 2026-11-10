@@ -168,10 +168,10 @@ def test_guessed_residency_is_rejected_by_code():
 
 def test_recommendation_request_is_not_guarded_and_makes_card():
     orch, llm = make([
-        call(("recommend_hospitals", {"department": "피부과", "district": "수성구", "language": "zh"})),
+        call(("recommend_hospitals", {"department": "피부과", "district": "수성구", "language": "zh-CN"})),
         say("Clinic B has Chinese-speaking staff."),
     ])
-    state = ConversationState(language="zh", residency="short_term")
+    state = ConversationState(language="zh-CN", residency="short_term")
     reply = orch.handle(state, "给我推荐一家皮肤科")
     assert reply.safety_categories == [] and not reply.medical_notice
     assert [m["role"] for m in llm.calls[0][0]].count("system") == 1  # guard 지시 없음

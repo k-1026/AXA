@@ -27,10 +27,21 @@ from __future__ import annotations
 from datetime import date
 
 from ai.agent.tools import fake_data as fd
-from ai.agent.tools.booking_store import BookingError, BookingStore, parse_local_slot, required_consents
+from ai.agent.tools.booking_store import (
+    BookingError, BookingStore, parse_local_slot, required_consents, to_booking_create,
+)
 from ai.agent.tools.registry import JSON, Tool, ToolContext, ToolError, ToolRegistry
 
-LANGS = ["en", "zh", "zh-TW", "vi", "ja", "th", "ru", "ko"]
+# 사용자 언어 코드 = 프론트·백엔드가 지원하는 5개 (backend `patients.preferred_lang`, 요청서 `lang`)
+LANGS = ["en", "zh-CN", "zh-TW", "vi", "ko"]
+# 한국어 진료과 이름 → DB `departments.code` (= 프론트 키, docs/backend-db-schema.md 5절).
+# 표에 없는 진료과(치과·정형외과·한방 등)는 병원 찾기까지만 되고 예약 요청은 못 한다. DB 진료과가 늘면 표만 넓힌다
+DEPT_CODES = {"피부과": "dermatology", "성형외과": "plastic", "내과": "internal", "안과": "ophthalmology"}
+
+
+def lang_family(lang: str) -> str:
+    """병원 직원 응대 언어는 중국어를 간체·번체로 나누지 않는다 (`zh`)."""
+    return "zh" if lang.startswith("zh") else lang
 DISTRICTS = ["중구", "동구", "서구", "남구", "북구", "수성구", "달서구", "달성군", "군위군"]
 WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 AFTERCARE_TOPICS = ["schedule", "cost", "documents", "accommodation", "other_non_medical"]
@@ -97,7 +108,7 @@ def search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     if args.get("registered_only", True):
         rows = [h for h in rows if h["is_registered_facility"]]
     if lang := args.get("language"):
-        rows = [h for h in rows if lang in h["staff_languages"] or h["ai_translation_chat"]]
+        rows = [h for h in rows if lang_family(lang) in h["staff_languages"] or h["ai_translation_chat"]]
     if day := args.get("open_on"):
         rows = [h for h in rows if h["hours"].get(day)]
     rows.sort(key=lambda h: h["name_en"])  # 중립 정렬
@@ -124,9 +135,9 @@ def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     for h in rows:
         score, reasons = 0, []
         if lang:
-            if lang in h["staff_languages"]:
+            if lang_family(lang) in h["staff_languages"]:
                 score += 2
-                reasons.append(f"staff speak {lang}")
+                reasons.append(f"staff speak {lang_family(lang)}")
             elif h["ai_translation_chat"]:
                 score += 1
                 reasons.append("AI translation chat available")
@@ -203,6 +214,11 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
                 "hospital_tel": h["tel"]}
     # 백엔드 BookingCreate(docs/backend-contracts.md 6절)가 요구하는 칸. 연락 방법은 계정 이메일로 고정
     department = args.get("department") or (h["departments"][0] if len(h["departments"]) == 1 else None)
+    if department and department not in DEPT_CODES:
+        return {"status": "not_available",
+                "reason": f"Online consultation requests are currently available for {', '.join(DEPT_CODES)} only. "
+                          f"Please contact the hospital directly for {department}.",
+                "hospital_tel": h["tel"]}
     missing = [k for k in ("department", "preferred_slots", "language", "nationality", "visa_needed", "inquiry")
                if (department if k == "department" else args.get(k)) in (None, "", [])]
     if missing:
@@ -219,7 +235,7 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
             raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
     draft = {
         "hospital_id": h["id"], "hospital_name_en": h["name_en"], "department": department,
-        "preferred_slots": slots, "language": args["language"], "nationality": args["nationality"].upper(),
+        "department_code": DEPT_CODES[department], "preferred_slots": slots, "language": args["language"], "nationality": args["nationality"].upper(),
         "visa_needed": args["visa_needed"], "contact_method": "email", "inquiry": args["inquiry"],
         "needs_interpreter": args.get("needs_interpreter", False),
     }
@@ -229,6 +245,10 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
         "status": "draft",  # 아직 제출 아님
         "requires_patient_confirmation": True,  # 화면의 [제출] 버튼을 환자가 눌러야 pending 생성
         "draft": draft,
+        # 사람이 쓰는 요청서와 **같은 API**로 보낼 값 (결정 3): POST /hospitals/{hospital_id}/booking-requests
+        # 본문 = request + 환자가 체크한 consents. 프론트는 변환 없이 그대로 보낸다
+        "hospital_id": h["id"],
+        "request": to_booking_create(draft, ctx.timezone),
         "consents_required": required_consents(draft),  # 요청서마다 받음. 건강정보는 별도 동의 (개인정보보호법 제23조)
         "note": "Show the summary card. Do not say the request was sent until the user presses Submit.",
     }

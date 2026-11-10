@@ -14,7 +14,7 @@ CONSENTS = [{"kind": "privacy", "version": "v1"}, {"kind": "overseas_transfer", 
 
 
 def draft(**kw):
-    d = {"hospital_id": 9001, "hospital_name_en": "Demo Dermatology Clinic A", "department": "피부과",
+    d = {"hospital_id": 9001, "hospital_name_en": "Demo Dermatology Clinic A", "department": "피부과", "department_code": "dermatology",
          "preferred_slots": ["2026-12-01 10:00"], "language": "en", "nationality": "TW", "visa_needed": False,
          "contact_method": "email", "inquiry": "scar laser options"}
     d.update(kw)

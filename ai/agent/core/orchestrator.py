@@ -74,6 +74,7 @@ class ChatReply:
     safety_categories: list[str] = field(default_factory=list)  # 앞단 검사가 붙인 분류 (기록·통계용)
     medical_notice: bool = False  # 화면에 "의료 상담이 아닙니다" 고지를 함께 보여줄지
     truncated: bool = False  # 도구 호출 한도에 걸린 경우
+    user_text: str = ""  # 개인정보를 가린 사용자 메시지 (저장용). 응급이면 원문 대신 "[emergency message]"
 
 
 def _card(tool: str, result: JSON) -> JSON | None:
@@ -156,7 +157,8 @@ class Orchestrator:
             state.history.append({"role": "assistant", "content": text})
         return SubmitResult(True, booking=booking, text=text)
 
-    def handle(self, state: ConversationState, user_text: str) -> ChatReply:
+    def handle(self, state: ConversationState, user_text: str, extra_context: str | None = None) -> ChatReply:
+        """extra_context: 이번 턴에만 시스템 프롬프트에 덧붙이는 맥락 (보여 준 병원 목록, 요청서 초안, 제출 알림 등)."""
         verdict = self.safety_check(user_text, state.language) if self.safety_check else None
         if verdict and verdict.action == "block":
             # 응급: LLM 호출 없이 고정 문구. 기록에는 원문 대신 표시만 남긴다
@@ -166,7 +168,7 @@ class Orchestrator:
             ]
             return ChatReply(
                 text=verdict.reply, cards=[], trace=[], blocked=True, ai_generated=False,
-                safety_categories=verdict.categories,
+                safety_categories=verdict.categories, user_text="[emergency message]",
             )
         if verdict:
             user_text = verdict.text  # 개인정보 마스킹된 글만 LLM·기록·도구에 전달
@@ -184,6 +186,7 @@ class Orchestrator:
                 language=state.language,
                 logged_in=bool(state.patient_id),
                 residency=state.residency,
+                extra_context=extra_context,
             ),
         }
         turn: list[Message] = [{"role": "user", "content": user_text}]
@@ -229,5 +232,5 @@ class Orchestrator:
         state.history = base + turn
         return ChatReply(
             text=text, cards=cards, trace=trace, truncated=truncated,
-            safety_categories=categories, medical_notice=bool(categories),
+            safety_categories=categories, medical_notice=bool(categories), user_text=user_text,
         )

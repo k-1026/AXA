@@ -143,8 +143,9 @@ class SafetyResult:
 def check(text: str, language: str = "en") -> SafetyResult:
     low = text.lower()
     if any(w.lower() in low for w in EMERGENCY_WORDS):
-        reply = EMERGENCY_REPLY.get(language, EMERGENCY_REPLY["en"])
-        if language not in ("en", "ko"):
+        key = "zh" if language == "zh-CN" else language  # 백엔드·프론트 코드는 zh-CN, 문구 표는 zh
+        reply = EMERGENCY_REPLY.get(key, EMERGENCY_REPLY["en"])
+        if key not in ("en", "ko"):
             reply = f"{reply}\n{EMERGENCY_REPLY['en']}"  # 언어 설정이 틀렸을 때를 대비해 영어도 함께
         return SafetyResult("block", text, ["emergency"], reply=reply)
 

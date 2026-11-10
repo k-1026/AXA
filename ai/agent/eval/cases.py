@@ -5,7 +5,7 @@
 - INTENT_CASES : 실제 모델이 어떤 도구를 불러야 하는지. 모델을 부르므로 `python -m ai.agent.eval.run_eval --intent`로 따로 돌림
   (무료 키는 하루 한도가 있어 일부만 돌려도 됨)
 
-언어 코드: en, ko, zh(간체), zh-TW(번체), vi, ja, th, ru
+언어 코드: en, ko, zh-CN(간체), zh-TW(번체), vi + 안전 검사 전용 ja, th, ru (zh는 zh-CN의 옛 이름)
 문장을 추가할 때는 "왜 이 문장이 필요한지"를 note에 짧게 적는다.
 """
 
@@ -137,14 +137,14 @@ INTENT_CASES: list[IntentCase] = [
     # ---- 진료과 안내
     IntentCase("dept-en", "I have acne scars, which department handles this?", "en", ("suggest_department",), note="진단 없이 일반 안내"),
     IntentCase("dept-ko", "임플란트는 어느 과에서 하나요?", "ko", ("suggest_department",)),
-    IntentCase("dept-zh", "我想做体检，应该挂哪个科？", "zh", ("suggest_department",)),
+    IntentCase("dept-zh", "我想做体检，应该挂哪个科？", "zh-CN", ("suggest_department",)),
     # ---- 병원 찾기
     IntentCase("search-ko", "수성구에 영어 되는 피부과 찾아줘", "ko", ("search_hospitals",), ("recommend_hospitals",)),
     IntentCase("search-vi", "Tìm giúp tôi phòng khám nha khoa ở quận Jung", "vi", ("search_hospitals",)),
     IntentCase("search-ja", "土曜日に診療している皮膚科を教えてください", "ja", ("search_hospitals",)),
     IntentCase("detail-en", "Show me the address and opening hours of hospital 9001", "en", ("get_hospital",)),
     # ---- 병원 추천 (체류 형태 아는 경우)
-    IntentCase("recommend-zh", "请推荐一家寿城区会说中文的皮肤科", "zh", ("recommend_hospitals",), residency="short_term"),
+    IntentCase("recommend-zh", "请推荐一家寿城区会说中文的皮肤科", "zh-CN", ("recommend_hospitals",), residency="short_term"),
     IntentCase("recommend-en", "Which dermatology clinic should I go to? I speak English.", "en", ("recommend_hospitals",), residency="short_term"),
     IntentCase("recommend-resident", "수성구 피부과 추천해 주세요", "ko", ("search_hospitals",), residency="resident",
                note="국내 거주자 → 추천 대신 중립 목록"),
@@ -166,7 +166,7 @@ INTENT_CASES: list[IntentCase] = [
     IntentCase("book-unknown-residency", "Book hospital 9001 on 2026-12-01 10:00, I want to ask about scar laser, English",
                "en", ("prepare_booking_request",), ("record_residency",), note="체류 형태를 추측해 기록하면 안 됨"),
     # ---- 예약 상태 / 사후 문의
-    IntentCase("status-zh", "我的预约状态怎么样了？", "zh", ("get_my_bookings",), patient_id="demo-patient-1"),
+    IntentCase("status-zh", "我的预约状态怎么样了？", "zh-CN", ("get_my_bookings",), patient_id="demo-patient-1"),
     IntentCase("status-anon", "What is the status of my booking?", "en", ("get_my_bookings",), note="로그인 필요 응답"),
     IntentCase("aftercare-en", "For my booking demo-bk-002 I need a receipt document from the hospital", "en",
                ("open_aftercare_thread",), patient_id="demo-patient-1"),

@@ -84,7 +84,7 @@
 
 | 단계 | 어디서 | 내용 | 끝났다고 보는 기준 |
 |---|---|---|---|
-| **7a** | `ai` | 서비스 층, 저장소·게이트웨이 인터페이스와 메모리 구현, 카드 모델, 요청서 카드의 `request` 변환, 진료과·언어 코드 변환, 제출 확인(초안 정리), `LLMSettings` 절대 경로, 계정당 호출 제한 | 이 PC에서 테스트 통과 |
+| **7a ✅ (11/10)** | `ai` | 서비스 층, 저장소·게이트웨이 인터페이스와 메모리 구현, 카드 모델, 요청서 카드의 `request` 변환, 진료과·언어 코드 변환, 제출 확인(초안 정리), `LLMSettings` 절대 경로, 계정당 호출 제한 | 이 PC에서 테스트 통과 |
 | **7a-검증** | `ai` | 실제 모델로 6턴 시나리오를 **저장소를 거쳐**(텍스트만 저장, 도구 결과 없음) 재현. "첫 번째 병원" 같은 말을 `shown_hospitals`로 이어 가는지, 다른 계정의 세션 접근 거절 | 시나리오 10/10 유지 |
 | **B 요청** | 팀 | B에게: `chat_sessions`·`chat_messages` 마이그레이션(`state jsonb` 포함), 필요하면 30일 삭제 작업. `backend-todo-B`/worklog "상대에게 요청"에 기록 | B 확인 |
 | **PR** | 팀 | 7a 직후 `ai` → `main` (리더 승인). 전에 공용 파일 변경(plan.md, 질의서, `pyproject.toml`, agent-spec, `.env.example`, 이 문서)을 팀에 알림 | 머지 |
@@ -92,6 +92,33 @@
 | **7c** | 계약·문서 PR | `/chatbot/*` 계약, 새 에러 코드 `chatbot.unavailable`, 언어·진료과 코드, 카드 형식, 로그인 표(`backend-plan.md`)·`compliance.md`·`plan.md` 갱신 | B 승인 |
 | **7d** | 프론트 | `/chatbot` 로그인 필요로 변경, API 호출로 교체, 카드 9종 표시, [제출] = 기존 예약 요청 API, 병원 검색은 로그인 없이 유지 | 브라우저 시연 |
 | **7e** | 후속 | 마이페이지 "지난 대화" | — |
+
+## 5-1. 7a 결과 (11/10)
+
+**만든 것** — `ai/agent/`
+| 파일 | 내용 |
+|---|---|
+| `service.py` | `ChatService.ask / delete_session / purge_expired`, 계정당 호출 제한, 입력·언어 검사, 제출 확인, 모델 맥락 복원, `ChatServiceError`(백엔드가 `AppError`로 변환) |
+| `schemas.py` | 카드 9종과 `AskRequest`/`ChatResponse` (Pydantic) — 카드 형식의 기준, OpenAPI 스키마 약 11KB |
+| `session_store.py` | `SessionStore` 인터페이스 + 메모리 구현(30일 정리, 탈퇴 삭제 포함). 7b에서 DB 구현으로 교체 |
+| `tools/booking_store.py` | `create_from_payload`(= 사람이 쓰는 요청서 API가 하는 일을 흉내), 상태 전환 |
+| 그 밖의 수정 | 언어 코드 5개로 정리(`zh`→`zh-CN`), 진료과 한국어 이름 → `departments.code`, 요청서 카드에 `hospital_id`·`request`(BookingCreate, UTC) 포함, `.env` 절대 경로 |
+
+**검증**
+- 테스트 **202개** 통과 (서비스 층 14개: 세션 소유, 텍스트만 저장, 호출 제한, 503, 응급, 제출 감지, 보관 기간, 카드 9종이 도구 결과와 맞는지)
+- 실제 모델로 서비스 층을 거친 8턴 시나리오(저장된 텍스트만으로 이어 가고, 제출은 기존 예약 요청 API 호출로): **Gemini 10/10, Nemotron 10/10** ([결과](../ai/agent/eval/results/))
+- 안전 검사 81/81, 의도 평가는 Nemotron **25~26/27** (예약 의도 2건은 실행마다 통과·실패가 바뀜 — 모델 비결정성으로 보임)
+
+**실제로 나온 수치 (8턴, 도구 포함)**: LLM 호출 17~18회, 입력 토큰 **약 62,000(Gemini lite)~83,000(Nemotron)**, 턴당 1.4~13.6초(가장 느린 턴은 호출 3회). Gemini는 `gemini-3.5-flash` 하루 한도가 이미 찬 상태라 전부 `flash-lite`로 실행됐다
+
+**알게 된 것 / 7b·7c에서 다룰 것**
+1. **예약 요청 API에 체류 형태 칸이 없다.** `BookingCreate`(계약 6절)에는 단기 방문/국내 거주 구분이 없어서, 국내 거주자 걸러내기는 **챗봇 안에서만** 동작한다(자기 신고). 사람이 쓰는 요청서 화면에도 같은 구분이 필요하고, 서버가 확인하려면 칸(또는 계정 속성)이 필요하다 → 7c 계약 PR에 올릴 것
+2. **제출 뒤 모델은 도구를 다시 부르지 않고 서버 맥락만으로 답할 수 있다.** 맥락이 정확해서 답은 맞았다(점검 항목을 "카드 또는 pending 답변"으로 고침). 대신 맥락의 상태는 감지 시점 값이라, 그 사이 병원이 확정해도 다음 질문에서 도구를 부르기 전까지는 옛 상태를 말할 수 있음
+3. **국내 거주자 `resident`는 자기 신고**이고 서버 저장 상태에도 그대로 저장된다. 사용자가 처음에 거주자라고 말했다가 정정하는 경우를 처리하는 방법은 아직 없음(상태를 직접 바꾸는 경로 없음)
+4. **무료 키로는 시연 한 번도 빠듯하다**: 8턴 시나리오 한 번이 약 17~18회 호출이라 `gemini-3.5-flash`(하루 20회) 한도를 한 번에 넘긴다. lite·Nemotron 폴백이 있어 지금은 통과하지만 여러 사람의 동시 시연은 불가
+5. **입력 토큰**: 8턴에 6만~8만. 도구 11개의 설명이 매 호출에 들어가는 것이 큰 몫 → 유료 전환 전에 의도별로 도구를 줄이는 개선 필요
+
+**B에게 보낼 요청 (마이그레이션)**: `chat_sessions`(id uuid, patient_id FK CASCADE, lang, title varchar(60), `state jsonb`, created_at, last_message_at), `chat_messages`(id bigint, session_id FK CASCADE, role, content, refused bool, created_at). 출처 칸(`sources`)은 이번 설계에서 쓰지 않음. `session_store.py`의 인터페이스가 곧 DB 구현의 명세
 
 ## 6. 남은 결정
 1. 유료 키 전환 시점 (시연 일정에 따라)

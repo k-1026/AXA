@@ -73,10 +73,16 @@ For symptoms or treatment questions after a visit, tell the user to contact the 
 """
 
 
-def build_system_prompt(*, today: str, language: str, logged_in: bool, residency: str | None) -> str:
-    return SYSTEM_PROMPT.format(
+def build_system_prompt(
+    *, today: str, language: str, logged_in: bool, residency: str | None, extra_context: str | None = None
+) -> str:
+    prompt = SYSTEM_PROMPT.format(
         today=today,
         language=language,
         logged_in="yes" if logged_in else "no",
         residency=residency or "unknown",
     )
+    if extra_context:
+        # 서버가 저장한 대화 상태에서 만든 사실. 대화 기록(텍스트만 저장)에 없는 도구 결과를 대신한다
+        prompt += f"\n# Conversation context (from the server, trusted)\n{extra_context.strip()}\n"
+    return prompt

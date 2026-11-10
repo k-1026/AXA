@@ -66,15 +66,15 @@ def required_consents(draft: JSON) -> list[str]:
     kinds = ["privacy"]
     if draft.get("health_info"):
         kinds.append("health")
-    if draft.get("language") != "ko":
+    if (draft.get("lang") or draft.get("language")) != "ko":  # 요청서 payload는 lang, 챗봇 초안은 language
         kinds.append("overseas_transfer")
     return kinds
 
 
 def to_booking_create(draft: JSON, patient_timezone: str) -> JSON:
-    """챗봇 초안 → 백엔드 `BookingCreate` 모양 (계약 6절). 진료과 코드 통일 전이라 department_code 대신 department 이름을 넣는다."""
+    """챗봇 초안 → 백엔드 `BookingCreate` 모양 (계약 6절). `consents`는 환자가 체크한 뒤 제출 때 붙인다."""
     return {
-        "department": draft["department"],  # TODO 진료과 코드 통일 후 department_code
+        "department_code": draft["department_code"],  # departments.code (= 프론트 키)
         "preferred_slots": [to_utc_iso(s) for s in draft["preferred_slots"]],
         "patient_timezone": patient_timezone,
         "lang": draft["language"],
@@ -84,6 +84,15 @@ def to_booking_create(draft: JSON, patient_timezone: str) -> JSON:
         "message": draft["inquiry"],
         "health_info": draft.get("health_info"),
     }
+
+
+def utc_iso_to_local(text: str) -> str:
+    """UTC ISO → 병원 현지(KST) 'YYYY-MM-DD HH:MM'."""
+    return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).astimezone(KST).strftime("%Y-%m-%d %H:%M")
+
+
+def _utc(text: str) -> datetime:
+    return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
 
 class BookingStore:
@@ -114,36 +123,55 @@ class BookingStore:
         patient_timezone: str = "UTC",
         today: datetime | None = None,
     ) -> JSON:
+        """챗봇 초안으로 제출 (시연·eval용 지름길). 체류 형태는 요청서 API에는 없는 칸이라 여기서만 검사한다."""
         if not patient_id:
             raise BookingError("auth.required", "로그인이 필요합니다")
         if residency == "resident":
             raise BookingError("booking.not_available", "국내 거주 외국인은 이 경로로 요청할 수 없습니다")
         if residency is None:
             raise BookingError("validation", "체류 형태가 확인되지 않았습니다", {"missing": ["residency"]})
+        try:
+            payload = to_booking_create(draft, patient_timezone)
+        except (KeyError, ValueError) as e:
+            raise BookingError("validation", f"요청서 칸 오류: {e}") from e
+        return self.create_from_payload(patient_id, draft.get("hospital_id"), payload, consents, today=today)
 
-        hospital = next((h for h in fd.HOSPITALS if h["id"] == draft.get("hospital_id")), None)
+    def create_from_payload(
+        self,
+        patient_id: str | None,
+        hospital_id: int | None,
+        payload: JSON,
+        consents: list[JSON],
+        *,
+        today: datetime | None = None,
+    ) -> JSON:
+        """`POST /hospitals/{id}/booking-requests` (사람이 쓰는 것과 같은 API)가 하는 일을 흉내 낸다.
+        payload = BookingCreate 모양(계약 6절), consents = [{"kind", "version"}]. 백엔드가 생기면 이 함수만 교체."""
+        if not patient_id:
+            raise BookingError("auth.required", "로그인이 필요합니다")
+        hospital = next((h for h in fd.HOSPITALS if h["id"] == hospital_id), None)
         if hospital is None:
             raise BookingError("not_found", "병원을 찾을 수 없습니다")
         if not hospital["is_registered_facility"]:
             raise BookingError("booking.not_available", "외국인환자 유치의료기관으로 등록되지 않은 병원입니다")
 
-        missing = [k for k in ("preferred_slots", "language", "nationality", "inquiry", "department") if not draft.get(k)]
-        if draft.get("visa_needed") is None:
+        missing = [k for k in ("department_code", "preferred_slots", "lang", "nationality", "message") if not payload.get(k)]
+        if payload.get("visa_needed") is None:
             missing.append("visa_needed")
         if missing:
             raise BookingError("validation", "요청서 칸이 비어 있습니다", {"missing": missing})
-        slots = draft["preferred_slots"]
+        slots = payload["preferred_slots"]
         if not 1 <= len(slots) <= 3:
             raise BookingError("validation", "희망 일시는 1~3개여야 합니다")
         try:
-            payload = to_booking_create(draft, patient_timezone)
+            slot_times = [_utc(x) for x in slots]
         except ValueError as e:
             raise BookingError("validation", f"희망 일시 형식 오류: {e}") from e
         now = today or datetime.now(timezone.utc)
-        if any(parse_local_slot(s) <= now for s in slots):
+        if any(t <= now for t in slot_times):
             raise BookingError("validation", "이미 지난 일시가 있습니다")
 
-        needed = required_consents(draft)
+        needed = required_consents(payload)
         given = {c.get("kind") for c in consents if c.get("version")}
         lacking = [k for k in needed if k not in given]
         if lacking:
@@ -158,9 +186,9 @@ class BookingStore:
             "patient_id": patient_id,
             "hospital_id": hospital["id"],
             "status": "pending",
-            "preferred": list(slots),
+            "preferred": [utc_iso_to_local(x) for x in slots],
             "created_at": now.strftime("%Y-%m-%d"),
-            "request": payload,  # BookingCreate 모양
+            "request": copy.deepcopy(payload),  # BookingCreate 모양
             "consents": [{"kind": c["kind"], "version": c["version"]} for c in consents if c.get("kind") in needed],
             "events": [{"status": "pending", "actor": "patient"}],
         }

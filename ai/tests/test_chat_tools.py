@@ -38,7 +38,7 @@ def test_scar_flow_department_then_neutral_list():
 
 
 def test_translation_badge_filter():
-    zh = R.run("search_hospitals", {"department": "피부과", "language": "zh"}, SHORT)["hospitals"]
+    zh = R.run("search_hospitals", {"department": "피부과", "language": "zh-CN"}, SHORT)["hospitals"]
     # B는 직원 중국어, A는 AI 번역 채팅으로 포함
     assert {h["hospital_id"] for h in zh} == {9001, 9002}
     dental_vi = R.run("search_hospitals", {"department": "치과", "language": "vi"}, SHORT)["hospitals"]
@@ -72,7 +72,7 @@ def test_booking_draft_input_checks():
     assert R.run("prepare_booking_request", {**base, "preferred_slots": []}, SHORT)["missing"] == ["preferred_slots"]
     four = [f"2026-12-0{i} 10:00" for i in range(1, 5)]
     assert "error" in R.run("prepare_booking_request", {**base, "preferred_slots": four}, SHORT)
-    assert "error" in R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-01 10:00"], "department": "치과"}, SHORT)
+    assert "error" in R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-01 10:00"], "department": "성형외과"}, SHORT)
     multi = R.run("prepare_booking_request", {**base, "hospital_id": 9005, "preferred_slots": ["2026-12-01 08:30"]}, SHORT)
     assert multi["missing"] == ["department"]  # 진료과가 둘인 병원은 묻는다
 
@@ -101,7 +101,7 @@ def test_prices_and_docs():
 
 
 def test_recommend_by_match_only_for_short_term_visitors():
-    args = {"department": "피부과", "district": "수성구", "language": "zh", "preferred_date": "2026-12-04"}
+    args = {"department": "피부과", "district": "수성구", "language": "zh-CN", "preferred_date": "2026-12-04"}
     assert R.run("recommend_hospitals", args, ToolContext())["ask"] == "residency"
     assert R.run("recommend_hospitals", args, ToolContext(residency="resident"))["status"] == "not_available"
     res = R.run("recommend_hospitals", args, SHORT)
