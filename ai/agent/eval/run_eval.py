@@ -72,9 +72,9 @@ def run_intent(args) -> tuple[list[str], int, int, str]:
     return head + rows, ok, done, stopped
 
 
-def save(kind: str, lines: list[str], ok: int, total: int, extra: str = "") -> Path:
+def save(kind: str, lines: list[str], ok: int, total: int, extra: str = "", tag: str = "") -> Path:
     RESULTS.mkdir(exist_ok=True)
-    path = RESULTS / f"{date.today().isoformat()}-{kind}.md"
+    path = RESULTS / f"{date.today().isoformat()}-{kind}{'-' + tag if tag else ''}.md"
     body = [f"# 평가 결과 — {kind} ({date.today().isoformat()})", "", f"통과 {ok} / {total}", ""]
     if extra:
         body += [f"> {extra}", ""]
@@ -90,6 +90,7 @@ def main() -> None:
     ap.add_argument("--skip", type=int, default=0)
     ap.add_argument("--ids", default="")
     ap.add_argument("--sleep", type=float, default=6.0)
+    ap.add_argument("--tag", default="", help="결과 파일 이름에 붙일 표시. 예: nemotron")
     args = ap.parse_args()
     if not (args.safety or args.intent):
         ap.error("--safety 또는 --intent")
@@ -98,7 +99,7 @@ def main() -> None:
         print(save("safety", lines, ok, total), f"{ok}/{total}")
     if args.intent:
         lines, ok, total, stopped = run_intent(args)
-        print(save("intent", lines, ok, total, stopped), f"{ok}/{total}", stopped)
+        print(save("intent", lines, ok, total, stopped, args.tag), f"{ok}/{total}", stopped)
 
 
 if __name__ == "__main__":

@@ -198,4 +198,13 @@ def test_unknown_provider_name():
 
 def test_comma_separated_models_become_fallback_chain():
     s = LLMSettings(_env_file=None, gemini_api_key="k", gemini_model="a, b", nemotron_api_key="k2", nemotron_model="n")
-    assert [(p.name, p.model) for p in s.providers()] == [("gemini", "a"), ("gemini", "b"), ("nemotron", "n")]
+    assert [(p.name, p.model) for p in s.providers()] == [("gemini", "a"), ("gemini", "b"), ("nemotron", "nvidia/n")]
+
+
+def test_nvidia_model_names_get_vendor_prefix():
+    s = LLMSettings(_env_file=None, gemini_api_key="", nemotron_api_key="k",
+                    nemotron_model="nemotron-3.5-lightning-30b-a3b, nvidia/nemotron-3.5-super-vl-120b-a12b")
+    assert [p.model for p in s.providers()] == ["nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3.5-super-vl-120b-a12b"]
+    other = LLMSettings(_env_file=None, gemini_api_key="", nemotron_api_key="k", nemotron_base_url="https://other.test/v1",
+                        nemotron_model="nemotron-x")
+    assert [p.model for p in other.providers()] == ["nemotron-x"]  # NVIDIA 주소가 아니면 건드리지 않음

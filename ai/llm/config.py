@@ -64,7 +64,14 @@ class LLMSettings(BaseSettings):
             base_url, key, models = table[name]
             if not key:
                 continue
-            out += [ProviderConfig(name, base_url, key, m.strip()) for m in models.split(",") if m.strip()]
+            for m in (x.strip() for x in models.split(",")):
+                if not m:
+                    continue
+                # NVIDIA build는 모델 이름 앞에 제작사 접두사가 필요하다 (nvidia/nemotron-...).
+                # 접두사 없이 쓰면 404 "page not found"만 나와 원인을 찾기 어려움 (2026-11-10 확인)
+                if name == "nemotron" and "nvidia.com" in base_url and "/" not in m:
+                    m = f"nvidia/{m}"
+                out.append(ProviderConfig(name, base_url, key, m))
         return out
 
 
