@@ -27,10 +27,13 @@ EMERGENCY_WORDS = [
     # ko
     "가슴 통증", "가슴이 아파", "흉통", "숨이 안", "숨을 못", "숨쉬기 힘", "호흡 곤란", "호흡곤란", "피가 멈추지", "출혈이 심",
     "피가 많이", "의식이 없", "의식을 잃", "쓰러졌", "쓰러져", "경련을 하", "경련이 멈추",
+    "피를 토", "숨을 안 쉬", "숨을 쉬지 않", "대답이 없", "반응이 없",
     # en
     "chest pain", "can't breathe", "cannot breathe", "trouble breathing", "difficulty breathing", "short of breath",
     "heavy bleeding", "bleeding heavily", "won't stop bleeding", "unconscious", "passed out", "fainted",
     "having a seizure", "having a stroke", "having a heart attack", "overdosed",
+    "vomiting blood", "coughing up blood", "not breathing", "stopped breathing", "not responding", "anaphylaxis",
+    "severe allergic reaction", "collapsed and", "just collapsed", "he collapsed", "she collapsed", "i collapsed",
     # zh (간체·번체)
     "胸痛", "呼吸困难", "呼吸困難", "喘不上气", "喘不過氣", "大出血", "流血不止", "昏迷", "晕倒", "暈倒",
     # vi
@@ -79,6 +82,7 @@ def mask_pii(text: str) -> tuple[str, list[str]]:
 GUARD_PATTERNS: dict[str, list[str]] = {
     # 진단·예후: "이거 무슨 병", "암인가요", "나을까요"
     "diagnosis": [
+        r"โรคอะไร", r"какая у меня болезнь|что у меня за",
         r"무슨\s*병", r"어떤\s*병", r"진단해", r"암인가", r"(나을|낫)(까요|나요)", r"심각한가",
         r"what (disease|condition) do i have", r"do i have .{0,30}(cancer|disease|infection|tumou?r|syndrome|allergy)", r"is (it|this) (cancer|serious|dangerous|normal)", r"diagnos(e|is) (me|my)",
         r"will (it|i) (heal|recover|get better)",
@@ -87,12 +91,17 @@ GUARD_PATTERNS: dict[str, list[str]] = {
     # 시술 적합성·효과·부작용·안전성
     "treatment_judgment": [
         r"효과(가|는)?\s*(있|좋|어때|얼마)", r"부작용", r"안전한가", r"괜찮을까", r"받아도\s*(되|될)", r"(어떤|무슨)\s*시술(이|을)?\s*(좋|받|맞)",
+        r"ผลข้างเคียง", r"ปลอดภัยไหม", r"побочн", r"безопасн.{0,15}ли|ли.{0,15}безопасн",
+        r"위험하지\s*않", r"(없어지|사라지|없앨)\s*(나요|까요|수\s*있)", r"완전히\s*(없|사라)",
+        r"will (it|the laser|this|that).{0,30}(get rid of|remove|cure|fix|heal|erase)",
+        r"(get rid of|erase|cure|heal).{0,30}(completely|permanently|forever)",
         r"side effects?", r"\bis\b.{0,40}\bsafe\b.{0,15}\bfor (me|my|someone|people|pregnan)", r"\b(laser|treatment|procedure|surgery|botox|filler|injection|medicine|drug|peel|implant)s?\b.{0,25}\bsafe\b", r"\bis (it|this|that) safe (to (get|have|do|take|use|undergo)|after|during)", r"does (it|this) work", r"(treatment|laser|procedure|surgery|botox|filler|injection)s?\b.{0,30}\bworks?\b", r"how effective", r"(which|what) (treatment|procedure|laser) (is|should|would|do)",
         r"should i (get|have|do|try) .{0,40}(surgery|laser|botox|filler|treatment|procedure|implant|injection|lift|peel)", r"is .{0,40}(right|suitable|good) for me",
         r"副作用", r"效果(好|怎么样|怎麼樣|如何)", r"安全吗", r"安全嗎", r"适合我", r"適合我", r"tác dụng phụ", r"có hiệu quả", r"có an toàn", r"効果(は|が)", r"安全ですか",
     ],
     # 약·용량
     "medication": [
+        r"which (antibiotic|painkiller|medicine|medication|drug)s?\b",
         r"(약|연고).{0,10}(먹어도|발라도|써도|복용)", r"(약|복용)\s*용량", r"처방해",
         r"(can|should) i take .{0,40}(medicine|medication|pills?|drugs?|ibuprofen|aspirin|antibiotics?|painkillers?|tylenol)", r"\bdosage\b", r"\bdose\b", r"prescribe", r"what (medicine|medication|drug)",
         r"吃什么药", r"吃什麼藥", r"剂量", r"劑量", r"liều", r"uống thuốc gì", r"何の薬", r"用量",
