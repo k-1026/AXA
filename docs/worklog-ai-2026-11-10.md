@@ -54,7 +54,7 @@
 
 | 검증 | 방법 | 결과 |
 |---|---|---|
-| 자동 테스트 | `pytest` (백엔드 23개 + AI 157개) | **180개 통과** (6단계 후 189개) |
+| 자동 테스트 | `pytest` (백엔드 13개 + AI 나머지) | **180개 통과** (6단계 후 189개) |
 | 안전 검사 | `run_eval --safety`, 81문장·8개 언어 | **81/81** ([결과](../ai/agent/eval/results/2026-11-10-safety.md)) |
 | 의도→도구 (Gemini) | `run_eval --intent`, 27문장·6개 언어 | **27/27** ([결과](../ai/agent/eval/results/2026-11-10-intent.md)) — `gemini-3.5-flash` 한도 소진 후 `flash-lite`로 자동 전환되어 실행 |
 | 의도→도구 (Nemotron) | 같은 27문장, `LLM_PROVIDER_ORDER=nemotron` | **26/27** ([결과](../ai/agent/eval/results/2026-11-10-intent-nemotron.md)) — 실패: 국내 거주자로 이미 알려졌는데 체류 형태를 다시 물음 |
@@ -141,6 +141,14 @@
 2. `overseas_transfer` 동의: 한국어가 아닌 글을 번역하느라 해외 AI를 쓰는 경우 필수로 가정함. 개인정보보호위원회 질의 8번 회신 전 가정
 3. 프론트: 요청서 카드는 `consents_required` 목록을 체크박스로 보여 주고, 체크한 동의의 `kind`·`version`을 제출 API에 같이 보낼 것
 4. 병원 쪽: 요청 상태를 바꾸는 API(확정·거절·제안)가 필요 — 지금은 저장소의 `hospital_respond`가 흉내만 냄
+
+## 9. 정정과 후속 (11/10 밤)
+
+| 정정 | 내용 |
+|---|---|
+| 마이그레이션 담당 | 문서에 "마이그레이션은 B만 만든다, B에게 요청"이라고 쓴 것은 **틀렸다**. `backend`의 `AGENTS.md`·결정 13은 **A가 만든다**. `plan-step7-chat-api.md`와 `plan.md`를 고쳤고, 마이그레이션 `0005`는 A가 `backend-A-chatbot`에서 만들어 push함(`7c440b3`) |
+| 테스트 개수 | 8절 앞부분의 "백엔드 23개 + AI 157개"는 틀렸다. 지금은 **203개 = AI 190 + 백엔드 13** (`ai` 브랜치 기준. `backend` 브랜치에서는 백엔드 테스트가 88개) |
+| 건강정보 저장 | 서버에 저장하는 요청서 초안에서 `health_info`·`inquiry`를 뺐다(허용 목록 `DRAFT_KEPT_KEYS`). 화면 카드의 `request`에는 그대로 있어 제출에는 지장이 없다. 테스트로 확인(`test_health_info_reaches_the_client_card_but_is_never_stored_on_the_server`). **남은 한계**: 사용자가 대화에 직접 쓴 증상 문장과 세션 제목은 개인정보 가리기로 지워지지 않아 그대로 저장됨 → 고지·30일 보관·삭제 버튼으로 대응, 팀 확인 필요 |
 
 ## 출처
 

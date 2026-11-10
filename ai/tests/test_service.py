@@ -1,5 +1,6 @@
 """ai/agent/service.py — 7a 서비스 층 (가짜 LLM, 메모리 저장소, 가짜 예약 저장소)."""
 
+import json
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -186,6 +187,7 @@ def test_submission_through_the_existing_api_is_noticed_on_the_next_turn():
     assert card.request["patient_timezone"] == "Asia/Taipei" and card.request["lang"] == "en"
     state = sessions.get(ME.patient_id, s.id).state
     assert state["draft"]["hospital_id"] == 9002 and state["draft_known_booking_ids"] == []
+    assert "inquiry" not in state["draft"] and "health_info" not in state["draft"]  # 자유 문장은 서버에 저장하지 않는다
 
     # 제출 전에 물으면 아직 초안이 열려 있다고 알려 줌
     ctx = build_context(state, None)
@@ -207,6 +209,20 @@ def test_submission_through_the_existing_api_is_noticed_on_the_next_turn():
     service.orchestrator.llm.script.append(say("Anything else?"))
     service.ask(ME, s.id, "thanks", "en")
     assert "submitted the request" not in system_prompt(llm, 3)
+
+
+def test_health_info_reaches_the_client_card_but_is_never_stored_on_the_server():
+    """건강정보 동의 없이 서버에 건강정보를 저장하지 않는다 (backend/AGENTS.md 6절). 제출에 필요한 값은 카드로 클라이언트에 나간다."""
+    secret = "scars on both cheeks since 2024"
+    service, _, sessions, *_ = make([call("prepare_booking_request", {**FULL, "health_info": secret}), say("Check the card.")])
+    s = sessions.create(ME.patient_id, "en", "t", {"residency": "short_term"})
+    r = service.ask(ME, s.id, "book clinic B", "en")
+    card = next(c for c in r.cards if c.type == "booking_draft").data
+    assert card.request["health_info"] == secret and card.consents_required == ["privacy", "health", "overseas_transfer"]
+    stored = sessions.get(ME.patient_id, s.id).state
+    assert secret not in json.dumps(stored, ensure_ascii=False)
+    assert "scar laser" not in json.dumps(stored, ensure_ascii=False)  # 문의 내용(inquiry)도 저장하지 않음
+    assert set(stored["draft"]) <= set(svc.DRAFT_KEPT_KEYS)
 
 
 def test_existing_open_request_before_the_draft_is_not_mistaken_for_a_submission():

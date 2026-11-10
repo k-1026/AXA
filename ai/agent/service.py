@@ -43,6 +43,17 @@ LANGUAGE_ALIASES = {"zh": "zh-CN", "zh-Hans": "zh-CN", "zh-hans": "zh-CN", "zh-H
                     "zh-cn": "zh-CN", "zh-tw": "zh-TW"}
 
 
+# 서버에 저장하는 요청서 초안에서 **건강정보가 섞일 수 있는 자유 문장(health_info, inquiry)은 뺀다**
+# (backend/AGENTS.md 6절: 건강정보를 health 동의 없이 저장 X). 허용 목록 방식이라 초안에 칸이 늘어도 기본은 저장하지 않는다.
+# 화면에 나간 카드의 `request`에는 그대로 있어서 제출에는 지장이 없고, 모델은 대화 기록(텍스트)에서 문의 내용을 다시 읽는다.
+DRAFT_KEPT_KEYS = ("hospital_id", "hospital_name_en", "department", "department_code", "preferred_slots",
+                   "language", "nationality", "visa_needed")
+
+
+def persistable_draft(draft: JSON) -> JSON:
+    return {k: draft[k] for k in DRAFT_KEPT_KEYS if k in draft}
+
+
 class ChatServiceError(Exception):
     """백엔드가 `AppError(status, code, message, detail)`로 그대로 바꾼다. 코드는 docs/backend-contracts.md 4절."""
 
@@ -209,7 +220,7 @@ class ChatService:
         if state.residency:
             new_state["residency"] = state.residency
         if state.booking_draft:
-            new_state["draft"] = state.booking_draft
+            new_state["draft"] = persistable_draft(state.booking_draft)
             if any(c.type == "booking_draft" for c in cards):  # 새 초안: 이 시점의 내 요청 id를 기억
                 new_state["draft_known_booking_ids"] = [b["id"] for b in self.bookings.list_for_patient(patient.patient_id)]
             else:

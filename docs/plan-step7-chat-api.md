@@ -5,14 +5,14 @@
 
 ## 한 줄 결론
 
-**연결은 가능하고 방향이 정해졌다.** 대화는 **DB 세션(최소 저장)** 으로 두고, **챗봇은 로그인한 사람만** 쓰며, 제출은 **사람이 쓰는 것과 같은 예약 요청 API**를 부른다. 이 선택 때문에 **백엔드 B의 마이그레이션이 필요한 길**(대화 테이블)이 생겼다. 그 전까지 AI 쪽(7a)은 저장소를 바꿔 끼울 수 있게 만들어 기다리지 않고 진행한다.
+**연결은 가능하고 방향이 정해졌다.** 대화는 **DB 세션(최소 저장)** 으로 두고, **챗봇은 로그인한 사람만** 쓰며, 제출은 **사람이 쓰는 것과 같은 예약 요청 API**를 부른다. 이 선택 때문에 **대화 테이블 마이그레이션이 필요**했고, 마이그레이션은 A 담당이라 11/10에 `0005`로 만들어 `backend-A-chatbot` 브랜치에 올렸다(`backend`에 머지하고 공용 DB에 적용하는 일이 남음). AI 쪽 서비스 층(7a)은 저장소를 바꿔 끼울 수 있게 만들어 먼저 끝냈다.
 
 ## 1. 결정 기록
 
 | # | 결정 | 내용 | 제안(처음 안)과 달라진 점 |
 |---|---|---|---|
 | 1 | 7b 담당 | **내가 직접** `backend-A-chatbot`에서 만든다. `core/` 공유 파일을 고치면 PR에 표시하고 백엔드 담당 승인을 받는다 | 같음 |
-| 2 | 대화 상태 | **DB 세션** (`chat_sessions`, `chat_messages`) | 서명된 상태 값을 권장했으나 DB 세션으로 결정. 마이그레이션(B)과 개인정보 결정이 따라옴 |
+| 2 | 대화 상태 | **DB 세션** (`chat_sessions`, `chat_messages`) | 서명된 상태 값을 권장했으나 DB 세션으로 결정. 마이그레이션(A 담당 — 11/10 `0005`로 완료)과 개인정보 결정이 따라옴 |
 | 3 | 제출 경로 | **사람이 쓰는 것과 같은 API** `POST /hospitals/{id}/booking-requests`. 챗봇 전용 제출 경로는 만들지 않음 | 챗봇 전용 `/chatbot/submit`을 제안했으나 철회. 검증·저장 형식이 한 곳에 있어야 함 |
 | 4 | 로그인 | **챗봇은 로그인 필요.** 로그인 없이는 **병원 검색(목록·지도·상세)** 만 | 계획은 "챗봇은 로그인 없이". 선택적 인증이 필요 없어져 구현은 쉬워짐 |
 | 5 | 저장 범위 | **최소 저장**: 개인정보를 가린 대화 텍스트 + 체류 형태 + 요청서 초안만. 도구 호출·결과와 카드는 저장하지 않음. 초안의 `health_info`는 제출되면 지움 | — |
@@ -34,7 +34,7 @@
 | 대화 기록 크기 | 같은 실행 | 6턴 뒤 약 12KB. DB 저장은 텍스트만이라 훨씬 작음 |
 | 진료과 코드 | `backend-db-schema.md` | `departments.code` = 프론트 키(`dermatology`, `plastic`, `internal`, `ophthalmology`…) |
 | 예약 요청 API | `backend-plan.md` | `POST /hospitals/{id}/booking-requests`(로그인, 필수 동의 없으면 422)가 이미 계획돼 있음 |
-| 대화 테이블 계획 | `backend-db-schema.md` | `chat_sessions`, `chat_messages`가 **설계만** 있고 마이그레이션은 아직 없음(0001~0004는 환자·동의·환율·탈퇴). "30일 후 삭제 + 삭제 버튼, 계정당 세션 수 제한"이 제안으로 적혀 있음 |
+| 대화 테이블 계획 | `backend-db-schema.md` | `chat_sessions`, `chat_messages`가 **설계만** 있고 마이그레이션이 없었음(0001~0004는 환자·동의·환율·탈퇴). **11/10 `0005`가 생김** — `backend-A-chatbot` 브랜치 `7c440b3`, 아직 `backend`에 머지 전이고 공용 DB에는 미적용. "30일 후 삭제 + 삭제 버튼, 계정당 세션 수 제한"이 제안으로 적혀 있음 |
 | 백엔드 테스트 실행 | `.venv` 확인 | 이 PC에서는 불가: `sqlalchemy`·`psycopg`·`alembic` 미설치 → `uv sync` 후 확인 필요 |
 | 서버 직접 기동 | `fastapi.exe dev` | 실행 권한 거부, **미확인** (소스 확인으로 대체) |
 
@@ -42,7 +42,7 @@
 
 | # | 문제 | 처리 |
 |---|---|---|
-| 1 | **대화 테이블 마이그레이션은 B만 만든다** (`backend/AGENTS.md` 4절). 우리는 `chat_sessions`에 상태 칸(`state jsonb`)을 더해야 하고 테이블 자체도 아직 없음 | **핵심 의존성.** 7b 시작 전에 B에게 요청서를 보낸다(아래 4절). 그동안 7a는 메모리 저장소로 개발 |
+| 1 | ~~대화 테이블 마이그레이션은 B만 만든다~~ **정정**: 마이그레이션은 **A가 만든다**(`backend/AGENTS.md` 4절, 결정 13). 처음에 옛 규칙을 읽고 B에게 요청한다고 잘못 썼음 | **해결 (11/10)**: `0005`(`state jsonb` 포함)를 A가 `backend-A-chatbot`에서 작성·검증함. 남은 일: `backend` PR 머지 → 공용 DB에 `alembic upgrade head` |
 | 2 | **계약과 우리 API가 다르다** (`/chatbot/ask`는 출처가 붙은 답만 정의) | 계약 수정 PR + B 승인 (7c) |
 | 3 | **진료과 코드**: 챗봇은 한국어 이름(피부과 등), DB는 영어 코드. 게다가 챗봇 가상 데이터에는 치과·정형외과·한방 등 **DB에 없는 진료과**가 있음 | 도구는 한국어 이름을 받되 초안에는 `departments.code`로 변환해 넣음. 코드 표에 없는 진료과는 **병원 찾기까지만, 예약 요청 불가**로 처리(DB 진료과가 늘면 표만 확장) |
 | 4 | **언어 코드**: 백엔드·프론트 5개(`ko, en, zh-TW, zh-CN, vi`), 챗봇 8개 | API 입구에서 `zh`→`zh-CN`으로 정리, 지원 밖(`ja`, `th`, `ru`)은 가장 가까운 UI 언어 + 대화 자체는 사용자 언어로 응답 |
@@ -68,11 +68,11 @@
 ### 저장 (최소 저장)
 | 테이블 | 저장하는 것 | 저장하지 않는 것 |
 |---|---|---|
-| `chat_sessions` (+ **`state jsonb`** 추가 요청) | `patient_id`(탈퇴 시 CASCADE 삭제), 언어, 제목(첫 질문 앞부분, 개인정보 가림), 시각, `state` = `{residency, draft, shown_hospitals}` | 도구 결과 전체 |
+| `chat_sessions` (+ **`state jsonb`**, 마이그레이션 `0005` 완료) | `patient_id`(탈퇴 시 CASCADE 삭제), 언어, 제목(첫 질문 앞부분, 개인정보 가림), 시각, `state` = `{residency, draft, shown_hospitals}` | 도구 결과 전체 |
 | `chat_messages` | 역할(user/assistant), **개인정보를 가린** 텍스트, 거절 여부, 출처 | 카드, 도구 호출·결과 |
 - 모델에게 주는 맥락 = 최근 텍스트 N개 + `state` 요약(체류 형태, 초안, "방금 보여 준 병원: 이름=id")
 - 보관 **30일 후 삭제**(스키마 문서의 제안, 법적 기준은 **미확인**), 대화 삭제 버튼, 계정당 세션 수 제한, 챗봇 첫 사용 때 "대화가 저장됩니다" 고지
-- **한계(솔직히)**: 개인정보 가리기는 이메일·전화·여권번호를 가릴 뿐 **증상을 쓴 문장은 그대로 저장**된다. 개인정보보호위원회 질의 8번 회신 전까지는 저장 고지와 삭제 수단으로 대응하고, 회신에 따라 건강정보 동의를 추가할 수 있게 저장 층을 분리한다
+- **한계(솔직히)**: 개인정보 가리기는 이메일·전화·여권번호를 가릴 뿐 **증상을 쓴 문장은 그대로 저장**된다. 그래서 **요청서 초안의 `health_info`·`inquiry`는 서버에 저장하지 않는다**(허용 목록 방식, 11/10 반영). 개인정보보호위원회 질의 8번 회신 전까지는 저장 고지와 삭제 수단으로 대응하고, 회신에 따라 건강정보 동의를 추가할 수 있게 저장 층을 분리한다
 
 ### AI 쪽 서비스 층 (`ai/agent/service.py`) — FastAPI 없이 테스트됨
 `ChatService.ask(patient, session_id, message, language)` → 응답. 아래 인터페이스를 주입받아 7a에서는 **메모리 구현**, 7b에서 **DB 구현**으로 바꾼다.
@@ -86,7 +86,7 @@
 |---|---|---|---|
 | **7a ✅ (11/10)** | `ai` | 서비스 층, 저장소·게이트웨이 인터페이스와 메모리 구현, 카드 모델, 요청서 카드의 `request` 변환, 진료과·언어 코드 변환, 제출 확인(초안 정리), `LLMSettings` 절대 경로, 계정당 호출 제한 | 이 PC에서 테스트 통과 |
 | **7a-검증** | `ai` | 실제 모델로 6턴 시나리오를 **저장소를 거쳐**(텍스트만 저장, 도구 결과 없음) 재현. "첫 번째 병원" 같은 말을 `shown_hospitals`로 이어 가는지, 다른 계정의 세션 접근 거절 | 시나리오 10/10 유지 |
-| **B 요청** | 팀 | B에게: `chat_sessions`·`chat_messages` 마이그레이션(`state jsonb` 포함), 필요하면 30일 삭제 작업. `backend-todo-B`/worklog "상대에게 요청"에 기록 | B 확인 |
+| **마이그레이션 ✅ (11/10)** | `backend-A-chatbot` | A가 직접 `0005`(`chat_sessions`·`chat_messages`, RLS 켬) + 모델 + 탈퇴 시 대화 즉시 삭제 + 테스트 10개. 백엔드 테스트 88개 통과, `alembic check` 일치, 되돌리기/다시 올리기 통과, Postgres SQL 확인 | PR 머지, 공용 DB 적용 |
 | **PR** | 팀 | 7a 직후 `ai` → `main` (리더 승인). 전에 공용 파일 변경(plan.md, 질의서, `pyproject.toml`, agent-spec, `.env.example`, 이 문서)을 팀에 알림 | 머지 |
 | **7b** | `backend-A-chatbot` → `backend` | `uv sync` 후 기존 테스트 확인, `modules/chatbot`(모델·라우터), DB 구현 `SessionStore`, 에러 변환, 가짜 LLM 주입 테스트 | 백엔드 테스트 통과 |
 | **7c** | 계약·문서 PR | `/chatbot/*` 계약, 새 에러 코드 `chatbot.unavailable`, 언어·진료과 코드, 카드 형식, 로그인 표(`backend-plan.md`)·`compliance.md`·`plan.md` 갱신 | B 승인 |
@@ -118,7 +118,7 @@
 4. **무료 키로는 시연 한 번도 빠듯하다**: 8턴 시나리오 한 번이 약 17~18회 호출이라 `gemini-3.5-flash`(하루 20회) 한도를 한 번에 넘긴다. lite·Nemotron 폴백이 있어 지금은 통과하지만 여러 사람의 동시 시연은 불가
 5. **입력 토큰**: 8턴에 6만~8만. 도구 11개의 설명이 매 호출에 들어가는 것이 큰 몫 → 유료 전환 전에 의도별로 도구를 줄이는 개선 필요
 
-**B에게 보낼 요청 (마이그레이션)**: `chat_sessions`(id uuid, patient_id FK CASCADE, lang, title varchar(60), `state jsonb`, created_at, last_message_at), `chat_messages`(id bigint, session_id FK CASCADE, role, content, refused bool, created_at). 출처 칸(`sources`)은 이번 설계에서 쓰지 않음. `session_store.py`의 인터페이스가 곧 DB 구현의 명세
+**마이그레이션 `0005` (완료, 11/10)**: `chat_sessions`(id uuid, patient_id FK CASCADE, lang CHECK 5개, title varchar(60) NOT NULL, `state jsonb` NOT NULL 기본 `{}`, created_at, last_message_at), `chat_messages`(id bigint identity, session_id FK CASCADE, role CHECK, content, refused bool, created_at). 출처 칸(`sources`)은 이번 설계에서 쓰지 않아 뺐고 스키마 문서(db-schema 5절)도 맞춰 고침. `session_store.py`의 인터페이스가 곧 DB 구현의 명세
 
 ## 6. 남은 결정
 1. 유료 키 전환 시점 (시연 일정에 따라)
@@ -127,7 +127,7 @@
 4. 개인정보보호위원회 질의 8번 회신에 따른 건강정보 동의 추가 여부
 
 ## 7. 위험
-- **B의 마이그레이션이 늦어지면 7b가 멈춘다.** 완화: 7a는 메모리 저장소로 끝까지 가능, 요청을 일찍 보냄
+- **`0005`가 `backend` 브랜치에 머지되기 전에는 DB 구현을 공용 DB에서 시험할 수 없다.** 완화: 테스트는 메모리 SQLite라 머지와 무관하게 진행 가능, 공용 DB 적용은 PR 머지 뒤
 - 텍스트와 `state`만으로 대화를 이어 가는 것이 도구 결과 전체를 쓸 때보다 약해질 수 있음 → 7a-검증에서 수치로 확인
 - 입력 토큰이 큼(턴당 약 9,800): 도구 설명 11개가 매 호출에 들어감. 유료 전환 시 비용이므로 의도별로 도구를 줄이는 개선 필요
 - 로그인 필요로 바뀌면 처음 방문자가 챗봇을 못 써 보고 이탈할 수 있음(제품 판단)
