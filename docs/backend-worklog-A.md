@@ -17,6 +17,15 @@
 
 ## 기록
 
+### 2026-11-10 · backend-A-chatbot · Claude
+- 한 일: **챗봇 대화 테이블** — `modules/chatbot/models.py`(`ChatSession`·`ChatMessage`), 마이그레이션 `0005`(`chat_sessions`·`chat_messages`, RLS 켬), `sessions.py`(`delete_all`·`purge_older_than`), `auth.service.withdraw`가 챗봇 대화도 즉시 삭제, `core/db_models.py` 등록. 결정 16 기록, db-schema 5절·backend-plan 로그인 표 갱신
+- 바뀐 계약: 없음 (`/chatbot/*` 계약은 7c에서 별도 PR). 단 **이전 결정 3 일부 변경(챗봇 로그인 필요)** — 결정 16
+- 마이그레이션: 있음 `0005`. **공용 Supabase에는 아직 적용하지 않음**(PR 머지 뒤 `alembic upgrade head`)
+- 테스트: 88개 통과 (기존 78 + 챗봇 테이블 10). `alembic upgrade head`(0001~0005, 임시 SQLite)·`alembic check`(모델과 일치)·`downgrade 0004`→`upgrade head`·PostgreSQL SQL 출력(JSONB, identity, ON DELETE CASCADE, RLS) 확인. 탈퇴 삭제 연결을 빼면 테스트가 실패하는 것도 확인
+- 다음 할 일: `SessionStore` 인터페이스(`ai/agent/session_store.py`)의 DB 구현 + `POST /chatbot/ask` 라우터(`ai` 브랜치가 `main`에 들어온 뒤 — 지금 `backend`에는 `ai/` 패키지가 없음), 계약 PR
+- B에게 요청: 결정 16(챗봇 로그인 필요, 요청서는 같은 API로 제출) 확인. 병원 쪽 `booking.service.create_request`·`list_for_patient`가 오면 챗봇이 제출 확인에 씀
+- 막힌 것·질문: ① 증상을 쓰면 건강정보가 계정에 저장되어 AGENTS.md 6절과 충돌(스키마 5절 ⚠️) — 고지·마스킹·30일·삭제 버튼으로 진행하되 **팀 확인 필요**, 개인정보보호위원회 질의 8번 회신 전. 요청서 초안의 `health_info`는 저장 상태에서 빼는 것이 안전(7a 서비스 층에 반영 예정) ② 이 PC는 보안 정책이 `sqlalchemy`의 컴파일된 확장 파일을 막아, 일회용 가상환경에서 그 파일만 지우고 순수 파이썬으로 테스트함(팀 환경·`uv.lock` 무관, 속도만 느림)
+
 ### 2026-11-05 (3) · backend-A-account · Claude
 - 한 일: **Supabase DB 초기화** — `alembic downgrade base` → `upgrade head`로 `0001`~`0004` 다시 적용 (현재 `0004`, 모든 테이블 비어 있음, RLS 켜짐). 기존 테스트 계정 3개·세션·동의 삭제. 아래 항목의 "Supabase 미적용"은 이걸로 처리
 - 바뀐 계약: 없음
