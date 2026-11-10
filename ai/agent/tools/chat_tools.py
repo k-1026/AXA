@@ -1,9 +1,10 @@
-"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 10개 — 지금은 가짜 응답 (fake_data.py).
+"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 11개 — 지금은 가짜 응답 (fake_data.py).
 
 | 의도 | 도구 |
 |---|---|
 | 진료과안내 | suggest_department |
 | 병원찾기 | search_hospitals, get_hospital |
+| 병원추천 | recommend_hospitals |
 | 가격 | get_prices |
 | 정보질문 | retrieve_docs |
 | 예약 | check_availability, prepare_booking_request, record_residency |
@@ -11,7 +12,10 @@
 | 사후문의 | open_aftercare_thread |
 
 규칙 (docs/agent-spec.md, subject/plan.md 12절)
-- 병원은 항상 **여러 곳을 이름순(중립)** 으로. 순위·평가·"추천" 없음
+- search_hospitals는 **여러 곳을 이름순(중립)** 으로
+- recommend_hospitals는 **조건에 얼마나 맞는지**(언어·요일·희망 날짜)로 최대 3곳을 이유와 함께 제안한다 (2026-11-10 추가).
+  등록 유치사업자 가정에서 허용되는 유치 행위. 의료 수준·실력·결과에 대한 평가는 아님. 단기 방문 외국인에게만,
+  등록 유치의료기관만, 수수료 관계 고지 포함. 국내 거주자에게는 추천하지 않고 중립 목록으로 안내
 - prepare_booking_request는 **초안 카드만** 만든다. 제출은 환자가 화면 버튼으로 (도구로 제출 X)
 - 국내 거주 외국인(resident)은 상담 예약 연결 불가 → 병원 연락처만 안내
 - 사후 문의는 비의료 주제만 (의료 상담은 2027-05-27 외국인환자 비대면진료 시행 후 확장)
@@ -33,6 +37,12 @@ DOC_TOPICS = ["visa", "procedure", "rights", "payment", "other"]
 
 MEDICAL_DISCLAIMER = "General information only. Diagnosis and suitable treatment must be decided by a doctor."
 NEUTRAL_NOTE = "Listed in name order. This is not a recommendation or ranking."
+RECOMMEND_BASIS = (
+    "Suggested only by how well each hospital matches the user's stated conditions (language support, opening day, "
+    "available time). This is not a judgment of medical quality, skill or results. All are registered foreign-patient "
+    "facilities. MediDaegu is a registered patient facilitator and may receive a referral fee from hospitals; "
+    "the fee does not affect the order."
+)
 PRICE_NOTE = "Public non-covered fee notice for Korean patients (demo values). Final cost may differ; ask the hospital."
 
 
@@ -92,6 +102,51 @@ def search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     rows.sort(key=lambda h: h["name_en"])  # 중립 정렬
     limit = args.get("limit", 5)
     return {"count": len(rows), "hospitals": [_hospital_card(h) for h in rows[:limit]], "note": NEUTRAL_NOTE}
+
+
+def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
+    # 소개·알선은 건강보험 미가입·국내 비거주 외국인에게만 허용 (의료법 제27조 제3항 제2호, 시행규칙 제19조의2)
+    if ctx.residency is None:
+        return {"status": "needs_info", "ask": "residency",
+                "question": "Are you visiting Korea short-term, or do you live in Korea (alien registration / NHIS)?"}
+    if ctx.residency == "resident":
+        return {"status": "not_available",
+                "reason": "Hospital suggestions are for short-term visitors. Use search_hospitals to show the neutral list instead."}
+    dept = args["department"]
+    rows = [h for h in fd.HOSPITALS if dept in h["departments"] and h["is_registered_facility"]]
+    if args.get("district"):
+        rows = [h for h in rows if h["district"] == args["district"]]
+    lang, day, pref = args.get("language"), args.get("open_on"), args.get("preferred_date")
+    if pref:
+        _parse_date(pref, "preferred_date")
+    scored = []
+    for h in rows:
+        score, reasons = 0, []
+        if lang:
+            if lang in h["staff_languages"]:
+                score += 2
+                reasons.append(f"staff speak {lang}")
+            elif h["ai_translation_chat"]:
+                score += 1
+                reasons.append("AI translation chat available")
+            else:
+                continue  # 소통 수단이 없는 병원은 제안하지 않음
+        if day and h["hours"].get(day):
+            score += 1
+            reasons.append(f"open on {day} ({h['hours'][day]})")
+        if pref and fd.AVAILABILITY.get(h["id"], {}).get(pref):
+            score += 1
+            reasons.append(f"consultation slots on {pref}")
+        if args.get("district"):
+            reasons.append(f"in {h['district']}")
+        scored.append((score, h, reasons))
+    scored.sort(key=lambda x: (-x[0], x[1]["name_en"]))
+    return {
+        "status": "ok",
+        "count": len(scored),
+        "suggestions": [{**_hospital_card(h), "match_reasons": reasons} for _, h, reasons in scored[:3]],
+        "basis": RECOMMEND_BASIS,
+    }
 
 
 def get_hospital(args: JSON, ctx: ToolContext) -> JSON:
@@ -213,7 +268,7 @@ def build_registry() -> ToolRegistry:
         suggest_department, "진료과안내"))
     r.register(Tool(
         "search_hospitals",
-        "대구 병원을 조건으로 검색해 **여러 곳을 이름순**으로 돌려준다 (추천·순위 아님). "
+        "대구 병원을 조건으로 검색해 **여러 곳을 이름순**으로 돌려준다 (추천·순위 아님 — 추천 요청은 recommend_hospitals). "
         "기본은 외국인환자 유치의료기관 등록 병원만. language를 주면 그 언어로 직원 응대 또는 AI 번역 채팅이 되는 병원만.",
         {"type": "object", "properties": {
             "department": {"type": "string", "description": "한국어 진료과명. 예: 피부과, 성형외과, 치과, 내과, 가정의학과, 정형외과, 한방"},
@@ -224,6 +279,19 @@ def build_registry() -> ToolRegistry:
             "limit": {"type": "integer", "minimum": 1, "maximum": 10}},
          "required": ["department"]},
         search_hospitals, "병원찾기"))
+    r.register(Tool(
+        "recommend_hospitals",
+        "사용자가 **추천·제안을 요청했을 때** 조건(언어·요일·희망 날짜·지역)에 가장 잘 맞는 등록 병원을 최대 3곳, 이유와 함께 제안한다. "
+        "이유는 결과의 match_reasons만 사용한다. 의료 수준·실력·결과 평가가 아니며 '최고'라고 말하지 않는다. "
+        "체류 형태를 모르면 needs_info를 돌려주므로 사용자에게 묻는다.",
+        {"type": "object", "properties": {
+            "department": {"type": "string", "description": "한국어 진료과명. 예: 피부과, 성형외과, 치과, 내과, 가정의학과, 정형외과, 한방"},
+            "district": {"type": "string", "enum": DISTRICTS},
+            "language": {"type": "string", "enum": LANGS, "description": "사용자 언어 코드"},
+            "open_on": {"type": "string", "enum": WEEKDAYS},
+            "preferred_date": {"type": "string", "description": "YYYY-MM-DD"}},
+         "required": ["department"]},
+        recommend_hospitals, "병원추천"))
     r.register(Tool(
         "get_hospital",
         "병원 1곳의 상세 정보(주소·전화·진료시간·지원 언어·상담 요청 가능 여부). 평가 정보는 없다.",

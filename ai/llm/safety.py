@@ -6,10 +6,14 @@ LLM을 부르기 **전에** 코드로 하는 검사 (LLM 호출 없음 → 무�
 |---|---|---|
 | 1 | 응급 표현 (가슴 통증·호흡 곤란·심한 출혈·의식 저하 — 병명만 말한 경우는 제외) | **block** — LLM 없이 119 안내 고정 문구 |
 | 2 | 개인정보 (이메일·전화·여권번호·외국인등록번호) | 마스킹한 글만 LLM에 전달 |
-| 3 | 의료 판단·병원 평가 요청 (진단, 효과·부작용, 약·용량, 순위·추천) | **guard** — 막지 않고, 그 부분을 거절하라는 지시를 이번 턴에 덧붙임 + 화면에 의료 고지 |
+| 3 | 의료 판단 요청 (진단, 효과·부작용, 약·용량), 병원 평판·실력 비교 요청 | **guard** — 막지 않고, 그 부분을 거절하라는 지시를 이번 턴에 덧붙임 + 화면에 의료 고지 |
 
 3번을 통째로 막지 않는 이유: "흉터가 있는데 어디가 제일 좋아요?"처럼 거절할 부분과 도와줄 부분(병원 찾기·예약)이
 한 문장에 섞여 온다. 통째로 막으면 원스톱 흐름이 끊긴다 (subject/plan.md 12-5 "증상 → 진료과 → 병원 → 예약").
+병원 **추천 요청은 guard 대상이 아니다** (2026-11-10 변경): 메디대구를 등록 유치사업자로 가정하면 단기 방문 외국인에게
+병원을 소개·알선하는 것은 허용된 유치 행위다 (의료법 제27조 제3항 제2호, 의료해외진출법 제2조 제3호·제6조 제2항).
+의료 판단은 등록과 무관하게 금지 그대로다 (의료법 제27조 제1항 — 의료인이 아니면 의료행위 불가).
+근거: research/의료관광/방향성-검토-플랫폼-샌드박스.md 5절.
 키워드 목록은 완전하지 않다 → 시스템 프롬프트의 금지 규칙이 기본 방어선, 이 파일은 보강.
 """
 
@@ -83,7 +87,7 @@ GUARD_PATTERNS: dict[str, list[str]] = {
     # 시술 적합성·효과·부작용·안전성
     "treatment_judgment": [
         r"효과(가|는)?\s*(있|좋|어때|얼마)", r"부작용", r"안전한가", r"괜찮을까", r"받아도\s*(되|될)", r"(어떤|무슨)\s*시술(이|을)?\s*(좋|받|맞)",
-        r"side effects?", r"is (it|this|that) safe", r"does (it|this) work", r"how effective", r"(which|what) (treatment|procedure|laser) (is|should|would|do)",
+        r"side effects?", r"\bis\b.{0,40}\bsafe\b", r"does (it|this) work", r"how effective", r"(which|what) (treatment|procedure|laser) (is|should|would|do)",
         r"should i (get|have|do|try) .{0,40}(surgery|laser|botox|filler|treatment|procedure|implant|injection|lift|peel)", r"is .{0,40}(right|suitable|good) for me",
         r"副作用", r"效果(好|怎么样|怎麼樣|如何)", r"安全吗", r"安全嗎", r"适合我", r"適合我", r"tác dụng phụ", r"có hiệu quả", r"có an toàn", r"効果(は|が)", r"安全ですか",
     ],
@@ -93,14 +97,13 @@ GUARD_PATTERNS: dict[str, list[str]] = {
         r"(can|should) i take .{0,40}(medicine|medication|pills?|drugs?|ibuprofen|aspirin|antibiotics?|painkillers?|tylenol)", r"\bdosage\b", r"\bdose\b", r"prescribe", r"what (medicine|medication|drug)",
         r"吃什么药", r"吃什麼藥", r"剂量", r"劑量", r"liều", r"uống thuốc gì", r"何の薬", r"用量",
     ],
-    # 병원 순위·평가·추천
-    "hospital_ranking": [
-        r"(제일|가장)\s*(잘|좋|유명|싼|저렴)", r"(병원|의원|의사|곳|어디).{0,12}추천", r"추천.{0,12}(병원|의원|의사|곳)", r"추천해", r"잘하는\s*(곳|병원|의원)", r"(병원|의원|의사).{0,10}(어때|괜찮|믿을)", r"후기", r"평판",
-        r"\b(best|cheapest|most (famous|popular|trusted))\b", r"\btop[- ]?(rated|clinic|hospital|doctor|\d+)", r"\brecommend",
+    # 병원 평판·후기·실력 비교 (추천 요청 자체는 해당 없음 → recommend_hospitals 도구로 처리)
+    "hospital_evaluation": [
+        r"(병원|의원|의사|선생님|여기|거기).{0,10}(어때|괜찮(아|나|은가|을까)|믿을)", r"후기", r"평판", r"보다\s*(더\s*)?(잘|낫|나아|좋)",
         r"(clinic|hospital|doctor)\b.{0,15}\b(any good|reliable|trustworthy|good\?)",
         r"reviews? (of|for|on|about) .{0,30}(clinic|hospital|doctor)", r"(clinic|hospital|doctor)s?\b.{0,20}\breviews?\b", r"\breputation\b",
-        r"最好", r"最便宜", r"最有名", r"推荐", r"推薦", r"口碑", r"评价", r"評價", r"tốt nhất", r"rẻ nhất", r"giới thiệu", r"đánh giá",
-        r"一番(いい|良い|安い)", r"おすすめ", r"口コミ", r"評判",
+        r"\bbetter than\b", r"more skilled",
+        r"口碑", r"评价", r"評價", r"比.{0,12}(好|强|強)", r"đánh giá", r"tốt hơn", r"口コミ", r"評判", r"より(上手|いい|良い)",
     ],
 }
 _GUARD_RE = {cat: [re.compile(p, re.IGNORECASE) for p in pats] for cat, pats in GUARD_PATTERNS.items()}
@@ -110,10 +113,11 @@ GUARD_NOTES = {
     "treatment_judgment": "The user is asking whether a treatment works, is safe, has side effects, or suits them. "
     "Do not answer that part: say a doctor explains this at the consultation.",
     "medication": "The user is asking about medicine or dosage. Do not answer that part: say a doctor or pharmacist must advise.",
-    "hospital_ranking": "The user is asking for a recommendation, ranking, review or opinion about hospitals. "
-    "Do not rank, recommend, praise or criticise any hospital and do not pick one. Offer neutral filters or the full list instead.",
+    "hospital_evaluation": "The user is asking for an opinion, review, reputation or skill comparison of hospitals or doctors. "
+    "Do not give opinions, reviews or quality comparisons, and do not criticise any hospital. You may state facts from tools "
+    "(languages, hours, registration, prices) and, if they want a suggestion, use recommend_hospitals.",
 }
-GUARD_SUFFIX = " Then help with whatever else they asked that you are allowed to do (department info, hospital search, prices, booking)."
+GUARD_SUFFIX = " Then help with whatever else they asked that you are allowed to do (department info, hospital search or suggestion, prices, booking)."
 
 
 # ------------------------------------------------------------------ 결과

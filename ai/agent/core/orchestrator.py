@@ -22,6 +22,7 @@ from ai.llm.client import LLMResponse, Message, tool_result_message
 # 도구 이름 → 화면 카드 종류. 결과가 오류이거나 비어 있으면 카드를 만들지 않는다
 CARD_TYPES = {
     "search_hospitals": "hospital_list",
+    "recommend_hospitals": "hospital_suggestions",
     "get_hospital": "hospital_detail",
     "get_prices": "price_list",
     "retrieve_docs": "sources",
@@ -73,6 +74,8 @@ def _card(tool: str, result: JSON) -> JSON | None:
     if tool == "open_aftercare_thread" and result.get("status") != "opened":
         return None
     if tool == "search_hospitals" and not result.get("hospitals"):
+        return None
+    if tool == "recommend_hospitals" and not result.get("suggestions"):
         return None
     if tool == "get_prices" and not result.get("prices"):
         return None

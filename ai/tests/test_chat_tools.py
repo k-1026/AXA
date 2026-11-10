@@ -9,13 +9,13 @@ SHORT = ToolContext(patient_id="demo-patient-1", language="en", residency="short
 
 def test_tools_have_valid_specs():
     specs = R.openai_specs()
-    assert len(specs) == 10
+    assert len(specs) == 11
     for s in specs:
         fn = s["function"]
         assert s["type"] == "function" and fn["name"] and fn["description"]
         assert fn["parameters"]["type"] == "object"
     intents = {t.intent for t in R.tools.values()}
-    assert intents == {"진료과안내", "병원찾기", "가격", "정보질문", "예약", "예약상태", "사후문의"}
+    assert intents == {"진료과안내", "병원찾기", "병원추천", "가격", "정보질문", "예약", "예약상태", "사후문의"}
 
 
 def test_validation_errors_are_returned_not_raised():
@@ -78,3 +78,22 @@ def test_prices_and_docs():
     assert len(p["prices"]) == 2 and "Korean patients" in p["note"]
     assert R.run("retrieve_docs", {"query": "visa", "topic": "visa"}, SHORT)["documents"][0]["source"]
     assert R.run("retrieve_docs", {"query": "zzz unknown"}, SHORT)["documents"] == []
+
+
+def test_recommend_by_match_only_for_short_term_visitors():
+    args = {"department": "피부과", "district": "수성구", "language": "zh", "preferred_date": "2026-12-04"}
+    assert R.run("recommend_hospitals", args, ToolContext())["ask"] == "residency"
+    assert R.run("recommend_hospitals", args, ToolContext(residency="resident"))["status"] == "not_available"
+    res = R.run("recommend_hospitals", args, SHORT)
+    first, second = res["suggestions"]
+    # B: 직원 중국어(+2) + 12/4 시간(+1) → A(AI 번역 +1)보다 앞. 미등록 C는 제외
+    assert [first["hospital_id"], second["hospital_id"]] == [9002, 9001]
+    assert "staff speak zh" in first["match_reasons"] and "consultation slots on 2026-12-04" in first["match_reasons"]
+    assert second["match_reasons"][0] == "AI translation chat available"
+    assert "not a judgment of medical quality" in res["basis"] and "referral fee" in res["basis"]
+
+
+def test_recommend_skips_hospitals_without_language_support():
+    res = R.run("recommend_hospitals", {"department": "성형외과", "language": "en"}, SHORT)
+    assert res["suggestions"] == []  # 가상성형외과: 직원 zh·vi, AI 번역 없음
+    assert "error" in R.run("recommend_hospitals", {"department": "피부과", "preferred_date": "12/04"}, SHORT)

@@ -30,15 +30,13 @@ def test_emergency_reply_adds_english_for_other_languages():
     ("Should I get botox or filler?", "treatment_judgment"),
     ("激光治疗痘疤效果好吗？", "treatment_judgment"),
     ("Can I take ibuprofen after the procedure?", "medication"),
-    ("대구에서 제일 잘하는 피부과 추천해 주세요", "hospital_ranking"),
-    ("Which clinic is the best?", "hospital_ranking"),
-    ("给我推荐一家最好的皮肤科", "hospital_ranking"),
-    ("Bệnh viện nào tốt nhất?", "hospital_ranking"),
-    ("おすすめの皮膚科は？", "hospital_ranking"),
     ("Do I have skin cancer?", "diagnosis"),
     ("이 약 먹어도 되나요?", "medication"),
-    ("여기 병원 어때요?", "hospital_ranking"),
-    ("Is Demo Clinic A any good?", "hospital_ranking"),
+    ("여기 병원 어때요?", "hospital_evaluation"),
+    ("Is Demo Clinic A any good?", "hospital_evaluation"),
+    ("A 의원이 B 의원보다 잘하나요?", "hospital_evaluation"),
+    ("What are the reviews of this clinic?", "hospital_evaluation"),
+    ("这家医院口碑怎么样", "hospital_evaluation"),
     ("쌍꺼풀 수술 받아도 될까요?", "treatment_judgment"),
 ])
 def test_guard_categories(text, cat):
@@ -67,6 +65,12 @@ def test_guard_categories(text, cat):
     "top floor parking available?",
     "Is clinic A good at English?",
     "Show me the review of my booking draft",
+    # 추천 요청은 guard 대상이 아님 (등록 유치사업자 가정, 2026-11-10) → recommend_hospitals 도구가 처리
+    "대구에서 피부과 추천해 주세요",
+    "Which clinic is the best?",
+    "给我推荐一家最好的皮肤科",
+    "Bệnh viện nào tốt nhất?",
+    "おすすめの皮膚科は？",
     # 병명만 말한 병원 찾기는 응급이 아님
     "stroke rehabilitation hospitals in Daegu",
     "마비 재활 병원 찾아줘",
@@ -77,7 +81,7 @@ def test_normal_requests_pass(text):
 
 
 def test_mixed_request_is_guarded_not_blocked():
-    r = check("I have acne scars. Which clinic in Suseong-gu is best, and can I book for Dec 1?")
+    r = check("I have acne scars. Is laser safe for me, and can I book a clinic in Suseong-gu for Dec 1?")
     assert r.action == "guard" and "Then help with whatever else" in r.note
 
 

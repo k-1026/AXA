@@ -43,7 +43,7 @@ def test_plain_answer_keeps_history_and_ai_flag():
     assert [m["role"] for m in state.history] == ["user", "assistant"]
     system = llm.calls[0][0][0]
     assert system["role"] == "system" and "2026-11-10" in system["content"] and "residency=unknown" in system["content"]
-    assert len(llm.calls[0][1]) == 10  # 도구 10개 전달
+    assert len(llm.calls[0][1]) == 11  # 도구 11개 전달
 
 
 def test_tool_chain_builds_cards_from_tool_results():
@@ -119,12 +119,12 @@ def test_emergency_blocks_without_calling_llm():
 
 
 def test_guard_note_is_sent_this_turn_only():
-    orch, llm = make([say("I can't rank hospitals, but here is how to filter."), say("Sure.")])
+    orch, llm = make([say("A doctor decides that at the consultation."), say("Sure.")])
     state = ConversationState()
-    reply = orch.handle(state, "Which dermatology clinic is the best?")
-    assert reply.safety_categories == ["hospital_ranking"] and reply.medical_notice
+    reply = orch.handle(state, "Is fractional laser safe for me?")
+    assert reply.safety_categories == ["treatment_judgment"] and reply.medical_notice
     sent = llm.calls[0][0]
-    assert sent[-2]["role"] == "system" and "Do not rank" in sent[-2]["content"] and sent[-1]["role"] == "user"
+    assert sent[-2]["role"] == "system" and "Do not answer that part" in sent[-2]["content"] and sent[-1]["role"] == "user"
     assert all(m["role"] != "system" for m in state.history)
     orch.handle(state, "ok, show me clinics in Jung-gu")
     assert [m["role"] for m in llm.calls[1][0]].count("system") == 1  # 다음 턴에는 guard 없음
@@ -161,3 +161,17 @@ def test_guessed_residency_is_rejected_by_code():
     reply = orch.handle(state, "10:00 please. I want to ask about scar laser options.")
     assert state.residency is None and state.booking_draft is None and reply.cards == []
     assert "not_recorded" in llm.calls[1][0][-2]["content"]
+
+
+def test_recommendation_request_is_not_guarded_and_makes_card():
+    orch, llm = make([
+        call(("recommend_hospitals", {"department": "피부과", "district": "수성구", "language": "zh"})),
+        say("Clinic B has Chinese-speaking staff."),
+    ])
+    state = ConversationState(language="zh", residency="short_term")
+    reply = orch.handle(state, "给我推荐一家皮肤科")
+    assert reply.safety_categories == [] and not reply.medical_notice
+    assert [m["role"] for m in llm.calls[0][0]].count("system") == 1  # guard 지시 없음
+    card = reply.cards[0]
+    assert card["type"] == "hospital_suggestions" and card["data"]["suggestions"][0]["hospital_id"] == 9002
+    assert "referral fee" in card["data"]["basis"]
