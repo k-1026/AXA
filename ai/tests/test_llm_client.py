@@ -186,7 +186,7 @@ def test_all_providers_fail():
 
 def test_no_keys_means_no_providers():
     s = LLMSettings(_env_file=None, gemini_api_key="", nemotron_api_key="k")
-    assert [p.name for p in s.providers()] == ["nemotron"]
+    assert {p.name for p in s.providers()} == {"nemotron"}  # 기본값이 모델 2개라 nemotron이 2번 나옴
     with pytest.raises(AllProvidersFailed):
         LLMClient([]).chat([{"role": "user", "content": "x"}])
 
@@ -194,3 +194,8 @@ def test_no_keys_means_no_providers():
 def test_unknown_provider_name():
     with pytest.raises(ValueError):
         LLMSettings(_env_file=None, llm_provider_order="gemini,gpt").providers()
+
+
+def test_comma_separated_models_become_fallback_chain():
+    s = LLMSettings(_env_file=None, gemini_api_key="k", gemini_model="a, b", nemotron_api_key="k2", nemotron_model="n")
+    assert [(p.name, p.model) for p in s.providers()] == [("gemini", "a"), ("gemini", "b"), ("nemotron", "n")]
