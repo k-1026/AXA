@@ -16,13 +16,15 @@ JSON = dict[str, Any]
 
 @dataclass
 class ToolContext:
-    """대화마다 서버가 채우는 값. LLM이 바꿀 수 없다 (도구 인자로 받지 않음)."""
+    """대화마다 서버가 채우는 값. patient_id는 LLM이 바꿀 수 없다.
+    residency만 record_residency 도구로 사용자가 말한 값을 기록할 수 있다."""
 
     patient_id: str | None = None
     language: str = "en"
     # 국내 거주 여부: "short_term"(단기 방문) | "resident"(외국인등록·거소신고·건보 가입) | None(아직 모름)
     # resident는 상담 예약 연결 불가 (의료법 제27조 제3항 제2호, 시행규칙 제19조의2)
     residency: str | None = None
+    last_user_text: str = ""  # 이번 턴 사용자 메시지 원문 (record_residency가 실제 발화인지 확인하는 데 씀)
 
 
 Handler = Callable[[JSON, ToolContext], JSON]

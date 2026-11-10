@@ -7,9 +7,9 @@ R = build_registry()
 SHORT = ToolContext(patient_id="demo-patient-1", language="en", residency="short_term")
 
 
-def test_nine_tools_with_valid_specs():
+def test_tools_have_valid_specs():
     specs = R.openai_specs()
-    assert len(specs) == 9
+    assert len(specs) == 10
     for s in specs:
         fn = s["function"]
         assert s["type"] == "function" and fn["name"] and fn["description"]

@@ -1,4 +1,4 @@
-"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 9개 — 지금은 가짜 응답 (fake_data.py).
+"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 10개 — 지금은 가짜 응답 (fake_data.py).
 
 | 의도 | 도구 |
 |---|---|
@@ -6,7 +6,7 @@
 | 병원찾기 | search_hospitals, get_hospital |
 | 가격 | get_prices |
 | 정보질문 | retrieve_docs |
-| 예약 | check_availability, prepare_booking_request |
+| 예약 | check_availability, prepare_booking_request, record_residency |
 | 예약상태 | get_my_bookings |
 | 사후문의 | open_aftercare_thread |
 
@@ -162,6 +162,19 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
     }
 
 
+def record_residency(args: JSON, ctx: ToolContext) -> JSON:
+    # 사용자가 채팅에서 직접 말한 값만 기록 (자기 신고). 실제 서비스에서는 가입 단계 확인 값이 우선.
+    # 모델이 추측으로 기록하는 것을 코드로 막는다: 인용문이 이번 사용자 메시지 안에 실제로 있어야 함
+    # (2026-11-10 실제 호출에서 사용자가 답하기 전에 short_term으로 기록한 사례 확인)
+    quote = " ".join(args["user_statement"].split()).lower()
+    said = " ".join(ctx.last_user_text.split()).lower()
+    if len(quote) < 3 or quote not in said:
+        return {"status": "not_recorded",
+                "reason": "The user has not stated this in their latest message. Ask the user and wait for their answer."}
+    ctx.residency = args["residency"]
+    return {"status": "recorded", "residency": ctx.residency}
+
+
 def get_my_bookings(args: JSON, ctx: ToolContext) -> JSON:
     if not ctx.patient_id:
         return {"status": "login_required"}
@@ -255,6 +268,16 @@ def build_registry() -> ToolRegistry:
             "needs_interpreter": {"type": "boolean"}},
          "required": ["hospital_id"]},
         prepare_booking_request, "예약"))
+    r.register(Tool(
+        "record_residency",
+        "사용자가 **직접 말한** 체류 형태를 기록한다. short_term = 한국에 살지 않는 단기 방문, "
+        "resident = 한국 거주(외국인등록·국내거소신고·건강보험 가입). 추측으로 부르지 않는다.",
+        {"type": "object", "properties": {
+            "residency": {"type": "string", "enum": ["short_term", "resident"]},
+            "user_statement": {"type": "string",
+                               "description": "사용자의 **이번 메시지에서 그대로 복사한** 근거 문구 (번역·요약 X). 없으면 이 도구를 부르지 말고 사용자에게 묻는다"}},
+         "required": ["residency", "user_statement"]},
+        record_residency, "예약"))
     r.register(Tool(
         "get_my_bookings",
         "로그인한 사용자의 상담 요청 목록과 상태(pending/confirmed/rejected/proposed/cancelled/expired)를 조회한다.",
