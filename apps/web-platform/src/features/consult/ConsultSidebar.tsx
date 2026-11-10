@@ -26,7 +26,7 @@ export function ConsultSidebar({ activeId, search, demo, onSelect, onClose }: Pr
   const preview = (th: ConsultThread) => {
     const last = th.messages[th.messages.length - 1];
     if (!last) return t('consult.newThread');
-    if (last.booking) return t('consult.bookingSent');
+    if (last.booking) return last.booking.status === 'pending' ? t('consult.bookingSent') : t(`consult.status.${last.booking.status}`);
     return text(last.text ?? '');
   };
 

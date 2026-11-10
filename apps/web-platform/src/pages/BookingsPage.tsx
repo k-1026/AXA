@@ -11,11 +11,11 @@ import { useConsultThreads } from '../features/consult/useConsultThreads';
 import type { BookingStatus } from '../features/consult/types';
 import { LegalLinks } from '../features/legal/LegalLinks';
 
-type Filter = 'all' | 'pending' | 'confirmed' | 'cancelled';
+type Filter = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
 type Sort = 'visit' | 'recent';
-const FILTERS: Filter[] = ['all', 'pending', 'confirmed', 'cancelled'];
+const FILTERS: Filter[] = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
 
-// 상담에서 신청한 예약 모아 보기. 변경·취소는 환자가 하고, 확정은 병원이 한다
+// 상담에서 신청한 예약 모아 보기. 변경·취소는 환자가 하고, 확정·방문 완료 표시는 병원이 한다
 export function BookingsPage() {
   const { t, i18n } = useTranslation();
   const text = useChatText();
@@ -88,6 +88,7 @@ export function BookingsPage() {
         {items.map(({ thread, message, booking }) => {
           const key = message.id;
           const cancelled = booking.status === 'cancelled' || booking.status === 'declined';
+          const done = booking.status === 'completed';
           return (
             <article key={key} className={`mp-card bk-card ${cancelled ? 'is-cancelled' : ''}`}>
               <HospitalThumb photo={thread.photo} size="lg" />
@@ -110,7 +111,8 @@ export function BookingsPage() {
                 </div>
                 <p className="bk-sub">{t('bookings.kind', { lang: langLabel(booking.language) })}</p>
                 <p className="bk-meta">
-                  {booking.status === 'confirmed' && booking.bookingNo && t('bookings.number', { no: booking.bookingNo })}
+                  {(booking.status === 'confirmed' || done) && booking.bookingNo && t('bookings.number', { no: booking.bookingNo })}
+                  {done && booking.treatment && ` · ${text(booking.treatment)}`}
                   {booking.status === 'pending' && (
                     <>
                       <InfoIcon />
@@ -152,7 +154,12 @@ export function BookingsPage() {
                   </div>
                 ) : (
                   <div className="bk-actions">
-                    {!cancelled && (
+                    {done && (
+                      <button type="button" className="is-primary" onClick={() => navigate('/aftercare')}>
+                        {t('aftercare.aftercareButton')}
+                      </button>
+                    )}
+                    {!cancelled && !done && (
                       <>
                         <button type="button" className="is-primary" onClick={() => setEditing(key)}>
                           <PencilIcon />

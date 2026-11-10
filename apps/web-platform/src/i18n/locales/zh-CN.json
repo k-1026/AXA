@@ -365,7 +365,8 @@
       "pending": "待确认",
       "confirmed": "已确认",
       "declined": "无法预约",
-      "cancelled": "已取消"
+      "cancelled": "已取消",
+      "completed": "已就诊"
     },
     "quick": {
       "booking": "预约咨询",
@@ -390,7 +391,8 @@
       "changeTitle": "更改预约",
       "changeSubmit": "申请更改",
       "changeHint": "更改后医院会重新确认，确认前显示为“待确认”。"
-    }
+    },
+    "completedNote": "已完成就诊，可在术后管理中与医护人员交流。"
   },
   "bookings": {
     "backToChats": "返回咨询列表",
@@ -401,7 +403,8 @@
       "all": "全部",
       "pending": "待确认",
       "confirmed": "已确认",
-      "cancelled": "已取消"
+      "cancelled": "已取消",
+      "completed": "已就诊"
     },
     "sortLabel": "排序",
     "sortVisit": "按就诊日期",
@@ -422,5 +425,26 @@
     "cancelMsg": "已取消{{when}}的预约。",
     "footnote": "预约时间以韩国时间（KST）为准。",
     "sampleNote": "示例医院和预约信息。"
+  },
+  "aftercare": {
+    "list": "术后管理记录",
+    "listHint": "仅显示已完成的就诊。",
+    "openMenu": "打开术后管理记录",
+    "none": "还没有已完成的就诊。",
+    "start": "在医院完成诊疗并记录为已就诊后，可在这里与该医院的医护人员交流。",
+    "visitedOn": "{{date}} 就诊",
+    "doctorLabel": "{{name}} · 医护人员",
+    "notice": "诊疗后的状态请咨询该医院的医护人员。如症状严重或突然加重，请立即致电医院或拨打119。",
+    "empty": "请留下诊疗后的疑问或目前的状态，也可以发送照片和视频。",
+    "sampleNote": "示例医院和对话，并非真实诊疗记录。",
+    "placeholder": "告诉医护人员您的状态",
+    "attach": "添加照片或视频",
+    "pending": "待发送的照片和视频",
+    "remove": "移除{{name}}",
+    "mediaNote": "照片和视频属于健康信息。请遮挡面部等不必要的部分。（最多4个，每个50MB）",
+    "errType": "只能发送照片或视频。",
+    "errSize": "每个文件最大50MB。",
+    "errCount": "一次最多发送{{max}}个。",
+    "aftercareButton": "术后管理"
   }
 }

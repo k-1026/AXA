@@ -365,7 +365,8 @@
       "pending": "Chờ xác nhận",
       "confirmed": "Đã xác nhận",
       "declined": "Không thể đặt",
-      "cancelled": "Đã hủy"
+      "cancelled": "Đã hủy",
+      "completed": "Đã khám"
     },
     "quick": {
       "booking": "Hỏi đặt lịch",
@@ -390,7 +391,8 @@
       "changeTitle": "Đổi lịch",
       "changeSubmit": "Gửi yêu cầu đổi",
       "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\"."
-    }
+    },
+    "completedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
   },
   "bookings": {
     "backToChats": "Quay lại danh sách tư vấn",
@@ -401,7 +403,8 @@
       "all": "Tất cả",
       "pending": "Chờ xác nhận",
       "confirmed": "Đã xác nhận",
-      "cancelled": "Đã hủy"
+      "cancelled": "Đã hủy",
+      "completed": "Đã khám"
     },
     "sortLabel": "Sắp xếp",
     "sortVisit": "Theo ngày khám",
@@ -422,5 +425,26 @@
     "cancelMsg": "Tôi đã hủy lịch hẹn {{when}}.",
     "footnote": "Giờ hẹn theo giờ Hàn Quốc (KST).",
     "sampleNote": "Bệnh viện và lịch hẹn mẫu."
+  },
+  "aftercare": {
+    "list": "Lịch sử chăm sóc sau khám",
+    "listHint": "Chỉ hiển thị các lần khám đã hoàn tất.",
+    "openMenu": "Mở lịch sử chăm sóc",
+    "none": "Chưa có lần khám nào hoàn tất.",
+    "start": "Sau khi lần khám được ghi nhận hoàn tất, bạn có thể trao đổi với nhân viên y tế của bệnh viện tại đây.",
+    "visitedOn": "Khám ngày {{date}}",
+    "doctorLabel": "{{name}} · Nhân viên y tế",
+    "notice": "Hãy hỏi nhân viên y tế của bệnh viện về tình trạng sau điều trị. Nếu triệu chứng nặng hoặc xấu đi đột ngột, hãy gọi ngay cho bệnh viện hoặc 119.",
+    "empty": "Hãy để lại câu hỏi hoặc tình trạng hiện tại. Bạn cũng có thể gửi ảnh và video.",
+    "sampleNote": "Bệnh viện và tin nhắn mẫu, không phải hồ sơ khám thật.",
+    "placeholder": "Cho nhân viên y tế biết tình trạng của bạn",
+    "attach": "Đính kèm ảnh hoặc video",
+    "pending": "Ảnh và video sẽ gửi",
+    "remove": "Bỏ {{name}}",
+    "mediaNote": "Ảnh và video là thông tin sức khỏe. Hãy che các phần không cần thiết như khuôn mặt. (Tối đa 4 tệp, mỗi tệp 50MB)",
+    "errType": "Chỉ có thể gửi ảnh hoặc video.",
+    "errSize": "Mỗi tệp tối đa 50MB.",
+    "errCount": "Mỗi lần gửi tối đa {{max}} tệp.",
+    "aftercareButton": "Chăm sóc sau khám"
   }
 }

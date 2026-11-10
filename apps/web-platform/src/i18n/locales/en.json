@@ -365,7 +365,8 @@
       "pending": "Pending",
       "confirmed": "Confirmed",
       "declined": "Unavailable",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "completed": "Visited"
     },
     "quick": {
       "booking": "Booking",
@@ -390,7 +391,8 @@
       "changeTitle": "Change booking",
       "changeSubmit": "Request change",
       "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then."
-    }
+    },
+    "completedNote": "Visit completed. You can talk with the medical staff in Aftercare."
   },
   "bookings": {
     "backToChats": "Back to chats",
@@ -401,7 +403,8 @@
       "all": "All",
       "pending": "Pending",
       "confirmed": "Confirmed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "completed": "Visited"
     },
     "sortLabel": "Sort",
     "sortVisit": "By visit date",
@@ -422,5 +425,26 @@
     "cancelMsg": "I cancelled my booking for {{when}}.",
     "footnote": "Booking times are in Korea Standard Time (KST).",
     "sampleNote": "Sample hospitals and bookings."
+  },
+  "aftercare": {
+    "list": "Aftercare visits",
+    "listHint": "Only completed visits appear here.",
+    "openMenu": "Open aftercare list",
+    "none": "No completed visits yet.",
+    "start": "After your treatment is recorded as completed, you can talk with that hospital’s medical staff here.",
+    "visitedOn": "Visited {{date}}",
+    "doctorLabel": "{{name}} · Medical staff",
+    "notice": "Ask the hospital’s medical staff about your condition after treatment. If symptoms are severe or suddenly worse, call the hospital right away or dial 119.",
+    "empty": "Tell the medical staff how you feel or ask a question. You can send photos and videos too.",
+    "sampleNote": "Sample hospital and messages. Not a real medical record.",
+    "placeholder": "Tell the medical staff how you are",
+    "attach": "Attach photo or video",
+    "pending": "Photos and videos to send",
+    "remove": "Remove {{name}}",
+    "mediaNote": "Photos and videos are health information. Cover anything not needed, such as your face. (Up to 4 files, 50MB each)",
+    "errType": "You can only send photos or videos.",
+    "errSize": "Each file can be up to 50MB.",
+    "errCount": "You can send up to {{max}} files at once.",
+    "aftercareButton": "Aftercare"
   }
 }

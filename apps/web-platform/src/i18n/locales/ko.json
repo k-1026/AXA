@@ -365,7 +365,8 @@
       "pending": "확인 대기",
       "confirmed": "예약 확정",
       "declined": "예약 불가",
-      "cancelled": "예약 취소"
+      "cancelled": "예약 취소",
+      "completed": "방문 완료"
     },
     "quick": {
       "booking": "예약 문의",
@@ -390,7 +391,8 @@
       "changeTitle": "예약 변경",
       "changeSubmit": "변경 요청",
       "changeHint": "변경하면 병원이 다시 확인해요. 확인 전까지 \"확인 대기\"로 표시돼요."
-    }
+    },
+    "completedNote": "방문을 마쳤어요. 사후 관리에서 의료진과 대화할 수 있어요."
   },
   "bookings": {
     "backToChats": "상담 목록으로",
@@ -401,7 +403,8 @@
       "all": "전체",
       "pending": "확인 대기",
       "confirmed": "예약 확정",
-      "cancelled": "취소"
+      "cancelled": "취소",
+      "completed": "방문 완료"
     },
     "sortLabel": "정렬",
     "sortVisit": "방문 예정일 순",
@@ -422,5 +425,26 @@
     "cancelMsg": "{{when}} 예약을 취소했어요.",
     "footnote": "예약 시간은 한국 시간(KST) 기준이에요.",
     "sampleNote": "예시 병원 및 예약 정보예요."
+  },
+  "aftercare": {
+    "list": "사후 관리 내역",
+    "listHint": "방문을 마친 진료·시술만 표시돼요.",
+    "openMenu": "사후 관리 내역 열기",
+    "none": "아직 방문을 마친 진료가 없어요.",
+    "start": "병원에서 진료·시술을 받고 방문 완료로 기록되면, 여기서 그 병원 의료진과 대화할 수 있어요.",
+    "visitedOn": "{{date}} 방문",
+    "doctorLabel": "{{name}} · 의료진",
+    "notice": "시술·진료 후 상태를 그 병원 의료진에게 물어보세요. 증상이 심하거나 갑자기 나빠지면 바로 병원에 전화하거나 119에 연락하세요.",
+    "empty": "진료 후 궁금한 점이나 지금 상태를 남겨 주세요. 사진·영상도 보낼 수 있어요.",
+    "sampleNote": "예시 병원·대화예요. 실제 진료 기록이 아니에요.",
+    "placeholder": "의료진에게 상태를 알려 주세요",
+    "attach": "사진·영상 첨부",
+    "pending": "보낼 사진·영상",
+    "remove": "{{name}} 빼기",
+    "mediaNote": "사진·영상은 건강정보예요. 얼굴 등 필요 없는 부분은 가리고 보내 주세요. (사진·영상 최대 4개, 1개당 50MB)",
+    "errType": "사진이나 영상 파일만 보낼 수 있어요.",
+    "errSize": "파일 1개는 50MB까지 보낼 수 있어요.",
+    "errCount": "한 번에 {{max}}개까지 보낼 수 있어요.",
+    "aftercareButton": "사후 관리"
   }
 }

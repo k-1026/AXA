@@ -20,6 +20,7 @@ import { ChatbotPage } from './pages/ChatbotPage';
 import { VisitsPage } from './pages/VisitsPage';
 import { ConsultPage } from './pages/ConsultPage';
 import { BookingsPage } from './pages/BookingsPage';
+import { AftercarePage } from './pages/AftercarePage';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -43,9 +44,9 @@ createRoot(document.getElementById('root')!).render(
             <Route path="legal/:slug" element={<LegalPage />} />
             {/* 챗봇도 사이트 헤더·메뉴는 그대로, 대화 목록은 챗봇 영역 안에 따로 */}
             <Route path="chatbot" element={<ChatbotPage />} />
-            {/* 상담/예약: 병원별 1:1 상담 (로그인 필요, 확정은 병원). 사후관리는 아직 화면 없음 */}
+            {/* 상담/예약: 병원별 1:1 상담 (확정은 병원) · 사후관리: 방문 완료 예약별로 그 병원 의료진과 대화 (둘 다 로그인 필요) */}
             <Route path="booking" element={<RequireLogin><ConsultPage /></RequireLogin>} />
-            <Route path="aftercare" element={<PlaceholderPage titleKey="nav.aftercare" />} />
+            <Route path="aftercare" element={<RequireLogin><AftercarePage /></RequireLogin>} />
           </Route>
         </Routes>
       </BrowserRouter>

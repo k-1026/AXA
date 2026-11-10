@@ -2,7 +2,8 @@ import type { DepartmentKey } from '../hospital/types';
 import type { ChatText } from '../chatbot/types';
 
 // 병원 1곳 = 상담 1개. 날짜가 달라도 같은 병원과의 대화는 한 상담에 이어서 쌓인다
-export type BookingStatus = 'pending' | 'confirmed' | 'declined' | 'cancelled';
+// completed = 병원이 실제 방문(진료·시술)을 마쳤다고 표시한 예약 → 사후 관리 대상
+export type BookingStatus = 'pending' | 'confirmed' | 'declined' | 'cancelled' | 'completed';
 
 export interface BookingRequest {
   date: string; // YYYY-MM-DD (한국 시간)
@@ -12,6 +13,7 @@ export interface BookingRequest {
   status: BookingStatus; // 확정은 병원만 할 수 있다 (기본값 pending). 취소는 환자가 할 수 있다
   bookingNo?: string; // 병원이 확정하면 붙는 예약번호
   cancelledAt?: string; // ISO 시각
+  treatment?: ChatText; // 방문 완료 시 병원이 기록한 진료·시술 이름
 }
 
 export interface ConsultMessage {

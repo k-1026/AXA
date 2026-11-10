@@ -365,7 +365,8 @@
       "pending": "待確認",
       "confirmed": "已確認",
       "declined": "無法預約",
-      "cancelled": "已取消"
+      "cancelled": "已取消",
+      "completed": "已就診"
     },
     "quick": {
       "booking": "預約諮詢",
@@ -390,7 +391,8 @@
       "changeTitle": "變更預約",
       "changeSubmit": "申請變更",
       "changeHint": "變更後醫院會重新確認，確認前顯示為「待確認」。"
-    }
+    },
+    "completedNote": "已完成就診，可在術後管理中與醫護人員交流。"
   },
   "bookings": {
     "backToChats": "返回諮詢列表",
@@ -401,7 +403,8 @@
       "all": "全部",
       "pending": "待確認",
       "confirmed": "已確認",
-      "cancelled": "已取消"
+      "cancelled": "已取消",
+      "completed": "已就診"
     },
     "sortLabel": "排序",
     "sortVisit": "依就診日期",
@@ -422,5 +425,26 @@
     "cancelMsg": "已取消{{when}}的預約。",
     "footnote": "預約時間以韓國時間（KST）為準。",
     "sampleNote": "範例醫院與預約資訊。"
+  },
+  "aftercare": {
+    "list": "術後管理紀錄",
+    "listHint": "僅顯示已完成的就診。",
+    "openMenu": "開啟術後管理紀錄",
+    "none": "還沒有已完成的就診。",
+    "start": "在醫院完成診療並記錄為已就診後，可在這裡與該醫院的醫護人員交流。",
+    "visitedOn": "{{date}} 就診",
+    "doctorLabel": "{{name}} · 醫護人員",
+    "notice": "診療後的狀態請詢問該醫院的醫護人員。如症狀嚴重或突然惡化，請立即致電醫院或撥打119。",
+    "empty": "請留下診療後的疑問或目前的狀態，也可以傳送照片與影片。",
+    "sampleNote": "範例醫院與對話，並非真實診療紀錄。",
+    "placeholder": "告訴醫護人員您的狀態",
+    "attach": "附加照片或影片",
+    "pending": "待傳送的照片與影片",
+    "remove": "移除{{name}}",
+    "mediaNote": "照片與影片屬於健康資訊。請遮住臉部等不必要的部分。（最多4個，每個50MB）",
+    "errType": "只能傳送照片或影片。",
+    "errSize": "每個檔案最大50MB。",
+    "errCount": "一次最多傳送{{max}}個。",
+    "aftercareButton": "術後管理"
   }
 }

@@ -39,7 +39,7 @@ export function BookingCard({ booking, sentAt }: { booking: BookingRequest; sent
       <footer>
         <span>
           <InfoIcon />
-          {t(booking.status === 'pending' ? 'consult.pendingNote' : 'consult.decidedNote')}
+          {t(booking.status === 'pending' ? 'consult.pendingNote' : booking.status === 'completed' ? 'consult.completedNote' : 'consult.decidedNote')}
         </span>
         <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
           {t(open ? 'consult.hideDetail' : 'consult.showDetail')}
