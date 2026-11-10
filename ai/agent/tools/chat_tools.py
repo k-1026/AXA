@@ -27,6 +27,7 @@ from __future__ import annotations
 from datetime import date
 
 from ai.agent.tools import fake_data as fd
+from ai.agent.tools.booking_store import BookingError, BookingStore, parse_local_slot, required_consents
 from ai.agent.tools.registry import JSON, Tool, ToolContext, ToolError, ToolRegistry
 
 LANGS = ["en", "zh", "zh-TW", "vi", "ja", "th", "ru", "ko"]
@@ -200,19 +201,35 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
         return {"status": "not_available",
                 "reason": "This hospital is not a registered foreign-patient facility, so requests can't be sent here.",
                 "hospital_tel": h["tel"]}
-    missing = [k for k in ("preferred_slots", "language", "inquiry") if not args.get(k)]
+    # 백엔드 BookingCreate(docs/backend-contracts.md 6절)가 요구하는 칸. 연락 방법은 계정 이메일로 고정
+    department = args.get("department") or (h["departments"][0] if len(h["departments"]) == 1 else None)
+    missing = [k for k in ("department", "preferred_slots", "language", "nationality", "visa_needed", "inquiry")
+               if (department if k == "department" else args.get(k)) in (None, "", [])]
     if missing:
-        return {"status": "needs_info", "missing": missing}
+        return {"status": "needs_info", "missing": missing, "hospital_departments": h["departments"]}
+    if department not in h["departments"]:
+        raise ToolError(f"이 병원의 진료과가 아닙니다: {department} (가능: {h['departments']})")
+    slots = args["preferred_slots"]
+    if not 1 <= len(slots) <= 3:
+        raise ToolError("preferred_slots는 1~3개여야 합니다")
+    for s in slots:
+        try:
+            parse_local_slot(s)
+        except ValueError as e:
+            raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
+    draft = {
+        "hospital_id": h["id"], "hospital_name_en": h["name_en"], "department": department,
+        "preferred_slots": slots, "language": args["language"], "nationality": args["nationality"].upper(),
+        "visa_needed": args["visa_needed"], "contact_method": "email", "inquiry": args["inquiry"],
+        "needs_interpreter": args.get("needs_interpreter", False),
+    }
+    if args.get("health_info"):
+        draft["health_info"] = args["health_info"]
     return {
         "status": "draft",  # 아직 제출 아님
         "requires_patient_confirmation": True,  # 화면의 [제출] 버튼을 환자가 눌러야 pending 생성
-        "draft": {
-            "hospital_id": h["id"], "hospital_name_en": h["name_en"],
-            "preferred_slots": args["preferred_slots"], "language": args["language"],
-            "inquiry": args["inquiry"], "needs_interpreter": args.get("needs_interpreter", False),
-        },
-        "consents_required": ["privacy_and_transfer_to_hospital"],
-        "consents_optional": ["health_information"],  # 건강정보는 별도 동의 (개인정보보호법 제23조)
+        "draft": draft,
+        "consents_required": required_consents(draft),  # 요청서마다 받음. 건강정보는 별도 동의 (개인정보보호법 제23조)
         "note": "Show the summary card. Do not say the request was sent until the user presses Submit.",
     }
 
@@ -230,22 +247,28 @@ def record_residency(args: JSON, ctx: ToolContext) -> JSON:
     return {"status": "recorded", "residency": ctx.residency}
 
 
+def _store(ctx: ToolContext) -> BookingStore:
+    if ctx.store is None:
+        ctx.store = BookingStore()
+    return ctx.store
+
+
 def get_my_bookings(args: JSON, ctx: ToolContext) -> JSON:
     if not ctx.patient_id:
         return {"status": "login_required"}
-    rows = [b for b in fd.BOOKINGS if b["patient_id"] == ctx.patient_id]
-    if st := args.get("status"):
-        rows = [b for b in rows if b["status"] == st]
-    names = {h["id"]: h["name_en"] for h in fd.HOSPITALS}
-    return {"bookings": [{**b, "hospital_name_en": names.get(b["hospital_id"])} for b in rows]}
+    rows = _store(ctx).list_for_patient(ctx.patient_id, args.get("status"))
+    # 요청서 원문(request)·동의·이벤트는 모델에 보내지 않는다 (필요한 상태 정보만)
+    keep = ("id", "hospital_id", "hospital_name_en", "status", "preferred", "confirmed_slot", "proposed_slot", "created_at", "visited")
+    return {"bookings": [{k: b[k] for k in keep if k in b} for b in rows]}
 
 
 def open_aftercare_thread(args: JSON, ctx: ToolContext) -> JSON:
     if not ctx.patient_id:
         return {"status": "login_required"}
-    bk = next((b for b in fd.BOOKINGS if b["id"] == args["booking_id"] and b["patient_id"] == ctx.patient_id), None)
-    if bk is None:
-        raise ToolError("내 예약에서 해당 booking_id를 찾을 수 없습니다")
+    try:
+        bk = _store(ctx).get_for_patient(ctx.patient_id, args["booking_id"])
+    except BookingError as e:
+        raise ToolError("내 예약에서 해당 booking_id를 찾을 수 없습니다") from e
     if not bk.get("visited"):
         return {"status": "not_available", "reason": "Follow-up chat opens after the visit."}
     return {
@@ -326,13 +349,17 @@ def build_registry() -> ToolRegistry:
     r.register(Tool(
         "prepare_booking_request",
         "사용자가 **직접 고른** 병원에 보낼 상담 요청서 **초안**을 만든다. 제출은 하지 않는다 — 사용자가 화면의 제출 버튼을 누른다. "
-        "빠진 값이 있으면 needs_info를 돌려주므로 사용자에게 물어본다.",
+        "빠진 값이 있으면 needs_info의 missing을 돌려주므로 사용자에게 한 번에 하나씩 물어본다. 값은 사용자가 말한 것만 쓰고 추측하지 않는다.",
         {"type": "object", "properties": {
             "hospital_id": {"type": "integer"},
+            "department": {"type": "string", "description": "한국어 진료과명. 병원 진료과가 하나면 생략 가능"},
             "preferred_slots": {"type": "array", "items": {"type": "string"},
-                                "description": "희망 일시 후보, 'YYYY-MM-DD HH:MM'"},
+                                "description": "희망 일시 후보 1~3개, 병원 현지(한국) 시간 'YYYY-MM-DD HH:MM'"},
             "language": {"type": "string", "enum": LANGS},
+            "nationality": {"type": "string", "description": "국적 ISO 3166-1 alpha-2 코드 (TW, VN, US, CN, JP, TH ...). 사용자가 말한 국가명을 코드로 바꿔 넣는다"},
+            "visa_needed": {"type": "boolean", "description": "병원에서 비자 관련 서류 안내가 필요하다고 사용자가 말했는지"},
             "inquiry": {"type": "string", "description": "상담하고 싶은 내용 (사용자 표현 그대로)"},
+            "health_info": {"type": "string", "description": "사용자가 **스스로 말한** 증상·병력 원문. 먼저 묻지 않는다. 없으면 생략"},
             "needs_interpreter": {"type": "boolean"}},
          "required": ["hospital_id"]},
         prepare_booking_request, "예약"))

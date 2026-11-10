@@ -65,7 +65,8 @@ def test_tool_chain_builds_cards_from_tool_results():
 
 
 def test_residency_then_draft_is_stored_but_not_submitted():
-    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "acne scars"}
+    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "acne scars",
+            "nationality": "TW", "visa_needed": False}
     orch, _ = make([
         call(("prepare_booking_request", args)),
         say("Are you visiting short-term or living in Korea?"),
@@ -84,7 +85,8 @@ def test_residency_then_draft_is_stored_but_not_submitted():
 
 
 def test_resident_gets_no_draft_card():
-    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "x"}
+    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "x",
+            "nationality": "TW", "visa_needed": False}
     orch, _ = make([call(("prepare_booking_request", args)), say("Please call the hospital directly.")])
     state = ConversationState(residency="resident")
     reply = orch.handle(state, "book 9001")
@@ -150,7 +152,8 @@ def test_trim_cuts_only_at_user_boundaries():
 
 
 def test_guessed_residency_is_rejected_by_code():
-    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "scar laser"}
+    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "scar laser",
+            "nationality": "TW", "visa_needed": False}
     orch, llm = make([
         # 사용자는 체류 형태를 말하지 않았는데 모델이 추측해서 기록하려는 경우
         call(("record_residency", {"residency": "short_term", "user_statement": "I am visiting short-term"}),

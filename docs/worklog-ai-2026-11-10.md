@@ -54,7 +54,7 @@
 
 | 검증 | 방법 | 결과 |
 |---|---|---|
-| 자동 테스트 | `pytest` (백엔드 23개 + AI 157개) | **180개 통과** |
+| 자동 테스트 | `pytest` (백엔드 23개 + AI 157개) | **180개 통과** (6단계 후 189개) |
 | 안전 검사 | `run_eval --safety`, 81문장·8개 언어 | **81/81** ([결과](../ai/agent/eval/results/2026-11-10-safety.md)) |
 | 의도→도구 (Gemini) | `run_eval --intent`, 27문장·6개 언어 | **27/27** ([결과](../ai/agent/eval/results/2026-11-10-intent.md)) — `gemini-3.5-flash` 한도 소진 후 `flash-lite`로 자동 전환되어 실행 |
 | 의도→도구 (Nemotron) | 같은 27문장, `LLM_PROVIDER_ORDER=nemotron` | **26/27** ([결과](../ai/agent/eval/results/2026-11-10-intent-nemotron.md)) — 실패: 국내 거주자로 이미 알려졌는데 체류 형태를 다시 물음 |
@@ -114,6 +114,33 @@
   .venv/Scripts/python -m ai.agent.eval.run_eval --intent --limit 8 --sleep 6
   LLM_PROVIDER_ORDER=nemotron .venv/Scripts/python -m ai.agent.eval.run_eval --intent --tag nemotron
   ```
+
+## 8. 이후 추가 (같은 날 저녁): 브랜치 정리 + 6단계
+
+### 브랜치 정리
+- `ai`가 `presentation`에서 갈라져 11/9 발표자료 커밋(`9095a0f`)이 섞여 있었음 → `main` 기준으로 다시 쌓음(`git rebase --onto origin/main 9095a0f ai`)
+- 확인한 것: `9095a0f`는 `origin/presentation`에도 있어 사라지지 않음 / 다시 쌓은 결과와 백업의 차이는 발표자료 2개뿐 / 다른 분의 미커밋 수정 3개는 전후 완전히 동일 / 테스트 통과
+- 로컬 백업 브랜치 `ai-backup-before-rebase` (되돌리기용, 원격에는 없음)
+- **원격 `origin/ai`에는 아직 반영하지 못함**: 이미 올라간 기록을 덮어쓰는 강제 push(`--force-with-lease`)가 자동 승인 검사에 막혔고 우회하지 않음. 승인하시면 `git push --force-with-lease origin ai` 한 번이면 끝
+
+### 6단계: 채팅으로 요청서를 "대기" 상태까지
+| 한 일 | 내용 |
+|---|---|
+| 요청서 칸을 백엔드 계약에 맞춤 | 계약 6절 `BookingCreate`는 국적·비자 필요 여부·연락 방법·시간대·동의 목록을 요구하는데 챗봇 초안에는 없었음 → 챗봇이 국적과 비자 도움 여부를 묻고, 연락 방법은 이메일 고정, 시간대는 환자 프로필 값 |
+| 제출 분리 | 제출은 LLM 도구가 아니라 앱이 부르는 `submit_draft(state, consents)`. 모델이 마음대로 제출할 수 없음 |
+| 제출 검사 | 로그인(`auth.required`), 필수 동의(`consent.required`: privacy 필수, 건강정보를 적으면 health, 한국어가 아니면 overseas_transfer), 같은 병원의 처리 안 된 요청(`booking.duplicate`), 국내 거주자·미등록 병원 거절, 희망 일시 1~3개·지난 일시 거절 |
+| 가짜 예약 저장소 | 상태 전환은 계약 2절과 같음. 병원 확정·거절·제안과 환자 수락·취소를 시연·테스트용으로 흉내 냄 |
+| 실제 모델 시나리오 | 10개 확인 항목 모두 통과 (Gemini, Nemotron). 제출·병원 확정은 코드가 대신 수행 |
+
+### 검증하며 알게 된 것
+- Nemotron이 첫 실행에서 `health_info`를 넣어 건강정보 동의가 필수가 됐고, 제 실행기가 동의를 고정해 둔 탓에 제출이 실패했음. 코드 오류가 아니라 실행기 문제였고, 카드에 적힌 필수 동의를 따르도록 고침. **같은 모델도 실행마다 `health_info`를 넣거나 넣지 않음** → 화면은 초안 카드의 `consents_required`를 그대로 보여 줘야 함
+- 처음 쓴 단위 테스트에 항상 참인 단언 1개와 느슨한 단언 1개가 있어 고침
+
+### 이 단계에서 새로 생긴 팀 합의 사항
+1. 백엔드 `BookingCreate`: `department_code`가 아직 없어 한국어 진료과명을 `department`로 넣음(진료과 코드 통일 후 교체). `lang`은 계약에 `en/zh-TW/vi/ko`뿐인데 챗봇 언어 코드는 8개(`zh`, `ja`, `th`, `ru` 포함) → 프론트 지원 언어와 맞출 것
+2. `overseas_transfer` 동의: 한국어가 아닌 글을 번역하느라 해외 AI를 쓰는 경우 필수로 가정함. 개인정보보호위원회 질의 8번 회신 전 가정
+3. 프론트: 요청서 카드는 `consents_required` 목록을 체크박스로 보여 주고, 체크한 동의의 `kind`·`version`을 제출 API에 같이 보낼 것
+4. 병원 쪽: 요청 상태를 바꾸는 API(확정·거절·제안)가 필요 — 지금은 저장소의 `hospital_respond`가 흉내만 냄
 
 ## 출처
 

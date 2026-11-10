@@ -46,15 +46,35 @@ def test_translation_badge_filter():
 
 
 def test_booking_draft_rules():
-    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "acne scars"}
+    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "acne scars",
+            "nationality": "tw", "visa_needed": False}
     assert R.run("prepare_booking_request", args, ToolContext())["ask"] == "residency"
     res_resident = R.run("prepare_booking_request", args, ToolContext(residency="resident"))
     assert res_resident["status"] == "not_available" and "hospital_tel" in res_resident
     assert R.run("prepare_booking_request", {**args, "hospital_id": 9006}, SHORT)["status"] == "not_available"
-    assert R.run("prepare_booking_request", {"hospital_id": 9001}, SHORT)["missing"] == ["preferred_slots", "language", "inquiry"]
+    # 백엔드 BookingCreate가 요구하는 칸 (docs/backend-contracts.md 6절). 진료과는 병원 진료과가 하나면 자동
+    assert R.run("prepare_booking_request", {"hospital_id": 9001}, SHORT)["missing"] == [
+        "preferred_slots", "language", "nationality", "visa_needed", "inquiry"]
+    assert R.run("prepare_booking_request", {**args, "visa_needed": False}, SHORT)["status"] == "draft"  # False는 빈칸이 아님
     draft = R.run("prepare_booking_request", args, SHORT)
     assert draft["status"] == "draft" and draft["requires_patient_confirmation"] is True
-    assert "health_information" in draft["consents_optional"]
+    assert draft["draft"]["nationality"] == "TW" and draft["draft"]["department"] == "피부과"
+    assert draft["consents_required"] == ["privacy", "overseas_transfer"]  # 영어 → 해외 AI 번역 동의
+    with_health = R.run("prepare_booking_request", {**args, "health_info": "scars on cheeks since 2024"}, SHORT)
+    assert with_health["consents_required"] == ["privacy", "health", "overseas_transfer"]
+    ko = R.run("prepare_booking_request", {**args, "language": "ko"}, SHORT)
+    assert ko["consents_required"] == ["privacy"]
+
+
+def test_booking_draft_input_checks():
+    base = {"hospital_id": 9001, "language": "en", "inquiry": "x", "nationality": "US", "visa_needed": True}
+    assert "error" in R.run("prepare_booking_request", {**base, "preferred_slots": ["12/01 10am"]}, SHORT)
+    assert R.run("prepare_booking_request", {**base, "preferred_slots": []}, SHORT)["missing"] == ["preferred_slots"]
+    four = [f"2026-12-0{i} 10:00" for i in range(1, 5)]
+    assert "error" in R.run("prepare_booking_request", {**base, "preferred_slots": four}, SHORT)
+    assert "error" in R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-01 10:00"], "department": "치과"}, SHORT)
+    multi = R.run("prepare_booking_request", {**base, "hospital_id": 9005, "preferred_slots": ["2026-12-01 08:30"]}, SHORT)
+    assert multi["missing"] == ["department"]  # 진료과가 둘인 병원은 묻는다
 
 
 def test_availability_and_dates():

@@ -5,16 +5,18 @@
 - 도구 호출은 한 턴에 max_steps번까지. 넘으면 도구 없이 답만 받는다
 - 화면 카드는 **도구 결과에서 코드가 만든다** (LLM이 숫자·병원 정보를 다시 쓰지 않음)
 - 대화 상태(ConversationState)는 호출하는 쪽(백엔드)이 저장·복원한다. 여기서는 메모리 객체만 다룸
-- 요청서 제출은 여기서 하지 않는다. 초안(state.booking_draft)까지만 — 제출은 환자가 화면 버튼으로
+- 챗봇(handle)은 요청서 **초안**(state.booking_draft)까지만 만든다. 제출은 환자가 화면의 [제출] 버튼을 눌렀을 때
+  앱이 `submit_draft()`를 부른다 (LLM이 부르는 도구가 아님 → 모델이 마음대로 제출할 수 없다)
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime, time, timezone
 from typing import Any, Callable, Protocol
 
 from ai.agent.prompts.orchestrator import build_system_prompt
+from ai.agent.tools.booking_store import BookingError, BookingStore
 from ai.agent.tools.registry import JSON, ToolContext, ToolRegistry
 from ai.llm import safety
 from ai.llm.client import LLMResponse, Message, tool_result_message
@@ -44,6 +46,15 @@ class ConversationState:
     residency: str | None = None  # "short_term" | "resident" | None
     history: list[Message] = field(default_factory=list)  # system 메시지 제외
     booking_draft: JSON | None = None  # 마지막으로 만든 요청서 초안 (제출 전)
+    timezone: str = "UTC"  # 환자 프로필의 IANA 시간대 (요청서 patient_timezone)
+
+
+@dataclass
+class SubmitResult:
+    ok: bool
+    booking: JSON | None = None
+    text: str = ""
+    error: JSON | None = None  # {"code", "message", "detail"} — 코드는 docs/backend-contracts.md 4절과 같음
 
 
 @dataclass
@@ -109,13 +120,41 @@ class Orchestrator:
         max_history: int = 40,
         safety_check: Callable[[str, str], safety.SafetyResult] | None = safety.check,
         today: Callable[[], date] = date.today,
+        store: BookingStore | None = None,
     ):
+        self.store = store or BookingStore()  # 백엔드 booking.service가 생기면 교체
         self.llm = llm
         self.registry = registry
         self.max_steps = max_steps
         self.max_history = max_history
         self.safety_check = safety_check  # ai/llm/safety.py — None이면 검사 없이 통과 (테스트용)
         self._today = today
+
+    def submit_draft(self, state: ConversationState, consents: list[JSON]) -> SubmitResult:
+        """환자가 요청서 카드의 [제출]을 눌렀을 때 앱이 부른다. consents = [{"kind": "privacy", "version": "v1"}, ...]
+
+        성공하면 pending 요청이 생기고 초안은 비워진다. 대화 기록에 제출 사실을 남겨, 다음 턴에 모델이
+        "보냈다/안 보냈다"를 정확히 알게 한다.
+        """
+        draft = state.booking_draft
+        if draft is None:
+            return SubmitResult(False, error=BookingError("validation", "제출할 요청서 초안이 없습니다").as_dict())
+        now = datetime.combine(self._today(), time(), tzinfo=timezone.utc)
+        try:
+            booking = self.store.create_request(
+                state.patient_id, draft, consents, residency=state.residency,
+                patient_timezone=state.timezone, today=now,
+            )
+        except BookingError as e:
+            return SubmitResult(False, error=e.as_dict())
+        state.booking_draft = None
+        text = (f"[Submitted] The consultation request to {booking['hospital_name_en']} was submitted "
+                f"(id {booking['id']}, status: pending). The hospital will confirm, decline, or propose another time.")
+        if state.history and state.history[-1]["role"] == "assistant" and not state.history[-1].get("tool_calls"):
+            state.history[-1] = {**state.history[-1], "content": f"{state.history[-1]['content']}\n{text}"}  # 연속 assistant 메시지 방지
+        else:
+            state.history.append({"role": "assistant", "content": text})
+        return SubmitResult(True, booking=booking, text=text)
 
     def handle(self, state: ConversationState, user_text: str) -> ChatReply:
         verdict = self.safety_check(user_text, state.language) if self.safety_check else None
@@ -135,7 +174,8 @@ class Orchestrator:
         categories = verdict.categories if verdict else []
 
         ctx = ToolContext(
-            patient_id=state.patient_id, language=state.language, residency=state.residency, last_user_text=user_text
+            patient_id=state.patient_id, language=state.language, residency=state.residency, last_user_text=user_text,
+            timezone=state.timezone, store=self.store,
         )
         system = {
             "role": "system",

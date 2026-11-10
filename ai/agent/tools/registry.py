@@ -25,6 +25,8 @@ class ToolContext:
     # resident는 상담 예약 연결 불가 (의료법 제27조 제3항 제2호, 시행규칙 제19조의2)
     residency: str | None = None
     last_user_text: str = ""  # 이번 턴 사용자 메시지 원문 (record_residency가 실제 발화인지 확인하는 데 씀)
+    timezone: str = "UTC"  # 환자 프로필의 IANA 시간대 (프론트가 넣음). 요청서 patient_timezone으로 쓰임
+    store: Any = None  # BookingStore (ai/agent/tools/booking_store.py). 없으면 도구가 처음 쓸 때 기본 저장소를 만든다
 
 
 Handler = Callable[[JSON, ToolContext], JSON]
