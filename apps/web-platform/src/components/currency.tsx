@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { readSetting, writeSetting } from './storage';
 
-// 가격은 원화(KRW)로 저장되어 있고, 환산은 가격 가이드 화면에서 할 예정 (환율 출처 미정)
+// 가격은 원화(KRW)로 저장. 가격 가이드에서 고른 통화로 참고용 환산 (환율: components/exchangeRates.ts)
 export const CURRENCIES = ['KRW', 'USD', 'CNY', 'TWD', 'VND'] as const;
 export type Currency = (typeof CURRENCIES)[number];
 

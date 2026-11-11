@@ -21,6 +21,8 @@ export function LegalPage() {
   }
 
   const koreanOnly = i18n.language !== 'ko' && !doc.title.en;
+  // 번역이 없어 한국어 원문을 보여줄 때는 한국어 글꼴·줄바꿈으로
+  const docLang = koreanOnly ? 'ko' : undefined;
 
   return (
     <div className="legal-page">
@@ -28,14 +30,14 @@ export function LegalPage() {
         ← {t('legal.back')}
       </Link>
       <article className="legal-doc">
-        <h1>{tx(doc.title)}</h1>
+        <h1 lang={docLang}>{tx(doc.title)}</h1>
         <p className="legal-meta">{t('legal.updated', { date: doc.updated })}</p>
         <p className="legal-draft">{t('legal.draft')}</p>
         {koreanOnly && <p className="legal-draft">{t('legal.koreanOnly')}</p>}
         {doc.sections.map((s, i) => {
           const List = s.list?.ordered ? 'ol' : 'ul';
           return (
-            <section key={i}>
+            <section key={i} lang={docLang}>
               {s.heading && <h2>{tx(s.heading)}</h2>}
               {s.subheading && <h3>{tx(s.subheading)}</h3>}
               {s.body?.map((p) => <p key={p.ko}>{tx(p)}</p>)}

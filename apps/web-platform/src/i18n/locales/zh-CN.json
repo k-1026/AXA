@@ -12,6 +12,8 @@
     "prices": "价格指南",
     "chatbot": "聊天机器人（常见问题）",
     "about": "服务介绍",
+    "booking": "咨询/预约",
+    "aftercare": "就诊后管理",
     "mypage": "我的页面"
   },
   "map": {
@@ -57,7 +59,10 @@
     "label": "广告"
   },
   "footer": {
-    "notice": "基于韩国公共数据的医院信息，并非医院推荐或医疗咨询。",
+    "about": "AXA 是一支帮助外国人更轻松、更安全地体验大邱医疗与旅游的团队。",
+    "service": "MediDaegu 是一个利用公共数据和 AI，以多种语言提供医院与诊疗项目信息、签证及旅游信息的医疗旅游信息平台。",
+    "contact": "广告·横幅合作咨询",
+    "disclaimer": "本平台提供基于公共数据的信息，不推荐特定医院，也不提供医疗咨询。诊疗、项目及预约相关事项请直接向相关医院确认。",
     "source": "数据：韩国健康保险审查评价院 医院信息服务（公共数据门户 data.go.kr）",
     "emergency": "紧急情况请拨打 119。"
   },
@@ -109,12 +114,18 @@
     "lunchWeek": "午休（工作日）",
     "lunchSat": "午休（周六）",
     "rcvWeek": "挂号时间（工作日）",
-    "rcvSat": "挂号时间（周六）"
+    "rcvSat": "挂号时间（周六）",
+    "noPhoto": "暂无代表照片"
   },
   "prices": {
     "pending": "价格确认中",
     "range": "{{min}}–{{max}} 韩元",
-    "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。"
+    "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。",
+    "approx": "约 {{min}}~{{max}}",
+    "krwNote": "{{min}}~{{max}} 韩元",
+    "fxNotice": "换算金额仅供参考，实际费用以医院告知的韩元金额为准。{{applied}} 适用汇率（韩国银行 {{base}} 数据，每天韩国时间 {{hour}}:00 更新）·",
+    "fxProvider": "韩国银行经济统计系统",
+    "fxFallback": "无法获取汇率，以韩元显示。"
   },
   "mypage": {
     "home": "首页",
@@ -123,8 +134,7 @@
     "subtitle": "在一个地方管理收藏的医院、就诊日程和旅行准备。",
     "stats": {
       "saved": "收藏的医院",
-      "visits": "就诊记录",
-      "recent": "最近浏览"
+      "visits": "就诊记录"
     },
     "schedule": {
       "title": "我的大邱日程",
@@ -141,19 +151,26 @@
     "checklist": {
       "title": "就诊准备清单",
       "progress": "共 {{total}} 项，已完成 {{done}} 项",
-      "viewAll": "查看完整清单",
       "items": {
-        "saveAddress": "保存医院地址",
-        "setLanguage": "设置使用语言",
-        "checkHours": "确认就诊时间",
-        "checkInterpreter": "确认翻译支持",
-        "checkNotice": "确认医院须知"
+        "visitDateTime": "确认就诊日期和时间",
+        "route": "确认医院位置和交通路线",
+        "documents": "准备身份证件和所需材料",
+        "language": "确认咨询语言和翻译支持",
+        "medication": "整理正在服用的药物和过敏信息",
+        "cost": "确认预计费用和付款方式",
+        "hospitalNotice": "确认医院告知的准备事项"
       }
     },
     "account": {
       "title": "我的账户",
-      "desc": "个人资料和语言设置",
-      "manage": "管理账户"
+      "withdraw": "注销账号",
+      "withdrawTitle": "确定要注销账号吗？",
+      "withdrawDesc": "注销后将无法使用此账号登录，所有设备都会退出登录。可以使用同一邮箱重新注册。",
+      "withdrawPassword": "确认密码",
+      "withdrawConfirm": "注销账号",
+      "cancel": "取消",
+      "withdrawWrongPassword": "密码不正确。",
+      "withdrawDemo": "演示账号无法注销。"
     },
     "saved": {
       "title": "已保存的医院",
@@ -205,13 +222,41 @@
   },
   "auth": {
     "requiredTitle": "请先登录",
-    "requiredDesc": "已保存的医院、就诊记录、最近浏览和大邱行程需登录后查看。",
+    "requiredDesc": "已保存的医院、就诊记录和大邱行程需登录后查看。",
     "comingSoon": "会员登录即将推出。目前可以使用演示账号浏览。",
     "demo": "使用演示账号浏览",
     "demoNote": "演示账号也会显示示例数据，收藏和就诊记录仅保存在此浏览器中。",
     "demoBadge": "演示",
     "loggedInAs": "已以 {{name}} 账号登录。",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "tabLogin": "登录",
+    "tabSignup": "注册",
+    "email": "电子邮箱",
+    "password": "密码",
+    "passwordConfirm": "确认密码",
+    "passwordHint": "至少 {{n}} 个字符",
+    "passwordMismatch": "两次输入的密码不一致。",
+    "displayName": "显示名称",
+    "optional": "（选填）",
+    "displayNameHint": "显示在\"我的页面\"的问候语中，不必是真实姓名。留空则使用邮箱 @ 前的部分。",
+    "language": "使用语言",
+    "timezone": "时区",
+    "consentsTitle": "同意事项（必填）",
+    "age14": "我已年满 14 周岁。",
+    "agreeTerms": "我同意服务条款。",
+    "agreePrivacy": "我同意收集和使用个人信息。",
+    "viewDoc": "查看",
+    "submitLogin": "登录",
+    "submitSignup": "注册",
+    "submitting": "处理中…",
+    "err": {
+      "invalidCredentials": "邮箱或密码不正确。",
+      "emailTaken": "该邮箱已注册，请直接登录。",
+      "consent": "请确认年满 14 周岁并勾选必填同意事项。",
+      "validation": "请检查输入的内容。",
+      "network": "无法连接服务器，请稍后再试。",
+      "unknown": "出现问题，请稍后再试。"
+    }
   },
   "chat": {
     "title": "Medi 聊天机器人",
@@ -280,5 +325,126 @@
     "send": "发送",
     "disclaimer": "AI 回答仅供参考。诊疗和预约请向相关医院确认。",
     "cancel": "取消"
+  },
+  "consult": {
+    "threads": "医院咨询",
+    "manageBookings": "预约管理",
+    "openMenu": "打开咨询列表",
+    "closeMenu": "关闭咨询列表",
+    "search": "搜索医院或消息",
+    "noThreads": "还没有咨询过的医院。",
+    "noResults": "没有搜索结果。",
+    "newThread": "新咨询",
+    "bookingSent": "已申请预约",
+    "unread": "{{count}}条未读回复",
+    "sampleHospitals": "示例医院",
+    "sampleNote": "示例医院和对话，并非真实咨询记录。",
+    "empty": "请给医院工作人员发送第一条消息，医院会直接回复。",
+    "staffLabel": "{{name}} · 咨询人员",
+    "staffOnline": "咨询时间内",
+    "staffOffline": "非咨询时间",
+    "hospitalInfo": "医院信息",
+    "requestBooking": "申请预约",
+    "notice": "就诊前有任何问题，请咨询医院工作人员。",
+    "placeholder": "给医院工作人员发送消息",
+    "send": "发送",
+    "quickMenu": "快捷菜单",
+    "hours": "咨询时间 09:00–18:00（周日除外）· 非工作时间回复可能较慢。",
+    "start": "在医院信息中选择医院后，点击“咨询这家医院”即可开始咨询。",
+    "findHospital": "查找医院",
+    "startWith": "咨询这家医院",
+    "bookingTitle": "到院咨询预约",
+    "bookingLanguage": "咨询语言 · {{lang}}",
+    "sentAt": "申请时间",
+    "note": "要求事项",
+    "pendingNote": "医院确认后预约才会生效。",
+    "decidedNote": "医院已处理该预约。",
+    "showDetail": "查看预约详情",
+    "hideDetail": "收起",
+    "status": {
+      "pending": "待确认",
+      "confirmed": "已确认",
+      "declined": "无法预约",
+      "cancelled": "已取消",
+      "completed": "已就诊"
+    },
+    "quick": {
+      "booking": "预约咨询",
+      "interpret": "翻译支持",
+      "prepare": "就诊准备"
+    },
+    "quickText": {
+      "interpret": "就诊时可以提供翻译吗？",
+      "prepare": "就诊前需要准备什么吗？"
+    },
+    "form": {
+      "title": "申请预约",
+      "date": "希望日期",
+      "time": "希望时间",
+      "language": "咨询语言",
+      "note": "要求事项（选填）",
+      "notePlaceholder": "请填写想告诉医院的内容",
+      "hint": "提交后会以“待确认”状态发送给医院，由医院确认。",
+      "cancel": "取消",
+      "submit": "提交申请",
+      "errDate": "请选择今天或之后的日期。",
+      "changeTitle": "更改预约",
+      "changeSubmit": "申请更改",
+      "changeHint": "更改后医院会重新确认，确认前显示为“待确认”。"
+    },
+    "completedNote": "已完成就诊，可在术后管理中与医护人员交流。"
+  },
+  "bookings": {
+    "backToChats": "返回咨询列表",
+    "subtitle": "查看已申请的咨询预约和就诊日程。",
+    "toConsult": "前往咨询/预约",
+    "filterLabel": "预约状态",
+    "filter": {
+      "all": "全部",
+      "pending": "待确认",
+      "confirmed": "已确认",
+      "cancelled": "已取消",
+      "completed": "已就诊"
+    },
+    "sortLabel": "排序",
+    "sortVisit": "按就诊日期",
+    "sortRecent": "最近申请",
+    "none": "还没有预约。请在咨询中申请预约。",
+    "emptyFilter": "没有该状态的预约。",
+    "wish": "希望日程",
+    "kind": "到院咨询 · 咨询语言 {{lang}}",
+    "number": "预约编号 {{no}}",
+    "cancelledOn": "取消日期 {{date}}",
+    "declinedNote": "医院告知该时间无法预约。",
+    "change": "更改预约",
+    "cancel": "取消预约",
+    "chat": "咨询",
+    "keep": "保留预约",
+    "cancelConfirm": "要取消此预约吗？取消信息会发送给医院。",
+    "changeMsg": "已申请将预约改为{{when}}。",
+    "cancelMsg": "已取消{{when}}的预约。",
+    "footnote": "预约时间以韩国时间（KST）为准。",
+    "sampleNote": "示例医院和预约信息。"
+  },
+  "aftercare": {
+    "list": "术后管理记录",
+    "listHint": "仅显示已完成的就诊。",
+    "openMenu": "打开术后管理记录",
+    "none": "还没有已完成的就诊。",
+    "start": "在医院完成诊疗并记录为已就诊后，可在这里与该医院的医护人员交流。",
+    "visitedOn": "{{date}} 就诊",
+    "doctorLabel": "{{name}} · 医护人员",
+    "notice": "诊疗后的状态请咨询该医院的医护人员。如症状严重或突然加重，请立即致电医院或拨打119。",
+    "empty": "请留下诊疗后的疑问或目前的状态，也可以发送照片和视频。",
+    "sampleNote": "示例医院和对话，并非真实诊疗记录。",
+    "placeholder": "告诉医护人员您的状态",
+    "attach": "添加照片或视频",
+    "pending": "待发送的照片和视频",
+    "remove": "移除{{name}}",
+    "mediaNote": "照片和视频属于健康信息。请遮挡面部等不必要的部分。（最多4个，每个50MB）",
+    "errType": "只能发送照片或视频。",
+    "errSize": "每个文件最大50MB。",
+    "errCount": "一次最多发送{{max}}个。",
+    "aftercareButton": "术后管理"
   }
 }

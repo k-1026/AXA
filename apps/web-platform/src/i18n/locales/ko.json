@@ -12,6 +12,8 @@
     "prices": "가격 가이드",
     "chatbot": "챗봇 (자주 하는 질문)",
     "about": "서비스 소개",
+    "booking": "상담/예약",
+    "aftercare": "사후관리",
     "mypage": "마이페이지"
   },
   "map": {
@@ -57,7 +59,10 @@
     "label": "광고"
   },
   "footer": {
-    "notice": "공공데이터 기반 병원 정보 안내입니다. 병원 추천이나 의료 상담이 아닙니다.",
+    "about": "AXA는 외국인이 대구의 의료와 관광을 더 쉽고 안전하게 경험할 수 있도록 돕는 팀입니다.",
+    "service": "MediDaegu는 공공데이터와 AI를 활용해 병원·시술 정보, 비자 및 관광 정보를 다국어로 제공하는 의료관광 정보 플랫폼입니다.",
+    "contact": "광고·배너 문의",
+    "disclaimer": "본 플랫폼은 공공데이터 기반의 정보를 제공하며, 특정 병원 추천이나 의료 상담을 제공하지 않습니다. 진료·시술 및 예약 관련 사항은 해당 병원에 직접 확인해 주세요.",
     "source": "데이터: 건강보험심사평가원 병원정보서비스·의료기관별상세정보서비스 (공공데이터포털)",
     "emergency": "응급 상황에서는 119에 전화하세요."
   },
@@ -109,12 +114,18 @@
     "lunchWeek": "점심시간 (평일)",
     "lunchSat": "점심시간 (토)",
     "rcvWeek": "접수시간 (평일)",
-    "rcvSat": "접수시간 (토)"
+    "rcvSat": "접수시간 (토)",
+    "noPhoto": "대표사진 없음"
   },
   "prices": {
     "pending": "가격 확인 중",
     "range": "{{min}}~{{max}}원",
-    "notice": "표시 금액은 시중 가격 범위로, 실제 비용은 병원과 진료 내용에 따라 다릅니다. 병원별 제공 시술도 다를 수 있습니다. 광고·추천·의료 상담이 아니며, 예상 진료비는 병원에 서면으로 요청할 수 있습니다."
+    "notice": "표시 금액은 시중 가격 범위로, 실제 비용은 병원과 진료 내용에 따라 다릅니다. 병원별 제공 시술도 다를 수 있습니다. 광고·추천·의료 상담이 아니며, 예상 진료비는 병원에 서면으로 요청할 수 있습니다.",
+    "approx": "약 {{min}}~{{max}}",
+    "krwNote": "{{min}}~{{max}}원",
+    "fxNotice": "환산 금액은 참고용이에요. 실제 비용은 원화 기준이며 병원 안내를 따라요. {{applied}} 적용 환율(한국은행 {{base}} 기준, 매일 오전 {{hour}}시 갱신) ·",
+    "fxProvider": "한국은행 경제통계시스템",
+    "fxFallback": "환율을 불러오지 못해 원화로 표시해요."
   },
   "mypage": {
     "home": "홈",
@@ -123,8 +134,7 @@
     "subtitle": "관심 병원과 방문 일정, 여행 준비를 한곳에서 관리하세요.",
     "stats": {
       "saved": "저장한 병원",
-      "visits": "방문 기록",
-      "recent": "최근 조회 기록"
+      "visits": "방문 기록"
     },
     "schedule": {
       "title": "나의 대구 일정",
@@ -141,19 +151,26 @@
     "checklist": {
       "title": "방문 준비 체크리스트",
       "progress": "{{total}}개 중 {{done}}개 완료",
-      "viewAll": "체크리스트 전체 보기",
       "items": {
-        "saveAddress": "병원 주소 저장",
-        "setLanguage": "사용 언어 설정",
-        "checkHours": "방문 시간 확인",
-        "checkInterpreter": "통역 지원 확인",
-        "checkNotice": "병원 안내사항 확인"
+        "visitDateTime": "방문 날짜·시간 확인",
+        "route": "병원 위치·이동 경로 확인",
+        "documents": "신분증·필요 서류 준비",
+        "language": "상담 언어·통역 지원 확인",
+        "medication": "복용약·알레르기 정보 정리",
+        "cost": "예상 비용·결제 방법 확인",
+        "hospitalNotice": "병원에서 안내한 준비사항 확인"
       }
     },
     "account": {
       "title": "내 계정",
-      "desc": "프로필 및 언어 설정",
-      "manage": "계정 관리"
+      "withdraw": "탈퇴하기",
+      "withdrawTitle": "정말 탈퇴할까요?",
+      "withdrawDesc": "탈퇴하면 이 계정으로 로그인할 수 없고 모든 기기에서 로그아웃돼요. 같은 이메일로 다시 가입할 수 있어요.",
+      "withdrawPassword": "비밀번호 확인",
+      "withdrawConfirm": "탈퇴하기",
+      "cancel": "취소",
+      "withdrawWrongPassword": "비밀번호가 맞지 않아요.",
+      "withdrawDemo": "데모 계정은 탈퇴할 수 없어요."
     },
     "saved": {
       "title": "저장한 병원",
@@ -205,13 +222,41 @@
   },
   "auth": {
     "requiredTitle": "로그인이 필요해요",
-    "requiredDesc": "저장한 병원, 방문 기록, 최근 조회 기록, 나의 대구 일정은 로그인한 뒤에 볼 수 있어요.",
+    "requiredDesc": "저장한 병원, 방문 기록, 나의 대구 일정은 로그인한 뒤에 볼 수 있어요.",
     "comingSoon": "회원 로그인은 준비 중이에요. 지금은 데모 계정으로 화면을 둘러볼 수 있어요.",
     "demo": "데모 계정으로 둘러보기",
     "demoNote": "데모 계정은 예시 데이터를 함께 보여주며, 찜과 방문 기록은 이 브라우저에만 저장돼요.",
     "demoBadge": "데모",
     "loggedInAs": "{{name}} 계정으로 로그인했어요.",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "tabLogin": "로그인",
+    "tabSignup": "회원가입",
+    "email": "이메일",
+    "password": "비밀번호",
+    "passwordConfirm": "비밀번호 확인",
+    "passwordHint": "{{n}}자 이상",
+    "passwordMismatch": "비밀번호가 서로 달라요.",
+    "displayName": "표시 이름",
+    "optional": "(선택)",
+    "displayNameHint": "마이페이지 인사말에 보여요. 실명이 아니어도 돼요. 비우면 이메일 앞부분을 써요.",
+    "language": "사용 언어",
+    "timezone": "시간대",
+    "consentsTitle": "동의 (필수)",
+    "age14": "만 14세 이상입니다.",
+    "agreeTerms": "이용약관에 동의합니다.",
+    "agreePrivacy": "개인정보 수집·이용에 동의합니다.",
+    "viewDoc": "보기",
+    "submitLogin": "로그인",
+    "submitSignup": "가입하기",
+    "submitting": "처리 중…",
+    "err": {
+      "invalidCredentials": "이메일 또는 비밀번호가 맞지 않아요.",
+      "emailTaken": "이미 가입된 이메일이에요. 로그인해 주세요.",
+      "consent": "만 14세 이상 확인과 필수 동의가 필요해요.",
+      "validation": "입력한 내용을 다시 확인해 주세요.",
+      "network": "서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요.",
+      "unknown": "문제가 생겼어요. 잠시 후 다시 시도해 주세요."
+    }
   },
   "chat": {
     "title": "메디 챗봇",
@@ -280,5 +325,126 @@
     "send": "보내기",
     "disclaimer": "AI 답변은 정보 안내용입니다. 진료·예약은 해당 병원에 확인해 주세요.",
     "cancel": "취소"
+  },
+  "consult": {
+    "threads": "병원별 상담",
+    "manageBookings": "예약 관리",
+    "openMenu": "상담 목록 열기",
+    "closeMenu": "상담 목록 닫기",
+    "search": "병원·대화 검색",
+    "noThreads": "아직 상담한 병원이 없어요.",
+    "noResults": "검색 결과가 없어요.",
+    "newThread": "새 상담",
+    "bookingSent": "예약을 신청했어요",
+    "unread": "읽지 않은 답변 {{count}}개",
+    "sampleHospitals": "예시 병원",
+    "sampleNote": "예시 병원·대화예요. 실제 상담 기록이 아니에요.",
+    "empty": "병원 담당자에게 첫 메시지를 보내 보세요. 답변은 병원이 직접 드려요.",
+    "staffLabel": "{{name}} · 상담 담당자",
+    "staffOnline": "상담 가능 시간",
+    "staffOffline": "상담 시간 외",
+    "hospitalInfo": "병원 정보",
+    "requestBooking": "예약 신청",
+    "notice": "방문 전 궁금한 내용을 병원 담당자에게 문의하세요.",
+    "placeholder": "병원 담당자에게 메시지를 입력하세요",
+    "send": "보내기",
+    "quickMenu": "빠른 메뉴",
+    "hours": "상담 가능 시간 09:00–18:00 (일요일 제외) · 운영시간 외에는 답변이 늦어질 수 있어요.",
+    "start": "병원 정보에서 병원을 고른 뒤 \"병원에 상담하기\"를 누르면 상담을 시작할 수 있어요.",
+    "findHospital": "병원 찾기",
+    "startWith": "병원에 상담하기",
+    "bookingTitle": "방문 상담 예약",
+    "bookingLanguage": "상담 언어 · {{lang}}",
+    "sentAt": "신청 시각",
+    "note": "요청 사항",
+    "pendingNote": "병원 확인 후 예약이 확정돼요.",
+    "decidedNote": "병원이 예약을 확인했어요.",
+    "showDetail": "예약 상세 보기",
+    "hideDetail": "접기",
+    "status": {
+      "pending": "확인 대기",
+      "confirmed": "예약 확정",
+      "declined": "예약 불가",
+      "cancelled": "예약 취소",
+      "completed": "방문 완료"
+    },
+    "quick": {
+      "booking": "예약 문의",
+      "interpret": "통역 지원",
+      "prepare": "방문 준비사항"
+    },
+    "quickText": {
+      "interpret": "방문할 때 통역 지원이 가능한가요?",
+      "prepare": "방문 전에 준비해야 할 것이 있을까요?"
+    },
+    "form": {
+      "title": "예약 신청",
+      "date": "희망 날짜",
+      "time": "희망 시간",
+      "language": "상담 언어",
+      "note": "요청 사항 (선택)",
+      "notePlaceholder": "병원에 전할 내용을 적어 주세요",
+      "hint": "신청하면 병원에 \"확인 대기\"로 전달되고, 확정은 병원이 해요.",
+      "cancel": "취소",
+      "submit": "신청하기",
+      "errDate": "오늘 이후 날짜를 선택해 주세요.",
+      "changeTitle": "예약 변경",
+      "changeSubmit": "변경 요청",
+      "changeHint": "변경하면 병원이 다시 확인해요. 확인 전까지 \"확인 대기\"로 표시돼요."
+    },
+    "completedNote": "방문을 마쳤어요. 사후 관리에서 의료진과 대화할 수 있어요."
+  },
+  "bookings": {
+    "backToChats": "상담 목록으로",
+    "subtitle": "신청한 상담 예약과 방문 일정을 확인하세요.",
+    "toConsult": "상담/예약으로",
+    "filterLabel": "예약 상태",
+    "filter": {
+      "all": "전체",
+      "pending": "확인 대기",
+      "confirmed": "예약 확정",
+      "cancelled": "취소",
+      "completed": "방문 완료"
+    },
+    "sortLabel": "정렬",
+    "sortVisit": "방문 예정일 순",
+    "sortRecent": "최근 신청순",
+    "none": "아직 신청한 예약이 없어요. 상담에서 예약을 신청해 보세요.",
+    "emptyFilter": "이 상태의 예약이 없어요.",
+    "wish": "희망 일정",
+    "kind": "방문 상담 · 상담 언어 {{lang}}",
+    "number": "예약번호 {{no}}",
+    "cancelledOn": "취소일 {{date}}",
+    "declinedNote": "병원에서 이 일정으로는 예약이 어렵다고 알려 왔어요.",
+    "change": "예약 변경",
+    "cancel": "예약 취소",
+    "chat": "상담하기",
+    "keep": "그대로 두기",
+    "cancelConfirm": "이 예약을 취소할까요? 병원에 취소가 전달돼요.",
+    "changeMsg": "예약 일정을 {{when}}(으)로 변경 요청했어요.",
+    "cancelMsg": "{{when}} 예약을 취소했어요.",
+    "footnote": "예약 시간은 한국 시간(KST) 기준이에요.",
+    "sampleNote": "예시 병원 및 예약 정보예요."
+  },
+  "aftercare": {
+    "list": "사후 관리 내역",
+    "listHint": "방문을 마친 진료·시술만 표시돼요.",
+    "openMenu": "사후 관리 내역 열기",
+    "none": "아직 방문을 마친 진료가 없어요.",
+    "start": "병원에서 진료·시술을 받고 방문 완료로 기록되면, 여기서 그 병원 의료진과 대화할 수 있어요.",
+    "visitedOn": "{{date}} 방문",
+    "doctorLabel": "{{name}} · 의료진",
+    "notice": "시술·진료 후 상태를 그 병원 의료진에게 물어보세요. 증상이 심하거나 갑자기 나빠지면 바로 병원에 전화하거나 119에 연락하세요.",
+    "empty": "진료 후 궁금한 점이나 지금 상태를 남겨 주세요. 사진·영상도 보낼 수 있어요.",
+    "sampleNote": "예시 병원·대화예요. 실제 진료 기록이 아니에요.",
+    "placeholder": "의료진에게 상태를 알려 주세요",
+    "attach": "사진·영상 첨부",
+    "pending": "보낼 사진·영상",
+    "remove": "{{name}} 빼기",
+    "mediaNote": "사진·영상은 건강정보예요. 얼굴 등 필요 없는 부분은 가리고 보내 주세요. (사진·영상 최대 4개, 1개당 50MB)",
+    "errType": "사진이나 영상 파일만 보낼 수 있어요.",
+    "errSize": "파일 1개는 50MB까지 보낼 수 있어요.",
+    "errCount": "한 번에 {{max}}개까지 보낼 수 있어요.",
+    "aftercareButton": "사후 관리"
   }
 }

@@ -32,10 +32,13 @@ export function ScheduleCard({ start, end, items }: Props) {
           {t('mypage.schedule.edit')}
         </Link>
       </div>
-      <p className="mp-trip-range">
-        <CalendarIcon />
-        {formatRange(start, end, i18n.language)}
-      </p>
+      {/* 실제 회원은 여행 기간이 아직 없음 (빈 날짜로 formatRange하면 오류) */}
+      {start && end && (
+        <p className="mp-trip-range">
+          <CalendarIcon />
+          {formatRange(start, end, i18n.language)}
+        </p>
+      )}
       <ol className="mp-timeline">
         {items.map((item) => (
           <ScheduleEntry key={item.id} item={item} />

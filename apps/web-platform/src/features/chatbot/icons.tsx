@@ -12,13 +12,9 @@ const base = {
 };
 
 /** 메디 챗봇 얼굴 (말풍선 + 눈 두 개) */
+// 챗봇 캐릭터 (별 모양). 장식이라 alt는 비워 둔다
 export function BotIcon() {
-  return (
-    <svg {...base} strokeWidth={2.4}>
-      <path d="M12 3.5c5 0 8.5 3.2 8.5 7.6 0 4.4-3.5 7.6-8.5 7.6-1 0-2-.1-2.9-.4L5 20.5l.7-3.7C4.3 15.4 3.5 13.4 3.5 11.1 3.5 6.7 7 3.5 12 3.5Z" />
-      <path d="M9.6 9.6v2.4M14.4 9.6v2.4" strokeWidth={2.8} />
-    </svg>
-  );
+  return <img className="chat-bot-icon" src="/chatbot/medi-doctor-wink.png" alt="" />;
 }
 
 const icon = (d: string | string[]) =>
