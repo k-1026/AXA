@@ -25,4 +25,4 @@ package = false
 
 [tool.pytest.ini_options]
 pythonpath = [".", "backend/src"]
-testpaths = ["backend/tests"]
+testpaths = ["backend/tests", "ai/tests"]

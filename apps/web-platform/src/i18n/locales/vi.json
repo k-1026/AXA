@@ -1,0 +1,284 @@
+{
+  "header": {
+    "language": "Ngôn ngữ",
+    "currency": "Tiền tệ",
+    "login": "Đăng nhập / Đăng ký",
+    "chatbot": "Chatbot"
+  },
+  "nav": {
+    "title": "Menu",
+    "main": "Trang chủ",
+    "hospitals": "Thông tin bệnh viện",
+    "prices": "Hướng dẫn giá",
+    "chatbot": "Chatbot (Câu hỏi thường gặp)",
+    "about": "Giới thiệu dịch vụ",
+    "mypage": "Trang của tôi"
+  },
+  "map": {
+    "title": "Bản đồ bệnh viện Daegu",
+    "count": "Đang hiển thị {{count}} cơ sở",
+    "loading": "Đang tải dữ liệu bệnh viện…",
+    "error": "Không thể tải dữ liệu bệnh viện.",
+    "searchPlaceholder": "Tìm tên bệnh viện",
+    "searchLabel": "Tìm theo tên bệnh viện",
+    "searchClear": "Xóa tìm kiếm",
+    "searchEmpty": "Không có bệnh viện phù hợp",
+    "searchMore": "Hiển thị 8 trên {{count}}. Nhấn Enter để hiện tất cả trên bản đồ"
+  },
+  "dept": {
+    "label": "Lọc theo chuyên khoa",
+    "all": "Tất cả",
+    "dermatology": "Da liễu",
+    "plastic": "Phẫu thuật thẩm mỹ",
+    "internal": "Nội khoa",
+    "ophthalmology": "Nhãn khoa",
+    "notReady": "Đang chuẩn bị dữ liệu"
+  },
+  "popup": {
+    "type": "Loại",
+    "addr": "Địa chỉ",
+    "tel": "Điện thoại",
+    "source": "Nguồn: HIRA (thu thập {{date}})"
+  },
+  "hospitalType": {
+    "상급종합": "Bệnh viện tuyến cuối",
+    "종합병원": "Bệnh viện đa khoa",
+    "병원": "Bệnh viện",
+    "요양병원": "Bệnh viện điều dưỡng",
+    "정신병원": "Bệnh viện tâm thần",
+    "의원": "Phòng khám",
+    "한방병원": "Bệnh viện y học cổ truyền Hàn Quốc",
+    "한의원": "Phòng khám y học cổ truyền Hàn Quốc",
+    "보건소": "Trung tâm y tế công cộng",
+    "보건지소": "Chi nhánh y tế công cộng",
+    "보건진료소": "Trạm y tế"
+  },
+  "ad": {
+    "label": "Quảng cáo"
+  },
+  "footer": {
+    "notice": "Thông tin bệnh viện dựa trên dữ liệu công của Hàn Quốc. Đây không phải là giới thiệu bệnh viện hay tư vấn y tế.",
+    "source": "Dữ liệu: Dịch vụ thông tin bệnh viện của HIRA (data.go.kr)",
+    "emergency": "Trường hợp khẩn cấp, hãy gọi 119."
+  },
+  "placeholder": {
+    "comingSoon": "Trang đang được chuẩn bị."
+  },
+  "district": {
+    "label": "Lọc theo quận",
+    "all": "Tất cả",
+    "중구": "Jung-gu",
+    "동구": "Dong-gu",
+    "서구": "Seo-gu",
+    "남구": "Nam-gu",
+    "북구": "Buk-gu",
+    "수성구": "Suseong-gu",
+    "달서구": "Dalseo-gu",
+    "달성군": "Dalseong-gun",
+    "군위군": "Gunwi-gun"
+  },
+  "day": {
+    "mon": "Thứ 2",
+    "tue": "Thứ 3",
+    "wed": "Thứ 4",
+    "thu": "Thứ 5",
+    "fri": "Thứ 6",
+    "sat": "Thứ 7",
+    "sun": "Chủ nhật",
+    "holiday": "Ngày lễ"
+  },
+  "hospital": {
+    "homepage": "Trang web",
+    "instagram": "Instagram",
+    "more": "Xem thêm (còn {{count}} cơ sở)",
+    "empty": "Không có bệnh viện phù hợp.",
+    "back": "Danh sách bệnh viện",
+    "notFound": "Không tìm thấy bệnh viện.",
+    "hours": "Giờ khám",
+    "hoursNote": "Giờ khám có thể thay đổi. Vui lòng gọi điện cho bệnh viện trước khi đến.",
+    "facilities": "Cấp cứu & bãi đỗ xe",
+    "emergencyDay": "Cấp cứu ban ngày",
+    "emergencyNight": "Cấp cứu ban đêm",
+    "parking": "Bãi đỗ xe",
+    "parkingSpaces": "{{count}} chỗ",
+    "parkingFee": "Phí đỗ xe",
+    "location": "Vị trí",
+    "yes": "Có",
+    "no": "Không",
+    "closed": "Nghỉ",
+    "lunchWeek": "Nghỉ trưa (ngày thường)",
+    "lunchSat": "Nghỉ trưa (Thứ 7)",
+    "rcvWeek": "Giờ tiếp nhận (ngày thường)",
+    "rcvSat": "Giờ tiếp nhận (Thứ 7)"
+  },
+  "prices": {
+    "pending": "Đang xác nhận giá",
+    "range": "{{min}}–{{max}} KRW",
+    "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản."
+  },
+  "mypage": {
+    "home": "Trang chủ",
+    "kst": "Giờ Hàn Quốc (KST)",
+    "greeting": "{{name}}, hãy chuẩn bị cho chuyến đi Daegu của bạn.",
+    "subtitle": "Quản lý bệnh viện đã lưu, lịch khám và chuẩn bị chuyến đi tại một nơi.",
+    "stats": {
+      "saved": "Bệnh viện đã lưu",
+      "visits": "Lịch sử khám",
+      "recent": "Đã xem gần đây"
+    },
+    "schedule": {
+      "title": "Lịch trình Daegu của tôi",
+      "edit": "Sửa lịch",
+      "add": "Thêm lịch",
+      "directions": "Chỉ đường",
+      "more": "Tùy chọn lịch",
+      "tag": {
+        "userAdded": "Bạn tự thêm",
+        "experience": "Trải nghiệm",
+        "tour": "Tham quan"
+      }
+    },
+    "checklist": {
+      "title": "Danh sách chuẩn bị",
+      "progress": "Đã xong {{done}}/{{total}}",
+      "viewAll": "Xem toàn bộ danh sách",
+      "items": {
+        "saveAddress": "Lưu địa chỉ bệnh viện",
+        "setLanguage": "Chọn ngôn ngữ",
+        "checkHours": "Kiểm tra giờ khám",
+        "checkInterpreter": "Kiểm tra hỗ trợ phiên dịch",
+        "checkNotice": "Đọc lưu ý của bệnh viện"
+      }
+    },
+    "account": {
+      "title": "Tài khoản của tôi",
+      "desc": "Hồ sơ và cài đặt ngôn ngữ",
+      "manage": "Quản lý tài khoản"
+    },
+    "saved": {
+      "title": "Bệnh viện đã lưu",
+      "subtitle": "Xem nhanh thông tin các bệnh viện bạn quan tâm.",
+      "sortLabel": "Sắp xếp",
+      "sortRecent": "Lưu gần đây",
+      "sortName": "Theo tên",
+      "photo": "Ảnh bệnh viện",
+      "saved": "Đã lưu",
+      "save": "Lưu",
+      "languages": "Ngôn ngữ tư vấn",
+      "priceTitle": "Giá theo dịch vụ",
+      "detail": "Xem chi tiết",
+      "priceNote": "Vui lòng xác nhận chi phí thực tế với bệnh viện.",
+      "empty": "Không có bệnh viện đã lưu thuộc chuyên khoa này.",
+      "none": "Chưa có bệnh viện đã lưu."
+    },
+    "visits": {
+      "title": "Nhật ký khám",
+      "subtitle": "Nhật ký riêng về các bệnh viện bạn đã đến và trải nghiệm của bạn.",
+      "private": "Chỉ mình bạn xem được",
+      "formTitle": "Viết nhật ký mới",
+      "hospital": "Bệnh viện",
+      "hospitalPlaceholder": "Tìm hoặc nhập tên bệnh viện",
+      "date": "Ngày khám",
+      "note": "Trải nghiệm của tôi",
+      "notePlaceholder": "Ghi lại việc khám chữa, cảm nhận hoặc điều muốn hỏi lần sau.",
+      "save": "Lưu nhật ký",
+      "update": "Lưu thay đổi",
+      "cancel": "Hủy",
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "deleteConfirm": "Xóa nhật ký này? Không thể hoàn tác.",
+      "listTitle": "Nhật ký đã lưu",
+      "none": "Chưa có nhật ký nào.",
+      "deviceNote": "Nhật ký không gửi lên máy chủ mà chỉ lưu trong trình duyệt này. Xóa dữ liệu trình duyệt sẽ mất nhật ký, và người dùng chung thiết bị có thể xem được, nên hãy cẩn thận trên thiết bị công cộng.",
+      "errHospital": "Hãy nhập bệnh viện.",
+      "errDate": "Hãy chọn ngày khám từ hôm nay trở về trước.",
+      "errNote": "Hãy nhập trải nghiệm của bạn."
+    }
+  },
+  "legal": {
+    "label": "Điều khoản và chính sách",
+    "updated": "Cập nhật lần cuối {{date}}",
+    "draft": "Đây là bản nháp chưa được rà soát pháp lý và có thể thay đổi.",
+    "back": "Trang của tôi",
+    "notFound": "Không tìm thấy tài liệu.",
+    "koreanOnly": "Tài liệu này hiện chỉ có bản tiếng Hàn."
+  },
+  "auth": {
+    "requiredTitle": "Vui lòng đăng nhập",
+    "requiredDesc": "Bệnh viện đã lưu, lịch sử khám, mục xem gần đây và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
+    "comingSoon": "Đăng nhập thành viên sắp ra mắt. Hiện tại bạn có thể xem thử bằng tài khoản demo.",
+    "demo": "Xem thử bằng tài khoản demo",
+    "demoNote": "Tài khoản demo cũng hiển thị dữ liệu mẫu. Bệnh viện đã lưu và nhật ký khám chỉ lưu trong trình duyệt này.",
+    "demoBadge": "Demo",
+    "loggedInAs": "Đã đăng nhập bằng tài khoản {{name}}.",
+    "logout": "Đăng xuất"
+  },
+  "chat": {
+    "title": "Medi Chatbot",
+    "subtitle": "Cùng tìm thông tin y tế và du lịch Daegu.",
+    "openMenu": "Mở danh sách hội thoại",
+    "closeMenu": "Đóng danh sách hội thoại",
+    "new": "Hội thoại mới",
+    "search": "Tìm hội thoại",
+    "history": "Lịch sử hội thoại",
+    "group": {
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
+      "earlier": "Trước đó"
+    },
+    "noHistory": "Chưa có hội thoại.",
+    "noResults": "Không có kết quả.",
+    "sample": "Mẫu",
+    "sampleNote": "Đây là hội thoại mẫu, không phải hồ sơ tư vấn thật.",
+    "more": "Menu hội thoại {{title}}",
+    "delete": "Xóa hội thoại",
+    "confirmDelete": "Xóa hội thoại ngày {{title}}? Không thể hoàn tác.",
+    "saveNote": {
+      "guest": "Đăng nhập để lưu hội thoại",
+      "demo": "Hội thoại demo không được lưu",
+      "member": "Hội thoại được lưu tự động"
+    },
+    "login": "Đăng nhập",
+    "settings": "Cài đặt",
+    "summary": {
+      "none": "Hội thoại mới",
+      "hospital": "Thông tin bệnh viện",
+      "price": "Thông tin giá",
+      "interpret": "Phiên dịch",
+      "tour": "Thông tin du lịch"
+    },
+    "topic": {
+      "hospital": "Tìm bệnh viện",
+      "price": "Thông tin giá",
+      "interpret": "Phiên dịch",
+      "tour": "Du lịch Daegu"
+    },
+    "region": {
+      "junggu": "Jung-gu · Dongseong-ro",
+      "suseong": "Suseong-gu",
+      "any": "Khu vực nào cũng được"
+    },
+    "link": {
+      "hospitals": "Xem trong Thông tin bệnh viện",
+      "prices": "Mở Hướng dẫn giá"
+    },
+    "bot": {
+      "askDept": "Bạn đang tìm chuyên khoa nào?",
+      "askRegion": "Bạn muốn tìm ở khu vực nào?\nChọn khu vực để xem thông tin bệnh viện và kênh liên hệ chính thức.",
+      "hospitals": "Trong Thông tin bệnh viện, bạn có thể xem các bệnh viện phù hợp theo khoảng cách hoặc tên. Vui lòng kiểm tra liên hệ chính thức và giờ khám của từng bệnh viện.",
+      "price": "Bạn có thể xem khoảng giá theo dịch vụ trong Hướng dẫn giá. Chi phí thực tế khác nhau, vui lòng xác nhận với bệnh viện.",
+      "interpret": "Hỗ trợ phiên dịch khác nhau tùy bệnh viện. Vui lòng kiểm tra ngôn ngữ hỗ trợ qua liên hệ chính thức của bệnh viện trước khi đến. Nếu cần phiên dịch du lịch, hãy gọi đường dây 1330.",
+      "tour": "Thông tin du lịch Daegu đang được chuẩn bị. Tránh lịch trình dày ngay sau điều trị và hỏi bệnh viện về hướng dẫn hồi phục.",
+      "emergency": "Đây có thể là tình huống khẩn cấp. Hãy gọi 119 ngay hoặc đến phòng cấp cứu gần nhất. 119 hỗ trợ phiên dịch tiếng nước ngoài.",
+      "fallback": "Đây là bản demo, chưa kết nối tư vấn AI. Vui lòng chọn chủ đề bên dưới."
+    },
+    "copy": "Sao chép câu trả lời",
+    "copied": "Đã sao chép",
+    "like": "Hữu ích",
+    "quickMenu": "Hiện hoặc ẩn menu nhanh",
+    "placeholder": "Nhập câu hỏi của bạn",
+    "send": "Gửi",
+    "disclaimer": "Câu trả lời AI chỉ mang tính thông tin. Vui lòng xác nhận việc khám và đặt lịch với bệnh viện.",
+    "cancel": "Hủy"
+  }
+}
