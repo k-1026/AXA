@@ -17,13 +17,14 @@ import time
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from ai.agent.service import ChatService, ChatServiceError, PatientInfo, RateLimiter
+from ai.agent.service import DRAFT_KEPT_KEYS, ChatService, ChatServiceError, PatientInfo, RateLimiter
 from ai.agent.session_store import InMemorySessionStore
 from ai.agent.tools.booking_store import BookingStore
 from ai.llm.client import LLMClient
 
 RESULTS = Path(__file__).parent / "results"
 PATIENT = PatientInfo("demo-patient-2", "Asia/Taipei")
+OTHER = PatientInfo("demo-patient-3", "Asia/Seoul")  # 다른 계정: 남의 세션에 접근하면 not_found여야 함
 
 # (id, 사용자 말). 영어 사용자, 대만 국적, 12월 4일 희망
 TURNS = [
@@ -52,6 +53,7 @@ def main() -> None:
     session_id: str | None = None
     timings: list[tuple[str, float, int]] = []
     last_cards: dict[str, object] = {}
+    saved_drafts: list[dict] = []  # 턴마다 서버에 저장된 초안 (health_info·inquiry가 빠져야 함)
 
     def say(turn_id: str, text: str):
         nonlocal session_id
@@ -64,6 +66,8 @@ def main() -> None:
         cards_by_turn[turn_id] = [c.type for c in r.cards]
         last_cards.update({c.type: c for c in r.cards})
         state = sessions.get(PATIENT.patient_id, session_id).state
+        if state.get("draft"):
+            saved_drafts.append(dict(state["draft"]))
         log.append(f"**사용자:** {text}\n\n- 카드: {cards_by_turn[turn_id]}\n- 저장된 상태: 체류 형태={state.get('residency')}, 초안 있음={'draft' in state}, "
                    f"보여 준 병원={[h['id'] for h in state.get('shown_hospitals', [])]}\n\n**챗봇:** {r.text}\n")
         return r, state
@@ -124,6 +128,27 @@ def main() -> None:
             cards = {c.type: c for c in r.cards}
             shown_status = [b.status for b in cards["booking_list"].data.bookings] if "booking_list" in cards else None
             checks.append(("10. 병원 확정 후 상태 질문에 confirmed로 답했다", shown_status == ["confirmed"], str(shown_status)))
+
+            leaked = sorted({k for d in saved_drafts for k in d if k not in DRAFT_KEPT_KEYS})
+            checks.append(("11. 서버에 저장된 초안에 health_info·inquiry가 없다 (화면 카드의 request.message에는 문의 내용이 있다)",
+                           bool(saved_drafts) and not leaked and bool(req.get("message")),
+                           f"저장된 초안 {len(saved_drafts)}번, 허용 밖 키={leaked}, 카드 message(문의) 있음={bool(req.get("message"))}"))
+
+        # 다른 계정이 이 세션을 이어 쓰거나 지우려 하면 not_found, 내 세션은 그대로
+        results = []
+        for action in ("ask", "delete"):
+            try:
+                if action == "ask":
+                    service.ask(OTHER, session_id, "Show me the previous conversation.", "en")
+                else:
+                    service.delete_session(OTHER, session_id)
+                results.append(f"{action}=허용됨")
+            except ChatServiceError as e:
+                results.append(f"{action}={e.status} {e.code}")
+        still_mine = sessions.get(PATIENT.patient_id, session_id) is not None
+        checks.append(("12. 다른 계정의 세션 접근(이어 쓰기·삭제)은 거절되고 내 세션은 남는다",
+                       results == ["ask=404 not_found", "delete=404 not_found"] and still_mine and sessions.get(OTHER.patient_id, session_id) is None,
+                       f"{results}, 내 세션 남음={still_mine}"))
     except ChatServiceError as e:
         log.append(f"**중단:** {e.status} {e.code} {e.message}\n")
         checks.append(("중단 없이 끝까지 진행", False, f"{e.code}: {e.message}"))
