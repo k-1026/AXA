@@ -3,6 +3,8 @@
 from typing import Any
 
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
@@ -22,4 +24,19 @@ def register_error_handlers(app: FastAPI) -> None:
             status_code=exc.status_code,
             content={"code": exc.code, "message": exc.message, "detail": exc.detail},
             headers=headers,
+        )
+
+    # FastAPI 기본 422({"detail": [...]})도 같은 형식으로 → 프론트는 code만 보면 됨
+    @app.exception_handler(RequestValidationError)
+    async def handle_validation(_: Request, exc: RequestValidationError) -> JSONResponse:
+        errors = [
+            {"loc": e.get("loc"), "type": e.get("type"), "msg": e.get("msg")} for e in exc.errors()
+        ]
+        return JSONResponse(
+            status_code=422,
+            content={
+                "code": "validation",
+                "message": "입력 값을 확인하세요",
+                "detail": {"errors": jsonable_encoder(errors)},
+            },
         )
