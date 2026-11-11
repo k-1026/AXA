@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowRightIcon, CheckIcon } from './icons';
+import { CheckIcon } from './icons';
 import type { ChecklistItem } from './sampleData';
 
 export function ChecklistCard({ initial }: { initial: ChecklistItem[] }) {
@@ -44,10 +43,6 @@ export function ChecklistCard({ initial }: { initial: ChecklistItem[] }) {
           </li>
         ))}
       </ul>
-      <Link to="/mypage/checklist" className="mp-text-link mp-card-foot">
-        {t('mypage.checklist.viewAll')}
-        <ArrowRightIcon />
-      </Link>
     </section>
   );
 }

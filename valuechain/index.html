@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>밸류체인 v0</title>
+<style>
+  :root { --bg:#fff; --fg:#1f2328; --muted:#59636e; --line:#d1d9e0; --code:#f6f8fa; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#3d444d; --code:#151b23; } }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, "Malgun Gothic", sans-serif; margin:0; padding:24px 16px; }
+  main { max-width:1100px; margin:0 auto; }
+  table { border-collapse:collapse; width:100%; display:block; overflow-x:auto; font-size:14px; }
+  th, td { border:1px solid var(--line); padding:6px 10px; vertical-align:top; }
+  blockquote { color:var(--muted); border-left:4px solid var(--line); margin:0; padding:0 12px; }
+  code { background:var(--code); padding:1px 4px; border-radius:4px; }
+  .mermaid { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; overflow-x:auto; margin:12px 0; }
+  .zoombar { display:flex; gap:6px; align-items:center; margin-top:12px; font-size:13px; }
+  .zoombar button { border:1px solid var(--line); background:var(--code); color:var(--fg); border-radius:6px; padding:2px 10px; cursor:pointer; }
+  .zoombar span { min-width:44px; text-align:center; color:var(--muted); }
+  .err { color:#cf222e; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<main id="doc">불러오는 중…</main>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+  const doc = document.getElementById('doc');
+  try {
+    const file = new URLSearchParams(location.search).get('f') || 'valuechain_v0.md';
+    const md = await (await fetch(file, { cache: 'no-store' })).text();
+    doc.innerHTML = marked.parse(md);
+    doc.querySelectorAll('code.language-mermaid').forEach((c) => {
+      const div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = c.textContent;
+      c.parentElement.replaceWith(div);
+    });
+    mermaid.initialize({ startOnLoad: false, theme: 'default', flowchart: { useMaxWidth: false } });
+    await mermaid.run({ querySelector: '.mermaid' });
+    // 기본은 화면 너비에 맞춤, 버튼으로 확대·축소
+    doc.querySelectorAll('.mermaid').forEach((box) => {
+      const svg = box.querySelector('svg');
+      const natural = svg.getBBox ? svg.viewBox.baseVal.width || svg.getBoundingClientRect().width : 1000;
+      svg.style.maxWidth = 'none';
+      svg.style.height = 'auto';
+      let zoom = 0; // 0 = 맞춤
+      const apply = () => {
+        const fit = box.clientWidth - 24;
+        svg.style.width = (zoom === 0 ? Math.min(fit, natural) : natural * zoom) + 'px';
+        label.textContent = zoom === 0 ? '맞춤' : Math.round(zoom * 100) + '%';
+      };
+      const bar = document.createElement('div');
+      bar.className = 'zoombar';
+      const mk = (t, f) => { const b = document.createElement('button'); b.textContent = t; b.onclick = () => { f(); apply(); }; bar.append(b); };
+      const cur = () => (zoom === 0 ? Math.min(box.clientWidth - 24, natural) / natural : zoom);
+      mk('−', () => { zoom = Math.max(0.1, cur() - 0.1); });
+      const label = document.createElement('span');
+      bar.append(label);
+      mk('+', () => { zoom = Math.min(2, cur() + 0.1); });
+      mk('맞춤', () => { zoom = 0; });
+      mk('원래 크기', () => { zoom = 1; });
+      box.before(bar);
+      apply();
+      window.addEventListener('resize', () => { if (zoom === 0) apply(); });
+    });
+    document.title = doc.querySelector('h1')?.textContent.split('—')[0].trim() || '밸류체인';
+  } catch (e) {
+    doc.insertAdjacentHTML('beforeend', '<p class="err"></p>');
+    doc.lastElementChild.textContent = '그리기 오류: ' + e.message;
+  }
+</script>
+</body>
+</html>

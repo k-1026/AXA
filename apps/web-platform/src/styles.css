@@ -9,9 +9,53 @@
   --accent-soft: #e3edfd;
   --radius: 16px;
   --header-h: 64px;
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  /* 한국어 글꼴: 외국어 화면 안의 한국어(주소 등)도 이 글꼴로 */
+  --font-ko: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  font-family: system-ui, var(--font-ko);
   color: var(--text);
   background: var(--bg);
+  /* 줄에 안 들어가는 긴 단어·URL만 잘라서 칸 밖으로 안 나가게 */
+  overflow-wrap: break-word;
+}
+
+/* 언어별 글꼴·줄바꿈. 글꼴은 각 나라 기기 기본 글꼴만 써서 외부 다운로드가 없다 (중국에서는 구글 폰트가 막힘) */
+/* 한국어: 단어 중간에서 줄이 바뀌지 않게 띄어쓰기 단위로 */
+html:lang(ko),
+[lang='ko'] {
+  font-family: var(--font-ko);
+  word-break: keep-all;
+}
+
+/* 영어·베트남어: 성조 기호가 겹치지 않게 베트남어 지원 글꼴 + 줄 간격 여유 */
+html:lang(en),
+html:lang(vi),
+[lang='en'] {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', var(--font-ko);
+}
+
+/* 다른 언어 화면 속 영어 이름(시술·병원): 좁은 칸에서는 음절에서 하이픈으로 나눔 */
+[lang='en'] {
+  hyphens: auto;
+}
+
+html:lang(vi) {
+  line-height: 1.5;
+}
+
+/* 중국어: 한국어 글꼴로 한자가 그려지지 않게 간체·번체 글꼴을 따로, 문장부호가 줄 맨 앞에 오지 않게 */
+html:lang(zh-CN) {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', var(--font-ko);
+  line-break: strict;
+}
+
+html:lang(zh-TW) {
+  font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', 'Source Han Sans TC', var(--font-ko);
+  line-break: strict;
+}
+
+/* 지도 팝업도 Leaflet 기본 글꼴(Helvetica) 대신 언어별 글꼴 (leaflet.css가 나중에 불러와져도 이기게 html 붙임) */
+html .leaflet-container {
+  font-family: inherit;
 }
 
 * {
@@ -114,6 +158,8 @@ a {
 }
 
 .filter-grid button {
+  /* 긴 이름(영어·베트남어)은 칸 밖으로 잘리지 않고 다음 줄로 */
+  min-width: 0;
   min-height: 48px;
   padding: 0 16px;
   border: 0;
@@ -175,13 +221,33 @@ a {
   background: var(--surface-muted);
 }
 
-.hospital-card-body {
-  padding: 14px 16px 16px;
+.hospital-photo.is-empty {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
 }
 
-/* 마지막 줄(인스타그램)이 길어도 하트와 겹치지 않게 */
-.hospital-card .hospital-facts dd:last-child {
-  padding-right: 32px;
+/* 세로로 긴 사진도 칸 크기(4:3)는 그대로, 넘치는 부분은 잘림 */
+.hospital-photo:has(> img) {
+  position: relative;
+  overflow: hidden;
+}
+
+.hospital-photo > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 아래쪽은 찜 하트 자리: 긴 홈페이지 주소가 하트에 가려지지 않게 */
+.hospital-card-body {
+  padding: 14px 16px 50px;
 }
 
 /* 찜 하트: 카드 오른쪽 아래. 카드 전체 링크보다 위에 둔다 */
@@ -388,6 +454,8 @@ a {
 }
 
 .procedure-card {
+  /* 한국어는 단어 단위로만 줄을 바꿔서, 긴 단어가 칸을 밀어내지 않게 줄어들 수 있게 */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -463,6 +531,7 @@ a {
 }
 
 .detail-photo {
+  overflow: hidden;
   border-radius: 16px;
 }
 
@@ -819,9 +888,11 @@ a {
   gap: 16px;
 }
 
+/* 크기는 모든 언어 공통. 가장 긴 한 단어(Ophthalmology)가 한 줄에 들어가는 크기 */
 .dept-chip {
-  width: 104px;
-  height: 104px;
+  width: 128px;
+  height: 128px;
+  hyphens: none;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -1012,7 +1083,7 @@ a {
 /* 요약 카드 3개 */
 .mp-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
@@ -2047,21 +2118,54 @@ a {
 
 /* 푸터 */
 .site-footer {
-  padding: 24px;
+  padding: 32px 24px 24px;
   background: var(--surface);
   border-top: 1px solid var(--border);
-  text-align: center;
   font-size: 0.8rem;
+  line-height: 1.6;
   color: var(--text-muted);
 }
 
 .site-footer p {
-  margin: 4px 0;
+  margin: 0 0 6px;
+}
+
+/* 왼쪽: 팀·서비스 소개 / 오른쪽: 문의·안내 */
+.footer-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 48px;
+}
+
+.footer-team-name {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.footer-contact a {
+  color: var(--accent);
 }
 
 .footer-notice {
   font-weight: 600;
   color: var(--text);
+}
+
+.site-footer .footer-team {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .footer-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* 태블릿 이하: 사이드바를 위쪽 가로 메뉴로 */
@@ -2129,10 +2233,26 @@ a {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .dept-filter {
+    gap: 10px;
+  }
+
   .dept-chip {
-    width: 76px;
-    height: 76px;
+    width: 104px;
+    height: 104px;
+    padding: 6px;
     font-size: 0.8rem;
+  }
+
+  .filter-grid button {
+    padding: 0 12px;
+  }
+}
+
+/* 아주 작은 폰: 3칸이면 영어·베트남어 이름이 너무 좁아짐 */
+@media (max-width: 360px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -2368,7 +2488,7 @@ body.chat-open {
   color: var(--c-blue);
 }
 
-.chat-history-icon svg {
+.chat-history-icon .chat-bot-icon {
   width: 26px;
   height: 26px;
 }
@@ -2519,7 +2639,7 @@ body.chat-open {
   color: var(--c-blue);
 }
 
-.chat-title-icon svg {
+.chat-title-icon .chat-bot-icon {
   width: 40px;
   height: 40px;
 }
@@ -2598,7 +2718,7 @@ body.chat-open {
   color: var(--c-blue);
 }
 
-.chat-avatar svg {
+.chat-avatar .chat-bot-icon {
   width: 48px;
   height: 48px;
 }
@@ -2891,7 +3011,7 @@ body.chat-open {
     border-radius: 10px;
   }
 
-  .chat-title-icon svg {
+  .chat-title-icon .chat-bot-icon {
     width: 28px;
     height: 28px;
   }
@@ -2927,7 +3047,7 @@ body.chat-open {
   }
 
   .chat-avatar,
-  .chat-avatar svg {
+  .chat-avatar .chat-bot-icon {
     width: 34px;
     height: 34px;
   }
@@ -3234,4 +3354,1168 @@ body.chat-open {
   background: #c62828;
   color: #ffffff;
   font-weight: 600;
+}
+
+/* 챗봇 캐릭터 이미지 (얼굴·상반신으로 자른 그림이라 원 안에 꽉 차게) */
+.chat-bot-icon {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 로그인·회원가입 폼 */
+.auth-card {
+  max-width: 520px;
+  margin: 24px auto;
+  padding: 28px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.auth-tab {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-tab.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.08);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.auth-field em {
+  color: var(--text-muted);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.auth-field input,
+.auth-field select {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.auth-field input:focus-visible,
+.auth-field select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.auth-field input[aria-invalid='true'] {
+  border-color: #c4320a;
+}
+
+.auth-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.auth-hint.bad {
+  color: #c4320a;
+}
+
+.auth-row {
+  display: flex;
+  gap: 12px;
+}
+
+.auth-consents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.auth-consents legend {
+  padding: 0 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.auth-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.auth-check input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  flex: none;
+  accent-color: var(--accent);
+}
+
+.auth-check a {
+  color: var(--accent);
+}
+
+.auth-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fdeceb;
+  color: #a5280a;
+  font-size: 0.9rem;
+}
+
+.auth-submit {
+  justify-content: center;
+  width: 100%;
+}
+
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.auth-demo .mp-login-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 20px 16px;
+  }
+
+  .auth-row {
+    flex-direction: column;
+  }
+}
+
+/* 내 계정 > 탈퇴하기 */
+.mp-account-spacer {
+  flex: 1;
+}
+
+.mp-account-note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.mp-withdraw {
+  padding: 8px 14px;
+  border: 1px solid #f0c4bd;
+  border-radius: 10px;
+  background: var(--surface);
+  color: #b42318;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mp-withdraw:hover:not(:disabled) {
+  background: #fdeceb;
+}
+
+.mp-withdraw:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mp-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(16 24 40 / 0.45);
+}
+
+.mp-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgb(16 24 40 / 0.2);
+}
+
+.mp-dialog h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.mp-dialog > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.mp-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.mp-dialog-actions .mp-login-secondary {
+  margin-top: 0;
+}
+
+.mp-withdraw-confirm {
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: #b42318;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mp-withdraw-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 가격 가이드 > 통화 환산 */
+.procedure-price-krw {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.detail-source a {
+  color: var(--accent);
+}
+
+/* 병원 상담·예약 (/booking): 챗봇 레이아웃 재사용 + 병원별 상담 목록·예약 카드 */
+.consult-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.consult-list li {
+  border-radius: 12px;
+}
+
+.consult-list li + li {
+  margin-top: 4px;
+}
+
+.consult-list li:hover {
+  background: var(--c-blue-08);
+}
+
+.consult-list li.is-active {
+  background: var(--c-blue-14);
+}
+
+.consult-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.consult-item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.consult-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.consult-item-row strong {
+  overflow: hidden;
+  font-size: 0.98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.consult-item-row time {
+  flex-shrink: 0;
+  color: var(--c-ink-55);
+  font-size: 0.78rem;
+}
+
+.consult-preview {
+  overflow: hidden;
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.consult-badge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--c-blue);
+  color: var(--c-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.consult-thumb {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-blue);
+}
+
+.consult-thumb.is-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+
+.consult-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.consult-thumb svg {
+  width: 26px;
+  height: 26px;
+}
+
+.consult-status {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.consult-status.is-pending {
+  background: #fdf0d5;
+  color: #9a5b00;
+}
+
+.consult-status.is-confirmed {
+  background: #e3f4e8;
+  color: #15803d;
+}
+
+.consult-status.is-declined {
+  background: #fde7e5;
+  color: #b42318;
+}
+
+.consult-title h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.consult-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 4px 0 0;
+  color: var(--c-ink-70);
+  font-size: 0.88rem;
+}
+
+.consult-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--c-ink-55);
+  font-weight: 600;
+}
+
+.consult-online::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.consult-online.is-on {
+  color: #15803d;
+}
+
+.consult-head-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.consult-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  background: var(--c-white);
+  color: var(--c-ink);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.consult-button:hover {
+  border-color: var(--c-blue);
+}
+
+.consult-button.is-primary {
+  border-color: var(--c-blue);
+  background: var(--c-blue);
+  color: var(--c-white);
+}
+
+.consult-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.consult-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin: 14px 28px 0 32px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-ink);
+  font-size: 0.92rem;
+}
+
+.consult-notice svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--c-blue);
+}
+
+.consult-staff {
+  border-radius: 50%;
+  background: var(--c-blue-08);
+}
+
+.consult-staff svg {
+  width: 26px;
+  height: 26px;
+}
+
+.consult-staff-name {
+  margin-bottom: 4px;
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+}
+
+.consult-empty {
+  margin: 24px auto;
+  max-width: 36ch;
+  color: var(--c-ink-55);
+  text-align: center;
+}
+
+.consult-booking-row {
+  margin: 0 0 18px 66px;
+}
+
+.consult-booking {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 560px;
+  padding: 16px 18px 12px;
+  border: 1px solid var(--c-blue-40);
+  border-radius: 14px;
+  background: var(--c-white);
+}
+
+.consult-booking header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.consult-booking h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.consult-booking-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-blue);
+}
+
+.consult-booking-icon svg,
+.consult-booking-line svg,
+.consult-booking footer svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.consult-booking-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.consult-booking-detail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--c-blue-04);
+  font-size: 0.85rem;
+}
+
+.consult-booking-detail dt {
+  color: var(--c-ink-55);
+}
+
+.consult-booking-detail dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.consult-booking footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--c-line);
+  color: var(--c-ink-70);
+  font-size: 0.85rem;
+}
+
+.consult-booking footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.consult-booking footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--c-blue);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.consult-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 14px;
+  background: var(--c-blue-04);
+}
+
+.consult-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.consult-form-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.consult-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.consult-form input,
+.consult-form select,
+.consult-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: var(--c-white);
+  color: var(--c-ink);
+  font-weight: 400;
+}
+
+.consult-form textarea {
+  resize: vertical;
+}
+
+.consult-form-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
+.consult-form-hint {
+  margin: 0;
+  color: var(--c-ink-55);
+  font-size: 0.8rem;
+}
+
+.consult-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.consult-form-actions button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: var(--c-white);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.consult-form-actions .is-primary {
+  border-color: var(--c-blue);
+  background: var(--c-blue);
+  color: var(--c-white);
+}
+
+.consult-start {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px 32px;
+}
+
+.consult-start h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.consult-start p {
+  margin: 0;
+  max-width: 48ch;
+  color: var(--c-ink-70);
+}
+
+/* 병원 상세의 "병원에 상담하기" (사이트 공통 색) */
+.detail-consult {
+  display: inline-flex;
+  align-items: center;
+  margin: 4px 0 12px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (max-width: 860px) {
+  .consult-title {
+    flex-wrap: wrap;
+  }
+
+  .consult-title .consult-thumb.is-lg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .consult-title h1 {
+    font-size: 1.1rem;
+  }
+
+  .consult-head-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .consult-button {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.88rem;
+  }
+
+  .consult-notice {
+    margin: 10px 14px 0;
+    font-size: 0.85rem;
+  }
+
+  .consult-booking-row {
+    margin-left: 42px;
+  }
+
+  .consult-form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .consult-start {
+    padding: 16px;
+  }
+}
+
+.consult-sidebar a.chat-new {
+  text-decoration: none;
+}
+
+.consult-status.is-cancelled {
+  background: #eceff3;
+  color: #5d6875;
+}
+
+/* 예약 관리 (/mypage/bookings) */
+.bk-list {
+  /* 카드 안 예약 변경 폼이 상담 화면과 같은 색을 쓰도록 */
+  --c-blue: var(--accent);
+  --c-white: #ffffff;
+  --c-ink: #172b4d;
+  --c-ink-70: rgb(23 43 77 / 0.7);
+  --c-ink-55: rgb(23 43 77 / 0.55);
+  --c-line: rgb(23 43 77 / 0.12);
+  --c-blue-04: rgb(31 111 235 / 0.04);
+  --c-blue-08: rgb(31 111 235 / 0.08);
+  --c-blue-25: rgb(31 111 235 / 0.25);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bk-top-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-top: 28px;
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bk-top-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+.bk-filter-row {
+  justify-content: space-between;
+}
+
+.bk-sort {
+  margin-top: 0;
+}
+
+.bk-card {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 0.8fr) minmax(0, 1.6fr);
+  gap: 20px;
+  align-items: start;
+  padding: 16px 20px 16px 16px;
+}
+
+.bk-card .consult-thumb.is-lg {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  max-width: 100%;
+}
+
+.bk-card .consult-thumb svg {
+  width: 40px;
+  height: 40px;
+}
+
+.bk-hospital {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.bk-hospital h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.bk-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.bk-place svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bk-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 0 0 20px;
+  border-left: 1px solid var(--border);
+}
+
+.bk-when {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bk-when svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+}
+
+.bk-when p {
+  flex: 1;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.bk-wish {
+  font-weight: 700;
+}
+
+.bk-sub,
+.bk-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.bk-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 1.4em;
+}
+
+.bk-meta svg {
+  width: 16px;
+  height: 16px;
+}
+
+.bk-actions,
+.bk-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.bk-actions button,
+.bk-confirm button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 128px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bk-actions button:hover,
+.bk-confirm button:hover {
+  border-color: var(--accent);
+}
+
+.bk-actions .is-primary {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.bk-actions svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bk-confirm {
+  align-items: center;
+}
+
+.bk-confirm p {
+  flex: 1 1 100%;
+  margin: 0;
+  color: #b42318;
+  font-size: 0.9rem;
+}
+
+.bk-confirm .is-danger {
+  border-color: #c62828;
+  background: #c62828;
+  color: #ffffff;
+}
+
+.bk-card .consult-form {
+  margin-top: 10px;
+}
+
+.bk-card.is-cancelled .bk-when p,
+.bk-card.is-cancelled .bk-hospital h2 {
+  color: var(--text-muted);
+}
+
+.bk-footnote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.bk-footnote svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 860px) {
+  .bk-card {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .bk-detail {
+    grid-column: 1 / -1;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .bk-when p {
+    font-size: 1rem;
+  }
+
+  .bk-actions button {
+    flex: 1 1 120px;
+    min-width: 0;
+  }
+
+  .bk-top-link {
+    margin-top: 0;
+  }
+
+  .mp-saved-top:has(.bk-top-link) {
+    flex-direction: column;
+  }
+}
+
+.consult-status.is-completed {
+  background: #e4edfd;
+  color: #1f5fc8;
+}
+
+/* 사후 관리 (/aftercare) */
+.aftercare-top {
+  align-items: center;
+}
+
+.aftercare-top .chat-history-title {
+  flex: 1;
+  margin: 0;
+}
+
+.aftercare-hint {
+  margin: -4px 4px 4px;
+  color: var(--c-ink-55);
+  font-size: 0.82rem;
+}
+
+.aftercare-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px;
+  width: min(420px, 100%);
+  margin-bottom: 6px;
+}
+
+.aftercare-media {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--c-blue-08);
+  object-fit: cover;
+}
+
+.aftercare-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.aftercare-pending {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.aftercare-pending li {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  background: var(--c-blue-08);
+}
+
+.aftercare-pending img,
+.aftercare-pending video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.aftercare-pending button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(23 43 77 / 0.7);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.aftercare-pending button svg {
+  width: 14px;
+  height: 14px;
 }

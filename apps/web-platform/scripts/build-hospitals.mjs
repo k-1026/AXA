@@ -47,6 +47,9 @@ const excluded = new Set(
 );
 // 홈페이지·인스타그램 (팀 수집 파일에서 사이트 병원과 맞는 곳만, 블로그·네이버 제외)
 const links = new Map(readCsv('daegu_hospital_links.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r]));
+// 대표사진 주소 (팀 수집 파일을 요양기관 기호로 맞춘 것). 사진 파일은 저장하지 않고 원래 주소로 표시
+// 프로토타입용 임시 (2026-11-04). 광고성 이미지가 섞여 있고 이용 조건 미확인 → 정식 공개 전에 교체
+const photos = new Map(readCsv('daegu_hospital_photos.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r.photo]));
 
 // 진료과 판정
 // - 피부과·성형외과: 심평원 진료과목 코드 (14, 08)
@@ -108,6 +111,7 @@ const items = hours
       tel: r.telno || undefined,
       url: link?.homepage || url(b.hospUrl ?? ''),
       instagram: link?.instagram || undefined,
+      photo: photos.get(r.ykiho),
       lat: Number(r.YPos),
       lng: Number(r.XPos),
       depts,
