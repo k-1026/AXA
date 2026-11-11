@@ -17,6 +17,15 @@
 
 ## 기록
 
+### 2026-11-11 (2) · backend-A-chatbot · Claude
+- 한 일: **7e 지난 대화** — `GET /chatbot/sessions`(내 대화 목록, 최근 순, 최대 50), `GET /chatbot/sessions/{id}`(가린 글만, 카드·상태 X). **7c 계약·문서** — contracts 7절 챗봇 API 신설, 4절 `chatbot.unavailable`·`rate_limited` 챗봇 추가, 5절 챗봇의 `booking.service` 호출, 6절 `lang` 5개·`department_code` 값·`residency` 제안. `backend-plan.md` API 표, `compliance.md`(추천 허용 범위·대화 저장·AI 표시) 갱신. 수동 검증 안내 `docs/7b-수동검증.md`(Swagger·curl)
+- 바뀐 계약: **있음** 4·5·6·7절 (변경 이력에 한 줄) → **B 승인 필요**
+- 마이그레이션: 없음
+- 테스트: 290개 통과 = 백엔드 100(챗봇 API 12) + AI 190. 실제 서버 + 프론트(`frontend-chatbot-api`)로 확인: 새로고침 뒤 지난 대화 목록·내용이 서버에서 다시 보이고, 이어서 질문하면 같은 대화에 저장됨(로컬 SQLite)
+- 다음 할 일: 이 브랜치 → `backend` PR, 머지 뒤 공용 DB에 `0005`, 프론트 PR, 병원 데이터(`hospital` 모듈)
+- B에게 요청: ① contracts 4~7절 변경 확인 ② `BookingCreate`에 `residency`(체류 형태) 칸 또는 계정 속성 의견 ③ `booking.service.list_for_patient`·`get_for_patient`가 오면 챗봇 연결
+- 막힌 것·질문: 없음
+
 ### 2026-11-11 · backend-A-chatbot · Claude
 - 한 일: **7b 챗봇 API** — `origin/ai`를 이 브랜치에 merge(백엔드가 `ai.agent` 서비스 층을 import). `modules/chatbot/`에 `store.py`(`SessionStore`의 DB 구현, 환자 id로 범위 제한, 잘못된 id는 "없음"), `bookings.py`(예약 조회 게이트웨이 — `booking` 모듈이 없어 지금은 "내 요청 없음", 가짜 예약 데이터는 실제 환자에게 안 보임), `schemas.py`(`AskRequest`), `service.py`(계정의 시간대·선호 언어 채우기, `ChatServiceError` → `AppError`), `router.py`(`POST /chatbot/ask`, `DELETE /chatbot/sessions/{id}`, 모두 환자 로그인 필요). `main.py`에 라우터 등록. 응답은 `ai.agent.schemas.ChatResponse` 그대로(카드 9종이 OpenAPI에 나옴)
 - 바뀐 계약: 없음. 단 **`chatbot.unavailable`(503)은 계약 4절에 아직 없음** → 7c 계약 PR에서 추가 (`/chatbot/*` 경로·카드 형식도 같이)

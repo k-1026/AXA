@@ -89,9 +89,9 @@
 | **마이그레이션 ✅ (11/10)** | `backend-A-chatbot` | A가 직접 `0005`(`chat_sessions`·`chat_messages`, RLS 켬) + 모델 + 탈퇴 시 대화 즉시 삭제 + 테스트 10개. 백엔드 테스트 88개 통과, `alembic check` 일치, 되돌리기/다시 올리기 통과, Postgres SQL 확인 | PR 머지, 공용 DB 적용 |
 | **PR** | 팀 | 7a 직후 `ai` → `main` (리더 승인). 전에 공용 파일 변경(plan.md, 질의서, `pyproject.toml`, agent-spec, `.env.example`, 이 문서)을 팀에 알림 | 머지 |
 | **7b ✅ (11/11, PR 전)** | `backend-A-chatbot` → `backend` | `uv sync` 후 기존 테스트 확인, `modules/chatbot`(모델·라우터), DB 구현 `SessionStore`, 에러 변환, 가짜 LLM 주입 테스트 | 백엔드 테스트 통과 |
-| **7c** | 계약·문서 PR | `/chatbot/*` 계약, 새 에러 코드 `chatbot.unavailable`, 언어·진료과 코드, 카드 형식, 로그인 표(`backend-plan.md`)·`compliance.md`·`plan.md` 갱신 | B 승인 |
-| **7d** | 프론트 | `/chatbot` 로그인 필요로 변경, API 호출로 교체, 카드 9종 표시, [제출] = 기존 예약 요청 API, 병원 검색은 로그인 없이 유지 | 브라우저 시연 |
-| **7e** | 후속 | 마이페이지 "지난 대화" | — |
+| **7c ✅ (11/11, PR 전)** | 계약·문서 PR | `/chatbot/*` 계약, 새 에러 코드 `chatbot.unavailable`, 언어·진료과 코드, 카드 형식, 로그인 표(`backend-plan.md`)·`compliance.md`·`plan.md` 갱신 | B 승인 |
+| **7d 🔶 (11/11 일부, `frontend-chatbot-api`)** | 프론트 | `/chatbot` 로그인 필요로 변경, API 호출로 교체, 카드 9종 표시, [제출] = 기존 예약 요청 API, 병원 검색은 로그인 없이 유지 | 브라우저 시연 |
+| **7e ✅ (11/11, 백엔드 `backend-A-chatbot` · 프론트 `frontend-chatbot-api`)** | 후속 | 지난 대화: `GET /chatbot/sessions`·`/{id}`, 프론트가 회원 대화를 서버에서 불러옴(새로고침해도 유지, 글만) | — |
 
 ## 5-1. 7a 결과 (11/10)
 

@@ -170,7 +170,8 @@ backend/
 | `GET /hospitals` | X | 검색·필터(지역·진료과·요일·시간·휴진·등록·요청 가능), 정렬(`distance`·`name`만) | 구독 여부로 정렬 X |
 | `GET /hospitals/{id}` | X | 상세 + 진료시간 + 출처·수집일 + 전화·이메일 | 다른 연락 경로 항상 포함 |
 | `GET /prices/stats?item=&region=` | X | 지역 통계 | 5곳 미만 없음 |
-| `POST /chatbot/ask` | **O** | 챗봇 질문 | 출처·기준일 포함, 의료 판단 거절. 요청 횟수 제한 |
+| `POST /chatbot/ask` | **O** | 챗봇 질문 → 답 + 카드 | 의료 판단 거절, 응급은 119 안내. 요청 횟수 제한. 상세는 [contracts 7절](backend-contracts.md) |
+| `GET /chatbot/sessions` · `/{id}`, `DELETE /chatbot/sessions/{id}` | **O** | 지난 대화 목록·내용(글만)·삭제 | 남의 대화는 404 |
 | `POST /auth/patient/code` · `/auth/patient/verify` | X | 인증코드 발송·확인 → 토큰 | 시도 제한 |
 | `GET·PATCH·DELETE /me` | O | 내 정보·언어·탈퇴 | |
 | `POST /hospitals/{id}/booking-requests` | **O** | 요청서 제출 + 동의 | 필수 동의 없으면 422 |
