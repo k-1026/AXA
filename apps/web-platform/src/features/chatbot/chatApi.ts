@@ -53,3 +53,21 @@ export const askChatbot = (token: string, sessionId: string | undefined, message
 
 export const deleteChatSession = (token: string, sessionId: string) =>
   api<void>(`/chatbot/sessions/${encodeURIComponent(sessionId)}`, { method: 'DELETE', token });
+
+// 7e: 지난 대화 (글만 — 카드는 서버에 저장하지 않음)
+export interface ChatSessionOut {
+  id: string;
+  title: string;
+  lang: string;
+  created_at: string;
+  last_message_at: string;
+}
+
+export interface ChatSessionDetail extends ChatSessionOut {
+  messages: { role: 'user' | 'assistant'; content: string; refused: boolean; created_at: string }[];
+}
+
+export const listChatSessions = (token: string) => api<ChatSessionOut[]>('/chatbot/sessions', { token });
+
+export const getChatSession = (token: string, sessionId: string) =>
+  api<ChatSessionDetail>(`/chatbot/sessions/${encodeURIComponent(sessionId)}`, { token });

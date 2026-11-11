@@ -40,4 +40,5 @@ export interface Conversation {
   messages: ChatMessage[];
   sample?: boolean; // 예시 데이터 (실제 상담 기록 아님)
   serverId?: string; // 회원: 서버 대화 id (POST /chatbot/ask의 session_id)
+  remote?: boolean; // 회원: 서버 목록에서만 받았고 메시지는 아직 안 불러옴 (열 때 불러옴)
 }

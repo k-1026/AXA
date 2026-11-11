@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../components/api';
 import { useAuth } from '../../components/auth';
-import { askChatbot, chatLang, deleteChatSession } from './chatApi';
+import { askChatbot, chatLang, deleteChatSession, getChatSession, listChatSessions } from './chatApi';
 import { GREETING, SAMPLE_CONVERSATIONS } from './sampleConversations';
 import { replyToChip, replyToText, type BotReply } from './replies';
 import { dotDate } from './time';
@@ -12,7 +12,7 @@ import type { ChatMessage, ChipAction, ChatText, Conversation } from './types';
 // - guest: 로그인 전. 이 화면을 보는 동안만 메모리에 두고 저장하지 않음
 // - demo: 데모 계정. 예시 대화로 시작, 바꾼 내용은 메모리에만 (탭을 닫으면 사라짐)
 // - member: 실제 회원. 질문은 POST /chatbot/ask(AI)로 보내고 서버가 대화를 저장 (7d). 화면 목록은 아직 메모리
-//   (지난 대화 목록을 서버에서 불러오는 것은 7e)
+//   화면을 열면 서버의 지난 대화 목록을 불러오고(7e), 대화를 고르면 그때 메시지를 불러온다. 카드는 저장하지 않아 글만 보임
 export type ChatMode = 'guest' | 'demo' | 'member';
 
 const memory: Partial<Record<ChatMode, Conversation[]>> = {};
@@ -28,7 +28,7 @@ const API_ERRORS: Record<string, string> = {
 };
 
 // 인사말만 있는 대화는 아직 시작하지 않은 대화로 본다
-const isBlank = (c: Conversation) => c.messages.every((m) => m.role === 'bot');
+const isBlank = (c: Conversation) => !c.remote && c.messages.every((m) => m.role === 'bot');
 
 // 목록에 시작 전 대화가 하나는 있게 해서 화면을 열면 바로 입력할 수 있게 한다
 const withBlank = (list: Conversation[]) => (list.some(isBlank) ? list : [newConversation(), ...list]);
@@ -77,12 +77,67 @@ export function useConversations() {
     [mode],
   );
 
+  const loading = useRef(new Set<string>()); // 메시지를 불러오는 중인 대화 (같은 요청을 두 번 보내지 않게)
+
+  // 회원: 서버의 지난 대화 목록 (이미 화면에 있는 대화는 그대로)
+  useEffect(() => {
+    if (mode !== 'member' || !token) return;
+    let stop = false;
+    listChatSessions(token)
+      .then((rows) => {
+        if (stop) return;
+        update((prev) => {
+          const known = new Set(prev.map((c) => c.serverId).filter(Boolean));
+          const fromServer: Conversation[] = rows
+            .filter((r) => !known.has(r.id))
+            .map((r) => ({ id: r.id, serverId: r.id, createdAt: r.created_at, messages: [], remote: true }));
+          return fromServer.length ? [...prev, ...fromServer] : prev;
+        });
+      })
+      .catch(() => {}); // 목록을 못 받아도 새 대화는 할 수 있게
+    return () => {
+      stop = true;
+    };
+  }, [mode, token, update]);
+
   // 목록은 최근 생성순
   // (예시는 +09:00, 새 대화는 UTC 형식이라 문자열이 아닌 시각으로 비교)
   const sorted = useMemo(() => [...list].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)), [list]);
 
   // 고른 대화가 없으면 시작 전 대화를 보여준다
   const active = sorted.find((c) => c.id === activeId) ?? sorted.find(isBlank) ?? sorted[0] ?? null;
+
+  // 회원: 서버에서만 받은 대화를 열면 메시지를 불러온다 (첫 인사 + 저장된 글)
+  useEffect(() => {
+    if (!active?.remote || !active.serverId || !token || loading.current.has(active.id)) return;
+    const { id, serverId, createdAt } = active;
+    loading.current.add(id);
+    getChatSession(token, serverId)
+      .then((d) =>
+        update((prev) =>
+          prev.map((c) =>
+            c.id !== id
+              ? c
+              : {
+                  ...c,
+                  remote: false,
+                  messages: [
+                    { id: uid(), role: 'bot', text: GREETING, at: createdAt },
+                    ...d.messages.map((m): ChatMessage => ({
+                      id: uid(),
+                      role: m.role === 'user' ? 'user' : 'bot',
+                      text: m.content,
+                      at: m.created_at,
+                      ...(m.role === 'assistant' ? { ai: true } : {}),
+                    })),
+                  ],
+                },
+          ),
+        ),
+      )
+      .catch(() => update((prev) => withBlank(prev.filter((c) => c.id !== id)))) // 서버에서 지워짐(30일 등)
+      .finally(() => loading.current.delete(id));
+  }, [active, token, update]);
 
   const startNew = () => {
     const blank = sorted.find(isBlank);
