@@ -324,7 +324,39 @@
     "placeholder": "Nhập câu hỏi của bạn",
     "send": "Gửi",
     "disclaimer": "Câu trả lời AI chỉ mang tính thông tin. Vui lòng xác nhận việc khám và đặt lịch với bệnh viện.",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "api": {
+      "thinking": "Đang chuẩn bị câu trả lời…",
+      "aiGenerated": "Do AI tạo",
+      "medicalNotice": "Đây không phải tư vấn y tế. Chẩn đoán và điều trị do nhân viên y tế quyết định.",
+      "network": "Không kết nối được máy chủ. Vui lòng thử lại sau.",
+      "rateLimited": "Quá nhiều câu hỏi. Vui lòng thử lại sau.",
+      "unavailable": "Chatbot hiện không khả dụng. Vui lòng thử lại sau.",
+      "login": "Vui lòng đăng nhập lại.",
+      "notFound": "Không tìm thấy cuộc trò chuyện này. Hãy hỏi lại trong cuộc trò chuyện mới.",
+      "validation": "Vui lòng kiểm tra câu hỏi (tối đa 1.000 ký tự).",
+      "error": "Không nhận được câu trả lời. Vui lòng thử lại."
+    },
+    "card": {
+      "hospitalList": "{{count}} phòng khám (theo tên, không xếp hạng)",
+      "suggestions": "{{count}} phòng khám phù hợp điều kiện",
+      "prices": "Giá dịch vụ ngoài bảo hiểm công khai",
+      "draft": "Bản nháp yêu cầu tư vấn",
+      "hospital": "Phòng khám",
+      "department": "Chuyên khoa",
+      "slots": "Thời gian mong muốn (giờ địa phương)",
+      "consents": "Đồng ý trước khi gửi",
+      "submit": "Gửi yêu cầu",
+      "submitLater": "Giai đoạn demo: có thể gửi khi API yêu cầu đặt lịch được kết nối.",
+      "registered": "Cơ sở tiếp nhận bệnh nhân nước ngoài",
+      "staffLangs": "Nhân viên nói: {{langs}}",
+      "aiTranslation": "Chat dịch bằng AI"
+    },
+    "consent": {
+      "privacy": "Thu thập và sử dụng thông tin cá nhân",
+      "health": "Xử lý thông tin sức khỏe",
+      "overseas_transfer": "Xử lý bởi AI ở nước ngoài (chuyển ra nước ngoài)"
+    }
   },
   "consult": {
     "threads": "Tư vấn theo bệnh viện",

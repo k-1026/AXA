@@ -324,7 +324,39 @@
     "placeholder": "请输入您的问题",
     "send": "发送",
     "disclaimer": "AI 回答仅供参考。诊疗和预约请向相关医院确认。",
-    "cancel": "取消"
+    "cancel": "取消",
+    "api": {
+      "thinking": "正在准备回答…",
+      "aiGenerated": "AI 生成",
+      "medicalNotice": "这不是医疗咨询。诊断和治疗由医务人员判断。",
+      "network": "无法连接服务器，请稍后再试。",
+      "rateLimited": "提问过多，请稍后再试。",
+      "unavailable": "聊天机器人暂时无法使用，请稍后再试。",
+      "login": "请重新登录。",
+      "notFound": "找不到此对话，请在新对话中再问一次。",
+      "validation": "请检查您的问题（1,000 字以内）。",
+      "error": "未能获得回答，请重试。"
+    },
+    "card": {
+      "hospitalList": "{{count}} 家医院（按名称排列，非排名）",
+      "suggestions": "符合条件的医院 {{count}} 家",
+      "prices": "公开非医保价格",
+      "draft": "咨询申请草稿",
+      "hospital": "医院",
+      "department": "科室",
+      "slots": "希望时间（当地时间）",
+      "consents": "提交前同意",
+      "submit": "提交申请",
+      "submitLater": "演示阶段：预约申请 API 接入后即可提交。",
+      "registered": "外国患者招揽机构",
+      "staffLangs": "员工语言：{{langs}}",
+      "aiTranslation": "AI 翻译聊天"
+    },
+    "consent": {
+      "privacy": "个人信息收集与使用",
+      "health": "健康信息处理",
+      "overseas_transfer": "境外 AI 处理（跨境传输）"
+    }
   },
   "consult": {
     "threads": "医院咨询",

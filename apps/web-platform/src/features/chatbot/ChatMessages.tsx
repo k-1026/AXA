@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BotIcon, CopyIcon, ThumbIcon } from './icons';
+import { AnswerText, ChatCards } from './ChatCards';
 import { kstDay, longDate, msgTime } from './time';
 import type { ChatMessage, ChatText, Chip, Conversation } from './types';
 
@@ -56,7 +57,7 @@ export function ChatMessages({ conversation, onChip }: Props) {
   // 새 메시지가 오면 맨 아래로
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' });
-  }, [conversation.id, msgs.length]);
+  }, [conversation.id, msgs.length, msgs[msgs.length - 1]?.pending]); // AI 답이 "준비 중"을 대신할 때도
 
   const isLastBot = (m: ChatMessage) => m === msgs[msgs.length - 1];
 
@@ -79,8 +80,21 @@ export function ChatMessages({ conversation, onChip }: Props) {
                 </span>
               )}
               <div className="chat-msg-body">
-                <div className="chat-bubble">
-                  <p>{text(m.text)}</p>
+                <div className={m.failed ? 'chat-bubble is-failed' : 'chat-bubble'}>
+                  {m.pending ? (
+                    <p className="chat-pending">{t('chat.api.thinking')}</p>
+                  ) : m.ai !== undefined && m.role === 'bot' ? (
+                    <AnswerText text={text(m.text)} />
+                  ) : (
+                    <p>{text(m.text)}</p>
+                  )}
+                  {m.cards && <ChatCards cards={m.cards} />}
+                  {(m.ai || m.medicalNotice) && (
+                    <p className="chat-ai-note">
+                      {m.ai && <span className="chat-ai-badge">{t('chat.api.aiGenerated')}</span>}
+                      {m.medicalNotice && <span>{t('chat.api.medicalNotice')}</span>}
+                    </p>
+                  )}
                   {m.chips && (
                     <div className="chat-chips">
                       {m.chips.map((c) => (
@@ -100,7 +114,7 @@ export function ChatMessages({ conversation, onChip }: Props) {
                 <time className="chat-time" dateTime={m.at}>
                   {msgTime(m.at)}
                 </time>
-                {m.role === 'bot' && i > 0 && <BotActions text={text(m.text)} />}
+                {m.role === 'bot' && i > 0 && !m.pending && <BotActions text={text(m.text)} />}
               </div>
             </div>
           </Fragment>
