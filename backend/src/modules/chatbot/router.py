@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from ai.agent.core.orchestrator import ChatLLM
@@ -11,7 +11,7 @@ from ai.agent.service import RateLimiter
 from core.db import get_db
 from core.security import PatientPrincipal, current_patient
 from modules.chatbot import service
-from modules.chatbot.schemas import AskRequest
+from modules.chatbot.schemas import AskRequest, SessionDetail, SessionOut
 from modules.patient.router import patient_uuid
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
@@ -27,6 +27,18 @@ def ask(data: AskRequest, db: Db, me: Me, llm: Llm, limiter: Limiter):
     """메시지 → 답 + 카드. session_id가 없으면 새 대화. 남의 대화 id면 404 not_found, 너무 잦으면 429 rate_limited,
     모든 LLM이 실패하면 503 chatbot.unavailable."""
     return service.ask(db, llm, limiter, patient_uuid(me), data.session_id, data.message, data.language)
+
+
+@router.get("/sessions", response_model=list[SessionOut])
+def list_sessions(db: Db, me: Me, limit: Annotated[int, Query(ge=1, le=50)] = 50):
+    """내 지난 대화 목록 (마지막 대화가 최근인 순). 30일 지난 대화는 정리 작업이 지운다."""
+    return service.list_sessions(db, patient_uuid(me), limit)
+
+
+@router.get("/sessions/{session_id}", response_model=SessionDetail)
+def get_session(session_id: str, db: Db, me: Me):
+    """한 대화의 메시지(개인정보를 가린 글만, 오래된 순). 카드는 저장하지 않아 없음. 남의 대화면 404."""
+    return service.get_session(db, patient_uuid(me), session_id)
 
 
 @router.delete("/sessions/{session_id}", status_code=204)

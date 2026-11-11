@@ -11,6 +11,7 @@ from __future__ import annotations
 import uuid
 from functools import lru_cache
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ai.agent.core.orchestrator import ChatLLM
@@ -19,6 +20,8 @@ from ai.agent.service import ChatService, ChatServiceError, PatientInfo, RateLim
 from ai.llm.client import LLMClient
 from core.errors import AppError
 from modules.chatbot.bookings import BookingGateway
+from modules.chatbot.models import ChatMessage, ChatSession
+from modules.chatbot.schemas import MessageOut, SessionDetail, SessionOut
 from modules.chatbot.store import DbSessionStore
 from modules.patient import service as patient_service
 
@@ -58,3 +61,30 @@ def delete_session(db: Session, patient_id: uuid.UUID, session_id: str) -> None:
     """LLM·호출 제한과 무관 → 저장소만 쓴다."""
     if not DbSessionStore(db).delete(str(patient_id), session_id):
         raise AppError(404, "not_found", "대화를 찾을 수 없습니다")
+
+
+# ---- 7e: 지난 대화 (내 것만, 최근 순). 카드는 저장하지 않아 글만 돌려준다 (결정 5)
+LIST_LIMIT_MAX = 50  # = ai.agent.service.MAX_SESSIONS_PER_PATIENT
+
+
+def list_sessions(db: Session, patient_id: uuid.UUID, limit: int) -> list[SessionOut]:
+    rows = db.scalars(
+        select(ChatSession).where(ChatSession.patient_id == patient_id)
+        .order_by(ChatSession.last_message_at.desc()).limit(min(limit, LIST_LIMIT_MAX))
+    ).all()
+    return [SessionOut.model_validate(r, from_attributes=True) for r in rows]
+
+
+def get_session(db: Session, patient_id: uuid.UUID, session_id: str) -> SessionDetail:
+    try:
+        sid = uuid.UUID(session_id)
+    except ValueError:
+        sid = None
+    s = sid and db.scalar(select(ChatSession).where(ChatSession.id == sid, ChatSession.patient_id == patient_id))
+    if not s:
+        raise AppError(404, "not_found", "대화를 찾을 수 없습니다")
+    msgs = db.scalars(select(ChatMessage).where(ChatMessage.session_id == s.id).order_by(ChatMessage.id)).all()
+    return SessionDetail(
+        **SessionOut.model_validate(s, from_attributes=True).model_dump(),
+        messages=[MessageOut.model_validate(m, from_attributes=True) for m in msgs],
+    )

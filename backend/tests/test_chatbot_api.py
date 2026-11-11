@@ -194,3 +194,40 @@ def test_all_llm_providers_failing_returns_503_without_saving(client, llm, db_en
     assert r.status_code == 503 and r.json()["code"] == "chatbot.unavailable"
     with db(db_engine) as s:
         assert s.scalars(select(ChatSession)).all() == []
+
+
+# ------------------------------------------------------------------ 7e: 지난 대화
+def test_list_and_read_my_sessions_text_only(client, llm):
+    token = signup(client)
+    llm.script = [
+        call("search_hospitals", {"department": "피부과", "district": "수성구", "language": "en"}),
+        say("Two clinics found."),
+        say("Second answer."),
+    ]
+    first = ask(client, token, "my email is kim.test@example.com, clinics in Suseong-gu", language="en").json()["session_id"]
+    second = ask(client, token, "hello again", language="en").json()["session_id"]
+
+    r = client.get("/api/v1/chatbot/sessions", headers=auth(token))
+    assert r.status_code == 200
+    assert [s["id"] for s in r.json()] == [second, first]  # 최근 대화가 먼저
+    assert r.json()[1]["title"].startswith("my email is [email]")
+
+    r = client.get(f"/api/v1/chatbot/sessions/{first}", headers=auth(token))
+    assert r.status_code == 200
+    body = r.json()
+    assert [(m["role"], m["content"]) for m in body["messages"]] == [
+        ("user", "my email is [email], clinics in Suseong-gu"), ("assistant", "Two clinics found.")]
+    assert "cards" not in body and "state" not in body  # 카드·상태(초안)는 돌려주지 않음
+
+
+def test_session_list_and_detail_are_mine_only(client, llm):
+    mine = signup(client)
+    other = signup(client, email="patient2@example.com")
+    llm.script = [say("Hello!")]
+    sid = ask(client, mine, "hi").json()["session_id"]
+    assert client.get("/api/v1/chatbot/sessions", headers=auth(other)).json() == []
+    r = client.get(f"/api/v1/chatbot/sessions/{sid}", headers=auth(other))
+    assert r.status_code == 404 and r.json()["code"] == "not_found"
+    assert client.get("/api/v1/chatbot/sessions/not-a-uuid", headers=auth(mine)).status_code == 404
+    assert client.get("/api/v1/chatbot/sessions").status_code == 401
+    assert client.get("/api/v1/chatbot/sessions?limit=0", headers=auth(mine)).json()["code"] == "validation"
