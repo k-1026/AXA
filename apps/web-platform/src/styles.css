@@ -4519,3 +4519,123 @@ body.chat-open {
   width: 14px;
   height: 14px;
 }
+
+/* ---- 챗봇 AI 답 (7d): 답 문장·카드·AI 표시 ---- */
+.chat-answer p + p {
+  margin-top: 6px;
+}
+
+.chat-pending {
+  color: var(--c-ink-70);
+  font-style: italic;
+}
+
+.chat-bubble.is-failed {
+  border-color: #e5a3a3;
+  background: #fff6f6;
+}
+
+.chat-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.chat-card {
+  padding: 12px 14px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 10px;
+  background: var(--c-blue-08);
+}
+
+.chat-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.chat-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-card-hospital {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--c-white);
+  font-size: 0.92rem;
+}
+
+.chat-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chat-card-badges em {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-blue);
+  font-size: 0.8rem;
+  font-style: normal;
+}
+
+.chat-card-reasons,
+.chat-card-note {
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+}
+
+.chat-card-note {
+  margin: 8px 0 0;
+}
+
+.chat-card dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.chat-card dd {
+  margin: 0;
+}
+
+.chat-card fieldset {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.chat-card button:disabled {
+  padding: 6px 18px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--c-blue-25);
+  color: var(--c-ink-55);
+}
+
+.chat-ai-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0 !important;
+  color: var(--c-ink-70);
+  font-size: 0.8rem !important;
+}
+
+.chat-ai-badge {
+  padding: 0 8px;
+  border: 1px solid var(--c-ink-55);
+  border-radius: 8px;
+}

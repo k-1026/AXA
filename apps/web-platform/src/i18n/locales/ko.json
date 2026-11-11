@@ -324,7 +324,39 @@
     "placeholder": "궁금한 내용을 입력해 주세요",
     "send": "보내기",
     "disclaimer": "AI 답변은 정보 안내용입니다. 진료·예약은 해당 병원에 확인해 주세요.",
-    "cancel": "취소"
+    "cancel": "취소",
+    "api": {
+      "thinking": "답을 준비하고 있어요…",
+      "aiGenerated": "AI 생성",
+      "medicalNotice": "의료 상담이 아닙니다. 진단·치료는 의료진이 판단해요.",
+      "network": "서버에 연결할 수 없어요. 잠시 뒤 다시 시도해 주세요.",
+      "rateLimited": "질문이 너무 많아요. 잠시 뒤 다시 시도해 주세요.",
+      "unavailable": "지금은 챗봇을 사용할 수 없어요. 잠시 뒤 다시 시도해 주세요.",
+      "login": "로그인이 필요해요. 다시 로그인해 주세요.",
+      "notFound": "이 대화를 찾을 수 없어요. 새 대화로 다시 질문해 주세요.",
+      "validation": "질문을 확인해 주세요 (1,000자 이하).",
+      "error": "답을 받지 못했어요. 다시 시도해 주세요."
+    },
+    "card": {
+      "hospitalList": "병원 {{count}}곳 (이름순, 순위 아님)",
+      "suggestions": "조건에 맞는 병원 {{count}}곳",
+      "prices": "공공 비급여 가격",
+      "draft": "상담 요청서 초안",
+      "hospital": "병원",
+      "department": "진료과",
+      "slots": "희망 일시 (병원 현지 시간)",
+      "consents": "제출 전 동의",
+      "submit": "요청 보내기",
+      "submitLater": "시연 단계: 제출은 예약 요청 API가 연결되면 열려요.",
+      "registered": "외국인환자 유치기관",
+      "staffLangs": "직원 응대: {{langs}}",
+      "aiTranslation": "AI 번역 채팅"
+    },
+    "consent": {
+      "privacy": "개인정보 수집·이용",
+      "health": "건강정보 처리",
+      "overseas_transfer": "해외 AI 처리(국외 이전)"
+    }
   },
   "consult": {
     "threads": "병원별 상담",

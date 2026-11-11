@@ -57,6 +57,7 @@ function toUser(me: Me): User {
 
 const AuthContext = createContext<{
   user: User | null;
+  token: string | null; // 실제 회원의 API 토큰 (데모·비로그인은 null)
   ready: boolean; // 저장된 토큰 확인이 끝났는지
   loginDemo: () => void;
   login: (email: string, password: string) => Promise<void>;
@@ -65,6 +66,7 @@ const AuthContext = createContext<{
   logout: () => void;
 }>({
   user: null,
+  token: null,
   ready: true,
   loginDemo: () => {},
   login: async () => {},
@@ -145,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, ready, loginDemo, login, signup, withdraw, logout }}>
+    <AuthContext.Provider value={{ user, token: user && !user.demo ? token : null, ready, loginDemo, login, signup, withdraw, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ApiError } from '../../components/api';
 import { useAuth } from '../../components/auth';
+import { askChatbot, chatLang, deleteChatSession } from './chatApi';
 import { GREETING, SAMPLE_CONVERSATIONS } from './sampleConversations';
 import { replyToChip, replyToText, type BotReply } from './replies';
 import { dotDate } from './time';
@@ -9,10 +11,21 @@ import type { ChatMessage, ChipAction, ChatText, Conversation } from './types';
 // 대화 저장 방식 (마이페이지와 같은 구조)
 // - guest: 로그인 전. 이 화면을 보는 동안만 메모리에 두고 저장하지 않음
 // - demo: 데모 계정. 예시 대화로 시작, 바꾼 내용은 메모리에만 (탭을 닫으면 사라짐)
-// - member: 실제 회원. 백엔드 연결 전이라 지금은 메모리, 연결 후 save()에서 서버 저장
+// - member: 실제 회원. 질문은 POST /chatbot/ask(AI)로 보내고 서버가 대화를 저장 (7d). 화면 목록은 아직 메모리
+//   (지난 대화 목록을 서버에서 불러오는 것은 7e)
 export type ChatMode = 'guest' | 'demo' | 'member';
 
 const memory: Partial<Record<ChatMode, Conversation[]>> = {};
+
+// 서버 에러 코드 → 화면 문구 키 (chat.api.*)
+const API_ERRORS: Record<string, string> = {
+  network: 'network',
+  rate_limited: 'rateLimited',
+  'chatbot.unavailable': 'unavailable',
+  'auth.required': 'login',
+  not_found: 'notFound',
+  validation: 'validation',
+};
 
 // 인사말만 있는 대화는 아직 시작하지 않은 대화로 본다
 const isBlank = (c: Conversation) => c.messages.every((m) => m.role === 'bot');
@@ -41,8 +54,8 @@ function newConversation(): Conversation {
 const textOf = (x: ChatText) => (typeof x === 'string' ? x : `${x.ko} ${x.en}`);
 
 export function useConversations() {
-  const { t } = useTranslation();
-  const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { user, token } = useAuth();
   const mode: ChatMode = !user ? 'guest' : user.demo ? 'demo' : 'member';
 
   const [list, setList] = useState<Conversation[]>(() => load(mode));
@@ -80,6 +93,8 @@ export function useConversations() {
   };
 
   const remove = (id: string) => {
+    const target = list.find((c) => c.id === id);
+    if (mode === 'member' && token && target?.serverId) deleteChatSession(token, target.serverId).catch(() => {});
     update((prev) => withBlank(prev.filter((c) => c.id !== id)));
     if (id === active?.id) setActiveId(null);
   };
@@ -97,13 +112,49 @@ export function useConversations() {
     );
   };
 
+  // 회원: 질문을 바로 보여 주고, 답이 올 때까지 "답을 준비하는 중" 말풍선을 둔다
+  const askServer = async (conv: Conversation, userText: string) => {
+    if (!token) return;
+    const at = now();
+    const waitId = uid();
+    setActiveId(conv.id);
+    update((prev) =>
+      prev.map((c) =>
+        c.id !== conv.id
+          ? c
+          : { ...c, messages: [...c.messages, { id: uid(), role: 'user', text: userText, at }, { id: waitId, role: 'bot', text: '', at, pending: true }] },
+      ),
+    );
+    let serverId = conv.serverId;
+    let patch: Partial<ChatMessage>;
+    try {
+      const r = await askChatbot(token, conv.serverId, userText, chatLang(i18n.language));
+      serverId = r.session_id;
+      patch = { text: r.text, cards: r.cards, ai: r.ai_generated, medicalNotice: r.medical_notice, at: now() };
+    } catch (e) {
+      const code = e instanceof ApiError ? e.code : 'unknown';
+      if (code === 'not_found') serverId = undefined; // 서버에서 지워진 대화 → 다음 질문은 새 대화로
+      patch = { text: t(`chat.api.${API_ERRORS[code] ?? 'error'}`), failed: true };
+    }
+    update((prev) =>
+      prev.map((c) =>
+        c.id !== conv.id ? c : { ...c, serverId, messages: c.messages.map((m) => (m.id === waitId ? { ...m, ...patch, pending: false } : m)) },
+      ),
+    );
+  };
+
+  const busy = !!active?.messages.some((m) => m.pending);
+  const shown = (x: ChatText) => (typeof x === 'string' ? x : i18n.language === 'ko' ? x.ko : x.en);
+
   const send = (text: string) => {
-    if (!active || !text.trim()) return;
+    if (!active || !text.trim() || busy) return;
+    if (mode === 'member') return void askServer(active, text.trim());
     push(active.id, text.trim(), replyToText(t, text));
   };
 
   const choose = (label: ChatText, action: ChipAction) => {
-    if (!active) return;
+    if (!active || busy) return;
+    if (mode === 'member') return void askServer(active, shown(label)); // 버튼 문구를 질문으로
     push(active.id, label, replyToChip(t, action, active));
   };
 
@@ -119,5 +170,5 @@ export function useConversations() {
     );
   };
 
-  return { mode, conversations: sorted, active, select: setActiveId, startNew, remove, send, choose, search };
+  return { mode, busy, conversations: sorted, active, select: setActiveId, startNew, remove, send, choose, search };
 }

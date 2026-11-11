@@ -324,7 +324,39 @@
     "placeholder": "請輸入您的問題",
     "send": "傳送",
     "disclaimer": "AI 回答僅供參考。看診與預約請向相關醫院確認。",
-    "cancel": "取消"
+    "cancel": "取消",
+    "api": {
+      "thinking": "正在準備回答…",
+      "aiGenerated": "AI 生成",
+      "medicalNotice": "這不是醫療諮詢。診斷與治療由醫療人員判斷。",
+      "network": "無法連線到伺服器，請稍後再試。",
+      "rateLimited": "提問次數過多，請稍後再試。",
+      "unavailable": "聊天機器人目前無法使用，請稍後再試。",
+      "login": "請重新登入。",
+      "notFound": "找不到此對話，請在新對話中再問一次。",
+      "validation": "請確認您的問題（1,000 字以內）。",
+      "error": "未能取得回答，請再試一次。"
+    },
+    "card": {
+      "hospitalList": "{{count}} 家醫院（依名稱排列，非排名）",
+      "suggestions": "符合條件的醫院 {{count}} 家",
+      "prices": "公開非給付價格",
+      "draft": "諮詢申請草稿",
+      "hospital": "醫院",
+      "department": "科別",
+      "slots": "希望時間（當地時間）",
+      "consents": "送出前同意",
+      "submit": "送出申請",
+      "submitLater": "示範階段：預約申請 API 連接後即可送出。",
+      "registered": "外籍患者招攬機構",
+      "staffLangs": "員工語言：{{langs}}",
+      "aiTranslation": "AI 翻譯聊天"
+    },
+    "consent": {
+      "privacy": "個人資料蒐集與使用",
+      "health": "健康資訊處理",
+      "overseas_transfer": "境外 AI 處理（跨境傳輸）"
+    }
   },
   "consult": {
     "threads": "醫院諮詢",
