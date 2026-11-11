@@ -17,6 +17,7 @@ from core.errors import AppError
 from core.security import create_access_token, token_expires_at
 from modules.auth import sessions
 from modules.auth.schemas import LoginRequest, SignupRequest, TokenOut
+from modules.chatbot import sessions as chat_sessions
 from modules.consent import service as consent_service
 from modules.patient import service as patient_service
 
@@ -68,6 +69,7 @@ def withdraw(db: Session, patient_id: uuid.UUID, password: str) -> None:
     """탈퇴: 비밀번호 확인 → 계정 행을 바로 삭제 (결정 15). 되돌릴 수 없음
 
     - 세션 전부 삭제 → 모든 기기에서 그 토큰은 바로 401
+    - 챗봇 대화(메시지 포함)도 전부 삭제 (최소 저장 결정: 탈퇴하면 즉시 삭제)
     - 동의 기록은 동의 증명이라 남기되 patient_id를 비움 (누구 것인지 알 수 없게, 스키마 3절)
     - DB의 FK(CASCADE·SET NULL)에 기대지 않고 직접 지움 (SQLite 테스트에서도 같게)
     - 같은 메일로 바로 다시 가입 가능
@@ -76,6 +78,7 @@ def withdraw(db: Session, patient_id: uuid.UUID, password: str) -> None:
     if not password_hash.verify(password, patient.password_hash):
         raise _invalid()
     sessions.delete_all(db, patient.id)
+    chat_sessions.delete_all(db, patient.id)  # 챗봇 대화도 즉시 삭제
     consent_service.detach_patient(db, patient.id)
     db.delete(patient)
     db.commit()
