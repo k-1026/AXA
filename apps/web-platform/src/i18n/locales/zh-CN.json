@@ -1,0 +1,284 @@
+{
+  "header": {
+    "language": "语言",
+    "currency": "货币",
+    "login": "登录 / 注册",
+    "chatbot": "聊天机器人"
+  },
+  "nav": {
+    "title": "菜单",
+    "main": "首页",
+    "hospitals": "医院信息",
+    "prices": "价格指南",
+    "chatbot": "聊天机器人（常见问题）",
+    "about": "服务介绍",
+    "mypage": "我的页面"
+  },
+  "map": {
+    "title": "大邱医院地图",
+    "count": "显示 {{count}} 家",
+    "loading": "正在加载医院数据…",
+    "error": "无法加载医院数据。",
+    "searchPlaceholder": "搜索医院名称",
+    "searchLabel": "按医院名称搜索",
+    "searchClear": "清除搜索",
+    "searchEmpty": "没有匹配的医院",
+    "searchMore": "共 {{count}} 家，仅显示 8 家。按 Enter 在地图上显示全部"
+  },
+  "dept": {
+    "label": "科室筛选",
+    "all": "全部",
+    "dermatology": "皮肤科",
+    "plastic": "整形外科",
+    "internal": "内科",
+    "ophthalmology": "眼科",
+    "notReady": "数据准备中"
+  },
+  "popup": {
+    "type": "类型",
+    "addr": "地址",
+    "tel": "电话",
+    "source": "来源：韩国健康保险审查评价院（{{date}} 采集）"
+  },
+  "hospitalType": {
+    "상급종합": "上级综合医院",
+    "종합병원": "综合医院",
+    "병원": "医院",
+    "요양병원": "疗养医院",
+    "정신병원": "精神病院",
+    "의원": "诊所",
+    "한방병원": "韩医医院",
+    "한의원": "韩医诊所",
+    "보건소": "保健所",
+    "보건지소": "保健支所",
+    "보건진료소": "保健诊疗所"
+  },
+  "ad": {
+    "label": "广告"
+  },
+  "footer": {
+    "notice": "基于韩国公共数据的医院信息，并非医院推荐或医疗咨询。",
+    "source": "数据：韩国健康保险审查评价院 医院信息服务（公共数据门户 data.go.kr）",
+    "emergency": "紧急情况请拨打 119。"
+  },
+  "placeholder": {
+    "comingSoon": "页面准备中。"
+  },
+  "district": {
+    "label": "地区筛选",
+    "all": "全部",
+    "중구": "中区",
+    "동구": "东区",
+    "서구": "西区",
+    "남구": "南区",
+    "북구": "北区",
+    "수성구": "寿城区",
+    "달서구": "达西区",
+    "달성군": "达城郡",
+    "군위군": "军威郡"
+  },
+  "day": {
+    "mon": "周一",
+    "tue": "周二",
+    "wed": "周三",
+    "thu": "周四",
+    "fri": "周五",
+    "sat": "周六",
+    "sun": "周日",
+    "holiday": "公休日"
+  },
+  "hospital": {
+    "homepage": "官网",
+    "instagram": "Instagram",
+    "more": "查看更多（剩余 {{count}} 家）",
+    "empty": "没有符合条件的医院。",
+    "back": "医院列表",
+    "notFound": "找不到该医院。",
+    "hours": "诊疗时间",
+    "hoursNote": "诊疗时间可能变动，就诊前请致电医院确认。",
+    "facilities": "急诊室·停车",
+    "emergencyDay": "日间急诊",
+    "emergencyNight": "夜间急诊",
+    "parking": "停车",
+    "parkingSpaces": "{{count}} 个车位",
+    "parkingFee": "停车费",
+    "location": "位置",
+    "yes": "有",
+    "no": "无",
+    "closed": "休诊",
+    "lunchWeek": "午休（工作日）",
+    "lunchSat": "午休（周六）",
+    "rcvWeek": "挂号时间（工作日）",
+    "rcvSat": "挂号时间（周六）"
+  },
+  "prices": {
+    "pending": "价格确认中",
+    "range": "{{min}}–{{max}} 韩元",
+    "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。"
+  },
+  "mypage": {
+    "home": "首页",
+    "kst": "韩国时间 KST",
+    "greeting": "{{name}}，准备好您的大邱之旅吧。",
+    "subtitle": "在一个地方管理收藏的医院、就诊日程和旅行准备。",
+    "stats": {
+      "saved": "收藏的医院",
+      "visits": "就诊记录",
+      "recent": "最近浏览"
+    },
+    "schedule": {
+      "title": "我的大邱日程",
+      "edit": "编辑日程",
+      "add": "添加日程",
+      "directions": "路线",
+      "more": "日程菜单",
+      "tag": {
+        "userAdded": "自行登记",
+        "experience": "体验",
+        "tour": "观光"
+      }
+    },
+    "checklist": {
+      "title": "就诊准备清单",
+      "progress": "共 {{total}} 项，已完成 {{done}} 项",
+      "viewAll": "查看完整清单",
+      "items": {
+        "saveAddress": "保存医院地址",
+        "setLanguage": "设置使用语言",
+        "checkHours": "确认就诊时间",
+        "checkInterpreter": "确认翻译支持",
+        "checkNotice": "确认医院须知"
+      }
+    },
+    "account": {
+      "title": "我的账户",
+      "desc": "个人资料和语言设置",
+      "manage": "管理账户"
+    },
+    "saved": {
+      "title": "已保存的医院",
+      "subtitle": "一目了然地查看您感兴趣的医院信息。",
+      "sortLabel": "排序",
+      "sortRecent": "最近保存",
+      "sortName": "按名称",
+      "photo": "医院照片",
+      "saved": "已保存",
+      "save": "保存",
+      "languages": "咨询语言",
+      "priceTitle": "各项目价格信息",
+      "detail": "查看详情",
+      "priceNote": "实际费用请向医院确认。",
+      "empty": "该科室没有已保存的医院。",
+      "none": "还没有保存的医院。"
+    },
+    "visits": {
+      "title": "就诊记录",
+      "subtitle": "记录您去过的医院和当天经历的私人日记。",
+      "private": "仅您本人可见",
+      "formTitle": "写新记录",
+      "hospital": "医院",
+      "hospitalPlaceholder": "搜索或直接输入医院名称",
+      "date": "就诊日期",
+      "note": "我的经历",
+      "notePlaceholder": "请自由记录当天的诊疗、感受以及下次想咨询的问题。",
+      "save": "保存记录",
+      "update": "保存修改",
+      "cancel": "取消",
+      "edit": "修改",
+      "delete": "删除",
+      "deleteConfirm": "要删除这条记录吗？删除后无法恢复。",
+      "listTitle": "已保存的记录",
+      "none": "还没有保存的记录。",
+      "deviceNote": "记录不会发送到服务器，只保存在此浏览器中。清除浏览器数据后记录会一并消失，使用同一设备的人也能看到，在公用设备上请注意。",
+      "errHospital": "请输入医院。",
+      "errDate": "请选择今天或更早的就诊日期。",
+      "errNote": "请输入您的经历。"
+    }
+  },
+  "legal": {
+    "label": "条款与政策",
+    "updated": "最后更新 {{date}}",
+    "draft": "本文为尚未经过法律审查的草案，内容可能变更。",
+    "back": "我的页面",
+    "notFound": "找不到该文件。",
+    "koreanOnly": "本文件目前仅有韩语原文。"
+  },
+  "auth": {
+    "requiredTitle": "请先登录",
+    "requiredDesc": "已保存的医院、就诊记录、最近浏览和大邱行程需登录后查看。",
+    "comingSoon": "会员登录即将推出。目前可以使用演示账号浏览。",
+    "demo": "使用演示账号浏览",
+    "demoNote": "演示账号也会显示示例数据，收藏和就诊记录仅保存在此浏览器中。",
+    "demoBadge": "演示",
+    "loggedInAs": "已以 {{name}} 账号登录。",
+    "logout": "退出登录"
+  },
+  "chat": {
+    "title": "Medi 聊天机器人",
+    "subtitle": "一起查找大邱医疗和旅游信息。",
+    "openMenu": "打开对话列表",
+    "closeMenu": "关闭对话列表",
+    "new": "新对话",
+    "search": "搜索对话",
+    "history": "对话记录",
+    "group": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "earlier": "更早"
+    },
+    "noHistory": "还没有对话。",
+    "noResults": "没有搜索结果。",
+    "sample": "示例",
+    "sampleNote": "这是示例对话，并非真实咨询记录。",
+    "more": "{{title}} 对话菜单",
+    "delete": "删除对话",
+    "confirmDelete": "要删除 {{title}} 的对话吗？删除后无法恢复。",
+    "saveNote": {
+      "guest": "登录后可保存对话",
+      "demo": "演示对话不会被保存",
+      "member": "对话会自动保存"
+    },
+    "login": "登录",
+    "settings": "设置",
+    "summary": {
+      "none": "新对话",
+      "hospital": "医院信息",
+      "price": "价格信息",
+      "interpret": "翻译服务",
+      "tour": "旅游信息"
+    },
+    "topic": {
+      "hospital": "查找医院",
+      "price": "价格信息",
+      "interpret": "翻译服务",
+      "tour": "大邱旅游"
+    },
+    "region": {
+      "junggu": "中区 · 东城路",
+      "suseong": "寿城区",
+      "any": "不限地区"
+    },
+    "link": {
+      "hospitals": "在医院信息中查看",
+      "prices": "查看价格指南"
+    },
+    "bot": {
+      "askDept": "您要找哪个科室？",
+      "askRegion": "要在哪个地区查找？\n选择地区后，我会为您介绍医院信息和官方咨询渠道。",
+      "hospitals": "在医院信息中可以按距离或名称查看符合条件的医院。请确认各医院的官方联系方式和诊疗时间。",
+      "price": "各项目的价格范围可在价格指南中查看。实际费用因医院而异，请务必向医院确认。",
+      "interpret": "各医院的翻译服务不同。就诊前请通过医院官方联系方式确认支持的语言。如需旅游翻译，可拨打 1330 旅游咨询热线。",
+      "tour": "大邱旅游信息正在准备中。治疗后请避免安排过多行程，并向医院确认恢复注意事项。",
+      "emergency": "这可能是紧急情况。请立即拨打 119 或前往最近的急诊室。119 提供外语翻译。",
+      "fallback": "这是演示版本，尚未连接 AI 咨询。请在下方选择想了解的主题。"
+    },
+    "copy": "复制回答",
+    "copied": "已复制",
+    "like": "有帮助",
+    "quickMenu": "显示或隐藏快捷菜单",
+    "placeholder": "请输入您的问题",
+    "send": "发送",
+    "disclaimer": "AI 回答仅供参考。诊疗和预约请向相关医院确认。",
+    "cancel": "取消"
+  }
+}

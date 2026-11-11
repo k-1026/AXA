@@ -64,8 +64,9 @@
 | `consent.required` | 422 | 필수 동의 없음 |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
-| `rate_limited` | 429 | 제출 횟수 초과 |
+| `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
+| `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
 
 - `code`는 프론트 i18n 키로 그대로 씀. 새 코드는 이 표에 먼저 추가
 
@@ -86,27 +87,49 @@
 | `audit.service.log_action(db, tenant_id, actor, action, ref)` | B | A·B | 기록만 |
 | `hospital.service.get_basic(db, hospital_id)` | A | B (대시보드 병원 정보) | → `HospitalBasic` |
 
+- 챗봇(A)도 `booking.service.list_for_patient`·`get_for_patient`를 부른다 — "내 요청 상태" 답과 제출 확인용, `modules/chatbot/bookings.py` 한 곳에서만. `booking` 모듈이 올라오기 전에는 "요청 없음"으로 동작
+
 ## 6. 요청서 입력 (`BookingCreate`, 초안)
 
 | 칸 | 타입 | 필수 | 비고 |
 |---|---|---|---|
-| `department_code` | str | O | 진료과 코드 |
+| `department_code` | str | O | 진료과 코드 = `departments.code` (`dermatology`, `plastic`, `internal`, `ophthalmology` …) |
 | `preferred_slots` | list[datetime(UTC)] | O | 1~3개 |
 | `patient_timezone` | str (IANA, 예 `Asia/Taipei`) | O | 화면 표시용 |
-| `lang` | str (`en`/`zh-TW`/`vi`/`ko`) | O | 요청 언어 |
+| `lang` | str (`ko`/`en`/`zh-TW`/`zh-CN`/`vi`) | O | 요청 언어 (`patients.preferred_lang`·프론트 번역과 같은 5개) |
 | `nationality` | str (국가 코드) | O | |
 | `contact_method` | str (`email`/…) | O | |
 | `visa_needed` | bool | O | |
 | `message` | str | X | 자유 입력 원문 → 번역은 백그라운드 |
 | `health_info` | str | X | 있으면 `health` 동의 필수 |
 | `consents` | list[{kind, version}] | O | `privacy` 필수, `health`·`overseas_transfer` 조건부 |
+| `residency` | str (`short_term`) | **제안** | 체류 형태. 국내 거주 외국인은 유치 대상이 아니라 요청 불가(의료법 제27조 제3항 제2호) → 지금은 챗봇 안에서만 거름(자기 신고). 사람이 쓰는 요청서에도 같은 확인이 필요해 칸 또는 계정 속성으로 추가 제안 — **B 확인 필요** |
 
 - 요청서의 `privacy` 동의 = **이 요청서 내용을 고른 병원에 전달**하는 데 대한 동의 (가입 때 `privacy`와 별개로 요청서마다). 법적 구조가 제3자 제공(개인정보보호법 제17조 제1항 제1호)인지 처리 위탁(제26조)인지는 **개인정보위 질의 8번 회신 후** 문구 확정 ([plan.md](../subject/plan.md) 11절)
 
-## 7. 변경 이력
+## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
+
+모두 **환자 로그인 필요**. 경로 앞 `/api/v1`. 응답 모델은 `ai/agent/schemas.py`(카드 형식의 기준) → OpenAPI
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `POST /chatbot/ask` | `{session_id?, message(1~1000자), language?}` → `{session_id, text, cards[], ai_generated, blocked, medical_notice}`. `session_id`가 없으면 새 대화, `language`가 없으면 계정 선호 언어 | 404 `not_found`(남의·없는 대화), 422 `validation`, 429 `rate_limited`, 503 `chatbot.unavailable` |
+| `GET /chatbot/sessions?limit=` | 내 대화 목록 `[{id, title, lang, created_at, last_message_at}]`, 최근 순, 최대 50 | — |
+| `GET /chatbot/sessions/{id}` | 한 대화 + `messages[{role, content, refused, created_at}]` (개인정보를 가린 글만) | 404 `not_found` |
+| `DELETE /chatbot/sessions/{id}` | 대화 삭제 → 204 | 404 `not_found` |
+
+- **언어**: `ko`, `en`, `zh-TW`, `zh-CN`, `vi`. 별칭 `zh`·`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`. 그 밖은 422
+- **카드** `{type, data}` 9종: `hospital_list`, `hospital_suggestions`, `hospital_detail`, `price_list`, `sources`, `time_slots`, `booking_draft`, `booking_list`, `aftercare_thread`. 숫자·병원 정보는 도구 결과에서 코드가 넣음
+- **요청서 카드**(`booking_draft`)의 `data.request`는 6절 `BookingCreate` 모양(희망 일시 UTC). 프론트 [제출] = `POST /hospitals/{hospital_id}/booking-requests`에 `request` + 환자가 체크한 `consents`(`data.consents_required` 목록)를 그대로. **챗봇 전용 제출 경로 없음**
+- **진료과**: 챗봇은 한국어 이름을 받아 `department_code`로 바꿈. 코드 표에 없는 진료과는 병원 찾기까지만, 요청서 불가
+- **저장**: 개인정보를 가린 대화 글 + 상태(체류 형태, 초안 일부, 보여 준 병원)만. 도구 결과·카드·초안의 `health_info`·`message`는 저장 X → 지난 대화를 열면 글만 보임. 30일 후 삭제, 탈퇴 즉시 삭제
+- **호출 제한**: 계정당 분 10회·일 150회(가정), 계정당 대화 50개. 지금은 서버 메모리 → 운영 전 DB·캐시로
+
+## 8. 변경 이력
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-11 | 4·5·6·7 | 챗봇 API 7절 신설(`/chatbot/ask`, `/chatbot/sessions` 목록·상세·삭제), 에러 `chatbot.unavailable`(503)·`rate_limited`에 챗봇 호출 추가, 챗봇의 `booking.service` 호출, `BookingCreate.lang` 5개 언어·`department_code` 값, `residency` 칸 제안 | A (**B 확인 필요**) | `backend-A-chatbot` → `backend` |
 | 2026-11-04 | 1·4 | 새 모듈 `fx/`(A, 환율), 에러 `fx.unavailable`(503). `DELETE /me` 탈퇴(비밀번호 확인) | A | — |
 | 2026-11-05 | — | `DELETE /me` 탈퇴 = 계정 즉시 삭제(결정 15). 응답·코드는 그대로 | A | — |
 | 2026-11-04 | 3 | 환자 토큰에 `sid` 추가, `current_patient()`가 DB 세션 확인 (로그아웃 즉시 무효) | A (B 확인 필요) | — |

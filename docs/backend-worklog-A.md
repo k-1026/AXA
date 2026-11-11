@@ -17,6 +17,33 @@
 
 ## 기록
 
+### 2026-11-11 (2) · backend-A-chatbot · Claude
+- 한 일: **7e 지난 대화** — `GET /chatbot/sessions`(내 대화 목록, 최근 순, 최대 50), `GET /chatbot/sessions/{id}`(가린 글만, 카드·상태 X). **7c 계약·문서** — contracts 7절 챗봇 API 신설, 4절 `chatbot.unavailable`·`rate_limited` 챗봇 추가, 5절 챗봇의 `booking.service` 호출, 6절 `lang` 5개·`department_code` 값·`residency` 제안. `backend-plan.md` API 표, `compliance.md`(추천 허용 범위·대화 저장·AI 표시) 갱신. 수동 검증 안내 `docs/7b-수동검증.md`(Swagger·curl)
+- 바뀐 계약: **있음** 4·5·6·7절 (변경 이력에 한 줄) → **B 승인 필요**
+- 마이그레이션: 없음
+- 테스트: 290개 통과 = 백엔드 100(챗봇 API 12) + AI 190. 실제 서버 + 프론트(`frontend-chatbot-api`)로 확인: 새로고침 뒤 지난 대화 목록·내용이 서버에서 다시 보이고, 이어서 질문하면 같은 대화에 저장됨(로컬 SQLite)
+- 다음 할 일: 이 브랜치 → `backend` PR, 머지 뒤 공용 DB에 `0005`, 프론트 PR, 병원 데이터(`hospital` 모듈)
+- B에게 요청: ① contracts 4~7절 변경 확인 ② `BookingCreate`에 `residency`(체류 형태) 칸 또는 계정 속성 의견 ③ `booking.service.list_for_patient`·`get_for_patient`가 오면 챗봇 연결
+- 막힌 것·질문: 없음
+
+### 2026-11-11 · backend-A-chatbot · Claude
+- 한 일: **7b 챗봇 API** — `origin/ai`를 이 브랜치에 merge(백엔드가 `ai.agent` 서비스 층을 import). `modules/chatbot/`에 `store.py`(`SessionStore`의 DB 구현, 환자 id로 범위 제한, 잘못된 id는 "없음"), `bookings.py`(예약 조회 게이트웨이 — `booking` 모듈이 없어 지금은 "내 요청 없음", 가짜 예약 데이터는 실제 환자에게 안 보임), `schemas.py`(`AskRequest`), `service.py`(계정의 시간대·선호 언어 채우기, `ChatServiceError` → `AppError`), `router.py`(`POST /chatbot/ask`, `DELETE /chatbot/sessions/{id}`, 모두 환자 로그인 필요). `main.py`에 라우터 등록. 응답은 `ai.agent.schemas.ChatResponse` 그대로(카드 9종이 OpenAPI에 나옴)
+- 바뀐 계약: 없음. 단 **`chatbot.unavailable`(503)은 계약 4절에 아직 없음** → 7c 계약 PR에서 추가 (`/chatbot/*` 경로·카드 형식도 같이)
+- 마이그레이션: 없음 (`0005` 그대로, 공용 Supabase 미적용)
+- 테스트: 288개 통과 = 백엔드 98(기존 88 + 챗봇 API 10) + AI 190. 챗봇 API: 로그인 필요, 입력 검사, DB에 가린 텍스트만 저장, 다음 턴이 DB 기록·상태로 이어짐("보여 준 병원" 복원), 초안에 `health_info`·문의 내용 저장 X, **다른 환자의 대화 이어 쓰기·삭제 404**, 내 대화 삭제, 탈퇴 시 대화 삭제, 429, LLM 전부 실패 시 503·저장 안 함. 이 PC에서 `uv sync` 후 정상 실행됨(11/10의 sqlalchemy 확장 차단은 이번엔 없었음)
+- 다음 할 일: 이 브랜치 → `backend` PR, 공용 DB에 `0005` 적용, 7c 계약 PR, 7d 프론트 연결
+- B에게 요청: ① `booking.service.list_for_patient(db, patient_id, status)`·`get_for_patient`가 생기면 `modules/chatbot/bookings.py`만 바꾸면 챗봇의 "내 요청 상태"·제출 확인이 동작함 ② 7c 계약 PR 리뷰
+- 막힌 것·질문: ① 호출 제한이 프로세스 메모리라 Vercel 여러 인스턴스에서는 따로 셈 → 운영 전 DB·캐시로 ② 이 PR에는 `ai` 브랜치 변경이 함께 들어감(`ai` → `main` PR이 먼저 머지되면 겹치는 부분은 사라짐). 병원 검색 도구는 아직 `ai`의 가상 병원 데이터를 씀 (`hospital` 모듈 생기면 교체)
+
+### 2026-11-10 · backend-A-chatbot · Claude
+- 한 일: **챗봇 대화 테이블** — `modules/chatbot/models.py`(`ChatSession`·`ChatMessage`), 마이그레이션 `0005`(`chat_sessions`·`chat_messages`, RLS 켬), `sessions.py`(`delete_all`·`purge_older_than`), `auth.service.withdraw`가 챗봇 대화도 즉시 삭제, `core/db_models.py` 등록. 결정 16 기록, db-schema 5절·backend-plan 로그인 표 갱신
+- 바뀐 계약: 없음 (`/chatbot/*` 계약은 7c에서 별도 PR). 단 **이전 결정 3 일부 변경(챗봇 로그인 필요)** — 결정 16
+- 마이그레이션: 있음 `0005`. **공용 Supabase에는 아직 적용하지 않음**(PR 머지 뒤 `alembic upgrade head`)
+- 테스트: 88개 통과 (기존 78 + 챗봇 테이블 10). `alembic upgrade head`(0001~0005, 임시 SQLite)·`alembic check`(모델과 일치)·`downgrade 0004`→`upgrade head`·PostgreSQL SQL 출력(JSONB, identity, ON DELETE CASCADE, RLS) 확인. 탈퇴 삭제 연결을 빼면 테스트가 실패하는 것도 확인
+- 다음 할 일: `SessionStore` 인터페이스(`ai/agent/session_store.py`)의 DB 구현 + `POST /chatbot/ask` 라우터(`ai` 브랜치가 `main`에 들어온 뒤 — 지금 `backend`에는 `ai/` 패키지가 없음), 계약 PR
+- B에게 요청: 결정 16(챗봇 로그인 필요, 요청서는 같은 API로 제출) 확인. 병원 쪽 `booking.service.create_request`·`list_for_patient`가 오면 챗봇이 제출 확인에 씀
+- 막힌 것·질문: ① 증상을 쓰면 건강정보가 계정에 저장되어 AGENTS.md 6절과 충돌(스키마 5절 ⚠️) — 고지·마스킹·30일·삭제 버튼으로 진행하되 **팀 확인 필요**, 개인정보보호위원회 질의 8번 회신 전. 요청서 초안의 `health_info`는 저장 상태에서 빼는 것이 안전(7a 서비스 층에 반영 예정) ② 이 PC는 보안 정책이 `sqlalchemy`의 컴파일된 확장 파일을 막아, 일회용 가상환경에서 그 파일만 지우고 순수 파이썬으로 테스트함(팀 환경·`uv.lock` 무관, 속도만 느림)
+
 ### 2026-11-05 (3) · backend-A-account · Claude
 - 한 일: **Supabase DB 초기화** — `alembic downgrade base` → `upgrade head`로 `0001`~`0004` 다시 적용 (현재 `0004`, 모든 테이블 비어 있음, RLS 켜짐). 기존 테스트 계정 3개·세션·동의 삭제. 아래 항목의 "Supabase 미적용"은 이걸로 처리
 - 바뀐 계약: 없음
