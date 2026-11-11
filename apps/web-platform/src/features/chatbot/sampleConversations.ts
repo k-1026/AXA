@@ -4,8 +4,8 @@ import type { Conversation } from './types';
 
 const T = (ko: string, en: string) => ({ ko, en });
 const GREETING = T(
-  '안녕하세요! 대구 의료관광 도우미 메디입니다.\n병원 정보부터 대구 여행까지, 무엇이 궁금하신가요?',
-  "Hello! I'm Medi, your Daegu medical travel helper.\nWhat would you like to know, from hospitals to travel in Daegu?",
+  '안녕하세요! 대구 의료관광 도우미 닥터 권입니다.\n병원 정보부터 대구 여행까지, 무엇이 궁금하신가요?',
+  "Hello! I'm Dr. Kwon, your Daegu medical travel helper.\nWhat would you like to know, from hospitals to travel in Daegu?",
 );
 
 export const SAMPLE_CONVERSATIONS: Conversation[] = [

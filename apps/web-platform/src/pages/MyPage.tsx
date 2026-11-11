@@ -5,7 +5,7 @@ import { ScheduleCard } from '../features/mypage/ScheduleCard';
 import { ChecklistCard } from '../features/mypage/ChecklistCard';
 import { AccountBar } from '../features/mypage/AccountBar';
 import { LegalLinks } from '../features/legal/LegalLinks';
-import { CalendarCheckIcon, ClockIcon, HistoryIcon, HospitalHeartIcon } from '../features/mypage/icons';
+import { CalendarCheckIcon, ClockIcon, HospitalHeartIcon } from '../features/mypage/icons';
 import { useMyPageData } from '../features/mypage/useMyPageData';
 
 // 로그인 후 마이페이지. 데모 계정은 예시 데이터로 표시
@@ -40,7 +40,6 @@ export function MyPage() {
       <div className="mp-stats">
         <StatCard to="/mypage/saved" label={t('mypage.stats.saved')} value={data.stats.saved} icon={<HospitalHeartIcon />} tone="blue" />
         <StatCard to="/mypage/visits" label={t('mypage.stats.visits')} value={data.stats.visits} icon={<CalendarCheckIcon />} tone="orange" />
-        <StatCard to="/mypage/recent" label={t('mypage.stats.recent')} value={data.stats.recent} icon={<HistoryIcon />} tone="green" />
       </div>
 
       <div className="mp-main-row">
