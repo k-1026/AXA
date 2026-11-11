@@ -10,6 +10,7 @@ from fastapi.responses import RedirectResponse
 from core.config import get_settings
 from core.errors import register_error_handlers
 from modules.auth.router import router as auth_router
+from modules.chatbot.router import router as chatbot_router
 from modules.fx.router import router as fx_router
 from modules.patient.router import router as patient_router
 
@@ -34,6 +35,7 @@ def health() -> dict[str, str]:
 api.include_router(auth_router)
 api.include_router(patient_router)
 api.include_router(fx_router)
+api.include_router(chatbot_router)
 
 app.include_router(api)
 
