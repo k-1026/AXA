@@ -11,7 +11,6 @@ import { ConsultMessages } from '../features/consult/ConsultMessages';
 import { BookingForm } from '../features/consult/BookingForm';
 import { HospitalThumb } from '../features/consult/HospitalThumb';
 import { ClipboardIcon } from '../features/consult/icons';
-import { isConsultHours } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
 
 const QUICK = [
@@ -60,7 +59,8 @@ export function ConsultPage() {
   }, [drawer]);
 
   const active = consult.active;
-  const open = consult.mode === 'demo' || isConsultHours();
+  // "담당자 응답 가능" 표시는 데모에서만. 실제 회원 상담은 아직 병원이 답하는 기능이 연결되지 않았다
+  const demo = consult.mode === 'demo';
 
   // 화면에 열려 있는 상담의 답변은 읽은 것으로 처리
   useEffect(() => {
@@ -80,7 +80,7 @@ export function ConsultPage() {
       <ConsultSidebar
         activeId={active?.hospitalId}
         search={consult.search}
-        demo={consult.mode === 'demo'}
+        demo={demo}
         onSelect={(id) => {
           consult.select(id);
           setForm(false);
@@ -119,7 +119,7 @@ export function ConsultPage() {
                 <h1 id="consult-title">{text(active.name)}</h1>
                 <p className="consult-meta">
                   {t(`dept.${active.dept}`)} · {t(`district.${active.district}`)}
-                  <span className={open ? 'consult-online is-on' : 'consult-online'}>{t(open ? 'consult.staffOnline' : 'consult.staffOffline')}</span>
+                  {demo && <span className="consult-online is-on">{t('consult.staffOnline')}</span>}
                 </p>
               </div>
               <div className="consult-head-actions">

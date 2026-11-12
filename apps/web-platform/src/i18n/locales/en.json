@@ -378,7 +378,6 @@
     "empty": "Send your first message to the hospital staff. The hospital replies directly.",
     "staffLabel": "{{name}} · Staff",
     "staffOnline": "Within consultation hours",
-    "staffOffline": "Outside consultation hours",
     "hospitalInfo": "Hospital info",
     "requestBooking": "Request booking",
     "notice": "Ask the hospital staff anything before your visit.",

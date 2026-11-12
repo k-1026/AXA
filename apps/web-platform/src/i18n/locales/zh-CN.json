@@ -378,7 +378,6 @@
     "empty": "请给医院工作人员发送第一条消息，医院会直接回复。",
     "staffLabel": "{{name}} · 咨询人员",
     "staffOnline": "咨询时间内",
-    "staffOffline": "非咨询时间",
     "hospitalInfo": "医院信息",
     "requestBooking": "申请预约",
     "notice": "就诊前有任何问题，请咨询医院工作人员。",

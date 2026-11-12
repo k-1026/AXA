@@ -378,7 +378,6 @@
     "empty": "請傳送第一則訊息給醫院人員，醫院會直接回覆。",
     "staffLabel": "{{name}} · 諮詢人員",
     "staffOnline": "諮詢時間內",
-    "staffOffline": "非諮詢時間",
     "hospitalInfo": "醫院資訊",
     "requestBooking": "申請預約",
     "notice": "就診前有任何問題，請詢問醫院人員。",

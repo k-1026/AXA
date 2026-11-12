@@ -378,7 +378,6 @@
     "empty": "병원 담당자에게 첫 메시지를 보내 보세요. 답변은 병원이 직접 드려요.",
     "staffLabel": "{{name}} · 상담 담당자",
     "staffOnline": "상담 가능 시간",
-    "staffOffline": "상담 시간 외",
     "hospitalInfo": "병원 정보",
     "requestBooking": "예약 신청",
     "notice": "방문 전 궁금한 내용을 병원 담당자에게 문의하세요.",

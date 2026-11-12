@@ -378,7 +378,6 @@
     "empty": "Hãy gửi tin nhắn đầu tiên cho nhân viên bệnh viện. Bệnh viện sẽ trả lời trực tiếp.",
     "staffLabel": "{{name}} · Nhân viên tư vấn",
     "staffOnline": "Trong giờ tư vấn",
-    "staffOffline": "Ngoài giờ tư vấn",
     "hospitalInfo": "Thông tin bệnh viện",
     "requestBooking": "Đặt lịch",
     "notice": "Hãy hỏi nhân viên bệnh viện mọi thắc mắc trước khi đến khám.",
