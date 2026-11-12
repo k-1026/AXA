@@ -155,7 +155,7 @@ def test_short_secret_rejected(monkeypatch):
 def test_health(client):
     r = client.get("/api/v1/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    assert r.json() == {"status": "ok", "db": "ok"}
 
 
 @pytest.mark.parametrize(

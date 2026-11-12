@@ -18,7 +18,26 @@ def _app() -> FastAPI:
     def boom():
         raise RuntimeError(SECRET_TEXT)
 
+    @app.get("/only-get")
+    def only_get():
+        return {"ok": True}
+
     return app
+
+
+def test_unknown_path_is_api_not_found():
+    # 리소스 없음(`not_found`)과 다른 코드: 프론트가 "서버에 이미 없음"으로 오해해 데이터를 지우지 않게
+    r = TestClient(_app()).get("/no-such-path")
+    assert r.status_code == 404
+    assert r.json() == {"code": "api.not_found", "message": "없는 API 경로입니다", "detail": {}}
+
+
+def test_wrong_method_is_api_method_not_allowed_with_allow_header():
+    r = TestClient(_app()).post("/only-get")
+    assert r.status_code == 405
+    assert r.json()["code"] == "api.method_not_allowed"
+    assert set(r.json()) == {"code", "message", "detail"}
+    assert "GET" in r.headers["allow"]
 
 
 def test_unhandled_exception_is_internal_500(caplog):

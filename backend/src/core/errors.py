@@ -5,11 +5,21 @@ from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 log = logging.getLogger(__name__)
+
+# 경로·메서드가 없을 때 FastAPI가 내는 404·405. 리소스가 없다는 `not_found`와 일부러 다른 코드:
+# 프론트는 `not_found`를 "서버에 이미 없음"으로 보고 화면에서 지우는 곳이 있음 (챗봇 대화 삭제 등)
+# → 배포 버전이 어긋나 경로가 없을 때 데이터를 잘못 지우지 않게
+_ROUTE_ERRORS = {
+    404: ("api.not_found", "없는 API 경로입니다"),
+    405: ("api.method_not_allowed", "이 경로에서 쓸 수 없는 메서드입니다"),
+}
 
 
 class AppError(Exception):
@@ -66,6 +76,18 @@ def register_error_handlers(app: FastAPI) -> None:
             status_code=exc.status_code,
             content={"code": exc.code, "message": exc.message, "detail": exc.detail},
             headers=headers,
+        )
+
+    # 없는 경로 404·없는 메서드 405도 같은 형식으로. 그 밖의 HTTPException은 지금 코드에서 쓰지 않음 → 기본 처리
+    @app.exception_handler(StarletteHTTPException)
+    async def handle_http(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+        if exc.status_code not in _ROUTE_ERRORS:
+            return await http_exception_handler(request, exc)
+        code, message = _ROUTE_ERRORS[exc.status_code]
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"code": code, "message": message, "detail": {}},
+            headers=getattr(exc, "headers", None),  # 405의 Allow 헤더 유지
         )
 
     # FastAPI 기본 422({"detail": [...]})도 같은 형식으로 → 프론트는 code만 보면 됨
