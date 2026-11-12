@@ -67,6 +67,7 @@
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
+| `internal` | 500 | 처리하지 못한 서버 오류 (`detail` = `{}`, 로그에는 예외 종류만) |
 
 - `code`는 프론트 i18n 키로 그대로 씀. 새 코드는 이 표에 먼저 추가
 
@@ -129,6 +130,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-12 | 4 | 에러 `internal`(500) 추가 (처리하지 못한 예외도 같은 형식) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-11 | 4·5·6·7 | 챗봇 API 7절 신설(`/chatbot/ask`, `/chatbot/sessions` 목록·상세·삭제), 에러 `chatbot.unavailable`(503)·`rate_limited`에 챗봇 호출 추가, 챗봇의 `booking.service` 호출, `BookingCreate.lang` 5개 언어·`department_code` 값, `residency` 칸 제안 | A (**B 확인 필요**) | `backend-A-chatbot` → `backend` |
 | 2026-11-04 | 1·4 | 새 모듈 `fx/`(A, 환율), 에러 `fx.unavailable`(503). `DELETE /me` 탈퇴(비밀번호 확인) | A | — |
 | 2026-11-05 | — | `DELETE /me` 탈퇴 = 계정 즉시 삭제(결정 15). 응답·코드는 그대로 | A | — |
