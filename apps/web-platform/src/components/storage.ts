@@ -43,3 +43,9 @@ export function removeSettingsWithSuffix(suffix: string): void {
     // 저장소를 못 쓰면 지울 것도 없음
   }
 }
+
+// 계정 구분 전에 쓰던 키 (누구 것인지 알 수 없어 옮기지 않고 지운다). 앱 시작 때 한 번 부른다
+const LEGACY_KEYS = ['savedHospitals', 'visitLog'];
+export function removeLegacySettings(): void {
+  LEGACY_KEYS.forEach(removeSetting); // removeSetting이 저장소 오류를 try/catch로 무시
+}

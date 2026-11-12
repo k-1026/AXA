@@ -5,6 +5,7 @@ import './i18n';
 import './styles.css';
 import { CurrencyProvider } from './components/currency';
 import { AuthProvider } from './components/auth';
+import { removeLegacySettings } from './components/storage';
 import { Layout } from './layout/Layout';
 import { MainPage } from './pages/MainPage';
 import { HospitalsPage } from './pages/HospitalsPage';
@@ -21,6 +22,9 @@ import { VisitsPage } from './pages/VisitsPage';
 import { ConsultPage } from './pages/ConsultPage';
 import { BookingsPage } from './pages/BookingsPage';
 import { AftercarePage } from './pages/AftercarePage';
+
+// 계정별 저장(이름@계정) 전의 찜·방문 기록 키는 주인을 알 수 없어 지운다
+removeLegacySettings();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
