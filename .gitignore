@@ -20,6 +20,7 @@ __pycache__/
 
 # Node
 node_modules/
+.vite/
 
 # 공개 저장소에 올리지 않는 데이터 (로컬에만 보관)
 # - 대표자 실명 포함 원본 → 대표자 열을 뺀 가공본은 data/interim/ 에 있음
