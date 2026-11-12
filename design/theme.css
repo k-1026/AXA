@@ -1,0 +1,85 @@
+/* 메디대구 문서용 공통 테마 — apps/web-platform/src/styles.css의 색·글꼴·모서리를 그대로 가져옴
+   쓰는 곳: painpoint/*.html · bm/bm_canvas.html · spec/userflow.html
+   규칙: 색은 아래 토큰만 쓰고, 페이지 안에서 새 색을 만들지 않음 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+:root {
+  /* 웹사이트와 같은 값 */
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-muted: #eef1f5;
+  --border: #d7dce3;
+  --text: #1f2933;
+  --ink: #172b4d;
+  --text-muted: #5b6673;
+  --accent: #1f6feb;
+  --accent-soft: #e3edfd;
+  --accent-line: rgb(31 111 235 / 0.25);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow-hover: 0 4px 16px rgb(31 111 235 / 0.12);
+  /* 문서용 의미 색 (웹사이트 파랑과 겹치지 않게 최소한만) */
+  --pain: #d6336c;        /* Top 3 · 최저점 · 손 넘김 */
+  --pain-soft: #fdeef3;
+  --assume: #b26a00;      /* 가정값 · [가정] */
+  --assume-soft: #fff6e5;
+  --good: #2b8a3e;        /* 기회 · 해소 */
+  --good-soft: #ebf7ee;
+  --neutral: #8a94a3;     /* 보류 · 범위 밖 */
+  --font: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+}
+/* 다크 모드 없음 — 웹사이트(apps/web-platform)도 늘 밝은 화면이라 문서도 같게 둠 */
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+
+/* 한 장(1280×720) 레이아웃 */
+.page { width: 1280px; height: 720px; margin: 0 auto; padding: 24px 36px 14px; display: flex; flex-direction: column; gap: 12px; }
+.page.tall { height: auto; min-height: 720px; }
+
+/* 머리 */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 6px; }
+.eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { color: var(--text-muted); font-size: 13.5px; margin-top: 6px; }
+.pill { background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+
+/* 카드 */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.card-sm { border-radius: var(--radius-sm); padding: 8px 10px; }
+.card h2, .card h3 { margin: 0 0 4px; color: var(--ink); }
+.card h2 { font-size: 13px; font-weight: 800; display: flex; align-items: baseline; gap: 6px; }
+.card h2 .n { color: var(--accent); }
+.card h2 small { color: var(--text-muted); font-weight: 600; font-size: 11px; }
+
+/* 작은 부품 */
+.chip { display: inline-block; background: var(--surface-muted); color: var(--text); border-radius: 999px; padding: 1px 9px; font-size: 11.5px; margin: 0 3px 3px 0; }
+.chip.accent { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--pain); color: #fff; font-size: 11px; font-weight: 800; margin-right: 4px; vertical-align: 1px; }
+.badge.muted { background: var(--neutral); }
+.badge.accent { background: var(--accent); }
+.ev { color: var(--text-muted); font-size: 10.5px; }
+.src { color: var(--text-muted); font-size: 10.5px; margin-top: auto; }
+.assume { color: var(--assume); font-weight: 700; }
+.pain-t { color: var(--pain); font-weight: 700; }
+.good-t { color: var(--good); font-weight: 700; }
+.muted-t { color: var(--neutral); }
+.foot { color: var(--text-muted); font-size: 11px; display: flex; justify-content: space-between; gap: 16px; margin-top: auto; }
+
+/* 표 */
+table.t { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; font-size: 12.5px; }
+table.t th { background: var(--surface-muted); color: var(--text-muted); text-align: left; font-size: 11.5px; font-weight: 700; padding: 8px 10px; }
+table.t td { padding: 7px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+table.t tr.hl td { background: var(--pain-soft); }
+
+/* 설명 상자 */
+.callout { border-radius: var(--radius-sm); padding: 11px 14px; font-size: 12.5px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.callout b { color: var(--ink); }
+.callout.good { background: var(--good-soft); border-color: transparent; }
+.callout.solid { background: var(--accent); color: #fff; border: 0; }
+.callout.solid b { color: #fff; }
