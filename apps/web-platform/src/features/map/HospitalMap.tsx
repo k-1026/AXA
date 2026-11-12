@@ -47,7 +47,7 @@ export function HospitalMap({ hospitals, fetchedAt, selectedDept, focus = null }
   const markers = useRef(new Map<string, LeafletCircleMarker>()).current;
 
   return (
-    // preferCanvas: 병원 4천여 곳을 마커로 그려도 느려지지 않게
+    // preferCanvas: 병원 전체(수는 데이터에 따라 다름)를 마커로 그려도 느려지지 않게
     <MapContainer center={DAEGU_CENTER} zoom={DAEGU_ZOOM} preferCanvas className="hospital-map">
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
