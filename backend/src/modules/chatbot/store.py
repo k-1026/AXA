@@ -1,7 +1,9 @@
 """`SessionStore`의 DB 구현 (7b). 인터페이스는 `ai/agent/session_store.py`.
 
 - 모든 읽기·삭제는 `patient_id`로 범위를 좁힌다 → 남의 세션은 "없음"(계약 4절 `not_found`)
-- 쓰기는 메서드마다 commit (요청 하나에 세션 하나라서 다른 작업과 섞이지 않음)
+- 쓰기는 메서드마다 commit (요청 하나에 세션 하나라서 다른 작업과 섞이지 않음).
+  단 `create`는 commit하지 않음 → 바로 뒤 첫 `append`와 한 번에 (저장 실패 시 빈 세션이 남지 않게)
+- 같은 대화에 동시에 두 요청이 오면 `state`는 늦게 저장한 쪽 것이 남음 (낙관적 잠금 없음, 팀 확인)
 - id가 uuid 형식이 아니면 "없음"으로 본다 (잘못된 경로 값으로 500이 나지 않게)
 """
 
@@ -48,7 +50,7 @@ class DbSessionStore:
         s = ChatSession(patient_id=uuid.UUID(patient_id), lang=lang, title=title[:60], state=dict(state),
                         created_at=now, last_message_at=now)
         self.db.add(s)
-        self.db.commit()
+        self.db.flush()  # id만 받음. commit은 첫 append에서
         return _out(s)
 
     def get(self, patient_id: str, session_id: str) -> StoredSession | None:

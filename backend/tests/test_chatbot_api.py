@@ -118,6 +118,7 @@ def test_draft_saved_without_health_info_or_inquiry(client, llm, db_engine):
     me = client.get("/api/v1/me", headers=auth(token)).json()
     with db(db_engine) as s:
         sid = DbSessionStore(s).create(me["id"], "en", "t", {"residency": "short_term"}).id
+        s.commit()  # create는 commit하지 않음 (첫 append와 한 번에)
     secret = "scars on both cheeks since 2024"
     llm.script = [
         call("prepare_booking_request", {"hospital_id": 9002, "preferred_slots": ["2026-12-04 10:00"], "language": "en",
@@ -197,6 +198,30 @@ def test_all_llm_providers_failing_returns_503_without_saving(client, llm, db_en
 
 
 # ------------------------------------------------------------------ 7e: 지난 대화
+def test_new_session_and_first_messages_are_one_transaction(client, llm, db_engine):
+    """새 대화: 세션 만들기와 첫 메시지 저장이 한 번에 → 메시지 저장이 실패하면 빈 세션도 남지 않음."""
+    from sqlalchemy.exc import IntegrityError
+
+    from ai.agent.session_store import StoredMessage
+
+    token = signup(client)
+    me = client.get("/api/v1/me", headers=auth(token)).json()
+    with db(db_engine) as s:
+        store = DbSessionStore(s)
+        sid = store.create(me["id"], "en", "t", {}).id
+        with pytest.raises(IntegrityError):
+            store.append(sid, [StoredMessage("system", "x")], {})  # role 제약 위반 → 저장 실패
+        s.rollback()
+    with db(db_engine) as s:
+        assert s.scalars(select(ChatSession)).all() == []
+
+    llm.script = [say("hello")]
+    assert ask(client, token, "hi").status_code == 200
+    with db(db_engine) as s:
+        assert len(s.scalars(select(ChatSession)).all()) == 1
+        assert len(s.scalars(select(ChatMessage)).all()) == 2
+
+
 def test_list_and_read_my_sessions_text_only(client, llm):
     token = signup(client)
     llm.script = [
