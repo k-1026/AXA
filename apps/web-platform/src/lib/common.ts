@@ -11,17 +11,17 @@ export const KST = 'Asia/Seoul';
 /** 오늘 (YYYY-MM-DD, 한국 시간) */
 export const todayKst = () => new Intl.DateTimeFormat('en-CA', { timeZone: KST }).format(new Date());
 
-/** 한국어·영어를 함께 가진 예시 데이터. 사용자가 입력한 글은 문자열 그대로 */
-export type KoEn = { ko: string; en: string };
+/** 한국어·영어는 꼭, 그 밖의 화면 언어(zh-TW·zh-CN·vi)는 있으면 쓰는 글. 사용자가 입력한 글은 문자열 그대로 */
+export type KoEn = { ko: string; en: string; 'zh-TW'?: string; 'zh-CN'?: string; vi?: string };
 
 /**
- * 한국어 화면은 한국어, 그 밖의 언어는 영어 (병원 이름과 같은 규칙). 문자열은 그대로
+ * 화면 언어의 글이 있으면 그것, 없으면 영어 (병원 이름처럼 한국어·영어만 있는 데이터는 영어로). 문자열은 그대로
  * 언어가 바뀔 때만 새 함수 → useMemo 의존성으로 써도 됨
  */
 export function useLocalized() {
   const { i18n } = useTranslation();
-  const ko = i18n.language === 'ko';
-  return useCallback((x: string | KoEn): string => (typeof x === 'string' ? x : ko ? x.ko : x.en), [ko]);
+  const lang = i18n.language as keyof KoEn;
+  return useCallback((x: string | KoEn): string => (typeof x === 'string' ? x : x[lang] ?? x.en), [lang]);
 }
 
 /** 검색용 글: 한국어·영어를 모두 넣어 어느 언어로 찾아도 걸리게 */

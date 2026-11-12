@@ -1,8 +1,9 @@
 import type { DepartmentKey } from '../hospital/types';
 import type { ChatCard } from './chatApi';
+import type { KoEn } from '../../lib/common';
 
-// 예시 데이터는 한국어·영어를 함께 갖고, 사용자가 실제로 주고받은 대화는 입력한 언어 그대로 저장
-export type ChatText = string | { ko: string; en: string };
+// 고정 문구·예시 데이터는 한국어·영어(+있으면 다른 화면 언어)를 함께 갖고, 사용자가 실제로 주고받은 대화는 입력한 언어 그대로 저장
+export type ChatText = string | KoEn;
 
 export type Topic = 'hospital' | 'price' | 'interpret' | 'tour';
 
