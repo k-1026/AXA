@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { onAccountReset, type AccountKey } from '../../components/account';
 import { useAuth } from '../../components/auth';
 import { useConsultThreads } from '../consult/useConsultThreads';
 import { SAMPLE_AFTERCARE } from './sampleAftercare';
@@ -8,33 +9,39 @@ import type { AftercareMessage, Attachment } from './types';
 // 저장 방식은 상담과 같음: demo는 예시로 시작해 메모리에만, member는 백엔드 연결 전까지 메모리
 type Mode = 'demo' | 'member';
 type Store = Record<string, { messages: AftercareMessage[]; unread: number }>;
-const memory: Partial<Record<Mode, Store>> = {};
-const load = (mode: Mode): Store => (memory[mode] ??= mode === 'demo' ? SAMPLE_AFTERCARE : {});
+// 메모리는 계정별로 나누고, 로그아웃·탈퇴하면 모두 지운다
+const memory = new Map<AccountKey, Store>();
+onAccountReset(() => memory.clear());
+const load = (key: AccountKey, mode: Mode): Store => {
+  if (!memory.has(key)) memory.set(key, mode === 'demo' ? SAMPLE_AFTERCARE : {});
+  return memory.get(key)!;
+};
 
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function useAftercare() {
-  const { user } = useAuth();
+  const { user, account } = useAuth();
   const mode: Mode = user?.demo ? 'demo' : 'member';
   const consult = useConsultThreads();
-  const [store, setStore] = useState<Store>(() => load(mode));
+  const [store, setStore] = useState<Store>(() => load(account, mode));
   const [activeId, setActiveId] = useState<string | null>(null);
+  const accountRef = useRef(account);
+  accountRef.current = account;
 
   useEffect(() => {
-    setStore(load(mode));
+    setStore(load(account, mode));
     setActiveId(null);
-  }, [mode]);
+  }, [account, mode]);
 
-  const update = useCallback(
-    (fn: (prev: Store) => Store) =>
-      setStore((prev) => {
-        const next = fn(prev);
-        memory[mode] = next;
-        // TODO(member): 백엔드가 생기면 여기서 서버 저장 (사진·영상은 서버에 올린 주소로 교체)
-        return next;
-      }),
-    [mode],
-  );
+  const update = useCallback((fn: (prev: Store) => Store) => {
+    const key = accountRef.current; // 계정이 바뀐 뒤의 늦은 변경이 다른 계정 메모리에 들어가지 않게
+    setStore((prev) => {
+      const next = fn(prev);
+      memory.set(key, next);
+      // TODO(member): 백엔드가 생기면 여기서 서버 저장 (사진·영상은 서버에 올린 주소로 교체)
+      return next;
+    });
+  }, []);
 
   // 방문일이 최근인 순
   const visits = useMemo(

@@ -1,11 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import i18n from '../i18n';
-import { api, ApiError } from './api';
+import { api, ApiError, setUnauthorizedHandler } from './api';
+import { accountKeyOf, removeAccountData, resetAccountMemory, setCurrentAccount, type AccountKey } from './account';
+import { readSessionSetting, readSetting, removeSetting, writeSessionSetting, writeSetting } from './storage';
 
 // 로그인 상태
 // - 실제 회원: 백엔드 회원가입·로그인. 토큰은 이 브라우저(localStorage)에 두고, 로그아웃하면 서버 세션도 끝냄
 // - 데모 계정: 발표·화면 확인용. 이 탭에서만 유지 (sessionStorage), 예시 데이터를 보여준다
 export interface User {
+  id?: string; // 실제 회원의 서버 id (계정별 데이터를 나누는 데 씀). 데모는 없음
   name: string;
   demo: boolean; // true면 예시 데이터를 보여준다
   email?: string;
@@ -22,41 +25,23 @@ export interface SignupInput {
 }
 
 interface Me {
+  id: string;
   email: string;
   display_name: string | null;
   preferred_lang: string;
 }
 
-const DEMO_KEY = 'medidaegu.demoLogin';
-const TOKEN_KEY = 'medidaegu.token';
+const DEMO_KEY = 'demoLogin';
+const TOKEN_KEY = 'token';
 const DEMO_USER: User = { name: 'Emma', demo: true };
 
-function read(store: () => Storage, key: string): string | null {
-  try {
-    return store().getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function write(store: () => Storage, key: string, value: string | null) {
-  try {
-    if (value === null) store().removeItem(key);
-    else store().setItem(key, value);
-  } catch {
-    // 저장 실패는 무시 (새로고침하면 로그아웃 상태)
-  }
-}
-
-const local = () => localStorage;
-const session = () => sessionStorage;
-
 function toUser(me: Me): User {
-  return { name: me.display_name || me.email.split('@')[0], demo: false, email: me.email };
+  return { id: me.id, name: me.display_name || me.email.split('@')[0], demo: false, email: me.email };
 }
 
 const AuthContext = createContext<{
   user: User | null;
+  account: AccountKey; // 계정별 데이터의 열쇠 ('guest' | 'demo' | 'user:<id>')
   token: string | null; // 실제 회원의 API 토큰 (데모·비로그인은 null)
   ready: boolean; // 저장된 토큰 확인이 끝났는지
   loginDemo: () => void;
@@ -66,6 +51,7 @@ const AuthContext = createContext<{
   logout: () => void;
 }>({
   user: null,
+  account: 'guest',
   token: null,
   ready: true,
   loginDemo: () => {},
@@ -76,16 +62,31 @@ const AuthContext = createContext<{
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => read(local, TOKEN_KEY));
-  const [user, setUser] = useState<User | null>(() =>
-    read(session, DEMO_KEY) === '1' ? DEMO_USER : null,
-  );
-  const [ready, setReady] = useState(() => !read(local, TOKEN_KEY));
+  const [token, setToken] = useState<string | null>(() => readSetting(TOKEN_KEY));
+  const [user, setUser] = useState<User | null>(() => (readSessionSetting(DEMO_KEY) === '1' ? DEMO_USER : null));
+  const [ready, setReady] = useState(() => !readSetting(TOKEN_KEY));
+  const account = accountKeyOf(user);
+
+  // 계정별 저장소(찜·방문 기록 등)가 화면을 그리기 전에 새 계정으로 바뀌게 (useLayoutEffect)
+  useLayoutEffect(() => setCurrentAccount(account), [account]);
 
   const clearToken = useCallback(() => {
-    write(local, TOKEN_KEY, null);
+    removeSetting(TOKEN_KEY);
     setToken(null);
   }, []);
+
+  // 로그인 만료: 어느 API에서든 401 auth.required가 오면 로그아웃 (지금 토큰일 때만 — 이전 계정의 늦은 응답은 무시)
+  const tokenRef = useRef(token);
+  tokenRef.current = token;
+  useEffect(() => {
+    setUnauthorizedHandler((used) => {
+      if (used !== tokenRef.current) return;
+      clearToken();
+      resetAccountMemory();
+      setUser(null);
+    });
+    return () => setUnauthorizedHandler(null);
+  }, [clearToken]);
 
   // 저장된 토큰이 아직 유효한지 서버에 확인 (로그아웃·만료됐으면 지움)
   useEffect(() => {
@@ -94,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     api<Me>('/me', { token })
       .then((me) => alive && setUser(toUser(me)))
       .catch((e) => {
+        // auth.required는 위의 공통 처리가 로그아웃한다. 그 밖의 401도 토큰을 지움
         if (alive && e instanceof ApiError && e.status === 401) clearToken();
       })
       .finally(() => alive && setReady(true));
@@ -104,8 +106,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const startSession = async (accessToken: string) => {
     const me = await api<Me>('/me', { token: accessToken });
-    write(session, DEMO_KEY, null);
-    write(local, TOKEN_KEY, accessToken);
+    resetAccountMemory(); // 앞 계정(데모 포함)의 메모리 데이터를 남기지 않음
+    writeSessionSetting(DEMO_KEY, null);
+    writeSetting(TOKEN_KEY, accessToken);
     setToken(accessToken);
     setUser(toUser(me));
     if (me.preferred_lang && me.preferred_lang !== i18n.language) i18n.changeLanguage(me.preferred_lang);
@@ -128,14 +131,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginDemo = () => {
-    write(session, DEMO_KEY, '1');
+    resetAccountMemory();
+    writeSessionSetting(DEMO_KEY, '1');
     setUser(DEMO_USER);
   };
 
   const logout = () => {
     if (token) api('/auth/patient/logout', { method: 'POST', token }).catch(() => {});
     clearToken();
-    write(session, DEMO_KEY, null);
+    writeSessionSetting(DEMO_KEY, null);
+    resetAccountMemory(); // 같은 탭에서 다음에 로그인한 사람에게 대화·상담이 보이지 않게
     setUser(null);
   };
 
@@ -143,11 +148,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const withdraw = async (password: string) => {
     await api('/me', { method: 'DELETE', token, body: { password } });
     clearToken();
+    removeAccountData(account); // 이 브라우저에 남은 이 계정의 찜·방문 기록 + 메모리 데이터
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token: user && !user.demo ? token : null, ready, loginDemo, login, signup, withdraw, logout }}>
+    <AuthContext.Provider value={{ user, account, token: user && !user.demo ? token : null, ready, loginDemo, login, signup, withdraw, logout }}>
       {children}
     </AuthContext.Provider>
   );

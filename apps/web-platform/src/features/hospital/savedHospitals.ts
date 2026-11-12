@@ -1,40 +1,23 @@
 import { useSyncExternalStore } from 'react';
-import { readSetting, writeSetting } from '../../components/storage';
+import { createAccountList } from '../../components/account';
 
-// 찜한 병원. 회원 기능(백엔드) 연결 전이라 지금은 이 브라우저에만 저장한다
+// 찜한 병원. 찜 백엔드 연결 전이라 지금은 이 브라우저에만 저장한다
 export interface SavedEntry {
   id: string;
   savedAt: string; // ISO 시각, "최근 저장순" 정렬용
 }
 
-const KEY = 'savedHospitals';
-
-function read(): SavedEntry[] {
-  try {
-    const parsed = JSON.parse(readSetting(KEY) ?? '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-let entries = read();
-const listeners = new Set<() => void>();
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
+// 계정별로 따로 저장 (로그인 전·데모·회원마다 다른 목록). 탈퇴하면 그 계정 목록은 지움
+const store = createAccountList<SavedEntry>('savedHospitals');
 
 function toggle(id: string) {
-  entries = entries.some((e) => e.id === id)
-    ? entries.filter((e) => e.id !== id)
-    : [...entries, { id, savedAt: new Date().toISOString() }];
-  writeSetting(KEY, JSON.stringify(entries));
-  listeners.forEach((l) => l());
+  const entries = store.get();
+  store.set(
+    entries.some((e) => e.id === id) ? entries.filter((e) => e.id !== id) : [...entries, { id, savedAt: new Date().toISOString() }],
+  );
 }
 
 export function useSavedHospitals() {
-  const saved = useSyncExternalStore(subscribe, () => entries);
+  const saved = useSyncExternalStore(store.subscribe, store.get);
   return { saved, isSaved: (id: string) => saved.some((e) => e.id === id), toggle };
 }

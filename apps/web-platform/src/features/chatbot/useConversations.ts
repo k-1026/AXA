@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { onAccountReset, type AccountKey } from '../../components/account';
 import { ApiError } from '../../components/api';
 import { useAuth } from '../../components/auth';
 import { askChatbot, chatLang, deleteChatSession, getChatSession, listChatSessions } from './chatApi';
@@ -13,9 +14,11 @@ import type { ChatMessage, ChipAction, ChatText, Conversation } from './types';
 // - demo: 데모 계정. 예시 대화로 시작, 바꾼 내용은 메모리에만 (탭을 닫으면 사라짐)
 // - member: 실제 회원. 질문은 POST /chatbot/ask(AI)로 보내고 서버가 대화를 저장 (7d). 화면 목록은 아직 메모리
 //   화면을 열면 서버의 지난 대화 목록을 불러오고(7e), 대화를 고르면 그때 메시지를 불러온다. 카드는 저장하지 않아 글만 보임
+// 메모리는 계정별(account 키)로 나누고, 로그아웃·탈퇴하면 모두 지운다 (같은 탭의 다음 사용자에게 보이지 않게)
 export type ChatMode = 'guest' | 'demo' | 'member';
 
-const memory: Partial<Record<ChatMode, Conversation[]>> = {};
+const memory = new Map<AccountKey, Conversation[]>();
+onAccountReset(() => memory.clear());
 
 // 서버 에러 코드 → 화면 문구 키 (chat.api.*)
 const API_ERRORS: Record<string, string> = {
@@ -33,14 +36,15 @@ const isBlank = (c: Conversation) => !c.remote && c.messages.every((m) => m.role
 // 목록에 시작 전 대화가 하나는 있게 해서 화면을 열면 바로 입력할 수 있게 한다
 const withBlank = (list: Conversation[]) => (list.some(isBlank) ? list : [newConversation(), ...list]);
 
-function load(mode: ChatMode): Conversation[] {
-  memory[mode] = withBlank(memory[mode] ?? (mode === 'demo' ? SAMPLE_CONVERSATIONS : []));
-  return memory[mode]!;
+function load(key: AccountKey, mode: ChatMode): Conversation[] {
+  const list = withBlank(memory.get(key) ?? (mode === 'demo' ? SAMPLE_CONVERSATIONS : []));
+  memory.set(key, list);
+  return list;
 }
 
-function save(mode: ChatMode, list: Conversation[]) {
-  memory[mode] = list;
-  // TODO(member): 로그인·저장 백엔드가 생기면 여기서 서버에 저장
+// 회원 대화는 질문할 때 서버가 저장하므로 여기서는 화면 목록(메모리)만 갱신
+function save(key: AccountKey, list: Conversation[]) {
+  memory.set(key, list);
 }
 
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -55,27 +59,30 @@ const textOf = (x: ChatText) => (typeof x === 'string' ? x : `${x.ko} ${x.en}`);
 
 export function useConversations() {
   const { t, i18n } = useTranslation();
-  const { user, token } = useAuth();
+  const { user, account, token } = useAuth();
   const mode: ChatMode = !user ? 'guest' : user.demo ? 'demo' : 'member';
 
-  const [list, setList] = useState<Conversation[]>(() => load(mode));
+  const [list, setList] = useState<Conversation[]>(() => load(account, mode));
   const [activeId, setActiveId] = useState<string | null>(null);
+  const accountRef = useRef(account);
+  accountRef.current = account;
 
   // 로그인·로그아웃하면 그 계정의 대화로 바꿔 끼운다
   useEffect(() => {
-    setList(load(mode));
+    setList(load(account, mode));
     setActiveId(null);
-  }, [mode]);
+  }, [account, mode]);
 
-  const update = useCallback(
-    (fn: (prev: Conversation[]) => Conversation[]) =>
-      setList((prev) => {
-        const next = fn(prev);
-        save(mode, next);
-        return next;
-      }),
-    [mode],
-  );
+  // owner: 요청을 보낸 때의 계정. 응답이 오기 전에 로그아웃·계정 전환이 됐으면 그 결과는 버린다
+  // (예전 계정 목록이 새 계정 화면·메모리에 섞이지 않게)
+  const update = useCallback((fn: (prev: Conversation[]) => Conversation[], owner: AccountKey = accountRef.current) => {
+    if (owner !== accountRef.current) return;
+    setList((prev) => {
+      const next = fn(prev);
+      save(owner, next);
+      return next;
+    });
+  }, []);
 
   const loading = useRef(new Set<string>()); // 메시지를 불러오는 중인 대화 (같은 요청을 두 번 보내지 않게)
 
@@ -83,6 +90,7 @@ export function useConversations() {
   useEffect(() => {
     if (mode !== 'member' || !token) return;
     let stop = false;
+    const owner = accountRef.current;
     listChatSessions(token)
       .then((rows) => {
         if (stop) return;
@@ -92,7 +100,7 @@ export function useConversations() {
             .filter((r) => !known.has(r.id))
             .map((r) => ({ id: r.id, serverId: r.id, createdAt: r.created_at, messages: [], remote: true }));
           return fromServer.length ? [...prev, ...fromServer] : prev;
-        });
+        }, owner);
       })
       .catch(() => {}); // 목록을 못 받아도 새 대화는 할 수 있게
     return () => {
@@ -111,6 +119,7 @@ export function useConversations() {
   useEffect(() => {
     if (!active?.remote || !active.serverId || !token || loading.current.has(active.id)) return;
     const { id, serverId, createdAt } = active;
+    const owner = accountRef.current;
     loading.current.add(id);
     getChatSession(token, serverId)
       .then((d) =>
@@ -133,9 +142,10 @@ export function useConversations() {
                   ],
                 },
           ),
+          owner,
         ),
       )
-      .catch(() => update((prev) => withBlank(prev.filter((c) => c.id !== id)))) // 서버에서 지워짐(30일 등)
+      .catch(() => update((prev) => withBlank(prev.filter((c) => c.id !== id)), owner)) // 서버에서 지워짐(30일 등)
       .finally(() => loading.current.delete(id));
   }, [active, token, update]);
 
@@ -170,6 +180,7 @@ export function useConversations() {
   // 회원: 질문을 바로 보여 주고, 답이 올 때까지 "답을 준비하는 중" 말풍선을 둔다
   const askServer = async (conv: Conversation, userText: string) => {
     if (!token) return;
+    const owner = accountRef.current;
     const at = now();
     const waitId = uid();
     setActiveId(conv.id);
@@ -195,6 +206,7 @@ export function useConversations() {
       prev.map((c) =>
         c.id !== conv.id ? c : { ...c, serverId, messages: c.messages.map((m) => (m.id === waitId ? { ...m, ...patch, pending: false } : m)) },
       ),
+      owner,
     );
   };
 

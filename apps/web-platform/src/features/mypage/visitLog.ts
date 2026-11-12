@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { readSetting, writeSetting } from '../../components/storage';
+import { createAccountList } from '../../components/account';
 
 // 방문 기록(개인 다이어리). 본인만 쓰고 본인만 본다: 후기가 아니므로 서버로 보내거나 병원 화면에 표시하지 않는다
 export interface VisitRecord {
@@ -13,41 +13,19 @@ export interface VisitRecord {
 
 export type VisitInput = Pick<VisitRecord, 'hospitalId' | 'hospitalName' | 'date' | 'note'>;
 
-const KEY = 'visitLog';
-
-function read(): VisitRecord[] {
-  try {
-    const parsed = JSON.parse(readSetting(KEY) ?? '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-let records = read();
-const listeners = new Set<() => void>();
-
-function commit(next: VisitRecord[]) {
-  records = next;
-  writeSetting(KEY, JSON.stringify(records));
-  listeners.forEach((l) => l());
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
+// 계정별로 따로 저장 (로그인 전·데모·회원마다 다른 기록). 탈퇴하면 그 계정 기록은 지움
+const store = createAccountList<VisitRecord>('visitLog');
 
 const add = (input: VisitInput) =>
-  commit([
-    ...records,
+  store.set([
+    ...store.get(),
     { ...input, id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`, createdAt: new Date().toISOString() },
   ]);
 const update = (id: string, input: VisitInput) =>
-  commit(records.map((r) => (r.id === id ? { ...r, hospitalId: undefined, ...input } : r)));
-const remove = (id: string) => commit(records.filter((r) => r.id !== id));
+  store.set(store.get().map((r) => (r.id === id ? { ...r, hospitalId: undefined, ...input } : r)));
+const remove = (id: string) => store.set(store.get().filter((r) => r.id !== id));
 
 export function useVisitLog() {
-  const visits = useSyncExternalStore(subscribe, () => records);
+  const visits = useSyncExternalStore(store.subscribe, store.get);
   return { visits, add, update, remove };
 }
