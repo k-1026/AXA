@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { onAccountReset, type AccountKey } from '../../components/account';
 import { ApiError } from '../../components/api';
 import { useAuth } from '../../components/auth';
+import { readSessionSetting, writeSessionSetting } from '../../components/storage';
 import { searchText, uid, useLocalized } from '../../lib/common';
 import { askChatbot, chatLang, deleteChatSession, getChatSession, listChatSessions } from './chatApi';
 import { GREETING, SAMPLE_CONVERSATIONS } from './sampleConversations';
@@ -65,15 +66,22 @@ export function useConversations() {
   const { user, account, token } = useAuth();
   const mode: ChatMode = user?.demo ? 'demo' : 'member';
 
+  // 회원: 고른 대화(서버 id)를 탭 저장소에 기억해 새로고침해도 같은 대화를 다시 연다 (계정별 키)
+  const activeKey = `chat.active@${account}`; // storage.ts가 앞에 "medidaegu."를 붙임
+  const savedActive = () => (mode === 'member' ? readSessionSetting(activeKey) : null);
+
   const [list, setList] = useState<Conversation[]>(() => load(account, mode));
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(savedActive);
+  const [listed, setListed] = useState(false); // 서버 대화 목록을 받았는지 (받기 전에는 기억한 대화를 덮어쓰지 않음)
   const accountRef = useRef(account);
   accountRef.current = account;
 
   // 로그인·로그아웃하면 그 계정의 대화로 바꿔 끼운다
   useEffect(() => {
     setList(load(account, mode));
-    setActiveId(null);
+    setActiveId(savedActive());
+    setListed(false);
+    // savedActive는 account·mode로만 정해져서 의존성에 따로 넣지 않음
   }, [account, mode]);
 
   // owner: 요청을 보낸 때의 계정. 응답이 오기 전에 로그아웃·계정 전환이 됐으면 그 결과는 버린다
@@ -107,7 +115,10 @@ export function useConversations() {
           return fromServer.length ? [...prev, ...fromServer] : prev;
         }, owner);
       })
-      .catch(() => {}); // 목록을 못 받아도 새 대화는 할 수 있게
+      .catch(() => {}) // 목록을 못 받아도 새 대화는 할 수 있게
+      .finally(() => {
+        if (!stop) setListed(true);
+      });
     return () => {
       stop = true;
     };
@@ -117,8 +128,15 @@ export function useConversations() {
   // (예시는 +09:00, 새 대화는 UTC 형식이라 문자열이 아닌 시각으로 비교)
   const sorted = useMemo(() => [...list].sort((a, b) => Date.parse(lastActivity(b)) - Date.parse(lastActivity(a))), [list]);
 
-  // 고른 대화가 없으면 시작 전 대화를 보여준다
-  const active = sorted.find((c) => c.id === activeId) ?? sorted.find(isBlank) ?? sorted[0] ?? null;
+  // 고른 대화가 없으면 시작 전 대화를 보여준다 (기억한 값은 서버 id라 serverId로도 찾음)
+  const active =
+    sorted.find((c) => c.id === activeId || (!!activeId && c.serverId === activeId)) ?? sorted.find(isBlank) ?? sorted[0] ?? null;
+
+  // 지금 보고 있는 대화를 기억 (새 대화·아직 서버에 없는 대화면 지움 → 새로고침하면 새 대화)
+  useEffect(() => {
+    if (mode !== 'member' || !listed) return;
+    writeSessionSetting(activeKey, active?.serverId ?? null);
+  }, [mode, listed, activeKey, active?.serverId]);
 
   // 회원: 서버에서만 받은 대화를 열면 메시지를 불러온다 (첫 인사 + 저장된 글)
   // 불러오는 동안은 입력을 막아(busy) 새 질문이 불러온 글에 덮이지 않게 한다
