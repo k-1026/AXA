@@ -31,7 +31,9 @@ def remote(monkeypatch):
         return {c: (0.001, target) for c in service.CURRENCIES}
 
     monkeypatch.setattr(service, "fetch_remote", fake)
-    return calls
+    service.reset_failure()  # 실패 기억은 모듈 전역 → 테스트마다 비움
+    yield calls
+    service.reset_failure()
 
 
 def get(client):
@@ -92,6 +94,39 @@ def test_failure_keeps_previous_rates(client, clock, remote):
     status, body = get(client)
     assert status == 200
     assert body["applied_on"] == "2026-11-04" and body["stale"] is True
+
+
+def test_after_failure_skips_refetch_for_cooldown(client, clock, remote):
+    """ECOS 실패 뒤 10분은 다시 받지 않고 저장값(stale)을 바로 → 요청마다 10초 타임아웃을 기다리지 않음."""
+    get(client)
+    clock["t"] = kst(2026, 11, 5, 10, 5)
+    remote["fail"] = True
+    get(client)
+    clock["t"] = kst(2026, 11, 5, 10, 14)
+    status, body = get(client)
+    assert status == 200 and body["stale"] is True
+    assert remote["targets"] == [date(2026, 11, 4), date(2026, 11, 5)]  # 10:14에는 안 부름
+
+    remote["fail"] = False
+    clock["t"] = kst(2026, 11, 5, 10, 16)  # 10분 지남 → 다시 받음
+    status, body = get(client)
+    assert body["stale"] is False and body["applied_on"] == "2026-11-05"
+    assert remote["targets"] == [date(2026, 11, 4), date(2026, 11, 5), date(2026, 11, 5)]
+
+
+def test_first_call_race_rereads_rows_instead_of_503(client, clock, remote, monkeypatch):
+    """첫 요청 둘이 동시에 받으면 늦은 쪽 저장이 PK 충돌로 실패 → 먼저 저장된 값을 다시 읽어 200."""
+    from sqlalchemy.exc import IntegrityError
+
+    real_save = service._save
+
+    def save_after_other_request(db, fetched, target, now):
+        real_save(db, fetched, target, now)  # 다른 요청이 먼저 저장했다고 치고
+        raise IntegrityError("INSERT exchange_rates", None, Exception("duplicate key"))
+
+    monkeypatch.setattr(service, "_save", save_after_other_request)
+    status, body = get(client)
+    assert status == 200 and body["stale"] is False and body["applied_on"] == "2026-11-04"
 
 
 def test_failure_without_stored_rates_is_503(client, clock, remote):
