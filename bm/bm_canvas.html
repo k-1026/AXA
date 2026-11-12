@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AX BM 캔버스</title>
+<!-- theme:begin (design/theme.css, design/inline_theme.py로 갱신) -->
+<style>
+/* 메디대구 문서용 공통 테마 — apps/web-platform/src/styles.css의 색·글꼴·모서리를 그대로 가져옴
+   쓰는 곳: painpoint/*.html · bm/bm_canvas.html · spec/userflow.html
+   규칙: 색은 아래 토큰만 쓰고, 페이지 안에서 새 색을 만들지 않음 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+:root {
+  /* 웹사이트와 같은 값 */
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-muted: #eef1f5;
+  --border: #d7dce3;
+  --text: #1f2933;
+  --ink: #172b4d;
+  --text-muted: #5b6673;
+  --accent: #1f6feb;
+  --accent-soft: #e3edfd;
+  --accent-line: rgb(31 111 235 / 0.25);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow-hover: 0 4px 16px rgb(31 111 235 / 0.12);
+  /* 문서용 의미 색 (웹사이트 파랑과 겹치지 않게 최소한만) */
+  --pain: #d6336c;        /* Top 3 · 최저점 · 손 넘김 */
+  --pain-soft: #fdeef3;
+  --assume: #b26a00;      /* 가정값 · [가정] */
+  --assume-soft: #fff6e5;
+  --good: #2b8a3e;        /* 기회 · 해소 */
+  --good-soft: #ebf7ee;
+  --neutral: #8a94a3;     /* 보류 · 범위 밖 */
+  --font: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+}
+/* 다크 모드 없음 — 웹사이트(apps/web-platform)도 늘 밝은 화면이라 문서도 같게 둠 */
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+
+/* 한 장(1280×720) 레이아웃 */
+.page { width: 1280px; height: 720px; margin: 0 auto; padding: 24px 36px 14px; display: flex; flex-direction: column; gap: 12px; }
+.page.tall { height: auto; min-height: 720px; }
+
+/* 머리 */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 6px; }
+.eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { color: var(--text-muted); font-size: 13.5px; margin-top: 6px; }
+.pill { background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+
+/* 카드 */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.card-sm { border-radius: var(--radius-sm); padding: 8px 10px; }
+.card h2, .card h3 { margin: 0 0 4px; color: var(--ink); }
+.card h2 { font-size: 13px; font-weight: 800; display: flex; align-items: baseline; gap: 6px; }
+.card h2 .n { color: var(--accent); }
+.card h2 small { color: var(--text-muted); font-weight: 600; font-size: 11px; }
+
+/* 작은 부품 */
+.chip { display: inline-block; background: var(--surface-muted); color: var(--text); border-radius: 999px; padding: 1px 9px; font-size: 11.5px; margin: 0 3px 3px 0; }
+.chip.accent { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--pain); color: #fff; font-size: 11px; font-weight: 800; margin-right: 4px; vertical-align: 1px; }
+.badge.muted { background: var(--neutral); }
+.badge.accent { background: var(--accent); }
+.ev { color: var(--text-muted); font-size: 10.5px; }
+.src { color: var(--text-muted); font-size: 10.5px; margin-top: auto; }
+.assume { color: var(--assume); font-weight: 700; }
+.pain-t { color: var(--pain); font-weight: 700; }
+.good-t { color: var(--good); font-weight: 700; }
+.muted-t { color: var(--neutral); }
+.foot { color: var(--text-muted); font-size: 11px; display: flex; justify-content: space-between; gap: 16px; margin-top: auto; }
+
+/* 표 */
+table.t { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; font-size: 12.5px; }
+table.t th { background: var(--surface-muted); color: var(--text-muted); text-align: left; font-size: 11.5px; font-weight: 700; padding: 8px 10px; }
+table.t td { padding: 7px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+table.t tr.hl td { background: var(--pain-soft); }
+
+/* 설명 상자 */
+.callout { border-radius: var(--radius-sm); padding: 11px 14px; font-size: 12.5px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.callout b { color: var(--ink); }
+.callout.good { background: var(--good-soft); border-color: transparent; }
+.callout.solid { background: var(--accent); color: #fff; border: 0; }
+.callout.solid b { color: #fff; }
+</style>
+<!-- theme:end -->
+<style>
+  body { font-size: 12px; line-height: 1.45; }
+  .page { gap: 8px; padding-top: 20px; }
+  h1 { font-size: 23px; }
+  .lede { font-size: 12.5px; margin-top: 3px; }
+  .canvas { display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: 1fr 1fr auto; gap: 7px; flex: 1; min-height: 0; }
+  .b { padding: 8px 10px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; gap: 3px; }
+  .b p { margin: 0; }
+  .vp { background: var(--accent-soft); border-color: var(--accent-line); }
+  .kp { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+  .ka { grid-column: 3 / span 2; grid-row: 1; }
+  .kr { grid-column: 3 / span 2; grid-row: 2; }
+  .vpb { grid-column: 5 / span 2; grid-row: 1 / span 2; }
+  .cr { grid-column: 7 / span 2; grid-row: 1; }
+  .ch { grid-column: 7 / span 2; grid-row: 2; }
+  .cs { grid-column: 9 / span 2; grid-row: 1 / span 2; }
+  .cost { grid-column: 1 / span 5; grid-row: 3; }
+  .rev { grid-column: 6 / span 5; grid-row: 3; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 800; border-radius: 6px; padding: 0 6px; background: var(--accent-soft); color: var(--accent); margin-right: 3px; }
+  .vp .tag { background: var(--surface); }
+  .axband { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+  .ax { background: var(--surface-muted); border-color: transparent; }
+  .ax h2 .n { color: var(--good); }
+  .loop { display: flex; gap: 4px; align-items: center; font-size: 11px; flex-wrap: nowrap; }
+  .loop span { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2px 6px; white-space: nowrap; }
+  .loop i { color: var(--good); font-style: normal; font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="head">
+    <div>
+      <div class="eyebrow">bm · 9블록 + AX 3블록</div>
+      <h1>AX BM 캔버스 — <em>메디대구</em> <span style="font-size:13px;color:var(--text-muted);font-weight:600">v2 · 레드팀 반영</span></h1>
+      <div class="lede">외국인 환자는 진료시간·가격·등록 여부를 출처와 함께 자기 언어로 보고 상담 예약까지, 병원은 AI 요약·답장 초안으로 빨리 답한다</div>
+    </div>
+    <span class="pill">주 수익: 수수료</span>
+  </div>
+
+  <div class="canvas">
+    <div class="card b kp"><h2><span class="n">8</span>핵심 파트너</h2>
+      <p>심평원·공공데이터포털 · 메디컬코리아(진흥원) · 수성구 · 행안부(폐업)</p>
+      <p>LLM 제공자 (Gemini → Nemotron 자동 전환) · 한국은행 ECOS</p>
+      <p>입점 병원 · 대구시·특구 <span class="assume">[가정]</span></p>
+      <div class="src">step2-3 3-2 · .env.example</div></div>
+
+    <div class="card b ka"><h2><span class="n">7</span>핵심 활동</h2>
+      <p>데이터 갱신 · 폐업 대조 · <b>진료시간 빈칸 · 미용 가격 직접 수집</b></p>
+      <p>AI 상담 연결 → 코디 승인 후 발송 · 입점 영업 · 월 정산</p>
+      <div class="src">step4 4-1</div></div>
+
+    <div class="card b kr"><h2><span class="n">6</span>핵심 자원</h2>
+      <p>공공데이터 가공본 4,242곳 · 대상 1,267곳 + <b>공공에 없는 것</b>: 직접 채운 진료시간·미용 가격, 폐업 대조</p>
+      <p><b>유치업자 등록</b> · 5개 언어 UI · 오케스트레이터 + 도구 11개</p>
+      <div class="src">data/README · step1 1-5</div></div>
+
+    <div class="card b vp vpb"><h2><span class="n">2</span>가치 제안</h2>
+      <p><span class="tag">환자</span>대구 병원의 <b>진료시간 · 등록 여부</b>와 <b>공공 자료가 있는 항목의 가격 범위</b>를 <b>출처·확인일</b>과 함께 <b>내 언어로</b> 한곳에서 보고, 상담 예약까지 바로</p>
+      <p><span class="tag">병원</span>외국어 상담 요청을 <b>AI가 요약·번역·답장 초안</b>으로 정리 → 빨리 답하고, 유입·전환·응답 시간으로 성과 확인</p>
+      <p style="color:var(--text-muted)">페인포인트 Top 3: 진료시간 정보 없음 · 등록 병원 상세 부족 · 가격 기준 없음</p>
+      <div class="src">painpoint_def · vpc.md</div></div>
+
+    <div class="card b cr"><h2><span class="n">4</span>고객 관계</h2>
+      <p><span class="tag">환자</span>셀프 + 챗봇 · 병원 정보는 가입 없이, 챗봇·예약은 로그인 후</p>
+      <p><span class="tag">병원</span>셀프 대시보드 · 온보딩 · 정보 완성도 알림</p>
+      <div class="src">step0 3절</div></div>
+
+    <div class="card b ch"><h2><span class="n">3</span>채널</h2>
+      <p>환자 웹 (5개 언어 · 지도 · 챗봇) · 병원 대시보드</p>
+      <p>메디컬코리아·병원 홈페이지 링크</p>
+      <div class="src">dashboard-integration</div></div>
+
+    <div class="card b cs"><h2><span class="n">1</span>고객 세그먼트</h2>
+      <p><span class="tag">사용자</span>해외 거주 외국인 환자 — 1순위 대만 미용·외래 단기 방문객 (대구 대만 1,495명, +500.4%)</p>
+      <p><span class="tag">지불자</span>등록 유치의료기관 145곳 중 <b>유치업체 계약 없는 피부·성형 의원</b> (수 [U], 확보 0곳)</p>
+      <p><span class="tag">보조</span>광고 배너 일반 광고주 (화장품·관광)</p>
+      <div class="src">step0 4절 · painpoint_def</div></div>
+
+    <div class="card b cost"><h2><span class="n">9</span>비용 구조</h2>
+      <p><b>고정</b> 월 <span class="assume">275만 원 (가정값)</span> — 운영 1명 · 호스팅 · 보증보험료 · 빈칸 수작업 → <b>손익분기 월 92건</b> (계산값, 예상 10건의 9배)</p>
+      <p><b>변동</b> 건당 <span class="assume">5천 원 (가정값)</span> LLM·정산·CS · <b>리스크</b> 개인정보·국외 이전, LLM 요금·정책 변경</p>
+      <div class="src">revenue_platform 3절 · 보완조사 5절</div></div>
+
+    <div class="card b rev"><h2><span class="n">5</span>수익원 <small>주: 수수료 · 선택: 구독 · 보조: 광고</small></h2>
+      <p><b>요금제 B 수수료</b> 월 경유 진료비 합계 × <span class="assume">5~10% (가정값)</span> · 상한 의원 30%·병원 20%·상급종합 15% (확인값)</p>
+      <p>월 10건 × 50만 원 × 7% = <span class="assume">35만 원 (가정값 계산)</span> · <b>구독 A</b>는 상한 확인 전 합계에서 뺌 · 광고 보조</p>
+      <div class="src">revenue_options · revenue_platform</div></div>
+  </div>
+
+  <div class="axband">
+    <div class="card b ax"><h2><span class="n">◆</span>데이터 원천 <small>출처 · 권리 · 갱신</small></h2>
+      <p>심평원 API (포털 이용 조건 [U], 월) · 메디컬코리아·수성구 목록 (분기) · 진흥원 통계 (연)</p>
+      <p>환자 질문·요청서 (이용·건강정보·국외 이전 동의, 실시간) · 병원 입력 (약관)</p></div>
+    <div class="card b ax"><h2><span class="n">◆</span>AI 역할 <small>역량 · 사람 검토 지점</small></h2>
+      <p>추천·Q&A (출처 RAG) → 못 답하면 즉시 병원 상담으로 · 틀린 정보는 <b>데이터 담당</b> 책임</p>
+      <p>초안 → <b>코디 승인 후 발송</b> · 예약 "확정"은 <b>코디</b>가 · 사후 요약 → <b>의료진</b></p></div>
+    <div class="card b ax"><h2><span class="n">◆</span>학습 루프 <small style="color:var(--good)">↺ 데이터 원천으로</small></h2>
+      <div class="loop"><span>이용 질문·초안 수정</span><i>→</i><span>데이터 미답 질문·수정 이력</span></div>
+      <div class="loop"><i>→</i><span>개선 FAQ·규칙·빈칸 순서</span><i>→</i><span>결과 답↑ 수정↓ 응답↑</span></div>
+      <p style="font-size:10.5px;color:var(--text-muted)">모델 학습 아님 · 대구 외국인 환자 19,243명 전체 언어</p></div>
+  </div>
+
+  <div class="foot"><span><span class="assume">주황</span> = 가정값 · 근거 파일은 블록 아래 작은 글씨 · 입력 빈칸: ax/ (JTBD·Top 3·리스크) 없음 → bm_canvas.md 0절 [가정]</span><span>2026-11-12 · v2 (레드팀 21건 중 치명 12건 반영)</span></div>
+</div>
+</body>
+</html>
