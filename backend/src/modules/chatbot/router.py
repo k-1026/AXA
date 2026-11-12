@@ -9,10 +9,9 @@ from ai.agent.core.orchestrator import ChatLLM
 from ai.agent.schemas import ChatResponse
 from ai.agent.service import RateLimiter
 from core.db import get_db
-from core.security import PatientPrincipal, current_patient
+from core.security import PatientPrincipal, current_patient, patient_uuid
 from modules.chatbot import service
 from modules.chatbot.schemas import AskRequest, SessionDetail, SessionOut
-from modules.patient.router import patient_uuid
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
@@ -30,7 +29,7 @@ def ask(data: AskRequest, db: Db, me: Me, llm: Llm, limiter: Limiter):
 
 
 @router.get("/sessions", response_model=list[SessionOut])
-def list_sessions(db: Db, me: Me, limit: Annotated[int, Query(ge=1, le=50)] = 50):
+def list_sessions(db: Db, me: Me, limit: Annotated[int, Query(ge=1, le=service.LIST_LIMIT_MAX)] = service.LIST_LIMIT_MAX):
     """내 지난 대화 목록 (마지막 대화가 최근인 순). 30일 지난 대화는 정리 작업이 지운다."""
     return service.list_sessions(db, patient_uuid(me), limit)
 

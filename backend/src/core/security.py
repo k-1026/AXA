@@ -6,6 +6,7 @@
 - 병원 API는 current_staff()의 tenant_id로만 조회한다 (tenant 격리)
 """
 
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
 
@@ -109,6 +110,14 @@ def current_patient(
         # 로그아웃·만료된 세션, 탈퇴한 계정
         raise AppError(401, "auth.required", "로그인이 필요합니다")
     return PatientPrincipal(patient_id=token.sub, session_id=token.sid)
+
+
+def patient_uuid(me: PatientPrincipal) -> uuid.UUID:
+    """토큰의 환자 id → uuid. 서명은 맞는데 sub가 uuid가 아니면 로그인 다시 (401)."""
+    try:
+        return uuid.UUID(me.patient_id)
+    except ValueError:
+        raise AppError(401, "auth.required", "로그인이 필요합니다")
 
 
 def current_staff(token: Annotated[TokenData, Depends(current_token)]) -> StaffPrincipal:

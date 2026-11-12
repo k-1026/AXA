@@ -1,12 +1,10 @@
-import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 
 from core.db import get_db
-from core.errors import AppError
-from core.security import PatientPrincipal, current_patient
+from core.security import PatientPrincipal, current_patient, patient_uuid
 from modules.auth import service as auth_service
 from modules.auth.attempts import client_ip
 from modules.auth.schemas import WithdrawRequest
@@ -17,13 +15,6 @@ router = APIRouter(prefix="/me", tags=["patient"])
 
 Db = Annotated[Session, Depends(get_db)]
 Me = Annotated[PatientPrincipal, Depends(current_patient)]
-
-
-def patient_uuid(me: PatientPrincipal) -> uuid.UUID:
-    try:
-        return uuid.UUID(me.patient_id)
-    except ValueError:  # 서명은 맞는데 sub가 uuid가 아님 → 로그인 다시
-        raise AppError(401, "auth.required", "로그인이 필요합니다")
 
 
 @router.get("", response_model=PatientOut)
