@@ -1,0 +1,28 @@
+[project]
+name = "axa"
+version = "0.1.0"
+description = "대구 의료관광 정보 웹 + 병원 예약 요청 에이전트 (백엔드·AI)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]",
+    "pydantic-settings",
+    "pyjwt",
+    "pwdlib[argon2]",
+    "sqlalchemy>=2.1.8",
+    "psycopg[binary]>=3.3.7",
+    "alembic>=1.20.1",
+    "tzdata>=2026.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "httpx",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = [".", "backend/src"]
+testpaths = ["backend/tests", "ai/tests"]

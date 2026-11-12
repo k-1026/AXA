@@ -25,7 +25,9 @@
 | 건강정보(희망 진료·증상)는 선택 입력 + **별도 동의** (개인정보보호법 제23조) | `web-platform/booking-request` |
 | 병원 데이터는 해당 병원(tenant)만 조회·집계 (제26조 제5항) | `backend/modules/tenant`, `web-hospital/analytics` |
 | LLM 호출 전 개인정보 마스킹, 데모는 가상 데이터만 (국외 이전, 제28조의8) | `ai/llm/safety.py` |
-| 증상·시술 판단, 병원 추천 요청은 거절 → 병원 문의로 안내 (의료법 제27조 제1항) | `ai/llm/safety.py`, `ai/chatbot/prompts`, `ai/*/eval` |
+| 증상·시술 판단(진단·효과·부작용·약)은 거절 → 상담에서 의사에게 (의료법 제27조 제1항). 병원 추천은 **등록 유치사업자 가정에서 단기 방문 외국인에게만** 조건 맞춤 최대 3곳 + 수수료 관계 고지, "최고"·실력 비교·후기 X (제27조 제3항 제2호, 2026-11-10 변경 — `docs/agent-spec.md`) | `ai/llm/safety.py`, `ai/agent/prompts`, `ai/agent/tools/chat_tools.py`, `ai/agent/eval` |
+| 챗봇 대화는 개인정보를 가린 글만 저장, 30일 후 삭제·삭제 버튼·탈퇴 즉시 삭제. 요청서 초안의 건강정보·문의 내용은 서버에 저장 X (결정 16) | `backend/modules/chatbot`, `ai/agent/service.py` |
+| 챗봇 답에 "AI 생성" 표시 (인공지능기본법 제31조), 응급 고정 문구는 제외 | `web-platform/chatbot` |
 | 답장은 직원 승인 후 발송. 자동 발송은 접수 확인 메시지만 | `ai/agent/workflows`, `web-hospital/agent-settings` |
 | 구독 요금 기준 = 기능·좌석·AI 사용량. 예약 건수·환자 수·진료비 기준 X | `backend/modules/subscription` |
 | 광고(애드센스)는 목록·상세 옆에만, 건강·미용 카테고리 차단. 요청서·동의·챗봇 화면엔 X | `apps/web-platform` |

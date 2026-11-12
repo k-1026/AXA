@@ -1,0 +1,46 @@
+"""환경변수 설정. 값은 루트 .env에서 읽는다 (.env.example 참고)."""
+
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# JWT 알고리즘은 고정 (환경변수로 바꾸지 않음 → 알고리즘 혼동·none 공격 여지 없앰)
+JWT_ALGORITHM = "HS256"
+
+# 어느 폴더에서 실행해도 루트 .env를 읽도록 파일 위치 기준 (backend/src/core/config.py → 루트)
+ROOT_ENV = Path(__file__).resolve().parents[3] / ".env"
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=ROOT_ENV, extra="ignore")
+
+    # JWT — 비밀 키는 `openssl rand -hex 32` 등으로 만든 값을 .env에만 둔다
+    # HS256 키는 32바이트 이상 권장 (RFC 7518 3.2절) → 짧으면 서버 시작 실패
+    jwt_secret: str = Field(min_length=32)
+    jwt_patient_expire_minutes: int = 60 * 24
+    jwt_staff_expire_minutes: int = 60 * 8
+
+    # DB — Supabase 연결 문자열 (postgresql+psycopg://...). 없으면 DB를 쓰는 API가 실패
+    database_url: str | None = None
+
+    # 환율: 한국은행 ECOS Open API 인증키 (ecos.bok.or.kr 에서 발급, .env에만)
+    ecos_api_key: str | None = None
+    fx_switch_hour_kst: int = 10  # 매일 이 시각(한국 시간)에 그날 적용 환율로 바뀜
+
+    # 정기 정리 API(/internal/purge)용 비밀 값. 없으면 그 API는 꺼짐(404). Vercel Cron이 Bearer로 보냄
+    cron_secret: str | None = Field(default=None, min_length=16)
+
+    @field_validator("cron_secret", mode="before")
+    @classmethod
+    def _empty_is_none(cls, v: str | None) -> str | None:
+        return v or None  # .env의 `CRON_SECRET=`(빈 값) = 없음
+
+    # 프론트 주소 (CORS). 배포 시 .env에 CORS_ORIGINS=["https://…vercel.app"] 처럼 JSON 목록
+    cors_origins: list[str] = ["http://localhost:5403", "http://localhost:5173"]
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
