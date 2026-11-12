@@ -3,13 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../../i18n';
 import { CalendarIcon, ChevronRightIcon, GlobeIcon, InfoIcon } from '../mypage/icons';
 import { bookingDateTime } from './format';
-import type { BookingRequest } from './types';
+import { displayStatus, type BookingRequest, type DisplayStatus } from './types';
+
+// 카드 아래 안내 문구
+const NOTE: Partial<Record<DisplayStatus, string>> = {
+  pending: 'consult.pendingNote',
+  proposed: 'bookings.proposedNote',
+  rejected: 'bookings.rejectedNote',
+  expired: 'bookings.expiredNote',
+  visited: 'consult.visitedNote',
+};
 
 // 대화 속 예약 신청 카드. 병원이 확인하기 전까지는 "확인 대기"
 export function BookingCard({ booking, sentAt }: { booking: BookingRequest; sentAt: string }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const langLabel = LANGUAGES.find((l) => l.code === booking.language)?.label ?? booking.language;
+  const status = displayStatus(booking);
 
   return (
     <article className="consult-booking">
@@ -18,7 +28,7 @@ export function BookingCard({ booking, sentAt }: { booking: BookingRequest; sent
           <CalendarIcon />
         </span>
         <h3>{t('consult.bookingTitle')}</h3>
-        <span className={`consult-status is-${booking.status}`}>{t(`consult.status.${booking.status}`)}</span>
+        <span className={`consult-status is-${status}`}>{t(`consult.status.${status}`)}</span>
       </header>
       <p className="consult-booking-line">
         <CalendarIcon />
@@ -39,7 +49,7 @@ export function BookingCard({ booking, sentAt }: { booking: BookingRequest; sent
       <footer>
         <span>
           <InfoIcon />
-          {t(booking.status === 'pending' ? 'consult.pendingNote' : booking.status === 'completed' ? 'consult.completedNote' : 'consult.decidedNote')}
+          {t(NOTE[status] ?? 'consult.decidedNote')}
         </span>
         <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
           {t(open ? 'consult.hideDetail' : 'consult.showDetail')}

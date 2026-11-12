@@ -8,12 +8,24 @@ import { BookingForm } from '../features/consult/BookingForm';
 import { HospitalThumb } from '../features/consult/HospitalThumb';
 import { bookingDateFull } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
-import type { BookingStatus } from '../features/consult/types';
+import { displayStatus, type BookingRequest, type DisplayStatus } from '../features/consult/types';
 import { LegalLinks } from '../features/legal/LegalLinks';
 
-type Filter = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
+type Filter = 'all' | 'pending' | 'confirmed' | 'visited' | 'cancelled';
 type Sort = 'visit' | 'recent';
-const FILTERS: Filter[] = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+const FILTERS: Filter[] = ['all', 'pending', 'confirmed', 'visited', 'cancelled'];
+
+// 상태 → 필터 묶음: 병원의 다른 시간 제안은 "확인 대기", 병원 거절·기간 만료는 "취소" 묶음에 함께
+const GROUP: Record<DisplayStatus, Filter> = {
+  pending: 'pending',
+  proposed: 'pending',
+  confirmed: 'confirmed',
+  visited: 'visited',
+  cancelled: 'cancelled',
+  rejected: 'cancelled',
+  expired: 'cancelled',
+};
+const group = (b: { booking: BookingRequest }) => GROUP[displayStatus(b.booking)];
 
 // 상담에서 신청한 예약 모아 보기. 변경·취소는 환자가 하고, 확정·방문 완료 표시는 병원이 한다
 export function BookingsPage() {
@@ -26,14 +38,12 @@ export function BookingsPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
 
-  // 병원이 거절한 예약은 "취소" 묶음에 함께 보여준다
-  const group = (s: BookingStatus): Filter => (s === 'declined' ? 'cancelled' : s);
   const all = consult.bookings;
-  const count = (f: Filter) => (f === 'all' ? all.length : all.filter((b) => group(b.booking.status) === f).length);
+  const count = (f: Filter) => (f === 'all' ? all.length : all.filter((b) => group(b) === f).length);
   const items = useMemo(
     () =>
       all
-        .filter((b) => filter === 'all' || group(b.booking.status) === filter)
+        .filter((b) => filter === 'all' || group(b) === filter)
         .sort((a, b) =>
           sort === 'visit'
             ? `${a.booking.date}T${a.booking.time}`.localeCompare(`${b.booking.date}T${b.booking.time}`)
@@ -87,8 +97,11 @@ export function BookingsPage() {
         {items.length === 0 && <p className="mp-saved-empty">{t(all.length ? 'bookings.emptyFilter' : 'bookings.none')}</p>}
         {items.map(({ thread, message, booking }) => {
           const key = message.id;
-          const cancelled = booking.status === 'cancelled' || booking.status === 'declined';
-          const done = booking.status === 'completed';
+          const status = displayStatus(booking);
+          const cancelled = GROUP[status] === 'cancelled';
+          const done = status === 'visited';
+          // 변경·취소는 병원이 확정하기 전(대기·다른 시간 제안)에만 (계약 2절: 환자 취소는 pending·proposed에서만)
+          const editable = status === 'pending' || status === 'proposed';
           return (
             <article key={key} className={`mp-card bk-card ${cancelled ? 'is-cancelled' : ''}`}>
               <HospitalThumb photo={thread.photo} size="lg" />
@@ -104,25 +117,27 @@ export function BookingsPage() {
                 <div className="bk-when">
                   <CalendarIcon />
                   <p>
-                    {booking.status === 'pending' && <span className="bk-wish">{t('bookings.wish')} </span>}
+                    {editable && <span className="bk-wish">{t('bookings.wish')} </span>}
                     {bookingDateFull(booking.date, booking.time, i18n.language)}
                   </p>
-                  <span className={`consult-status is-${booking.status}`}>{t(`consult.status.${booking.status}`)}</span>
+                  <span className={`consult-status is-${status}`}>{t(`consult.status.${status}`)}</span>
                 </div>
                 <p className="bk-sub">{t('bookings.kind', { lang: langLabel(booking.language) })}</p>
                 <p className="bk-meta">
-                  {(booking.status === 'confirmed' || done) && booking.bookingNo && t('bookings.number', { no: booking.bookingNo })}
+                  {(status === 'confirmed' || done) && booking.bookingNo && t('bookings.number', { no: booking.bookingNo })}
                   {done && booking.treatment && ` · ${text(booking.treatment)}`}
-                  {booking.status === 'pending' && (
+                  {status === 'pending' && (
                     <>
                       <InfoIcon />
                       {t('consult.pendingNote')}
                     </>
                   )}
-                  {booking.status === 'cancelled' &&
+                  {status === 'cancelled' &&
                     booking.cancelledAt &&
                     t('bookings.cancelledOn', { date: new Date(booking.cancelledAt).toLocaleDateString(i18n.language, { timeZone: 'Asia/Seoul' }) })}
-                  {booking.status === 'declined' && t('bookings.declinedNote')}
+                  {status === 'rejected' && t('bookings.rejectedNote')}
+                  {status === 'proposed' && t('bookings.proposedNote')}
+                  {status === 'expired' && t('bookings.expiredNote')}
                 </p>
 
                 {editing === key ? (
@@ -159,7 +174,7 @@ export function BookingsPage() {
                         {t('aftercare.aftercareButton')}
                       </button>
                     )}
-                    {!cancelled && !done && (
+                    {editable && (
                       <>
                         <button type="button" className="is-primary" onClick={() => setEditing(key)}>
                           <PencilIcon />

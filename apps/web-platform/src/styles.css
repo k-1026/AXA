@@ -3788,7 +3788,7 @@ body.chat-open {
   color: #15803d;
 }
 
-.consult-status.is-declined {
+.consult-status.is-rejected {
   background: #fde7e5;
   color: #b42318;
 }
@@ -4176,9 +4176,15 @@ body.chat-open {
   text-decoration: none;
 }
 
-.consult-status.is-cancelled {
+.consult-status.is-cancelled,
+.consult-status.is-expired {
   background: #eceff3;
   color: #5d6875;
+}
+
+.consult-status.is-proposed {
+  background: #fdf0d5;
+  color: #9a5b00;
 }
 
 /* 예약 관리 (/mypage/bookings) */
@@ -4439,7 +4445,7 @@ body.chat-open {
   }
 }
 
-.consult-status.is-completed {
+.consult-status.is-visited {
   background: #e4edfd;
   color: #1f5fc8;
 }

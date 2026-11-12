@@ -119,7 +119,7 @@ export function AftercarePage() {
                   {t('aftercare.visitedOn', { date: bookingDateFull(active.booking.date, active.booking.time, i18n.language) })}
                 </p>
               </div>
-              <span className="consult-status is-completed">{t('consult.status.completed')}</span>
+              <span className="consult-status is-visited">{t('consult.status.visited')}</span>
             </div>
 
             <p className="consult-notice">

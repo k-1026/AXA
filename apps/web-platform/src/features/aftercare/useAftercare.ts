@@ -3,9 +3,10 @@ import { onAccountReset, type AccountKey } from '../../components/account';
 import { useAuth } from '../../components/auth';
 import { useConsultThreads } from '../consult/useConsultThreads';
 import { SAMPLE_AFTERCARE } from './sampleAftercare';
+import { displayStatus } from '../consult/types';
 import type { AftercareMessage, Attachment } from './types';
 
-// 사후 관리 대상 = 병원이 방문 완료로 표시한 예약만 (예약 내역 기반)
+// 사후 관리 대상 = 방문 완료로 보이는 예약만 (확정 + 방문 일시 지남, 예약 내역 기반)
 // 저장 방식은 상담과 같음: demo는 예시로 시작해 메모리에만, member는 백엔드 연결 전까지 메모리
 type Mode = 'demo' | 'member';
 type Store = Record<string, { messages: AftercareMessage[]; unread: number }>;
@@ -47,7 +48,7 @@ export function useAftercare() {
   const visits = useMemo(
     () =>
       consult.bookings
-        .filter((b) => b.booking.status === 'completed')
+        .filter((b) => displayStatus(b.booking) === 'visited') // 확정 + 방문 일시 지남 (consult/types.ts)
         .map((b) => ({ id: b.message.id, thread: b.thread, booking: b.booking, ...(store[b.message.id] ?? { messages: [], unread: 0 }) }))
         .sort((a, b) => `${b.booking.date}T${b.booking.time}`.localeCompare(`${a.booking.date}T${a.booking.time}`)),
     [consult.bookings, store],

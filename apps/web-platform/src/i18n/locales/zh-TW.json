@@ -400,9 +400,11 @@
     "status": {
       "pending": "待確認",
       "confirmed": "已確認",
-      "declined": "無法預約",
+      "rejected": "無法預約",
       "cancelled": "已取消",
-      "completed": "已就診"
+      "visited": "已就診",
+      "proposed": "醫院提議其他時間",
+      "expired": "已過期"
     },
     "quick": {
       "booking": "預約諮詢",
@@ -428,7 +430,7 @@
       "changeSubmit": "申請變更",
       "changeHint": "變更後醫院會重新確認，確認前顯示為「待確認」。"
     },
-    "completedNote": "已完成就診，可在術後管理中與醫護人員交流。"
+    "visitedNote": "已完成就診，可在術後管理中與醫護人員交流。"
   },
   "bookings": {
     "backToChats": "返回諮詢列表",
@@ -440,7 +442,7 @@
       "pending": "待確認",
       "confirmed": "已確認",
       "cancelled": "已取消",
-      "completed": "已就診"
+      "visited": "已就診"
     },
     "sortLabel": "排序",
     "sortVisit": "依就診日期",
@@ -451,7 +453,7 @@
     "kind": "到院諮詢 · 諮詢語言 {{lang}}",
     "number": "預約編號 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
-    "declinedNote": "醫院告知此時間無法預約。",
+    "rejectedNote": "醫院告知此時間無法預約。",
     "change": "變更預約",
     "cancel": "取消預約",
     "chat": "諮詢",
@@ -460,7 +462,9 @@
     "changeMsg": "已申請將預約改為{{when}}。",
     "cancelMsg": "已取消{{when}}的預約。",
     "footnote": "預約時間以韓國時間（KST）為準。",
-    "sampleNote": "範例醫院與預約資訊。"
+    "sampleNote": "範例醫院與預約資訊。",
+    "proposedNote": "醫院提議了其他時間，請在諮詢中確認。",
+    "expiredNote": "所有希望日期皆已過去，此申請已過期。"
   },
   "aftercare": {
     "list": "術後管理紀錄",

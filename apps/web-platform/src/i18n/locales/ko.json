@@ -400,9 +400,11 @@
     "status": {
       "pending": "확인 대기",
       "confirmed": "예약 확정",
-      "declined": "예약 불가",
+      "rejected": "예약 불가",
       "cancelled": "예약 취소",
-      "completed": "방문 완료"
+      "visited": "방문 완료",
+      "proposed": "다른 시간 제안",
+      "expired": "기간 만료"
     },
     "quick": {
       "booking": "예약 문의",
@@ -428,7 +430,7 @@
       "changeSubmit": "변경 요청",
       "changeHint": "변경하면 병원이 다시 확인해요. 확인 전까지 \"확인 대기\"로 표시돼요."
     },
-    "completedNote": "방문을 마쳤어요. 사후 관리에서 의료진과 대화할 수 있어요."
+    "visitedNote": "방문을 마쳤어요. 사후 관리에서 의료진과 대화할 수 있어요."
   },
   "bookings": {
     "backToChats": "상담 목록으로",
@@ -440,7 +442,7 @@
       "pending": "확인 대기",
       "confirmed": "예약 확정",
       "cancelled": "취소",
-      "completed": "방문 완료"
+      "visited": "방문 완료"
     },
     "sortLabel": "정렬",
     "sortVisit": "방문 예정일 순",
@@ -451,7 +453,7 @@
     "kind": "방문 상담 · 상담 언어 {{lang}}",
     "number": "예약번호 {{no}}",
     "cancelledOn": "취소일 {{date}}",
-    "declinedNote": "병원에서 이 일정으로는 예약이 어렵다고 알려 왔어요.",
+    "rejectedNote": "병원에서 이 일정으로는 예약이 어렵다고 알려 왔어요.",
     "change": "예약 변경",
     "cancel": "예약 취소",
     "chat": "상담하기",
@@ -460,7 +462,9 @@
     "changeMsg": "예약 일정을 {{when}}(으)로 변경 요청했어요.",
     "cancelMsg": "{{when}} 예약을 취소했어요.",
     "footnote": "예약 시간은 한국 시간(KST) 기준이에요.",
-    "sampleNote": "예시 병원 및 예약 정보예요."
+    "sampleNote": "예시 병원 및 예약 정보예요.",
+    "proposedNote": "병원에서 다른 시간을 제안했어요. 상담에서 확인해 주세요.",
+    "expiredNote": "희망 날짜가 모두 지나 요청이 만료됐어요."
   },
   "aftercare": {
     "list": "사후 관리 내역",

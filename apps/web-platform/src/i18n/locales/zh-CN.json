@@ -400,9 +400,11 @@
     "status": {
       "pending": "待确认",
       "confirmed": "已确认",
-      "declined": "无法预约",
+      "rejected": "无法预约",
       "cancelled": "已取消",
-      "completed": "已就诊"
+      "visited": "已就诊",
+      "proposed": "医院提议其他时间",
+      "expired": "已过期"
     },
     "quick": {
       "booking": "预约咨询",
@@ -428,7 +430,7 @@
       "changeSubmit": "申请更改",
       "changeHint": "更改后医院会重新确认，确认前显示为“待确认”。"
     },
-    "completedNote": "已完成就诊，可在术后管理中与医护人员交流。"
+    "visitedNote": "已完成就诊，可在术后管理中与医护人员交流。"
   },
   "bookings": {
     "backToChats": "返回咨询列表",
@@ -440,7 +442,7 @@
       "pending": "待确认",
       "confirmed": "已确认",
       "cancelled": "已取消",
-      "completed": "已就诊"
+      "visited": "已就诊"
     },
     "sortLabel": "排序",
     "sortVisit": "按就诊日期",
@@ -451,7 +453,7 @@
     "kind": "到院咨询 · 咨询语言 {{lang}}",
     "number": "预约编号 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
-    "declinedNote": "医院告知该时间无法预约。",
+    "rejectedNote": "医院告知该时间无法预约。",
     "change": "更改预约",
     "cancel": "取消预约",
     "chat": "咨询",
@@ -460,7 +462,9 @@
     "changeMsg": "已申请将预约改为{{when}}。",
     "cancelMsg": "已取消{{when}}的预约。",
     "footnote": "预约时间以韩国时间（KST）为准。",
-    "sampleNote": "示例医院和预约信息。"
+    "sampleNote": "示例医院和预约信息。",
+    "proposedNote": "医院提议了其他时间，请在咨询中确认。",
+    "expiredNote": "所有希望日期均已过去，此申请已过期。"
   },
   "aftercare": {
     "list": "术后管理记录",
