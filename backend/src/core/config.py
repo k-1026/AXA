@@ -6,6 +6,9 @@ from pathlib import Path
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# JWT 알고리즘은 고정 (환경변수로 바꾸지 않음 → 알고리즘 혼동·none 공격 여지 없앰)
+JWT_ALGORITHM = "HS256"
+
 # 어느 폴더에서 실행해도 루트 .env를 읽도록 파일 위치 기준 (backend/src/core/config.py → 루트)
 ROOT_ENV = Path(__file__).resolve().parents[3] / ".env"
 
@@ -16,7 +19,6 @@ class Settings(BaseSettings):
     # JWT — 비밀 키는 `openssl rand -hex 32` 등으로 만든 값을 .env에만 둔다
     # HS256 키는 32바이트 이상 권장 (RFC 7518 3.2절) → 짧으면 서버 시작 실패
     jwt_secret: str = Field(min_length=32)
-    jwt_algorithm: str = "HS256"
     jwt_patient_expire_minutes: int = 60 * 24
     jwt_staff_expire_minutes: int = 60 * 8
 

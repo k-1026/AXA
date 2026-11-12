@@ -16,7 +16,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, ValidationError
 from sqlalchemy.orm import Session
 
-from core.config import get_settings
+from core.config import JWT_ALGORITHM, get_settings
 from core.db import get_db
 from core.errors import AppError
 
@@ -69,7 +69,7 @@ def create_access_token(
         payload["tenant_id"] = tenant_id
     if session_id:
         payload["sid"] = session_id
-    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    return jwt.encode(payload, settings.jwt_secret, algorithm=JWT_ALGORITHM)
 
 
 def decode_access_token(token: str) -> TokenData:
@@ -78,7 +78,7 @@ def decode_access_token(token: str) -> TokenData:
         payload = jwt.decode(
             token,
             settings.jwt_secret,
-            algorithms=[settings.jwt_algorithm],
+            algorithms=[JWT_ALGORITHM],
             options={"require": ["exp", "sub"]},
         )
         return TokenData.model_validate(payload)
