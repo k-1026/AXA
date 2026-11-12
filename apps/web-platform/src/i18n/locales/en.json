@@ -2,8 +2,7 @@
   "header": {
     "language": "Language",
     "currency": "Currency",
-    "login": "Log in / Sign up",
-    "chatbot": "Chatbot"
+    "login": "Log in / Sign up"
   },
   "nav": {
     "title": "Menu",
@@ -223,7 +222,6 @@
   "auth": {
     "requiredTitle": "Please log in",
     "requiredDesc": "Your saved hospitals, visit history and Daegu schedule are available after you log in.",
-    "comingSoon": "Member login is coming soon. For now you can look around with a demo account.",
     "demo": "Try the demo account",
     "demoNote": "The demo account also shows sample data. Saved hospitals and your visit log stay in this browser only.",
     "demoBadge": "Demo",

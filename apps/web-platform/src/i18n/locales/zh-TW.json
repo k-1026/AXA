@@ -2,8 +2,7 @@
   "header": {
     "language": "語言",
     "currency": "貨幣",
-    "login": "登入 / 註冊",
-    "chatbot": "聊天機器人"
+    "login": "登入 / 註冊"
   },
   "nav": {
     "title": "選單",
@@ -223,7 +222,6 @@
   "auth": {
     "requiredTitle": "請先登入",
     "requiredDesc": "已儲存的醫院、就診紀錄與大邱行程需登入後查看。",
-    "comingSoon": "會員登入即將推出。目前可以使用示範帳號瀏覽。",
     "demo": "使用示範帳號瀏覽",
     "demoNote": "示範帳號也會顯示範例資料，收藏和就診紀錄僅儲存在此瀏覽器中。",
     "demoBadge": "示範",

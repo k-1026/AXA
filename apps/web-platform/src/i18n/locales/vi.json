@@ -2,8 +2,7 @@
   "header": {
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",
-    "login": "Đăng nhập / Đăng ký",
-    "chatbot": "Chatbot"
+    "login": "Đăng nhập / Đăng ký"
   },
   "nav": {
     "title": "Menu",
@@ -223,7 +222,6 @@
   "auth": {
     "requiredTitle": "Vui lòng đăng nhập",
     "requiredDesc": "Bệnh viện đã lưu, lịch sử khám và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
-    "comingSoon": "Đăng nhập thành viên sắp ra mắt. Hiện tại bạn có thể xem thử bằng tài khoản demo.",
     "demo": "Xem thử bằng tài khoản demo",
     "demoNote": "Tài khoản demo cũng hiển thị dữ liệu mẫu. Bệnh viện đã lưu và nhật ký khám chỉ lưu trong trình duyệt này.",
     "demoBadge": "Demo",

@@ -2,8 +2,7 @@
   "header": {
     "language": "语言",
     "currency": "货币",
-    "login": "登录 / 注册",
-    "chatbot": "聊天机器人"
+    "login": "登录 / 注册"
   },
   "nav": {
     "title": "菜单",
@@ -223,7 +222,6 @@
   "auth": {
     "requiredTitle": "请先登录",
     "requiredDesc": "已保存的医院、就诊记录和大邱行程需登录后查看。",
-    "comingSoon": "会员登录即将推出。目前可以使用演示账号浏览。",
     "demo": "使用演示账号浏览",
     "demoNote": "演示账号也会显示示例数据，收藏和就诊记录仅保存在此浏览器中。",
     "demoBadge": "演示",
