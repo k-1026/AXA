@@ -7,11 +7,13 @@
   Vercel 예약 작업(cron)은 미리 받아 두는 용도로만 (무료 플랜은 ±59분 어긋남)
 - 받을 때는 적용일까지(포함) 최근 영업일 값을 씀 → 주말·공휴일은 직전 영업일 값
 - 받기에 실패하면 저장된 값(stale), 저장된 값도 없으면 503 fx.unavailable
+  실패 뒤 FAILURE_COOLDOWN 동안은 다시 받지 않음 (ECOS 장애 때 요청마다 타임아웃을 기다리지 않게). 인스턴스마다 따로
 - 가격 표시는 참고용 환산 (실제 비용은 원화, 병원 안내 기준)
 """
 
 import json
 import logging
+import threading
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
 
@@ -37,6 +39,27 @@ ITEMS = {
 }
 CURRENCIES = tuple(ITEMS)  # 프론트 통화 선택과 같게 (KRW는 기준)
 LOOKBACK_DAYS = 10  # 긴 연휴도 덮도록
+FAILURE_COOLDOWN = timedelta(minutes=10)
+
+# 마지막 ECOS 실패 시각 (프로세스 메모리, 여러 스레드가 같이 씀)
+_failure_lock = threading.Lock()
+_last_failure: datetime | None = None
+
+
+def _mark_failure(now: datetime | None) -> None:
+    global _last_failure
+    with _failure_lock:
+        _last_failure = now
+
+
+def _in_cooldown(now: datetime) -> bool:
+    with _failure_lock:
+        return _last_failure is not None and now - _last_failure < FAILURE_COOLDOWN
+
+
+def reset_failure() -> None:
+    """테스트용: 실패 기억 지우기."""
+    _mark_failure(None)
 
 
 def applied_day(now: datetime) -> date:
@@ -80,23 +103,37 @@ def fetch_remote(target: date) -> dict[str, tuple[float, date]]:
     }
 
 
+def _read(db: Session) -> dict[str, ExchangeRate]:
+    return {r.currency: r for r in db.scalars(select(ExchangeRate))}
+
+
+def _save(db: Session, fetched: dict[str, tuple[float, date]], target: date, now: datetime) -> None:
+    for cur, (rate, base) in fetched.items():
+        db.merge(ExchangeRate(currency=cur, rate=rate, base_date=base, applied_on=target, fetched_at=now))
+    db.commit()
+
+
 def get_rates(db: Session) -> dict:
-    rows = {r.currency: r for r in db.scalars(select(ExchangeRate))}
+    rows = _read(db)
     now = utcnow()
     target = applied_day(now)
     current = len(rows) == len(CURRENCIES) and all(r.applied_on == target for r in rows.values())
-    if not current:
+    if not current and not _in_cooldown(now):
         try:
             fetched = fetch_remote(target)
-            for cur, (rate, base) in fetched.items():
-                db.merge(ExchangeRate(currency=cur, rate=rate, base_date=base, applied_on=target, fetched_at=now))
-            db.commit()
-            rows = {r.currency: r for r in db.scalars(select(ExchangeRate))}
-        except Exception as e:  # 네트워크·ECOS 오류 → 저장된 값으로
-            db.rollback()
+        except Exception as e:  # 네트워크·ECOS 오류 → 저장된 값으로, 잠시 다시 받지 않음
             log.error("환율 갱신 실패: %s", type(e).__name__)
-            if not rows:
-                raise AppError(503, "fx.unavailable", "환율 정보를 가져올 수 없습니다")
+            _mark_failure(now)
+            fetched = None
+        if fetched is not None:
+            try:
+                _save(db, fetched, target, now)
+            except Exception as e:  # 첫 요청 둘이 동시에 넣으면 늦은 쪽이 PK 충돌 → 먼저 저장된 값 사용
+                db.rollback()
+                log.error("환율 저장 실패: %s", type(e).__name__)
+            rows = _read(db)
+    if not rows:
+        raise AppError(503, "fx.unavailable", "환율 정보를 가져올 수 없습니다")
 
     return {
         "base": "KRW",

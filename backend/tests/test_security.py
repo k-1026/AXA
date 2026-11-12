@@ -178,3 +178,22 @@ def test_db_url_rejects_project_api_url():
 
     with pytest.raises(RuntimeError, match="Connection string"):
         normalize_db_url("https://example.supabase.co")
+
+
+@pytest.mark.filterwarnings("ignore:The HMAC key")  # 테스트용 HS512 토큰의 키 길이 경고
+def test_jwt_algorithm_pinned_to_hs256(monkeypatch):
+    """알고리즘은 환경변수로 바꾸지 못함 (알고리즘 혼동 공격 방지)."""
+    import jwt as pyjwt
+
+    from core.config import get_settings
+    from core.errors import AppError
+    from core.security import create_access_token, decode_access_token
+
+    monkeypatch.setenv("JWT_ALGORITHM", "HS512")
+    get_settings.cache_clear()
+    token = create_access_token("p1", "patient", session_id="s1")
+    assert pyjwt.get_unverified_header(token)["alg"] == "HS256"
+    hs512 = pyjwt.encode({"sub": "p1", "role": "patient", "sid": "s1", "exp": 9999999999},
+                         get_settings().jwt_secret, algorithm="HS512")
+    with pytest.raises(AppError):
+        decode_access_token(hs512)

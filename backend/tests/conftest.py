@@ -12,6 +12,9 @@ def test_settings(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "sqlite+pysqlite:///:memory:")
     get_settings.cache_clear()
     get_engine.cache_clear()
+    from modules.auth import attempts
+
+    attempts.reset_all()  # 로그인 시도 기록은 모듈 전역 → 테스트마다 비움
     yield
     get_settings.cache_clear()
     get_engine.cache_clear()

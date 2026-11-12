@@ -1,11 +1,15 @@
 """에러 형식 통일: {code, message, detail}. code는 docs/backend-contracts.md 4절 목록만 쓴다."""
 
+import logging
 from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+log = logging.getLogger(__name__)
 
 
 class AppError(Exception):
@@ -16,7 +20,45 @@ class AppError(Exception):
         self.detail = detail if detail is not None else {}
 
 
+class _CatchAll:
+    """처리하지 못한 예외 → 500 `internal` (같은 형식). 로그에는 예외 종류만 (메시지에 개인정보가 있을 수 있음).
+
+    `exception_handler(Exception)` 대신 미들웨어로: Starlette는 그 핸들러 뒤에 예외를 다시 던져
+    서버가 메시지 포함 traceback을 로그에 남기고, 응답에 CORS 헤더도 붙지 않음.
+    """
+
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        started = False
+
+        async def _send(message: Message) -> None:
+            nonlocal started
+            if message["type"] == "http.response.start":
+                started = True
+            await send(message)
+
+        try:
+            await self.app(scope, receive, _send)
+        except Exception as exc:  # noqa: BLE001 — 마지막 안전망
+            log.error("처리하지 못한 예외: %s", type(exc).__name__)
+            if started:  # 응답을 이미 보내기 시작함 → 더 할 수 있는 것 없음
+                return
+            response = JSONResponse(
+                status_code=500,
+                content={"code": "internal", "message": "서버 오류가 발생했습니다", "detail": {}},
+            )
+            await response(scope, receive, send)
+
+
 def register_error_handlers(app: FastAPI) -> None:
+    # CORS보다 먼저 등록 → CORS 미들웨어 안쪽 (500 응답에도 CORS 헤더가 붙음)
+    app.add_middleware(_CatchAll)
+
     @app.exception_handler(AppError)
     async def handle_app_error(_: Request, exc: AppError) -> JSONResponse:
         headers = {"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else None

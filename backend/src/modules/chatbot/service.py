@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from ai.agent.core.orchestrator import ChatLLM
 from ai.agent.schemas import ChatResponse
-from ai.agent.service import ChatService, ChatServiceError, PatientInfo, RateLimiter
+from ai.agent.service import MAX_SESSIONS_PER_PATIENT, ChatService, ChatServiceError, PatientInfo, RateLimiter
 from ai.llm.client import LLMClient
 from core.errors import AppError
 from modules.chatbot.bookings import BookingGateway
@@ -64,7 +64,7 @@ def delete_session(db: Session, patient_id: uuid.UUID, session_id: str) -> None:
 
 
 # ---- 7e: 지난 대화 (내 것만, 최근 순). 카드는 저장하지 않아 글만 돌려준다 (결정 5)
-LIST_LIMIT_MAX = 50  # = ai.agent.service.MAX_SESSIONS_PER_PATIENT
+LIST_LIMIT_MAX = MAX_SESSIONS_PER_PATIENT  # 목록 최대 = 계정당 대화 수 상한. router의 Query(le=)도 이 값 (한 곳에서)
 
 
 def list_sessions(db: Session, patient_id: uuid.UUID, limit: int) -> list[SessionOut]:

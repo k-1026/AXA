@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 
 from core.db import get_db
 from core.security import PatientPrincipal, current_patient
 from modules.auth import service
+from modules.auth.attempts import client_ip
 from modules.auth.schemas import LoginRequest, SignupRequest, TokenOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -20,8 +21,9 @@ def signup(data: SignupRequest, db: Db):
 
 
 @router.post("/patient/login", response_model=TokenOut)
-def login(data: LoginRequest, db: Db):
-    return service.login(db, data)
+def login(data: LoginRequest, db: Db, request: Request):
+    """실패가 많으면 429 auth.too_many_attempts (detail.retry_after 초)."""
+    return service.login(db, data, client_ip(request))
 
 
 @router.post("/patient/logout", status_code=204)

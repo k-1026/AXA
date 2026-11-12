@@ -17,7 +17,8 @@ SIGNUP = {
     "age14_confirmed": True,
     "preferred_lang": "zh-TW",
     "timezone": "Asia/Taipei",
-    "consents": [{"kind": "terms", "version": "2026-11"}, {"kind": "privacy", "version": "2026-11"}],
+    # 버전 = 프론트가 보여 준 문서의 개정일 (apps/web-platform/src/features/legal/terms.ts·privacy.ts `updated`)
+    "consents": [{"kind": "terms", "version": "2026-11-03"}, {"kind": "privacy", "version": "2026-11-03"}],
 }
 
 
@@ -79,12 +80,37 @@ def test_signup_under_14_rejected(client):
 
 
 def test_signup_missing_privacy_rejected(client, db_engine):
-    only_terms = [{"kind": "terms", "version": "2026-11"}]
+    only_terms = [{"kind": "terms", "version": "2026-11-03"}]
     r = client.post("/api/v1/auth/patient/signup", json={**SIGNUP, "consents": only_terms})
     assert r.status_code == 422
     assert r.json()["detail"]["missing"] == ["privacy"]
     with Session(db_engine) as db:
         assert db.scalar(select(Patient)) is None  # 계정 안 만들어짐
+
+
+def test_signup_old_consent_version_rejected(client, db_engine):
+    """지금 문서 버전이 아닌 동의(예: 예전 약관)는 받지 않음 → 422 validation."""
+    old = [{"kind": "terms", "version": "2026-10-01"}, {"kind": "privacy", "version": "2026-11-03"}]
+    r = client.post("/api/v1/auth/patient/signup", json={**SIGNUP, "consents": old})
+    assert r.status_code == 422 and r.json()["code"] == "validation"
+    assert r.json()["detail"]["invalid"] == [{"kind": "terms", "version": "2026-10-01", "current": "2026-11-03"}]
+    with Session(db_engine) as db:
+        assert db.scalar(select(Patient)) is None
+
+
+def test_consent_versions_match_frontend_documents():
+    """백엔드의 현재 버전 = 프론트 약관·개인정보 문서의 updated (한쪽만 바꾸면 가입이 막힘)."""
+    import re
+    from pathlib import Path
+
+    from modules.consent.service import CURRENT_VERSIONS
+
+    legal = Path(__file__).resolve().parents[2] / "apps/web-platform/src/features/legal"
+    if not legal.exists():
+        pytest.skip("프론트 폴더 없음")
+    for kind, file in (("terms", "terms.ts"), ("privacy", "privacy.ts")):
+        updated = re.search(r"updated:\s*'([^']+)'", (legal / file).read_text(encoding="utf-8")).group(1)
+        assert CURRENT_VERSIONS[kind] == updated, kind
 
 
 @pytest.mark.parametrize(
@@ -204,8 +230,23 @@ def test_revoke_all_logs_out_every_device(client, db_engine):
     b = login(client).json()["access_token"]
     with Session(db_engine) as db:
         sessions.revoke_all(db, db.scalar(select(Patient.id)))
+        db.commit()  # sessions.*는 commit하지 않음 (부르는 쪽이)
     for t in (a, b):
         assert client.get("/api/v1/me", headers=auth(t)).status_code == 401
+
+
+def test_session_functions_do_not_commit(client, db_engine):
+    """auth/sessions.py는 commit하지 않음 → 부르는 쪽이 다른 변경과 한 번에 commit·rollback."""
+    from modules.auth import sessions
+    from modules.auth.models import AuthSession
+
+    token = signup(client)
+    with Session(db_engine) as db:
+        sid = db.scalar(select(AuthSession.id))
+        sessions.revoke(db, sid)
+        sessions.revoke_all(db, db.scalar(select(Patient.id)))
+        db.rollback()
+    assert client.get("/api/v1/me", headers=auth(token)).status_code == 200
 
 
 def test_session_of_other_patient_rejected(client):
@@ -281,6 +322,14 @@ def test_signup_with_display_name(client):
     assert client.get("/api/v1/me", headers=auth(token)).json()["display_name"] == "Lan"
 
 
+def test_patch_display_name_trimmed_and_blank_is_null(client):
+    token = signup(client, display_name="Lan")
+    r = client.patch("/api/v1/me", headers=auth(token), json={"display_name": "  Mai  "})
+    assert r.json()["display_name"] == "Mai"
+    r = client.patch("/api/v1/me", headers=auth(token), json={"display_name": "   "})
+    assert r.status_code == 200 and r.json()["display_name"] is None
+
+
 def test_signup_blank_display_name_is_null(client):
     token = signup(client, display_name="   ")
     assert client.get("/api/v1/me", headers=auth(token)).json()["display_name"] is None
@@ -343,3 +392,14 @@ def test_withdraw_wrong_password(client):
 def test_withdraw_requires_login(client):
     r = client.request("DELETE", "/api/v1/me", json={"password": PASSWORD})
     assert r.status_code == 401
+
+
+def test_signup_race_on_same_email_is_409(client, monkeypatch):
+    """두 요청이 동시에 '없음'을 확인하고 넣으면 DB 유일 제약이 막음 → 500 대신 409."""
+    from modules.patient import service as patient_service
+
+    signup(client)
+    monkeypatch.setattr(patient_service, "get_by_email", lambda db, email: None)  # 확인을 지나친 두 번째 요청
+    r = client.post("/api/v1/auth/patient/signup", json=SIGNUP)
+    assert r.status_code == 409
+    assert r.json()["code"] == "auth.email_taken"
