@@ -9,7 +9,7 @@
 |---|---|---|
 | `backend/src/core/` | A+B 공동 | PR + 상대 승인 |
 | `backend/alembic/` | A | 마이그레이션 생성은 A만 (결정 13) |
-| `modules/auth/`, `patient/`, `consent/`, `hospital/`, `price/`, `chatbot/`, `notification/`, `fx/` | A | 요청만 |
+| `modules/auth/`, `patient/`, `consent/`, `hospital/`, `price/`, `chatbot/`, `notification/`, `fx/`, `maintenance/` | A | 요청만 |
 | `modules/booking/models.py`, `booking/service.py` | B | 요청만 |
 | `modules/booking/router_patient.py` | A | — |
 | `modules/booking/router_tenant.py` | B | — |
@@ -58,7 +58,7 @@
 | `auth.forbidden` | 403 | 역할이 다름 (환자 토큰으로 병원 API 등) |
 | `auth.invalid_credentials` | 401 | 이메일 또는 비밀번호가 맞지 않음 (어느 쪽인지 알려주지 않음) |
 | `auth.email_taken` | 409 | 이미 가입된 이메일 |
-| `auth.too_many_attempts` | 429 | 로그인 시도 초과 (아직 미구현, 11/17~ 남용 방지) |
+| `auth.too_many_attempts` | 429 | 로그인·탈퇴 비밀번호 실패 초과: 이메일당 15분 5회, IP당 15분 20회 (`detail.retry_after` 초). 성공하면 그 이메일 기록 초기화. 지금은 서버 메모리 → 운영 전 공유 저장소로 |
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
 | `validation` | 422 | 입력 오류 |
 | `consent.required` | 422 | 필수 동의 없음 |
@@ -67,6 +67,7 @@
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
+| `internal` | 500 | 처리하지 못한 서버 오류 (`detail` = `{}`, 로그에는 예외 종류만) |
 
 - `code`는 프론트 i18n 키로 그대로 씀. 새 코드는 이 표에 먼저 추가
 
@@ -125,10 +126,23 @@
 - **저장**: 개인정보를 가린 대화 글 + 상태(체류 형태, 초안 일부, 보여 준 병원)만. 도구 결과·카드·초안의 `health_info`·`message`는 저장 X → 지난 대화를 열면 글만 보임. 30일 후 삭제, 탈퇴 즉시 삭제
 - **호출 제한**: 계정당 분 10회·일 150회(가정), 계정당 대화 50개. 지금은 서버 메모리 → 운영 전 DB·캐시로
 
+## 7-1. 내부 정리 API (A, `modules/maintenance/`)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `GET`·`POST /internal/purge` | 30일 지난 챗봇 대화 + 만료·로그아웃한 로그인 세션 삭제 → `{chat_sessions, auth_sessions}` (지운 수) | 404 `not_found`(`CRON_SECRET` 없음 = 꺼짐), 401 `auth.required`(비밀 값 틀림) |
+
+- 인증: `Authorization: Bearer <CRON_SECRET>` (환경변수 `CRON_SECRET`, 16자 이상). Swagger에 숨김
+- **예약 작업이 하루 1번 불러야 함** (Vercel Cron 등). 부르지 않으면 30일 보관 정리가 되지 않음. Vercel Cron은 GET + 이 헤더를 자동으로 보냄 (`vercel.json` 설정은 배포 담당이)
+
 ## 8. 변경 이력
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
+| 2026-11-12 | 4 | 가입 동의 `terms`·`privacy`는 현재 문서 버전(프론트 `features/legal` `updated`, 지금 `2026-11-03`)만 받음 → 아니면 422 `validation` + `detail.invalid[{kind, version, current}]` | A | `backend-review-fix` → `backend` |
+| 2026-11-12 | 4 | `auth.too_many_attempts` 구현 (로그인·`DELETE /me` 비밀번호 확인) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
+| 2026-11-12 | 4 | 에러 `internal`(500) 추가 (처리하지 못한 예외도 같은 형식) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-11 | 4·5·6·7 | 챗봇 API 7절 신설(`/chatbot/ask`, `/chatbot/sessions` 목록·상세·삭제), 에러 `chatbot.unavailable`(503)·`rate_limited`에 챗봇 호출 추가, 챗봇의 `booking.service` 호출, `BookingCreate.lang` 5개 언어·`department_code` 값, `residency` 칸 제안 | A (**B 확인 필요**) | `backend-A-chatbot` → `backend` |
 | 2026-11-04 | 1·4 | 새 모듈 `fx/`(A, 환율), 에러 `fx.unavailable`(503). `DELETE /me` 탈퇴(비밀번호 확인) | A | — |
 | 2026-11-05 | — | `DELETE /me` 탈퇴 = 계정 즉시 삭제(결정 15). 응답·코드는 그대로 | A | — |

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from modules.consent.schemas import ConsentIn
-from modules.patient.schemas import Lang, Timezone
+from modules.patient.schemas import Lang, Timezone, blank_to_none
 
 # 비밀번호 길이 규칙 (초안, 팀 확인). 최대 길이는 해시 계산 남용 방지
 PASSWORD_MIN = 8
@@ -22,7 +22,7 @@ class SignupRequest(BaseModel):
     @field_validator("display_name")
     @classmethod
     def _blank_to_none(cls, v: str | None) -> str | None:
-        return (v.strip() or None) if v is not None else None
+        return blank_to_none(v)
 
 
 class LoginRequest(BaseModel):
