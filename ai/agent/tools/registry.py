@@ -8,8 +8,11 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable
+
+log = logging.getLogger(__name__)
 
 JSON = dict[str, Any]
 
@@ -116,6 +119,9 @@ class ToolRegistry:
             result = tool.handler(args, ctx)
         except ToolError as e:
             return {"error": str(e)}
+        except Exception as e:  # 게이트웨이·DB 오류가 대화 전체를 500으로 끝내지 않게. 메시지에 개인정보가 있을 수 있어 종류만 기록
+            log.error("tool %s failed: %s", name, type(e).__name__)
+            return {"error": "internal"}
         if tool.fake:
             result = {**result, "_demo": True}  # 가짜 응답 표시 (시연·테스트 구분용)
         return result

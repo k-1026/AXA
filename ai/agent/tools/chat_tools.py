@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date
 
 from ai.agent.tools import fake_data as fd
@@ -233,9 +234,13 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
             parse_local_slot(s)
         except ValueError as e:
             raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
+    # 국적은 초안에 저장돼 매 턴 "신뢰" 맥락에 들어가므로 자유 문장을 받지 않는다 (프롬프트 주입 경로 차단)
+    nationality = str(args["nationality"]).strip().upper()
+    if not re.fullmatch(r"[A-Z]{2}", nationality):
+        raise ToolError("nationality는 ISO 3166-1 alpha-2 국가 코드(예: TW, VN, US)여야 합니다")
     draft = {
         "hospital_id": h["id"], "hospital_name_en": h["name_en"], "department": department,
-        "department_code": DEPT_CODES[department], "preferred_slots": slots, "language": args["language"], "nationality": args["nationality"].upper(),
+        "department_code": DEPT_CODES[department], "preferred_slots": slots, "language": args["language"], "nationality": nationality,
         "visa_needed": args["visa_needed"], "contact_method": "email", "inquiry": args["inquiry"],
         "needs_interpreter": args.get("needs_interpreter", False),
     }

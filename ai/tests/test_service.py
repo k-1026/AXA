@@ -285,3 +285,14 @@ def test_every_tool_result_fits_its_card_model():
         who = PatientInfo(s.patient_id, "UTC")
         r = service.ask(who, s.id, "go", "en")
         assert [c.type for c in r.cards] == [card_type], tool
+
+
+def test_dropped_card_log_never_contains_the_card_contents(caplog):
+    """카드 검증 실패 로그에 health_info·문의 원문이 남으면 안 된다 (건강정보 서버 미저장 원칙)."""
+    from ai.agent.core.orchestrator import ChatReply
+    secret = "SECRET-HEALTH-scars-since-2024"
+    bad = {"type": "booking_draft", "draft": {"health_info": secret, "inquiry": secret}}  # 칸이 모자라 검증 실패
+    with caplog.at_level("ERROR", logger=svc.__name__):
+        assert ChatService._validated_cards(ChatReply(text="", cards=[bad], trace=[])) == []
+    assert "card dropped" in caplog.text
+    assert secret not in caplog.text

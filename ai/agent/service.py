@@ -261,5 +261,7 @@ class ChatService:
             try:
                 out.append(CARD_ADAPTER.validate_python(card))
             except ValidationError as e:  # 도구 결과와 카드 모델이 어긋남 → 그 카드만 뺀다 (테스트가 잡아야 하는 버그)
-                log.error("card dropped: %s %s", card.get("type"), e.errors()[:1])
+                # 입력값(input)은 남기지 않는다: booking_draft에는 health_info·문의 원문이 들어 있을 수 있음
+                log.error("card dropped: %s %s", card.get("type"),
+                          [(err["loc"], err["type"]) for err in e.errors(include_input=False, include_url=False)[:1]])
         return out
