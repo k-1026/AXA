@@ -1329,22 +1329,6 @@ a {
   height: 14px;
 }
 
-.mp-icon-button {
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 8px;
-  background: none;
-  color: var(--text-muted);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.mp-icon-button:hover {
-  background: var(--surface-muted);
-}
-
 .mp-add {
   margin-top: 4px;
   font-size: 1rem;
@@ -2083,7 +2067,6 @@ a {
   .mp-entry-dot { grid-area: dot; margin-top: 4px; }
   .mp-entry-time { grid-area: time; padding: 0; }
   .mp-entry-body { grid-area: body; }
-  .mp-icon-button { grid-area: more; }
 
   .mp-entry + .mp-entry::after {
     left: 40px;

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ArrowUpRightIcon, MoreIcon } from './icons';
+import { ArrowUpRightIcon } from './icons';
 import type { Localized, ScheduleItem } from './sampleData';
 
 // 병원 방문은 "직접 등록" 표시로 사용자가 넣은 일정임을 보여준다
@@ -43,9 +43,6 @@ export function ScheduleEntry({ item }: { item: ScheduleItem }) {
           )}
         </p>
       </div>
-      <button type="button" className="mp-icon-button" aria-label={t('mypage.schedule.more')}>
-        <MoreIcon />
-      </button>
     </li>
   );
 }

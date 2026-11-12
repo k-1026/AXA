@@ -102,16 +102,6 @@ export function ArrowUpRightIcon() {
   );
 }
 
-export function MoreIcon() {
-  return (
-    <svg {...base} fill="currentColor" stroke="none">
-      <circle cx="5" cy="12" r="1.6" />
-      <circle cx="12" cy="12" r="1.6" />
-      <circle cx="19" cy="12" r="1.6" />
-    </svg>
-  );
-}
-
 export function CheckIcon() {
   return (
     <svg {...base} strokeWidth={2.6}>
