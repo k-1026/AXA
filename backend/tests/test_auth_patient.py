@@ -204,8 +204,23 @@ def test_revoke_all_logs_out_every_device(client, db_engine):
     b = login(client).json()["access_token"]
     with Session(db_engine) as db:
         sessions.revoke_all(db, db.scalar(select(Patient.id)))
+        db.commit()  # sessions.*는 commit하지 않음 (부르는 쪽이)
     for t in (a, b):
         assert client.get("/api/v1/me", headers=auth(t)).status_code == 401
+
+
+def test_session_functions_do_not_commit(client, db_engine):
+    """auth/sessions.py는 commit하지 않음 → 부르는 쪽이 다른 변경과 한 번에 commit·rollback."""
+    from modules.auth import sessions
+    from modules.auth.models import AuthSession
+
+    token = signup(client)
+    with Session(db_engine) as db:
+        sid = db.scalar(select(AuthSession.id))
+        sessions.revoke(db, sid)
+        sessions.revoke_all(db, db.scalar(select(Patient.id)))
+        db.rollback()
+    assert client.get("/api/v1/me", headers=auth(token)).status_code == 200
 
 
 def test_session_of_other_patient_rejected(client):

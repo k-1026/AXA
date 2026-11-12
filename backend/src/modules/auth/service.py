@@ -93,6 +93,7 @@ def withdraw(db: Session, patient_id: uuid.UUID, password: str) -> None:
 
 def logout(db: Session, session_id: str) -> None:
     sessions.revoke(db, uuid.UUID(session_id))
+    db.commit()
 
 
 def _start_session(db: Session, patient_id: uuid.UUID) -> TokenOut:
