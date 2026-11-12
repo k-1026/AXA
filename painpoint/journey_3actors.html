@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세 사람의 여정</title>
+<style>
+  :root {
+    --bg:#f6f5f2; --card:#ffffff; --fg:#1d1f23; --muted:#5d636b; --line:#dcdad4;
+    --a1:#24364f; --a2:#3d6b5a; --a3:#6b5a3d; --coral:#e8604c; --coralbg:#fdeeea; --tag:#eef1f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#14171b; --card:#1d2127; --fg:#e8eaed; --muted:#a2a8b0; --line:#343a42;
+      --a1:#2d4566; --a2:#2f5a4b; --a3:#5a4b2f; --coral:#f07a66; --coralbg:#3a2420; --tag:#262c34;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:13px/1.45 system-ui, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+  .page { width:1280px; margin:0 auto; padding:18px 22px 24px; }
+  h1 { font-size:20px; margin:0; }
+  .sub { color:var(--muted); font-size:12px; margin:2px 0 14px; }
+  .lane { display:grid; grid-template-columns:120px repeat(5, 1fr); gap:6px; align-items:stretch; }
+  .who { color:#fff; border-radius:8px; padding:8px 10px; font-weight:700; font-size:13px; display:flex; flex-direction:column; justify-content:center; }
+  .who small { font-weight:400; font-size:11px; opacity:.85; }
+  .step { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:7px 9px; font-size:12px; }
+  .step b { display:block; font-size:12.5px; margin-bottom:2px; }
+  .step .p { color:var(--muted); font-size:11.5px; }
+  .ev { color:var(--muted); font-size:10.5px; }
+  .hand { display:grid; grid-template-columns:120px repeat(5, 1fr); gap:6px; height:34px; }
+  .hand div { display:flex; justify-content:center; align-items:center; }
+  .h { border-left:2px dashed var(--coral); height:100%; position:relative; }
+  .h span { position:absolute; top:50%; transform:translate(-50%,-50%); left:0; background:var(--coral); color:#fff; font-weight:700; font-size:11px; border-radius:10px; padding:1px 7px; white-space:nowrap; }
+  .lanegap { height:6px; }
+  table { width:100%; border-collapse:collapse; margin-top:18px; background:var(--card); border:1px solid var(--line); border-radius:8px; overflow:hidden; font-size:12px; }
+  th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:var(--tag); font-size:11.5px; color:var(--muted); }
+  td.id { font-weight:700; color:var(--coral); white-space:nowrap; }
+  td.sig { font-weight:600; }
+  .note { color:var(--muted); font-size:11.5px; margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>세 사람의 여정 — 환자 · 병원 코디네이터 · 메디대구 운영자</h1>
+  <div class="sub">각자의 순서로 그리고, 손이 넘어가는 지점(코랄 점선)과 그 지점의 측정 신호만 연결 · 코디·운영자 감정은 생략, 페르소나는 [가정] · 근거 painpoint/evidence.csv</div>
+
+  <div class="lane">
+    <div class="who" style="background:var(--a1)">환자 린<small>대만 미용 단기 방문객</small></div>
+    <div class="step"><b>① 알아보기</b><span class="p">등록 병원 상세 정보 부족</span> <span class="ev">E03</span></div>
+    <div class="step"><b>② 비교·결정</b><span class="p">진료시간·가격 기준 없음</span> <span class="ev">E01 E02</span></div>
+    <div class="step"><b>③ 상담 예약</b><span class="p">병원 답 기다림</span> <span class="ev">G01 가정</span></div>
+    <div class="step"><b>④ 방문·진료</b><span class="p">동의서 이해 어려움</span> <span class="ev">E13</span></div>
+    <div class="step"><b>⑤ 귀국 후 관리</b><span class="p">진료성 상담 창구 없음</span> <span class="ev">E15</span></div>
+  </div>
+
+  <div class="hand"><div></div><div class="h"><span>H0 정보 공개</span></div><div></div><div class="h"><span>H1 요청 · H2 확정</span></div><div></div><div class="h"><span>H4 사후 문의</span></div></div>
+
+  <div class="lane">
+    <div class="who" style="background:var(--a2)">코디 김<small>수성구 피부과 국제진료 담당</small></div>
+    <div class="step"><b>① 문의 받기</b><span class="p">채널이 흩어져 놓침</span> <span class="ev">G02 가정</span></div>
+    <div class="step"><b>② 문의 파악</b><span class="p">상담지를 손으로 채움</span> <span class="ev">E10</span></div>
+    <div class="step"><b>③ 답장·견적</b><span class="p">USD·환율 기준일·유효기간 매번</span> <span class="ev">E11</span></div>
+    <div class="step"><b>④ 예약 확정</b><span class="p">예약금 30%·환불 4구간</span> <span class="ev">E12</span></div>
+    <div class="step"><b>⑤ 진료 후·정산</b><span class="p">중개 비용이 겹침</span> <span class="ev">E17</span></div>
+  </div>
+
+  <div class="hand"><div></div><div></div><div></div><div></div><div class="h"><span>H3 방문 완료 입력</span></div><div class="h"><span>H5 월 정산</span></div></div>
+
+  <div class="lane">
+    <div class="who" style="background:var(--a3)">메디대구 운영자<small>AXA · 데이터·정산</small></div>
+    <div class="step"><b>① 데이터 갱신</b><span class="p">폐업 섞임·진료시간 빈칸</span> <span class="ev">E20 E01</span></div>
+    <div class="step"><b>② 병원 입점</b><span class="p">초기 콜드스타트</span> <span class="ev">E21</span></div>
+    <div class="step"><b>③ 요청 연결</b><span class="p">건강정보 동의·국외 이전</span> <span class="ev">E19</span></div>
+    <div class="step"><b>④ 방문 확인</b><span class="p">진료비·완납을 병원만 앎</span> <span class="ev">E14</span></div>
+    <div class="step"><b>⑤ 정산</b><span class="p">상한 안 계산, 구독료 상한 [U]</span> <span class="ev">E18</span></div>
+  </div>
+
+  <table>
+    <thead><tr><th>지점</th><th>누가 → 누구</th><th>넘어가는 것</th><th>문제 (근거)</th><th>측정 신호 = 대시보드 지표 후보</th></tr></thead>
+    <tbody>
+      <tr><td class="id">H0</td><td>운영자 → 환자</td><td>진료시간·가격·등록 여부</td><td>진료시간 빈칸 (E01), 폐업 섞임 (E20)</td><td class="sig">진료시간 채움률 (지금 26.1%), 확인일 30일 지난 병원 수</td></tr>
+      <tr><td class="id">H1</td><td>환자 → 코디</td><td>상담 예약 요청서</td><td>환자 기다림 (G01), 코디 정리 부담 (E10, G02)</td><td class="sig">요청 후 첫 응답 시간, 24시간 미응답 건수</td></tr>
+      <tr><td class="id">H2</td><td>코디 → 환자</td><td>가능 시간·예상 비용·확정</td><td>견적·예약금 서식 복잡 (E11, E12)</td><td class="sig">요청 → 확정 비율, 시간 제안 후 재응답 비율</td></tr>
+      <tr><td class="id">H3</td><td>코디 → 운영자</td><td>방문 완료·진료비(완납)</td><td>진료비를 병원만 앎 (E14)</td><td class="sig">방문일 +7일 미입력 건수, 환자 확인 금액 불일치 건수</td></tr>
+      <tr><td class="id">H4</td><td>환자 → 코디</td><td>귀국 후 질문·사진</td><td>진료성 상담은 2027-05 전 불가 (E15)</td><td class="sig">사후 문의 첫 응답 시간, 불편 키워드 빈도</td></tr>
+      <tr><td class="id">H5</td><td>운영자 → 코디(병원)</td><td>월 정산 내역서</td><td>상한 안 계산 (E18), 비용 중첩 불만 (E17)</td><td class="sig">정산 이의 건수, 병원별 경유 매출 ÷ 낸 비용</td></tr>
+    </tbody>
+  </table>
+  <div class="note">페인포인트가 몰리는 손 넘김은 H0(데이터 근거가 가장 강함)과 H1(환자 기다림과 코디 정리 부담이 같은 문제의 앞뒤). 운영자 줄의 문제는 회사 내부 문제로 BM·spec에 넘김.</div>
+</div>
+</body>
+</html>
