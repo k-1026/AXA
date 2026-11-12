@@ -10,13 +10,12 @@ import { dotDate } from './time';
 import type { ChatMessage, ChipAction, ChatText, Conversation } from './types';
 import { useChatText } from './ChatMessages';
 
-// 대화 저장 방식 (마이페이지와 같은 구조)
-// - guest: 로그인 전. 이 화면을 보는 동안만 메모리에 두고 저장하지 않음
+// 대화 저장 방식 (마이페이지와 같은 구조). 챗봇은 로그인한 사람만 쓴다 (main.tsx RequireLogin, plan-step7 결정 4)
 // - demo: 데모 계정. 예시 대화로 시작, 바꾼 내용은 메모리에만 (탭을 닫으면 사라짐)
 // - member: 실제 회원. 질문은 POST /chatbot/ask(AI)로 보내고 서버가 대화를 저장 (7d). 화면 목록은 아직 메모리
 //   화면을 열면 서버의 지난 대화 목록을 불러오고(7e), 대화를 고르면 그때 메시지를 불러온다. 카드는 저장하지 않아 글만 보임
 // 메모리는 계정별(account 키)로 나누고, 로그아웃·탈퇴하면 모두 지운다 (같은 탭의 다음 사용자에게 보이지 않게)
-export type ChatMode = 'guest' | 'demo' | 'member';
+export type ChatMode = 'demo' | 'member';
 
 const memory = new Map<AccountKey, Conversation[]>();
 onAccountReset(() => memory.clear());
@@ -66,7 +65,7 @@ export function lastActivity(c: Conversation): string {
 export function useConversations() {
   const { t, i18n } = useTranslation();
   const { user, account, token } = useAuth();
-  const mode: ChatMode = !user ? 'guest' : user.demo ? 'demo' : 'member';
+  const mode: ChatMode = user?.demo ? 'demo' : 'member';
 
   const [list, setList] = useState<Conversation[]>(() => load(account, mode));
   const [activeId, setActiveId] = useState<string | null>(null);

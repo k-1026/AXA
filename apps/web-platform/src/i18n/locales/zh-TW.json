@@ -279,11 +279,9 @@
     "delete": "刪除對話",
     "confirmDelete": "要刪除 {{title}} 的對話嗎？刪除後無法復原。",
     "saveNote": {
-      "guest": "登入後可儲存對話",
       "demo": "示範對話不會被儲存",
       "member": "對話會自動儲存"
     },
-    "login": "登入",
     "settings": "設定",
     "summary": {
       "none": "新對話",

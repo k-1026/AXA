@@ -279,11 +279,9 @@
     "delete": "대화 삭제",
     "confirmDelete": "{{title}} 대화를 삭제할까요? 삭제하면 되돌릴 수 없어요.",
     "saveNote": {
-      "guest": "로그인하면 대화가 저장돼요",
       "demo": "데모 대화는 저장되지 않아요",
       "member": "대화는 자동으로 저장됩니다"
     },
-    "login": "로그인",
     "settings": "설정",
     "summary": {
       "none": "새 대화",

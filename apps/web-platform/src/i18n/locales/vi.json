@@ -279,11 +279,9 @@
     "delete": "Xóa hội thoại",
     "confirmDelete": "Xóa hội thoại ngày {{title}}? Không thể hoàn tác.",
     "saveNote": {
-      "guest": "Đăng nhập để lưu hội thoại",
       "demo": "Hội thoại demo không được lưu",
       "member": "Hội thoại được lưu tự động"
     },
-    "login": "Đăng nhập",
     "settings": "Cài đặt",
     "summary": {
       "none": "Hội thoại mới",

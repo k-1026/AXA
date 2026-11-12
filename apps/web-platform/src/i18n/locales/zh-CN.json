@@ -279,11 +279,9 @@
     "delete": "删除对话",
     "confirmDelete": "要删除 {{title}} 的对话吗？删除后无法恢复。",
     "saveNote": {
-      "guest": "登录后可保存对话",
       "demo": "演示对话不会被保存",
       "member": "对话会自动保存"
     },
-    "login": "登录",
     "settings": "设置",
     "summary": {
       "none": "新对话",

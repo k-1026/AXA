@@ -279,11 +279,9 @@
     "delete": "Delete chat",
     "confirmDelete": "Delete the chat from {{title}}? This cannot be undone.",
     "saveNote": {
-      "guest": "Log in to save your chats",
       "demo": "Demo chats are not saved",
       "member": "Chats are saved automatically"
     },
-    "login": "Log in",
     "settings": "Settings",
     "summary": {
       "none": "New chat",

@@ -92,9 +92,9 @@ export function ChatSidebar({ mode, activeId, search, onNew, onSelect, onDelete,
           <InfoIcon />
           {t(`chat.saveNote.${mode}`)}
         </p>
-        <Link to={mode === 'guest' ? '/login' : '/mypage'} state={{ from: '/chatbot' }} className="chat-settings">
+        <Link to="/mypage" className="chat-settings">
           <GearIcon />
-          {t(mode === 'guest' ? 'chat.login' : 'chat.settings')}
+          {t('chat.settings')}
         </Link>
       </div>
     </aside>
