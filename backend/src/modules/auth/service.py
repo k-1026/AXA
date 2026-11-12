@@ -32,6 +32,7 @@ _DUMMY_HASH = password_hash.hash("not-a-real-password")
 
 def signup(db: Session, data: SignupRequest) -> TokenOut:
     _check_signup(data)
+    consent_service.check_versions(data.consents)
     if patient_service.get_by_email(db, data.email) is not None:
         raise _email_taken()
 

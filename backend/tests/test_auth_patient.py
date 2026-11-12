@@ -17,7 +17,8 @@ SIGNUP = {
     "age14_confirmed": True,
     "preferred_lang": "zh-TW",
     "timezone": "Asia/Taipei",
-    "consents": [{"kind": "terms", "version": "2026-11"}, {"kind": "privacy", "version": "2026-11"}],
+    # 버전 = 프론트가 보여 준 문서의 개정일 (apps/web-platform/src/features/legal/terms.ts·privacy.ts `updated`)
+    "consents": [{"kind": "terms", "version": "2026-11-03"}, {"kind": "privacy", "version": "2026-11-03"}],
 }
 
 
@@ -79,12 +80,37 @@ def test_signup_under_14_rejected(client):
 
 
 def test_signup_missing_privacy_rejected(client, db_engine):
-    only_terms = [{"kind": "terms", "version": "2026-11"}]
+    only_terms = [{"kind": "terms", "version": "2026-11-03"}]
     r = client.post("/api/v1/auth/patient/signup", json={**SIGNUP, "consents": only_terms})
     assert r.status_code == 422
     assert r.json()["detail"]["missing"] == ["privacy"]
     with Session(db_engine) as db:
         assert db.scalar(select(Patient)) is None  # 계정 안 만들어짐
+
+
+def test_signup_old_consent_version_rejected(client, db_engine):
+    """지금 문서 버전이 아닌 동의(예: 예전 약관)는 받지 않음 → 422 validation."""
+    old = [{"kind": "terms", "version": "2026-10-01"}, {"kind": "privacy", "version": "2026-11-03"}]
+    r = client.post("/api/v1/auth/patient/signup", json={**SIGNUP, "consents": old})
+    assert r.status_code == 422 and r.json()["code"] == "validation"
+    assert r.json()["detail"]["invalid"] == [{"kind": "terms", "version": "2026-10-01", "current": "2026-11-03"}]
+    with Session(db_engine) as db:
+        assert db.scalar(select(Patient)) is None
+
+
+def test_consent_versions_match_frontend_documents():
+    """백엔드의 현재 버전 = 프론트 약관·개인정보 문서의 updated (한쪽만 바꾸면 가입이 막힘)."""
+    import re
+    from pathlib import Path
+
+    from modules.consent.service import CURRENT_VERSIONS
+
+    legal = Path(__file__).resolve().parents[2] / "apps/web-platform/src/features/legal"
+    if not legal.exists():
+        pytest.skip("프론트 폴더 없음")
+    for kind, file in (("terms", "terms.ts"), ("privacy", "privacy.ts")):
+        updated = re.search(r"updated:\s*'([^']+)'", (legal / file).read_text(encoding="utf-8")).group(1)
+        assert CURRENT_VERSIONS[kind] == updated, kind
 
 
 @pytest.mark.parametrize(

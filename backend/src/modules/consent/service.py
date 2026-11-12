@@ -10,7 +10,12 @@ from sqlalchemy.orm import Session
 
 from core.errors import AppError
 from modules.consent.models import Consent
-from modules.consent.schemas import ConsentOut
+from modules.consent.schemas import ConsentIn, ConsentOut
+
+# 지금 화면에 보여 주는 동의 문서 버전 = 프론트 문서의 개정일
+# (apps/web-platform/src/features/legal/terms.ts·privacy.ts의 `updated`). 문서를 고치면 둘 다 바꿀 것 (테스트가 확인)
+# health·overseas_transfer는 아직 기준 문서가 없어 검사하지 않음
+CURRENT_VERSIONS = {"terms": "2026-11-03", "privacy": "2026-11-03"}
 
 
 def record(
@@ -27,6 +32,17 @@ def record(
     db.add(row)
     db.flush()
     return ConsentOut.model_validate(row)
+
+
+def check_versions(consents: list[ConsentIn]) -> None:
+    """현재 버전이 정해진 종류는 그 버전만 받음 → 아니면 422 validation (detail.invalid)."""
+    invalid = [
+        {"kind": c.kind, "version": c.version, "current": CURRENT_VERSIONS[c.kind]}
+        for c in consents
+        if c.kind in CURRENT_VERSIONS and c.version != CURRENT_VERSIONS[c.kind]
+    ]
+    if invalid:
+        raise AppError(422, "validation", "동의 문서 버전이 맞지 않습니다 (화면을 새로 고침)", {"invalid": invalid})
 
 
 def require(
