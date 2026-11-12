@@ -12,7 +12,15 @@ type Mode = 'demo' | 'member';
 type Store = Record<string, { messages: AftercareMessage[]; unread: number }>;
 // 메모리는 계정별로 나누고, 로그아웃·탈퇴하면 모두 지운다
 const memory = new Map<AccountKey, Store>();
-onAccountReset(() => memory.clear());
+onAccountReset(() => {
+  // 보낸 사진·영상의 임시 주소(blob:)도 풀어 준다
+  memory.forEach((store) =>
+    Object.values(store).forEach((v) =>
+      v.messages.forEach((m) => m.attachments?.forEach((a) => a.url.startsWith('blob:') && URL.revokeObjectURL(a.url))),
+    ),
+  );
+  memory.clear();
+});
 const load = (key: AccountKey, mode: Mode): Store => {
   if (!memory.has(key)) memory.set(key, mode === 'demo' ? SAMPLE_AFTERCARE : {});
   return memory.get(key)!;

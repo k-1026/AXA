@@ -27,6 +27,11 @@ export function AftercarePage() {
   const picker = useRef<HTMLInputElement>(null);
   useVisualViewport();
 
+  // 보내지 않은 첨부의 임시 주소(blob:)는 화면을 떠날 때 풀어 준다 (보낸 첨부는 대화에 남아 있으므로 제외)
+  const filesRef = useRef(files);
+  filesRef.current = files;
+  useEffect(() => () => filesRef.current.forEach((f) => URL.revokeObjectURL(f.url)), []);
+
   const active = care.active;
 
   // 열려 있는 대화의 의료진 답변은 읽은 것으로 처리
@@ -35,26 +40,22 @@ export function AftercarePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id, active?.unread]);
 
-  // 다른 기록으로 옮기면 보내지 않은 첨부는 비운다
+  // 다른 기록으로 옮기면 보내지 않은 첨부는 비운다 (임시 주소도 풀어 줌)
   useEffect(() => {
+    filesRef.current.forEach((f) => URL.revokeObjectURL(f.url));
     setFiles([]);
     setError('');
   }, [active?.id]);
 
+  // 모두 검사한 뒤에 임시 주소를 만든다 (중간에 오류가 나도 풀지 않은 주소가 남지 않게)
   const pick = (e: ChangeEvent<HTMLInputElement>) => {
     const chosen = Array.from(e.target.files ?? []);
     e.target.value = '';
-    const ok: Attachment[] = [];
-    for (const f of chosen) {
-      const kind = f.type.startsWith('image/') ? 'image' : f.type.startsWith('video/') ? 'video' : null;
-      if (!kind) return setError(t('aftercare.errType'));
-      if (f.size > MAX_BYTES) return setError(t('aftercare.errSize'));
-      ok.push({ kind, url: URL.createObjectURL(f), name: f.name });
-    }
-    if (files.length + ok.length > MAX_FILES) {
-      ok.forEach((a) => URL.revokeObjectURL(a.url));
-      return setError(t('aftercare.errCount', { max: MAX_FILES }));
-    }
+    const kindOf = (f: File) => (f.type.startsWith('image/') ? 'image' : f.type.startsWith('video/') ? 'video' : null);
+    if (chosen.some((f) => !kindOf(f))) return setError(t('aftercare.errType'));
+    if (chosen.some((f) => f.size > MAX_BYTES)) return setError(t('aftercare.errSize'));
+    if (files.length + chosen.length > MAX_FILES) return setError(t('aftercare.errCount', { max: MAX_FILES }));
+    const ok: Attachment[] = chosen.map((f) => ({ kind: kindOf(f)!, url: URL.createObjectURL(f), name: f.name }));
     setError('');
     setFiles([...files, ...ok]);
   };
