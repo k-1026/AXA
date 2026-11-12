@@ -483,5 +483,10 @@
     "errSize": "Each file can be up to 50MB.",
     "errCount": "You can send up to {{max}} files at once.",
     "aftercareButton": "Aftercare"
+  },
+  "notFoundPage": {
+    "title": "Page not found",
+    "body": "The address may have changed, or the page doesn't exist.",
+    "home": "Go to home"
   }
 }

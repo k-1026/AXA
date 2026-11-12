@@ -483,5 +483,10 @@
     "errSize": "Mỗi tệp tối đa 50MB.",
     "errCount": "Mỗi lần gửi tối đa {{max}} tệp.",
     "aftercareButton": "Chăm sóc sau khám"
+  },
+  "notFoundPage": {
+    "title": "Không tìm thấy trang",
+    "body": "Địa chỉ có thể đã thay đổi hoặc trang không tồn tại.",
+    "home": "Về trang chủ"
   }
 }

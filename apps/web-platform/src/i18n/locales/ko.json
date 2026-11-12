@@ -483,5 +483,10 @@
     "errSize": "파일 1개는 50MB까지 보낼 수 있어요.",
     "errCount": "한 번에 {{max}}개까지 보낼 수 있어요.",
     "aftercareButton": "사후 관리"
+  },
+  "notFoundPage": {
+    "title": "페이지를 찾을 수 없어요",
+    "body": "주소가 바뀌었거나 없는 페이지예요.",
+    "home": "메인으로"
   }
 }

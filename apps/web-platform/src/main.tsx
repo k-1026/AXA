@@ -22,6 +22,7 @@ import { VisitsPage } from './pages/VisitsPage';
 import { ConsultPage } from './pages/ConsultPage';
 import { BookingsPage } from './pages/BookingsPage';
 import { AftercarePage } from './pages/AftercarePage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 // 계정별 저장(이름@계정) 전의 찜·방문 기록 키는 주인을 알 수 없어 지운다
 removeLegacySettings();
@@ -51,6 +52,8 @@ createRoot(document.getElementById('root')!).render(
             {/* 상담/예약: 병원별 1:1 상담 (확정은 병원) · 사후관리: 방문 완료 예약별로 그 병원 의료진과 대화 (둘 다 로그인 필요) */}
             <Route path="booking" element={<RequireLogin><ConsultPage /></RequireLogin>} />
             <Route path="aftercare" element={<RequireLogin><AftercarePage /></RequireLogin>} />
+            {/* 위에 없는 주소는 빈 화면 대신 "페이지를 찾을 수 없어요" */}
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

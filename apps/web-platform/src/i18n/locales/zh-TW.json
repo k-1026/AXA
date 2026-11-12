@@ -483,5 +483,10 @@
     "errSize": "每個檔案最大50MB。",
     "errCount": "一次最多傳送{{max}}個。",
     "aftercareButton": "術後管理"
+  },
+  "notFoundPage": {
+    "title": "找不到頁面",
+    "body": "網址可能已變更，或頁面不存在。",
+    "home": "回到首頁"
   }
 }
