@@ -343,3 +343,14 @@ def test_withdraw_wrong_password(client):
 def test_withdraw_requires_login(client):
     r = client.request("DELETE", "/api/v1/me", json={"password": PASSWORD})
     assert r.status_code == 401
+
+
+def test_signup_race_on_same_email_is_409(client, monkeypatch):
+    """두 요청이 동시에 '없음'을 확인하고 넣으면 DB 유일 제약이 막음 → 500 대신 409."""
+    from modules.patient import service as patient_service
+
+    signup(client)
+    monkeypatch.setattr(patient_service, "get_by_email", lambda db, email: None)  # 확인을 지나친 두 번째 요청
+    r = client.post("/api/v1/auth/patient/signup", json=SIGNUP)
+    assert r.status_code == 409
+    assert r.json()["code"] == "auth.email_taken"
