@@ -171,3 +171,11 @@ def test_submit_blocked_for_resident_and_anonymous():
     state.patient_id, state.residency = "demo-patient-2", "resident"
     assert orch.submit_draft(state, CONSENTS).error["code"] == "booking.not_available"
     assert state.booking_draft is not None and orch.store.list_for_patient("demo-patient-2") == []
+
+
+def test_get_for_patient_returns_a_copy():
+    from ai.agent.tools.booking_store import BookingStore
+    store = BookingStore()
+    row = store.get_for_patient("demo-patient-1", "demo-bk-001")
+    row["status"] = "tampered"
+    assert store.get_for_patient("demo-patient-1", "demo-bk-001")["status"] != "tampered"

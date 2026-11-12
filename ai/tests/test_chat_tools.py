@@ -138,3 +138,13 @@ def test_unexpected_handler_error_becomes_a_tool_error_result():
     reg.register(Tool(name="boom", description="x", parameters={"type": "object", "properties": {}}, handler=boom, intent="정보질문"))
     res = reg.run("boom", {}, SHORT)
     assert res == {"error": "internal"}
+
+
+def test_past_slots_are_rejected_when_the_draft_is_made():
+    from datetime import date
+    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "x",
+            "nationality": "TW", "visa_needed": False}
+    late = ToolContext(patient_id="demo-patient-1", residency="short_term", today=date(2026, 12, 2))
+    assert "error" in R.run("prepare_booking_request", args, late)
+    early = ToolContext(patient_id="demo-patient-1", residency="short_term", today=date(2026, 11, 12))
+    assert R.run("prepare_booking_request", args, early)["status"] == "draft"

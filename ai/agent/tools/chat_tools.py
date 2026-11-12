@@ -25,7 +25,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import date, datetime, time, timezone
 
 from ai.agent.tools import fake_data as fd
 from ai.agent.tools.booking_store import (
@@ -229,11 +229,15 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
     slots = args["preferred_slots"]
     if not 1 <= len(slots) <= 3:
         raise ToolError("preferred_slots는 1~3개여야 합니다")
+    # 제출 때 백엔드와 같은 기준(오늘 0시 UTC)으로 지난 일시를 미리 거른다 → 제출 단계 422를 줄임
+    now = datetime.combine(ctx.today, time(), tzinfo=timezone.utc) if ctx.today else None
     for s in slots:
         try:
-            parse_local_slot(s)
+            slot = parse_local_slot(s)
         except ValueError as e:
             raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
+        if now and slot <= now:
+            raise ToolError(f"이미 지난 일시입니다: {s} (오늘 {ctx.today.isoformat()})")
     # 국적은 초안에 저장돼 매 턴 "신뢰" 맥락에 들어가므로 자유 문장을 받지 않는다 (프롬프트 주입 경로 차단)
     nationality = str(args["nationality"]).strip().upper()
     if not re.fullmatch(r"[A-Z]{2}", nationality):

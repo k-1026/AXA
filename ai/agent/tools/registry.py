@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Any, Callable
 
 log = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ class ToolContext:
     residency: str | None = None
     last_user_text: str = ""  # 이번 턴 사용자 메시지 원문 (record_residency가 실제 발화인지 확인하는 데 씀)
     timezone: str = "UTC"  # 환자 프로필의 IANA 시간대 (프론트가 넣음). 요청서 patient_timezone으로 쓰임
+    today: date | None = None  # 오늘 날짜(서버 시계). 있으면 초안 단계에서 지난 희망 일시를 거른다
     store: Any = None  # BookingStore (ai/agent/tools/booking_store.py). 없으면 도구가 처음 쓸 때 기본 저장소를 만든다
 
 

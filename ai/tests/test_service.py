@@ -296,3 +296,51 @@ def test_dropped_card_log_never_contains_the_card_contents(caplog):
         assert ChatService._validated_cards(ChatReply(text="", cards=[bad], trace=[])) == []
     assert "card dropped" in caplog.text
     assert secret not in caplog.text
+
+
+# ------------------------------------------------------------------ 리뷰 Minor (2026-11-12)
+def test_newest_submission_is_picked_even_if_the_gateway_lists_newest_first():
+    """계약은 목록 순서를 정하지 않는다 → 제출 감지는 created_at으로 가장 새 요청을 고른다."""
+    class NewestFirst:
+        def __init__(self, inner):
+            self.inner = inner
+
+        def list_for_patient(self, patient_id, status=None):
+            return list(reversed(self.inner.list_for_patient(patient_id, status)))
+
+        def get_for_patient(self, patient_id, booking_id):
+            return self.inner.get_for_patient(patient_id, booking_id)
+
+    inner = BookingStore()
+    service, llm, sessions, *_ = make([call("prepare_booking_request", FULL), say("Check the card."), say("Sent.")],
+                                      bookings=NewestFirst(inner))
+    s = sessions.create(ME.patient_id, "en", "t", {"residency": "short_term"})
+    r1 = service.ask(ME, s.id, "book clinic B", "en")
+    card = next(c for c in r1.cards if c.type == "booking_draft").data
+    consents = [{"kind": k, "version": "v1"} for k in card.consents_required]
+    older = inner.create_from_payload(ME.patient_id, card.hospital_id, card.request, consents, today=T0)
+    next(r for r in inner._rows if r["id"] == older["id"])["status"] = "cancelled"  # 같은 병원에 열린 요청은 하나뿐이라 먼저 닫는다
+    newer = inner.create_from_payload(ME.patient_id, card.hospital_id, card.request, consents, today=T0 + timedelta(days=1))
+    service.ask(ME, s.id, "Did it go through?", "en")
+    assert f"id {newer['id']}, status pending" in system_prompt(llm, 2)
+
+
+def test_known_booking_ids_are_saved_when_the_draft_changes_even_if_its_card_is_dropped(monkeypatch):
+    one = PatientInfo("demo-patient-1", "UTC")
+    service, _, sessions, *_ = make([call("prepare_booking_request", {**FULL, "hospital_id": 9001}), say("Check the card.")])
+    monkeypatch.setattr(ChatService, "_validated_cards", staticmethod(lambda reply: []))  # 카드가 검증에서 빠진 상황
+    s = sessions.create(one.patient_id, "en", "t", {"residency": "short_term"})
+    service.ask(one, s.id, "book clinic A", "en")
+    assert sessions.get(one.patient_id, s.id).state["draft_known_booking_ids"] == ["demo-bk-001", "demo-bk-002"]
+
+
+def test_ask_request_accepts_language_aliases_for_the_service_to_normalize():
+    from ai.agent.schemas import AskRequest
+    assert AskRequest(message="hi", language="zh").language == "zh"  # zh → zh-CN은 서비스가 정리 (계획 3절 4번)
+
+
+def test_user_text_is_masked_even_without_a_safety_check():
+    service, _, sessions, *_ = make([say("ok")], safety_check=None)
+    r = service.ask(ME, None, "my email is tester@example.com", "en")
+    stored = [m.content for m in sessions.messages(r.session_id, 10)]
+    assert not any("tester@example.com" in t for t in stored)

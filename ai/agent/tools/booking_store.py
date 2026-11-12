@@ -16,7 +16,7 @@ from __future__ import annotations
 import copy
 import itertools
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Protocol
 
 from ai.agent.tools import fake_data as fd
 
@@ -95,6 +95,17 @@ def _utc(text: str) -> datetime:
     return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
 
+class BookingGateway(Protocol):
+    """서비스·도구가 쓰는 예약 조회 (읽기 전용). 지금은 `BookingStore`(가짜), 7b에서 `booking.service` 어댑터로 교체.
+    - get_for_patient는 없거나 남의 것이면 `BookingError("not_found")`를 낸다
+    - 어댑터는 DB·`AppError` 같은 예외를 `BookingError`로 바꿔서 낸다 (도구 run()은 그 밖의 예외를 "internal"로만 돌려줌)
+    - 반환 dict 키: id, hospital_id, hospital_name_en, status, preferred, created_at (목록 순서는 정하지 않음)"""
+
+    def list_for_patient(self, patient_id: str, status: str | None = None) -> list[JSON]: ...
+
+    def get_for_patient(self, patient_id: str, booking_id: str) -> JSON: ...
+
+
 class BookingStore:
     def __init__(self, seed: list[JSON] | None = None):
         self._rows: list[JSON] = copy.deepcopy(fd.BOOKINGS if seed is None else seed)
@@ -109,7 +120,7 @@ class BookingStore:
     def get_for_patient(self, patient_id: str, booking_id: str) -> JSON:
         for r in self._rows:
             if r["id"] == booking_id and r["patient_id"] == patient_id:
-                return r
+                return copy.deepcopy(r)
         raise BookingError("not_found", "내 예약에서 찾을 수 없습니다")  # 남의 것도 404 (계약 4절)
 
     # ------------------------------------------------------------ 환자가 제출
