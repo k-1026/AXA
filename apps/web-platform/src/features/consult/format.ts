@@ -23,3 +23,7 @@ export function bookingDateFull(date: string, time: string, lang: string) {
 
 /** 오늘 (YYYY-MM-DD, 한국 시간) */
 export const todayKst = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
+
+/** 지금 시각 (HH:mm, 한국 시간) */
+export const nowKstTime = () =>
+  new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());

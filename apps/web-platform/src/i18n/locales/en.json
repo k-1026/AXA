@@ -427,7 +427,8 @@
       "errDate": "Choose today or a later date.",
       "changeTitle": "Change booking",
       "changeSubmit": "Request change",
-      "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then."
+      "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then.",
+      "errTime": "Please choose a time later than now."
     },
     "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare."
   },

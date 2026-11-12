@@ -427,7 +427,8 @@
       "errDate": "Hãy chọn hôm nay hoặc ngày sau đó.",
       "changeTitle": "Đổi lịch",
       "changeSubmit": "Gửi yêu cầu đổi",
-      "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\"."
+      "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\".",
+      "errTime": "Vui lòng chọn thời gian sau hiện tại."
     },
     "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
   },
