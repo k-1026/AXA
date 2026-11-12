@@ -59,6 +59,8 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: 
 th { color: var(--text-muted); font-weight: 600; font-size: 12.5px; background: var(--surface-muted); }
 td.num { text-align: right; font-variant-numeric: tabular-nums; }
 tr.top td { background: #fbfcff; }
+table.calc td { padding: 6px 6px; }
+table.calc td:first-child, table.calc td.num { white-space: nowrap; }
 
 /* 1장 */
 .cover { justify-content: center; }
@@ -94,11 +96,11 @@ tr.top td { background: #fbfcff; }
 
 /* 6장 플로우 */
 .uf { display: flex; align-items: stretch; gap: 0; }
-.uf .s { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 8px; font-size: 12.8px; text-align: center; line-height: 1.35; }
-.uf .s b { display: block; color: var(--ink); font-size: 13.5px; }
+.uf .s { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; font-size: 11.8px; text-align: center; line-height: 1.35; word-break: keep-all; }
+.uf .s b { display: block; color: var(--ink); font-size: 13px; }
 .uf .s.hosp { border-color: var(--good); background: var(--good-soft); }
 .uf .s.end { border-color: var(--accent); background: var(--accent-soft); }
-.uf .ar { width: 18px; display: flex; align-items: center; justify-content: center; color: var(--neutral); }
+.uf .ar { width: 13px; flex: none; display: flex; align-items: center; justify-content: center; color: var(--neutral); }
 .ex { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .ex span { font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--pain-soft); color: var(--pain); font-weight: 600; }
 
@@ -227,58 +229,59 @@ tr.top td { background: #fbfcff; }
 <!-- 5 수익모델·레드팀 -->
 <section class="slide">
   <div class="eyebrow">③ 수익모델 · 레드팀 검증</div>
-  <h1>수수료가 주 수익원 — 다만 <em>대만 미용만으로는 손익분기에 못 미친다</em></h1>
-  <p class="lead">금액은 모두 가정값. 확인값은 법정 상한뿐 → 다음 시장 검증에서 숫자를 채움</p>
+  <h1>병원이 <em>수수료·구독 중 하나를 고른다</em> — 대만 미용만으로는 손익분기에 못 미친다</h1>
+  <p class="lead">금액은 모두 가정값 (확인값은 법정 상한·환자 수뿐) → 다음 시장 검증에서 숫자를 채움 · 계산은 다시 해서 맞는지 확인함</p>
   <div class="body">
-    <div class="grid" style="grid-template-columns: 1.1fr 1fr 1fr;">
+    <div class="grid" style="grid-template-columns: 1fr 1.15fr 1fr;">
       <div class="card">
-        <h3>수익모델 다섯 유형 대어 보기</h3>
+        <h3>수익모델 — 입점 병원이 요금제를 고름</h3>
         <table style="font-size: 13.5px;">
           <tr><th>유형</th><th>판단</th></tr>
-          <tr class="top"><td style="white-space:nowrap"><b>수수료</b><br><span class="muted">등록 병원</span></td><td><span class="tag t-acc">주</span> 환자↔병원을 잇는 자리, 데모에서 돈이 오가는 장면이 가장 잘 보임</td></tr>
-          <tr><td style="white-space:nowrap">구독<br><span class="muted">등록 병원</span></td><td><span class="tag t-neu">선택</span> 대시보드(AI 요약·번역·지표) 이용료 — 상한은 <b>유치 행위 대가</b>의 진료비 대비 비율이라 <b>다른 개념</b>. 환자 연결 대가는 구독에 넣지 않음</td></tr>
+          <tr class="top"><td style="white-space:nowrap"><b>수수료</b><br><span class="muted">등록 병원</span></td><td><span class="tag t-acc">주 · 선택 B</span> 방문 완료·완납 1건 진료비의 %, 월 정산. 온 환자에 대해서만 냄</td></tr>
+          <tr class="top"><td style="white-space:nowrap"><b>구독</b><br><span class="muted">등록 병원</span></td><td><span class="tag t-acc">주 · 선택 A</span> 대시보드(AI 요약·번역·지표) 월 이용료. 유치 수수료(진료비 대비 %)와 <b>다른 개념</b> — 환자 연결 대가는 넣지 않음</td></tr>
           <tr><td style="white-space:nowrap">광고<br><span class="muted">일반 광고주</span></td><td><span class="tag t-neu">보조·나중</span> 한국 화장품·관광 등, 병원 광고 아님</td></tr>
-          <tr><td>데이터</td><td>환자 질문·요청서는 건강정보 → 판매 불가에 가까움</td></tr>
-          <tr><td>라이선스</td><td>해당 없음</td></tr>
         </table>
+        <p class="muted" style="margin-top:8px; font-size:12.5px;">법정 상한: 유치 수수료 ÷ 그 환자 총 진료비 ≤ 의원 30% · 병원 20% · 상급종합 15% (확인값)</p>
       </div>
       <div class="card">
-        <h3>가격 가설 · 손익분기</h3>
-        <p>유치업체 계약이 없는 등록 의원은 방문 완료 1건마다 진료비의 <b class="as">5~10% (가정값)</b>를 낼 것이다 — 온 환자에 대해서만 내니까</p>
-        <p class="muted" style="margin-top:6px;">법정 상한: 유치 수수료 ÷ 그 환자 총 진료비 ≤ 의원 30% · 병원 20% · 상급종합 15% (확인값) — 구독료와는 별개</p>
-        <div style="display:flex; gap:12px; margin-top: 12px;">
-          <div><div class="big">≈ 92건 <small>/ 월</small></div><p class="muted">손익분기 방문 완료 (계산값)</p></div>
-          <div><div class="big" style="color: var(--pain);">≈ 9배</div><p class="muted">예상 월 10건 대비</p></div>
-        </div>
-        <p class="muted" style="margin-top:8px; font-size:12.5px;">= 월 고정비 275만 원 ÷ 1건당 3만 원 (진료비 50만 원 × 7% − 5천 원), 모두 가정값</p>
-        <p style="margin-top:6px;">→ 구독 수익을 빼고 계산한 값. 국적 확장 (대구 외국인 환자 2025년 19,243명), 진료과 확장 필요</p>
+        <h3>가격 가설 · 손익분기 (가정값으로 계산)</h3>
+        <p>수수료: 방문 완료 1건 진료비의 <b class="as">5~10%</b>, 기준 7% · 구독: <b class="as">월 10만~30만 원</b>, 기준 20만 원</p>
+        <table class="calc" style="font-size: 12.8px; margin-top: 6px;">
+          <tr><td>예상 방문</td><td>대만 환자 1,495명 × 미용·외래 80.3% × 경유 <span class="as">10%</span> ÷ 12</td><td class="num"><b>월 10건</b></td></tr>
+          <tr><td>1건 이익</td><td>진료비 <span class="as">50만</span> × <span class="as">7%</span> − 변동비 <span class="as">5천</span></td><td class="num"><b>3만 원</b></td></tr>
+          <tr><td>손익분기</td><td>월 고정비 <span class="as">275만</span> ÷ 3만</td><td class="num"><b>≈ 92건</b></td></tr>
+          <tr><td>구독 포함</td><td>(275만 − 병원 10곳 × 30% × 20만) ÷ 3만</td><td class="num"><b>≈ 72건</b></td></tr>
+          <tr><td>% 바꾸면</td><td>5% → 138건 · 10% → 61건</td><td class="num"></td></tr>
+        </table>
+        <p style="margin-top:8px;">→ 예상 월 10건의 <b style="color: var(--pain);">약 7~9배</b>가 필요 = 대만 미용만으로는 부족. 국적 확장 (대구 외국인 환자 2025년 19,243명)·진료과 확장이 먼저</p>
       </div>
       <div class="card">
         <h3>레드팀 3관점 · 지적 21개</h3>
-        <p class="muted">고객 · 경쟁사 · 투자자 관점으로 v1을 공격</p>
-        <div style="display:flex; gap:14px; margin: 10px 0 10px;">
+        <p class="muted">투자자 · 고객(환자·코디) · 경쟁사 역할의 AI 검토자 3명이 v1을 읽기 전용으로 공격, 지적마다 문서 문장을 인용</p>
+        <div style="display:flex; gap:14px; margin: 8px 0 8px;">
           <div><div class="big" style="color: var(--good);">16</div><p class="muted">반영</p></div>
           <div><div class="big">1</div><p class="muted">일부 반영</p></div>
           <div><div class="big" style="color: var(--assume);">2</div><p class="muted">추가 확인</p></div>
           <div><div class="big" style="color: var(--neutral);">2</div><p class="muted">보류·반박</p></div>
         </div>
-        <ul>
+        <p style="font-size:12.8px;">처리 규칙: 치명 → 바로 반영 · 중요 → 반영 또는 확인 · 참고 → 보류 이유 · <b>두 관점이 같은 지적이면 한 단계 올림</b> · 근거 파일이 있으면 반박</p>
+        <ul style="margin-top:6px;">
+          <li>월 40건은 대만 환자의 32% 경유 → 시장 식을 세워 <b>10건</b>으로</li>
+          <li>비용에 숫자 없음 → <b>손익분기 식</b> 추가</li>
           <li>"가격 범위"를 <b>공공 자료가 있는 항목만</b>으로 좁힘</li>
-          <li>지불자를 "유치업체 계약 없는 의원"으로 좁힘 — 중개자를 하나 더 늘리지 않게</li>
-          <li>"확정"은 코디가 확정한 뒤에만 표시</li>
-          <li>LLM 요금·정책 변경을 리스크 비용에 추가</li>
+          <li>지불자를 "유치업체 계약 없는 의원"으로 좁힘</li>
         </ul>
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: bm/revenue_options.md · revenue_platform.md 3절 · redteam_log.md · redteam_diff.md · 유치 수수료 정의·상한: 통합 고시 제2조·제3조 (보건복지부고시 제2025-72호) · 19,243명: 진흥원 2025 통계</span><span class="no">5 / 6</span></div>
+  <div class="foot"><span class="src">출처: bm/revenue_platform.md 1~3절 (재계산) · redteam_log.md · .claude/agents/redteam-*.md · 상한: 통합 고시 제2·3조 · 환자 수: 진흥원 통계 · 80.3%: 전국 대만 환자 피부과 비중</span><span class="no">5 / 6</span></div>
 </section>
 
 <!-- 6 시나리오·플로우·IA -->
 <section class="slide">
   <div class="eyebrow">④ 서비스 시나리오 · 유저 플로우 · IA</div>
-  <h1>린의 하루: <em>병원 찾기 → 상담 예약 "확정"</em>까지 한 흐름</h1>
-  <p class="lead">As-Is 장면마다 To-Be 화면 하나 · 필수 스토리 5개 = MVP 범위 · 화면 이름은 지금 웹사이트 메뉴 그대로</p>
+  <h1>린의 여정: <em>병원 찾기 → 예약 확정 → 귀국 후 사후관리</em>까지 한 흐름</h1>
+  <p class="lead">As-Is 장면마다 To-Be 화면 하나 · 필수 스토리 5개(US1~US5) = MVP 범위, 사후관리(US6)는 그다음 · 화면 이름은 지금 웹사이트 메뉴 그대로</p>
   <div class="body">
     <div class="card" style="padding: 12px 14px;">
       <div class="uf">
@@ -289,7 +292,9 @@ tr.top td { background: #fbfcff; }
         <div class="s"><b>로그인 → 챗봇</b>출처 붙은 답<br><span class="tag t-acc">US4</span></div><div class="ar">→</div>
         <div class="s"><b>상담/예약</b>희망 날짜·언어·문의<br>→ "요청됨"</div><div class="ar">→</div>
         <div class="s hosp"><b>병원 대시보드</b>AI 요약·답장 초안<br>코디 승인 <span class="tag t-good">US5</span></div><div class="ar">→</div>
-        <div class="s end"><b>예약 관리</b>상태: 확정</div>
+        <div class="s end"><b>예약 관리</b>상태: 확정</div><div class="ar">→</div>
+        <div class="s"><b>방문·진료</b>길찾기 링크만<br><span class="muted">진료는 병원 몫</span></div><div class="ar">→</div>
+        <div class="s hosp"><b>사후관리</b>귀국 후 병원과 채팅<br>지원 병원만 <span class="tag t-neu">US6</span></div>
       </div>
       <div class="ex"><span>예외 5개</span><span>E0 조건 맞는 병원 없음 → 필터 해제</span><span>E1 진료시간 없음 → "병원에 묻기"</span><span>E2 공공 가격 없음 → 숫자 안 지어냄</span><span>E3 챗봇 미답 → 직접 상담 요청</span><span>E4 국내 거주 → 예약 막음</span></div>
     </div>
@@ -302,6 +307,7 @@ tr.top td { background: #fbfcff; }
           <tr><td>견적이 적정한지 비교 기준 없음</td><td>공공 자료가 있는 항목은 대구 범위 안 위치, 없으면 "자료 없음"</td></tr>
           <tr><td>병원 LINE·메일로 따로 묻고 기다림</td><td>챗봇에 묻고 그 자리에서 상담 예약 요청</td></tr>
           <tr><td>코디가 문의를 번역해 상담지를 손으로 작성</td><td>AI 요약·초안을 고쳐 승인 → 발송·확정</td></tr>
+          <tr><td>귀국 후 붓기가 걱정돼도 물어볼 곳이 마땅치 않음</td><td>사후관리 지원 병원이면 채팅으로 안내 (진료성 상담은 제도 시행 전 불가)</td></tr>
         </table>
       </div>
       <div class="grid" style="grid-template-rows: auto auto; gap: 10px;">
