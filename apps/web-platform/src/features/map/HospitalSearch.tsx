@@ -2,6 +2,7 @@ import { useId, useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHospitalName } from '../hospital/name';
 import type { Hospital } from '../hospital/types';
+import { HospitalAddress } from '../hospital/HospitalAddress';
 
 // 띄어쓰기·대소문자 무시하고 한국어·영어 이름 둘 다에서 찾는다
 const norm = (s: string) => s.replace(/\s+/g, '').toLowerCase();
@@ -92,7 +93,7 @@ export function HospitalSearch({ hospitals, onSearch }: Props) {
                 {/* onMouseDown: input blur보다 먼저 처리 */}
                 <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pick(h)}>
                   <strong>{nameOf(h)}</strong>
-                  <span>{h.addr}</span>
+                  <span><HospitalAddress addr={h.addr} original={false} /></span>
                 </button>
               </li>
             ))

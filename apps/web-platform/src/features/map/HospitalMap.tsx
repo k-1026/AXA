@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { DEPARTMENT_COLORS } from '../hospital/filters';
 import { useHospitalName } from '../hospital/name';
 import type { DepartmentKey, Hospital } from '../hospital/types';
+import { HospitalAddress } from '../hospital/HospitalAddress';
 
 const DAEGU_CENTER: [number, number] = [35.8714, 128.6014];
 const DAEGU_ZOOM = 12;
@@ -77,7 +78,7 @@ export function HospitalMap({ hospitals, fetchedAt, selectedDept, focus = null }
               <dt>{t('popup.type')}</dt>
               <dd>{t(`hospitalType.${h.type}`, { defaultValue: h.type })}</dd>
               <dt>{t('popup.addr')}</dt>
-              <dd lang="ko">{h.addr}</dd>
+              <dd><HospitalAddress addr={h.addr} /></dd>
               {h.tel && (
                 <>
                   <dt>{t('popup.tel')}</dt>

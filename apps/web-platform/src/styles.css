@@ -4633,3 +4633,11 @@ body.chat-open {
   border: 1px solid var(--c-ink-55);
   border-radius: 8px;
 }
+
+/* 화면 언어 주소 아래의 한국어 원문 (택시·지도 앱용) */
+.addr-original {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}

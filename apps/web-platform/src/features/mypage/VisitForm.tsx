@@ -5,6 +5,7 @@ import { useHospitalName } from '../hospital/name';
 import type { Hospital } from '../hospital/types';
 import { todayKst } from '../../lib/common';
 import type { VisitInput } from './visitLog';
+import { HospitalAddress } from '../hospital/HospitalAddress';
 
 const MAX_SUGGESTIONS = 8;
 
@@ -87,7 +88,7 @@ export function VisitForm({ hospitals, initial, onSubmit, onCancel }: Props) {
                     }}
                   >
                     <strong>{nameOf(h)}</strong>
-                    <span lang="ko">{h.addr}</span>
+                    <span><HospitalAddress addr={h.addr} original={false} /></span>
                   </button>
                 </li>
               ))}

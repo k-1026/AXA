@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import { LANGUAGES } from '../../i18n';
 import type { DepartmentKey } from '../hospital/types';
 import type { ChatCard, HospitalBrief } from './chatApi';
+import { localHospitalName } from '../hospital/localize';
 
 // 카드의 진료과는 한국어 이름(피부과 등)으로 온다 (ai/agent/tools/chat_tools.py DEPT_CODES와 같은 표)
 // 화면 진료과 키가 있는 것만 번역하고, 나머지(치과·한방 등)는 받은 그대로 보여 준다
@@ -60,7 +61,7 @@ function HospitalRow({ h, reasons }: { h: HospitalBrief; reasons?: string[] }) {
   const { t, i18n } = useTranslation();
   return (
     <li className="chat-card-hospital">
-      <strong>{i18n.language === 'ko' ? h.name_ko : h.name_en}</strong>
+      <strong>{i18n.language === 'ko' ? h.name_ko : localHospitalName(h.name_en, i18n.language)}</strong>
       <span>
         {t(`district.${h.district}`, { defaultValue: h.district })} · {h.departments.map((d) => deptLabel(t, d)).join(', ')}
       </span>
