@@ -18,6 +18,17 @@
 
 ## 기록
 
+### 2026-11-12 · backend-B-health-404 · Claude
+- 한 일: (1) 없는 경로 404·없는 메서드 405를 `{code, message, detail}` 형식으로 (`core/errors.py`). 코드는 `not_found`가 아니라 `api.not_found`·`api.method_not_allowed` — 프론트 `useConversations.ts`가 `not_found`를 "서버에 이미 없음"으로 보고 대화를 지우므로, 경로 오류와 섞이면 데이터를 잘못 지움. 프론트는 모르는 코드를 일반 오류로 처리하므로 프론트 변경 없음. (2) `GET /health`가 DB `SELECT 1`까지 확인, 실패하면 503 `db.unavailable` (로그엔 예외 종류만) (`main.py`)
+- 바뀐 계약: contracts 4절 (에러 코드 3개), 결정 18
+- 마이그레이션: 없음
+- 테스트: **미실행** — 이 PC에 Python 없음. 추가: `test_health.py` 3개, `test_errors.py` 2개, 수정: `test_security.py::test_health` 응답
+- 다음 할 일: Python·uv 설치 후 `uv run python -m pytest backend/tests` 확인
+- A에게 요청:
+  1. **공통 파일 변경**(`core/errors.py`, `main.py`) + contracts 4절 리뷰·승인
+  2. 프론트에서 `api.not_found`·`db.unavailable`을 따로 보여 줄 필요가 생기면 i18n 키 추가 (지금은 일반 오류로 충분)
+- 막힌 것·질문: 없음
+
 ### 2026-11-12 · backend-B-setup · Claude
 - 한 일: main(4505b75) 반영. 10/30 셋업 코드는 결정 12·13(Supabase, 마이그레이션 A 담당) 이후 A가 같은 파일을 만들어 쓸모가 없어짐 → 커밋하지 않고 `git stash`에 보관. 비교 결과는 [review-backend-B-setup-2026-11-12.md](review-backend-B-setup-2026-11-12.md). `backend-todo-B.md` 기반 항목을 실제 상태로 고침, `.gitignore`에 `.pytest_cache/`·`*.egg-info/`·`.vite/` 추가
 - 바뀐 계약: 없음

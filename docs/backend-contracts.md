@@ -60,6 +60,8 @@
 | `auth.email_taken` | 409 | 이미 가입된 이메일 |
 | `auth.too_many_attempts` | 429 | 로그인·탈퇴 비밀번호 실패 초과: 이메일당 15분 5회, IP당 15분 20회 (`detail.retry_after` 초). 성공하면 그 이메일 기록 초기화. 지금은 서버 메모리 → 운영 전 공유 저장소로 |
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
+| `api.not_found` | 404 | **API 경로 자체가 없음** (오타·배포 버전 어긋남). `not_found`와 일부러 나눔: 프론트는 `not_found`를 "서버에 이미 없음"으로 보고 화면에서 지우는 곳이 있음 |
+| `api.method_not_allowed` | 405 | 경로는 있지만 그 메서드가 없음 (`Allow` 헤더 그대로) |
 | `validation` | 422 | 입력 오류 |
 | `consent.required` | 422 | 필수 동의 없음 |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
@@ -67,6 +69,7 @@
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
+| `db.unavailable` | 503 | `GET /health`에서 DB 연결 실패 (`DATABASE_URL` 없음 포함, 로그에는 예외 종류만) |
 | `internal` | 500 | 처리하지 못한 서버 오류 (`detail` = `{}`, 로그에는 예외 종류만) |
 
 - `code`는 프론트 i18n 키로 그대로 씀. 새 코드는 이 표에 먼저 추가
@@ -139,6 +142,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-12 | 4 | 에러 `api.not_found`(404)·`api.method_not_allowed`(405) 추가 (없는 경로·메서드도 같은 형식, 리소스 없음 `not_found`와 구분), `db.unavailable`(503) 추가 — `GET /health`가 DB 연결도 확인, 응답 `{"status":"ok","db":"ok"}` | B (**A 확인 필요**) | `backend-B-health-404` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-12 | 4 | 가입 동의 `terms`·`privacy`는 현재 문서 버전(프론트 `features/legal` `updated`, 지금 `2026-11-03`)만 받음 → 아니면 422 `validation` + `detail.invalid[{kind, version, current}]` | A | `backend-review-fix` → `backend` |
 | 2026-11-12 | 4 | `auth.too_many_attempts` 구현 (로그인·`DELETE /me` 비밀번호 확인) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
