@@ -186,7 +186,8 @@ CARD_ADAPTER: TypeAdapter[Card] = TypeAdapter(Card)
 class AskRequest(_Model):
     session_id: str | None = None  # 없으면 새 대화
     message: str = Field(min_length=1, max_length=1000)
-    language: Language
+    # 옛 코드(zh, zh-Hans 등)도 받고 서비스(normalize_language)가 UI_LANGUAGES로 정리한다. 지원하지 않는 값은 거기서 422
+    language: str = Field(min_length=2, max_length=10)
 
 
 class ChatResponse(_Model):

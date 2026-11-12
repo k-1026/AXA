@@ -17,16 +17,18 @@ FastAPI·DB에 의존하지 않는다 → 이 PC에서도 테스트된다. 백�
 from __future__ import annotations
 
 import logging
+import threading
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Protocol
+from typing import Any, Callable
 
 from pydantic import ValidationError
 
 from ai.agent.core.orchestrator import ChatLLM, ChatReply, ConversationState, Orchestrator
 from ai.agent.schemas import CARD_ADAPTER, UI_LANGUAGES, ChatResponse
 from ai.agent.session_store import JSON, SessionStore, StoredMessage, StoredSession
+from ai.agent.tools.booking_store import BookingGateway  # noqa: F401  (이전 경로 ai.agent.service.BookingGateway 유지)
 from ai.agent.tools.chat_tools import build_registry
 from ai.agent.tools.registry import ToolRegistry
 from ai.llm import safety
@@ -70,15 +72,6 @@ class PatientInfo:
     timezone: str = "UTC"  # patients.timezone
 
 
-class BookingGateway(Protocol):
-    """도구와 제출 확인이 쓰는 예약 조회. 지금은 `BookingStore`(가짜), 7b에서 `booking.service` 어댑터로 교체.
-    get_for_patient는 없거나 남의 것이면 `BookingError("not_found")`를 낸다."""
-
-    def list_for_patient(self, patient_id: str, status: str | None = None) -> list[JSON]: ...
-
-    def get_for_patient(self, patient_id: str, booking_id: str) -> JSON: ...
-
-
 class RateLimiter:
     """계정당 분·일 상한 (메모리). 서버리스·다중 인스턴스에서는 인스턴스마다 따로라서 운영에서는 DB·캐시 기반으로 바꾼다.
     기본값은 무료 키 한도를 아끼기 위한 가정이다."""
@@ -86,8 +79,13 @@ class RateLimiter:
     def __init__(self, per_minute: int = 10, per_day: int = 150):
         self.per_minute, self.per_day = per_minute, per_day
         self._hits: dict[str, deque[datetime]] = defaultdict(deque)
+        self._lock = threading.Lock()  # FastAPI 동기 엔드포인트는 스레드풀에서 돈다
 
     def check(self, key: str, now: datetime) -> None:
+        with self._lock:
+            self._check(key, now)
+
+    def _check(self, key: str, now: datetime) -> None:
         hits = self._hits[key]
         while hits and now - hits[0] > timedelta(days=1):
             hits.popleft()
@@ -198,7 +196,8 @@ class ChatService:
             fresh = [b for b in self.bookings.list_for_patient(patient.patient_id)
                      if b["hospital_id"] == draft["hospital_id"] and b["id"] not in known]
             if fresh:
-                submitted = fresh[-1]
+                # 계약은 목록 순서를 정하지 않는다 → created_at으로 가장 새 것 (같은 날이면 목록 뒤쪽)
+                submitted = sorted(fresh, key=lambda b: b.get("created_at") or "")[-1]
                 draft = None
                 saved.pop("draft", None)
                 saved.pop("draft_known_booking_ids", None)
@@ -221,7 +220,7 @@ class ChatService:
             new_state["residency"] = state.residency
         if state.booking_draft:
             new_state["draft"] = persistable_draft(state.booking_draft)
-            if any(c.type == "booking_draft" for c in cards):  # 새 초안: 이 시점의 내 요청 id를 기억
+            if state.booking_draft is not draft:  # 이번 턴에 초안이 새로 만들어짐 (카드가 검증에서 빠져도): 이 시점의 내 요청 id를 기억
                 new_state["draft_known_booking_ids"] = [b["id"] for b in self.bookings.list_for_patient(patient.patient_id)]
             else:
                 new_state["draft_known_booking_ids"] = saved.get("draft_known_booking_ids", [])
@@ -237,7 +236,8 @@ class ChatService:
         now = self._clock()
         self.sessions.append(
             session.id,
-            [StoredMessage("user", reply.user_text, refused, now), StoredMessage("assistant", reply.text, refused, now)],
+            # 안전 검사 없이 만든 서비스(safety_check=None)여도 개인정보는 가려서 저장한다
+            [StoredMessage("user", safety.mask_pii(reply.user_text)[0], refused, now), StoredMessage("assistant", reply.text, refused, now)],
             new_state,
         )
         return ChatResponse(
@@ -261,5 +261,7 @@ class ChatService:
             try:
                 out.append(CARD_ADAPTER.validate_python(card))
             except ValidationError as e:  # 도구 결과와 카드 모델이 어긋남 → 그 카드만 뺀다 (테스트가 잡아야 하는 버그)
-                log.error("card dropped: %s %s", card.get("type"), e.errors()[:1])
+                # 입력값(input)은 남기지 않는다: booking_draft에는 health_info·문의 원문이 들어 있을 수 있음
+                log.error("card dropped: %s %s", card.get("type"),
+                          [(err["loc"], err["type"]) for err in e.errors(include_input=False, include_url=False)[:1]])
         return out

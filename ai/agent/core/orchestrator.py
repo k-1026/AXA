@@ -16,7 +16,7 @@ from datetime import date, datetime, time, timezone
 from typing import Any, Callable, Protocol
 
 from ai.agent.prompts.orchestrator import build_system_prompt
-from ai.agent.tools.booking_store import BookingError, BookingStore
+from ai.agent.tools.booking_store import BookingError, BookingGateway, BookingStore
 from ai.agent.tools.registry import JSON, ToolContext, ToolRegistry
 from ai.llm import safety
 from ai.llm.client import LLMResponse, Message, tool_result_message
@@ -121,7 +121,7 @@ class Orchestrator:
         max_history: int = 40,
         safety_check: Callable[[str, str], safety.SafetyResult] | None = safety.check,
         today: Callable[[], date] = date.today,
-        store: BookingStore | None = None,
+        store: BookingGateway | None = None,
     ):
         self.store = store or BookingStore()  # 백엔드 booking.service가 생기면 교체
         self.llm = llm
@@ -137,6 +137,9 @@ class Orchestrator:
         성공하면 pending 요청이 생기고 초안은 비워진다. 대화 기록에 제출 사실을 남겨, 다음 턴에 모델이
         "보냈다/안 보냈다"를 정확히 알게 한다.
         """
+        if not hasattr(self.store, "create_request"):  # 서비스가 주입한 읽기 전용 게이트웨이
+            raise NotImplementedError("submit_draft는 eval·시연 전용(BookingStore 필요). 서비스는 프론트가 "
+                                      "POST /hospitals/{id}/booking-requests 로 제출한다")
         draft = state.booking_draft
         if draft is None:
             return SubmitResult(False, error=BookingError("validation", "제출할 요청서 초안이 없습니다").as_dict())
@@ -177,7 +180,7 @@ class Orchestrator:
 
         ctx = ToolContext(
             patient_id=state.patient_id, language=state.language, residency=state.residency, last_user_text=user_text,
-            timezone=state.timezone, store=self.store,
+            timezone=state.timezone, store=self.store, today=self._today(),
         )
         system = {
             "role": "system",

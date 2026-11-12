@@ -178,3 +178,20 @@ def test_recommendation_request_is_not_guarded_and_makes_card():
     card = reply.cards[0]
     assert card["type"] == "hospital_suggestions" and card["data"]["suggestions"][0]["hospital_id"] == 9002
     assert "referral fee" in card["data"]["basis"]
+
+
+def test_submit_draft_with_a_read_only_gateway_fails_with_a_clear_message():
+    """서비스는 읽기 전용 게이트웨이를 주입한다. submit_draft(eval·시연 전용)를 잘못 부르면 AttributeError 대신 분명한 오류."""
+    import pytest
+
+    class ReadOnly:
+        def list_for_patient(self, patient_id, status=None):
+            return []
+
+        def get_for_patient(self, patient_id, booking_id):
+            raise KeyError(booking_id)
+
+    orch = Orchestrator(None, build_registry(), store=ReadOnly())
+    state = ConversationState(language="en", patient_id="p", residency="short_term", booking_draft={"hospital_id": 9001})
+    with pytest.raises(NotImplementedError, match="booking-requests"):
+        orch.submit_draft(state, [])
