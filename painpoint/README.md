@@ -9,7 +9,7 @@
 | 2 | [evidence.csv](evidence.csv) | 근거 24건 (데이터·공식·통계 21 + 가정 3), 단계·유형·강도 태그 |
 | 3 | [journey_map.md](journey_map.md) · [.html](journey_map.html) | 이용자 린의 여정 5단계 × 층 6개 (1280×720 한 장) |
 | 4 | [journey_3actors.md](journey_3actors.md) · [.html](journey_3actors.html) | 환자 · 코디 · 운영자 세 여정, 손 넘김 H0~H5와 측정 신호 |
-| 5 | [painpoint_def.md](painpoint_def.md) | 점수표, Top 3 진술문, 보류 목록, 근거 분류 검수표 |
+| 5 | [painpoint_def.md](painpoint_def.md) · [priority.html](priority.html) | 점수표, Top 3 진술문, 보류 목록, 근거 분류 검수표 · 우선순위 매트릭스 한 장 |
 
 **Top 3** — ① 진료시간 정보 없음 (80) · ② 등록 병원 상세 정보 부족 (75) · ③ 피부·성형 가격 기준 없음 (60)
 

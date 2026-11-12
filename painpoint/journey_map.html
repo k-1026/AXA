@@ -6,113 +6,114 @@
 <title>고객 여정 지도</title>
 <style>
   :root {
-    --bg:#f6f5f2; --card:#ffffff; --fg:#1d1f23; --muted:#5d636b; --line:#dcdad4;
-    --head:#24364f; --headfg:#ffffff; --coral:#e8604c; --coralbg:#fdeeea;
-    --pos:#2f8a5b; --neg:#c2412d; --curve:#24364f; --tag:#eef1f5;
+    --bg:#f4f5f4; --card:#ffffff; --fg:#1f2326; --muted:#6a7075; --line:#e3e6e6;
+    --teal:#2f8a86; --tealbg:#e4f2f1; --coral:#e2603f; --amber:#a07b1c; --gray:#9aa0a5;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg:#14171b; --card:#1d2127; --fg:#e8eaed; --muted:#a2a8b0; --line:#343a42;
-      --head:#2d4566; --headfg:#ffffff; --coral:#f07a66; --coralbg:#3a2420;
-      --pos:#5cc08a; --neg:#f07a66; --curve:#9fb6d6; --tag:#262c34;
+      --bg:#141819; --card:#1c2123; --fg:#e7eaeb; --muted:#a5acb0; --line:#30373a;
+      --teal:#4fb3ad; --tealbg:#1f3433; --coral:#f07a5c; --amber:#d9b25a; --gray:#7d858a;
     }
   }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--fg); font:13px/1.45 system-ui, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
-  .page { width:1280px; min-height:720px; margin:0 auto; padding:18px 22px; display:flex; flex-direction:column; gap:10px; }
-  header { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; }
-  h1 { font-size:20px; margin:0; letter-spacing:-0.2px; }
-  .sub { color:var(--muted); font-size:12px; margin-top:2px; }
-  .legend { display:flex; gap:12px; font-size:11.5px; color:var(--muted); white-space:nowrap; }
-  .legend b { color:var(--coral); }
-  .grid { display:grid; grid-template-columns:92px repeat(5, 1fr); gap:6px; }
-  .rowlabel { font-weight:700; font-size:12px; color:var(--muted); display:flex; align-items:center; padding-left:2px; }
-  .stage { background:var(--head); color:var(--headfg); border-radius:8px; padding:7px 10px; font-weight:700; font-size:14px; }
-  .stage small { display:block; font-weight:400; font-size:11px; opacity:.85; }
-  .cell { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:7px 9px; font-size:12px; }
-  .think { font-style:italic; color:var(--muted); }
-  .ev { color:var(--muted); font-size:10.5px; }
-  .tp { display:flex; flex-wrap:wrap; gap:3px; align-content:flex-start; align-items:flex-start; }
-  .tp span { background:var(--tag); border-radius:4px; padding:1px 5px; font-size:11px; }
-  .pain { position:relative; }
-  .pain.top { border:2px solid var(--coral); background:var(--coralbg); }
-  .badge { display:inline-block; background:var(--coral); color:#fff; font-weight:700; font-size:11px; border-radius:10px; padding:0 7px; margin-right:4px; }
-  .pain p { margin:0 0 5px; }
-  .pain p:last-child { margin-bottom:0; }
-  .dim { color:var(--muted); }
-  .curve { grid-column:2 / span 5; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:4px 0; }
-  .curve svg { display:block; width:100%; height:96px; }
-  footer { color:var(--muted); font-size:11px; display:flex; justify-content:space-between; gap:16px; margin-top:auto; }
+  .page { width:1280px; height:720px; margin:0 auto; padding:26px 40px 18px; display:flex; flex-direction:column; }
+  .bar { width:34px; height:4px; background:var(--teal); border-radius:2px; margin-bottom:10px; }
+  .top { display:flex; justify-content:space-between; align-items:flex-start; }
+  h1 { font-size:26px; margin:0; letter-spacing:-0.5px; font-weight:800; }
+  h1 em { font-style:normal; color:var(--teal); }
+  .pill { background:var(--tealbg); color:var(--teal); font-size:11.5px; font-weight:700; border-radius:14px; padding:5px 14px; white-space:nowrap; }
+  .sub { color:var(--muted); font-size:13px; margin:6px 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 22px 10px; flex:1; display:flex; flex-direction:column; }
+  .grid { display:grid; grid-template-columns:96px repeat(5, 1fr); grid-template-rows:auto 1fr 1fr 128px 1fr 1.25fr 1fr; column-gap:8px; flex:1; }
+  .lab { font-weight:700; font-size:13px; display:flex; align-items:center; }
+  .stage { background:var(--teal); color:#fff; text-align:center; font-weight:700; font-size:14.5px; border-radius:6px; padding:8px 4px; }
+  .c { text-align:center; padding:9px 6px; font-size:12.5px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; }
+  .row-l { border-bottom:1px solid var(--line); }
+  .think { color:var(--muted); }
+  .pain { color:var(--coral); font-weight:700; }
+  .pain.off { color:var(--gray); font-weight:600; }
+  .num { display:inline-block; background:var(--coral); color:#fff; border-radius:10px; font-size:11px; padding:0 7px; margin-right:3px; font-weight:800; }
+  .opp { color:var(--amber); font-weight:600; }
+  .ev { display:block; color:var(--gray); font-size:10.5px; font-weight:400; margin-top:2px; }
+  .curve { grid-column:2 / span 5; border-bottom:1px solid var(--line); position:relative; }
+  .curve svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+  .elab { font-size:11px; fill:var(--muted); }
+  .note { color:var(--muted); font-size:11px; margin-top:10px; }
 </style>
 </head>
 <body>
 <div class="page">
-  <header>
-    <div>
-      <h1>고객 여정 지도 — 린 (대만 미용의료 단기 방문객)</h1>
-      <div class="sub">시나리오: 3박 4일 대구 여행에 피부 시술 1회를 믿을 만한 병원에서 받고, 귀국 후 궁금한 점을 묻고 싶다 · 페르소나·생각·감정은 [가정]</div>
-    </div>
-    <div class="legend"><span><b>■</b> Top 3 페인포인트</span><span>E.. 데이터·공식 근거 · G.. 가정</span></div>
-  </header>
-
-  <div class="grid">
-    <div></div>
-    <div class="stage">① 알아보기<small>대만 · 검색·SNS</small></div>
-    <div class="stage">② 비교·결정<small>대만 · 병원 목록·상세</small></div>
-    <div class="stage">③ 상담 예약<small>대만 · 챗봇·요청서</small></div>
-    <div class="stage">④ 방문·진료<small>대구 · 병원</small></div>
-    <div class="stage">⑤ 귀국 후 관리<small>대만 · 채팅</small></div>
-
-    <div class="rowlabel">행동</div>
-    <div class="cell">대구 피부과 검색, 메디컬코리아·외국인 플랫폼 확인 <span class="ev">E03 E05</span></div>
-    <div class="cell">진료시간·가격 비교, 짧은 일정에 맞는 곳 고르기 <span class="ev">E01 E09</span></div>
-    <div class="cell">챗봇에 묻고 상담 예약 요청, 병원 답 기다림 <span class="ev">G01</span></div>
-    <div class="cell">병원 방문, 동의서 서명, 시술 <span class="ev">E13</span></div>
-    <div class="cell">회복 중 궁금한 점·불편을 병원에 묻기 <span class="ev">E15</span></div>
-
-    <div class="rowlabel">생각 [가정]</div>
-    <div class="cell think">“대구 병원 정보는 왜 다 한국어지?”</div>
-    <div class="cell think">“일요일에도 하나? 이 가격 적정한가?”</div>
-    <div class="cell think">“답이 언제 오지? 내 건강정보는?”</div>
-    <div class="cell think">“동의서를 제대로 이해한 걸까”</div>
-    <div class="cell think">“이 붓기, 물어봐도 되나?”</div>
-
-    <div class="rowlabel">감정 [가정]</div>
-    <div class="curve">
-      <svg viewBox="0 0 1000 96" preserveAspectRatio="none" role="img" aria-label="감정 곡선: 알아보기 -1, 비교·결정 -2 최저점, 상담 예약 -1, 방문·진료 0, 귀국 후 관리 -1">
-        <line x1="0" y1="20" x2="1000" y2="20" stroke="var(--line)" stroke-dasharray="4 4"/>
-        <line x1="0" y1="48" x2="1000" y2="48" stroke="var(--line)"/>
-        <line x1="0" y1="76" x2="1000" y2="76" stroke="var(--line)" stroke-dasharray="4 4"/>
-        <polyline points="100,62 300,82 500,62 700,48 900,62" fill="none" stroke="var(--curve)" stroke-width="3" vector-effect="non-scaling-stroke"/>
-      </svg>
-    </div>
-
-    <div class="rowlabel"></div>
-    <div class="cell" style="text-align:center"><b style="color:var(--neg)">−1</b> 정보 부족</div>
-    <div class="cell" style="text-align:center;border-color:var(--coral)"><b style="color:var(--neg)">−2 최저점</b> 판단 근거 없음</div>
-    <div class="cell" style="text-align:center"><b style="color:var(--neg)">−1</b> 기다림·불안</div>
-    <div class="cell" style="text-align:center"><b>0</b> 계획대로, 동의서 부담</div>
-    <div class="cell" style="text-align:center"><b style="color:var(--neg)">−1</b> 물어볼 곳 부족</div>
-
-    <div class="rowlabel">터치포인트</div>
-    <div class="cell tp"><span>화면 검색·SNS</span><span>메디컬코리아</span><span>UNNI·트립닥</span><span>메디대구 지도</span></div>
-    <div class="cell tp"><span>화면 병원 상세</span><span>가격 가이드</span><span>찜</span></div>
-    <div class="cell tp"><span>화면 챗봇</span><span>상담 예약</span><span>사람 병원 코디</span></div>
-    <div class="cell tp"><span>장소 대구 병원</span><span>사람 의료진·통역</span><span>화면 길찾기</span></div>
-    <div class="cell tp"><span>화면 사후관리 채팅</span><span>사람 의료진·코디</span></div>
-
-    <div class="rowlabel">페인포인트</div>
-    <div class="cell pain top"><p><span class="badge">2</span><b>등록 병원 상세 정보 부족</b></p><p>등록 145곳 중 상세 13곳, 외국어 정보 적음 <span class="ev">E03 E04 E05 E06</span></p></div>
-    <div class="cell pain top"><p><span class="badge">1</span><b>진료시간 정보 없음</b> <span class="ev">E01 E04</span></p><p><span class="badge">3</span><b>가격 기준 없음</b> <span class="ev">E02 E07</span></p></div>
-    <div class="cell pain"><p><b>병원 답 기다림</b> <span class="ev">G01 가정</span></p><p class="dim">예약 확인서 의존 <span class="ev">E16 · 범위 밖</span></p></div>
-    <div class="cell pain"><p class="dim">동의서 이해 어려움 <span class="ev">E13 · 의료진 몫</span></p></div>
-    <div class="cell pain"><p class="dim">귀국 후 진료성 상담 창구 없음 <span class="ev">E15</span></p></div>
+  <div class="bar"></div>
+  <div class="top">
+    <h1>고객 여정 지도 — <em>린 (대만 미용의료 단기 방문객)</em></h1>
+    <span class="pill">painpoint · 여정 지도 v1</span>
   </div>
+  <div class="sub">시나리오: 3박 4일 대구 여행에 피부 시술 1회를 믿을 만한 병원에서 받고, 귀국 후 궁금한 점을 묻고 싶다 · 위에서 아래로 행동 → 생각 → 감정 → 터치포인트 → 페인포인트 → 기회</div>
 
-  <footer>
-    <span>Top 1 진료시간 정보 없음 80점 · Top 2 등록 병원 상세 정보 부족 75점 · Top 3 피부·성형 가격 기준 없음 60점 (빈도 × 강도 × 해결 가능성)</span>
-    <span>근거: painpoint/evidence.csv · VOC 대신 데이터·공식 자료 (팀 결정 11/12) · 2026-11-12</span>
-  </footer>
+  <div class="card">
+    <div class="grid">
+      <div></div>
+      <div class="stage">알아보기</div>
+      <div class="stage">비교·결정</div>
+      <div class="stage">상담 예약</div>
+      <div class="stage">방문·진료</div>
+      <div class="stage">귀국 후 관리</div>
+
+      <div class="lab row-l">행동</div>
+      <div class="c">대구 피부과 검색<br>메디컬코리아·플랫폼 확인</div>
+      <div class="c">진료시간·가격 비교<br>일정 맞는 곳 고르기</div>
+      <div class="c">챗봇 질문·예약 요청<br>병원 답 기다리기</div>
+      <div class="c">병원 방문<br>동의서 서명·시술</div>
+      <div class="c">회복 중 궁금한 점<br>병원에 묻기</div>
+
+      <div class="lab row-l">생각</div>
+      <div class="c think">"대구 병원 정보는<br>왜 다 한국어지?"</div>
+      <div class="c think">"일요일에도 하나?<br>이 가격 적정한가?"</div>
+      <div class="c think">"답이 언제 오지?"</div>
+      <div class="c think">"동의서를 제대로<br>이해한 걸까"</div>
+      <div class="c think">"이 붓기,<br>물어봐도 되나?"</div>
+
+      <div class="lab row-l">감정</div>
+      <div class="curve">
+        <svg viewBox="0 0 1000 118" preserveAspectRatio="none" aria-label="감정 곡선: 알아보기 -1, 비교·결정 -2 최저점, 상담 예약 -1, 방문·진료 0, 귀국 후 관리 -1">
+          <line x1="0" y1="44" x2="1000" y2="44" stroke="var(--line)" stroke-dasharray="4 4"/>
+          <path d="M100,68 C170,68 230,96 300,96 C370,96 430,68 500,68 C570,68 630,44 700,44 C770,44 830,68 900,68"
+                fill="none" stroke="var(--teal)" stroke-width="3" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <svg viewBox="0 0 1000 118" aria-hidden="true">
+          <text x="4" y="22" class="elab">+</text><text x="4" y="112" class="elab">−</text>
+          <circle cx="100" cy="68" r="7" fill="var(--teal)"/><text x="100" y="54" text-anchor="middle" class="elab">−1</text>
+          <circle cx="300" cy="96" r="9" fill="var(--coral)"/><text x="300" y="80" text-anchor="middle" class="elab" style="fill:var(--coral);font-weight:700">−2 최저점</text>
+          <circle cx="500" cy="68" r="7" fill="var(--teal)"/><text x="500" y="54" text-anchor="middle" class="elab">−1</text>
+          <circle cx="700" cy="44" r="7" fill="var(--teal)"/><text x="700" y="30" text-anchor="middle" class="elab">0</text>
+          <circle cx="900" cy="68" r="7" fill="var(--teal)"/><text x="900" y="54" text-anchor="middle" class="elab">−1</text>
+        </svg>
+      </div>
+
+      <div class="lab row-l">터치포인트</div>
+      <div class="c">검색·SNS · 메디컬코리아<br>UNNI·트립닥 · 메디대구 지도</div>
+      <div class="c">메디대구 병원 상세<br>가격 가이드 · 찜</div>
+      <div class="c">챗봇 · 상담 예약<br>병원 코디네이터</div>
+      <div class="c">대구 병원<br>의료진 · 통역 · 길찾기</div>
+      <div class="c">사후관리 채팅<br>의료진 · 코디네이터</div>
+
+      <div class="lab row-l">페인포인트</div>
+      <div class="c pain"><div><span class="num">2</span>등록 병원 상세<br>정보 부족</div><span class="ev">E03 E04 E05 E06</span></div>
+      <div class="c pain"><div><span class="num">1</span>진료시간 정보 없음</div><div style="margin-top:3px"><span class="num">3</span>가격 기준 없음</div><span class="ev">E01 E04 · E02 E07</span></div>
+      <div class="c pain off"><div>병원 답 기다림</div><span class="ev">G01 가정 · 보류</span></div>
+      <div class="c pain off"><div>동의서 이해 어려움</div><span class="ev">E13 · 의료진 몫</span></div>
+      <div class="c pain off"><div>귀국 후 진료성<br>상담 창구 없음</div><span class="ev">E15 · 2027-05 전</span></div>
+
+      <div class="lab">기회</div>
+      <div class="c opp" style="border-bottom:0">등록 병원 상세를<br>5개 언어로 한곳에</div>
+      <div class="c opp" style="border-bottom:0">출처·확인일 붙은 진료시간<br>가격 위치 표시</div>
+      <div class="c opp" style="border-bottom:0">AI 요약·답장 초안으로<br>병원 응답 단축</div>
+      <div class="c opp" style="border-bottom:0">길찾기 · 병원 연락처</div>
+      <div class="c opp" style="border-bottom:0">사후관리 지원 병원<br>채팅 연결</div>
+    </div>
+  </div>
+  <div class="note">※ 근거 id는 painpoint/evidence.csv (VOC 대신 데이터·공식 자료, 팀 결정 11/12) · 페르소나·생각·감정은 [가정], 감정은 단계별 근거 순 강도로 매김 · 기회는 11/10 AX 기회 매트릭스에서 확정 · 숫자 = Top 3 순위 (priority.html)</div>
 </div>
 </body>
 </html>
