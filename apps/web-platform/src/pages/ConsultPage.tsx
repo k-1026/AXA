@@ -48,7 +48,7 @@ export function ConsultPage() {
       consult.open({ hospitalId: h.id, name: { ko: h.name, en: h.nameEn }, dept: h.depts[0], district: h.district, photo: h.photo });
     }
     setParams({}, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // 주소의 병원 id나 병원 데이터 준비 상태가 바뀔 때만 실행. consult는 렌더마다 새 객체라 일부러 뺌 (넣으면 매번 다시 실행)
   }, [wanted, hospitals.status]);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export function ConsultPage() {
   // 화면에 열려 있는 상담의 답변은 읽은 것으로 처리
   useEffect(() => {
     if (active?.unread) consult.select(active.hospitalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // consult는 렌더마다 새 객체라 의존성에서 일부러 뺌 (열린 상담·안 읽은 수가 바뀔 때만 실행)
   }, [active?.hospitalId, active?.unread]);
 
   const submit = (e: FormEvent) => {

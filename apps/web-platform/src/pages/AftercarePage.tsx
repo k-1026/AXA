@@ -37,7 +37,7 @@ export function AftercarePage() {
   // 열려 있는 대화의 의료진 답변은 읽은 것으로 처리
   useEffect(() => {
     if (active?.unread) care.select(active.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // care는 렌더마다 새 객체라 의존성에서 일부러 뺌 (열린 기록·안 읽은 수가 바뀔 때만 실행)
   }, [active?.id, active?.unread]);
 
   // 다른 기록으로 옮기면 보내지 않은 첨부는 비운다 (임시 주소도 풀어 줌)
