@@ -216,7 +216,8 @@
     "draft": "本文为尚未经过法律审查的草案，内容可能变更。",
     "back": "我的页面",
     "notFound": "找不到该文件。",
-    "koreanOnly": "本文件目前仅有韩语原文。"
+    "koreanOnly": "本文件目前仅有韩语原文。",
+    "translated": "本文件为翻译版本。如与韩文原文不一致，以韩文原文为准。"
   },
   "auth": {
     "requiredTitle": "请先登录",
@@ -346,7 +347,17 @@
       "submitLater": "演示阶段：预约申请 API 接入后即可提交。",
       "registered": "外国患者招揽机构",
       "staffLangs": "员工语言：{{langs}}",
-      "aiTranslation": "AI 翻译聊天"
+      "aiTranslation": "AI 翻译聊天",
+      "listNote": "按名称排序，并非推荐或排名。",
+      "suggestBasis": "仅根据各医院与您所说条件（接待语言、就诊日、可预约时间）的符合程度提出，并非对医疗水平、技术或结果的评价。均为已登记的外国患者招揽医疗机构。MediDaegu 为登记的患者招揽机构，可能向医院收取中介费，但中介费不影响排序。",
+      "priceNote": "以韩国患者为准公开的非医保价格（演示数值）。实际费用可能不同，请向医院确认。",
+      "reasons": {
+        "staffLang": "有会说{{lang}}的员工",
+        "aiTranslation": "可使用 AI 翻译聊天",
+        "openOn": "{{day}}就诊（{{hours}}）",
+        "slotsOn": "{{date}}有可咨询时段",
+        "inDistrict": "位于{{district}}"
+      }
     },
     "consent": {
       "privacy": "个人信息收集与使用",

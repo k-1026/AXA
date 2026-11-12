@@ -216,7 +216,8 @@
     "draft": "Đây là bản nháp chưa được rà soát pháp lý và có thể thay đổi.",
     "back": "Trang của tôi",
     "notFound": "Không tìm thấy tài liệu.",
-    "koreanOnly": "Tài liệu này hiện chỉ có bản tiếng Hàn."
+    "koreanOnly": "Tài liệu này hiện chỉ có bản tiếng Hàn.",
+    "translated": "Đây là bản dịch. Nếu có khác biệt với bản gốc tiếng Hàn, bản gốc tiếng Hàn được ưu tiên."
   },
   "auth": {
     "requiredTitle": "Vui lòng đăng nhập",
@@ -346,7 +347,17 @@
       "submitLater": "Giai đoạn demo: có thể gửi khi API yêu cầu đặt lịch được kết nối.",
       "registered": "Cơ sở tiếp nhận bệnh nhân nước ngoài",
       "staffLangs": "Nhân viên nói: {{langs}}",
-      "aiTranslation": "Chat dịch bằng AI"
+      "aiTranslation": "Chat dịch bằng AI",
+      "listNote": "Sắp xếp theo tên. Đây không phải là gợi ý hay xếp hạng.",
+      "suggestBasis": "Chỉ được gợi ý dựa trên mức độ phù hợp với điều kiện bạn đưa ra (ngôn ngữ hỗ trợ, ngày khám, giờ trống). Đây không phải là đánh giá về chất lượng y tế, tay nghề hay kết quả. Tất cả đều là cơ sở y tế đã đăng ký thu hút bệnh nhân nước ngoài. MediDaegu là đơn vị thu hút bệnh nhân đã đăng ký và có thể nhận phí môi giới từ bệnh viện; phí này không ảnh hưởng đến thứ tự.",
+      "priceNote": "Giá ngoài bảo hiểm công bố cho bệnh nhân Hàn Quốc (giá trị minh họa). Chi phí thực tế có thể khác, vui lòng hỏi bệnh viện.",
+      "reasons": {
+        "staffLang": "Nhân viên nói {{lang}}",
+        "aiTranslation": "Có trò chuyện dịch AI",
+        "openOn": "Mở cửa {{day}} ({{hours}})",
+        "slotsOn": "Có lịch tư vấn ngày {{date}}",
+        "inDistrict": "Tại {{district}}"
+      }
     },
     "consent": {
       "privacy": "Thu thập và sử dụng thông tin cá nhân",

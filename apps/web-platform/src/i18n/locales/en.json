@@ -216,7 +216,8 @@
     "draft": "This is a draft that has not yet had legal review. It may change.",
     "back": "My page",
     "notFound": "We couldn't find this document.",
-    "koreanOnly": "This document is currently available in Korean only."
+    "koreanOnly": "This document is currently available in Korean only.",
+    "translated": "This is a translation. If it differs from the Korean original, the Korean original prevails."
   },
   "auth": {
     "requiredTitle": "Please log in",
@@ -346,7 +347,17 @@
       "submitLater": "Demo stage: sending opens once the booking request API is connected.",
       "registered": "Registered for foreign patients",
       "staffLangs": "Staff speak: {{langs}}",
-      "aiTranslation": "AI translation chat"
+      "aiTranslation": "AI translation chat",
+      "listNote": "Listed in name order. This is not a recommendation or ranking.",
+      "suggestBasis": "Suggested only by how well each clinic matches the conditions you gave (language support, opening day, available time). This is not a judgment of medical quality, skill or results. All are registered foreign-patient facilities. MediDaegu is a registered patient facilitator and may receive a referral fee from hospitals; the fee does not affect the order.",
+      "priceNote": "Public non-covered prices for Korean patients (demo values). The final cost may differ, so please check with the clinic.",
+      "reasons": {
+        "staffLang": "Staff speak {{lang}}",
+        "aiTranslation": "AI translation chat available",
+        "openOn": "Open on {{day}} ({{hours}})",
+        "slotsOn": "Consultation slots on {{date}}",
+        "inDistrict": "In {{district}}"
+      }
     },
     "consent": {
       "privacy": "Collection and use of personal data",
