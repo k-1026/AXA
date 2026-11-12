@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { findLegalDocument, pickText } from '../features/legal/documents';
+import { findLegalDocument, isTranslated, pickText } from '../features/legal/documents';
 import { LegalLinks } from '../features/legal/LegalLinks';
 import type { Text } from '../features/legal/types';
 
@@ -20,7 +20,8 @@ export function LegalPage() {
     );
   }
 
-  const koreanOnly = i18n.language !== 'ko' && !doc.title.en;
+  const translated = isTranslated(doc.title, i18n.language);
+  const koreanOnly = i18n.language !== 'ko' && !translated;
   // 번역이 없어 한국어 원문을 보여줄 때는 한국어 글꼴·줄바꿈으로
   const docLang = koreanOnly ? 'ko' : undefined;
 
@@ -33,6 +34,7 @@ export function LegalPage() {
         <h1 lang={docLang}>{tx(doc.title)}</h1>
         <p className="legal-meta">{t('legal.updated', { date: doc.updated })}</p>
         <p className="legal-draft">{t('legal.draft')}</p>
+        {translated && <p className="legal-draft">{t('legal.translated')}</p>}
         {koreanOnly && <p className="legal-draft">{t('legal.koreanOnly')}</p>}
         {doc.sections.map((s, i) => {
           const List = s.list?.ordered ? 'ol' : 'ul';

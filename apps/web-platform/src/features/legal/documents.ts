@@ -5,6 +5,10 @@ import type { LegalDocument, Text } from './types';
 import { PRIVACY } from './privacy';
 import { TERMS } from './terms';
 import { AI_NOTICE } from './aiNotice';
+import en from './translations/en.json';
+import zhTW from './translations/zh-TW.json';
+import zhCN from './translations/zh-CN.json';
+import vi from './translations/vi.json';
 
 const L = (ko: string, en: string): Text => ({ ko, en });
 
@@ -75,7 +79,23 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
   },
 ];
 
-// 한국어 외 언어는 영어로 표시 (병원 이름과 같은 규칙). 영어본이 없으면 한국어 원문
-export const pickText = (x: Text, lang: string) => (lang !== 'ko' && x.en ? x.en : x.ko);
+// 번역본: 한국어 원문 문자열을 키로 한 언어별 JSON (원문이 바뀌면 키가 안 맞아 원문으로 돌아감)
+// 누락 확인: apps/web-platform 에서 node scripts/check-legal-translations.mjs
+const TRANSLATIONS: Record<string, Record<string, string>> = { en, 'zh-TW': zhTW, 'zh-CN': zhCN, vi };
+
+// ko → 원문. 그 외 → 문서 안 해당 언어 → 번역 파일 → 영어(문서 안 → 번역 파일) → 한국어 원문
+export const pickText = (x: Text, lang: string): string => {
+  if (lang === 'ko') return x.ko;
+  return (
+    (x as unknown as Record<string, string | undefined>)[lang] ??
+    TRANSLATIONS[lang]?.[x.ko] ??
+    x.en ??
+    TRANSLATIONS.en[x.ko] ??
+    x.ko
+  );
+};
+
+// 이 언어로 번역된 문서인지 (제목이 한국어 원문 그대로가 아니면 번역본)
+export const isTranslated = (x: Text, lang: string) => lang !== 'ko' && pickText(x, lang) !== x.ko;
 
 export const findLegalDocument =(slug: string | undefined) => LEGAL_DOCUMENTS.find((d) => d.slug === slug);
