@@ -17,6 +17,15 @@
 
 ## 기록
 
+### 2026-11-12 · backend-review-fix · Claude
+- 한 일: 코드 리뷰(`docs/review-branches-2026-11-12.md`, ai 브랜치) 반영. 공통 500 `internal`(ASGI 미들웨어) · 동시 가입 409 · 정리 API `/internal/purge`(`CRON_SECRET`) · 환율 ECOS 실패 뒤 10분 저장값·첫 요청 경쟁 · 로그인 시도 제한 `auth.too_many_attempts` · 챗봇 새 대화를 한 트랜잭션으로 · auth 세션 함수 commit 규칙 통일 · PATCH display_name 공백 · JWT HS256 고정 · 가입 동의 현재 버전 검사 · `patient_uuid`를 core/security로 · `.env.example`(`CRON_SECRET` 추가, `JWT_ALGORITHM` 삭제)
+- 바뀐 계약: **있음** 1·4·7-1절 (변경 이력에 기록) → **B 승인 필요**
+- 마이그레이션: 없음
+- 테스트: 315개 통과 = 백엔드 125 + AI 190 (`uv run --no-sync python -m pytest backend/tests ai/tests`). 이 PC는 SQLAlchemy C 확장 DLL이 정책에 막혀 worktree venv에서만 순수 Python으로 재설치함
+- 다음 할 일: Vercel Cron 설정(`vercel.json`) · 챗봇 `state` 동시 저장 충돌 처리 방식 결정
+- B에게 요청: ① contracts 1·4·7-1절 확인 ② PK 이름(`<table>_pkey` vs 모델 `pk_<table>`)·server_default 차이 정리 마이그레이션 (B가 마이그레이션 담당) ③ `current_staff()` 직원 토큰 DB 확인 ④ `modules/agent/` 빈 폴더 유지 여부
+- 막힌 것·질문: Vercel에서 `request.client.host`가 실제 사용자 IP인지 (프록시 IP면 IP 제한이 모두를 같이 막음)
+
 ### 2026-11-11 (2) · backend-A-chatbot · Claude
 - 한 일: **7e 지난 대화** — `GET /chatbot/sessions`(내 대화 목록, 최근 순, 최대 50), `GET /chatbot/sessions/{id}`(가린 글만, 카드·상태 X). **7c 계약·문서** — contracts 7절 챗봇 API 신설, 4절 `chatbot.unavailable`·`rate_limited` 챗봇 추가, 5절 챗봇의 `booking.service` 호출, 6절 `lang` 5개·`department_code` 값·`residency` 제안. `backend-plan.md` API 표, `compliance.md`(추천 허용 범위·대화 저장·AI 표시) 갱신. 수동 검증 안내 `docs/7b-수동검증.md`(Swagger·curl)
 - 바뀐 계약: **있음** 4·5·6·7절 (변경 이력에 한 줄) → **B 승인 필요**
