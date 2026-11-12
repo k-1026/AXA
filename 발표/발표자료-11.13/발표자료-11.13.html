@@ -21,7 +21,7 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
-body { background: #2b3440; font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; overflow: hidden; }
+body { background: #2b3440; font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; overflow: hidden; word-break: keep-all; overflow-wrap: break-word; }
 
 /* 16:9 한 장 = 1280×720, 화면 크기에 맞춰 축소·확대 */
 #stage { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; transform-origin: center center; }
@@ -65,10 +65,10 @@ table.calc td:first-child, table.calc td.num { white-space: nowrap; }
 /* 1장 */
 .cover { justify-content: center; }
 .cover h1 { font-size: 46px; }
-.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 26px; }
+.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px; margin-top: 26px; }
 .flow .card { position: relative; padding: 16px; }
 .flow .card .day { font-size: 12px; font-weight: 700; color: var(--accent); }
-.flow .card + .card::before { content: "→"; position: absolute; left: -12px; top: 50%; transform: translate(-50%, -50%); color: var(--neutral); font-size: 18px; }
+.flow .card + .card::before { content: "→"; position: absolute; left: -17px; top: 50%; transform: translate(-50%, -50%); color: var(--neutral); font-size: 18px; line-height: 1; }
 
 /* 3장 밸류체인 */
 .chain { display: grid; grid-template-columns: 150px repeat(5, 1fr); gap: 6px; font-size: 13px; }

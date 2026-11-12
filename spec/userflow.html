@@ -42,7 +42,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
 
 /* 한 장(1280×720) 레이아웃 */
 .page { width: 1280px; height: 720px; margin: 0 auto; padding: 24px 36px 14px; display: flex; flex-direction: column; gap: 12px; }
@@ -191,14 +191,14 @@ table.t tr.hl td { background: var(--pain-soft); }
       <!-- row2 exceptions -->
       <path class="ar ex" d="M700,262 V292" marker-end="url(#ap)"/><text x="706" y="280" class="lb n">아니오</text>
       <rect class="nd ex" x="640" y="294" width="150" height="40" rx="10"/><text class="tex" x="715" y="308">E3 직접 상담 요청</text><text class="t2" x="715" y="324">병원에 바로 요청 버튼</text>
-      <path class="ar" d="M648,294 V236" marker-end="url(#a)"/>
+      <path class="ar" d="M652,294 V272 H600 V249" marker-end="url(#a)"/>
       <path class="ar ex" d="M565,262 V292" marker-end="url(#ap)"/><text x="571" y="280" class="lb n">예</text>
       <rect class="nd ex" x="505" y="294" width="122" height="40" rx="10"/><text class="tex" x="566" y="308">E4 예약 막음</text><text class="t2" x="566" y="324">정보·챗봇만 이용</text>
 
       <!-- ROW 3 : 병원 대시보드 lane -->
       <rect class="lane" x="130" y="360" width="1078" height="132" rx="14"/>
       <text x="0" y="372" class="rowt">③ 병원 확정</text>
-      <text x="146" y="382" class="lanet">병원 대시보드 · 코디 (US5)</text>
+      <text x="240" y="384" class="lanet">병원 대시보드 · 코디 (US5)</text>
       <path class="ar dash" d="M220,252 V414" marker-end="url(#a)"/><text x="226" y="300" class="lb">병원으로 넘어감</text>
       <rect class="nd main" x="150" y="416" width="160" height="44" rx="12"/><text class="t1" x="230" y="431">요청함</text><text class="t2" x="230" y="448">AI 요약 · 답장 초안</text>
       <path class="ar" d="M310,438 H352" marker-end="url(#a)"/><text x="314" y="430" class="lb">초안 고치기</text>
