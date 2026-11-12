@@ -9,7 +9,7 @@
 |---|---|---|
 | `backend/src/core/` | A+B 공동 | PR + 상대 승인 |
 | `backend/alembic/` | A | 마이그레이션 생성은 A만 (결정 13) |
-| `modules/auth/`, `patient/`, `consent/`, `hospital/`, `price/`, `chatbot/`, `notification/`, `fx/` | A | 요청만 |
+| `modules/auth/`, `patient/`, `consent/`, `hospital/`, `price/`, `chatbot/`, `notification/`, `fx/`, `maintenance/` | A | 요청만 |
 | `modules/booking/models.py`, `booking/service.py` | B | 요청만 |
 | `modules/booking/router_patient.py` | A | — |
 | `modules/booking/router_tenant.py` | B | — |
@@ -126,10 +126,20 @@
 - **저장**: 개인정보를 가린 대화 글 + 상태(체류 형태, 초안 일부, 보여 준 병원)만. 도구 결과·카드·초안의 `health_info`·`message`는 저장 X → 지난 대화를 열면 글만 보임. 30일 후 삭제, 탈퇴 즉시 삭제
 - **호출 제한**: 계정당 분 10회·일 150회(가정), 계정당 대화 50개. 지금은 서버 메모리 → 운영 전 DB·캐시로
 
+## 7-1. 내부 정리 API (A, `modules/maintenance/`)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `GET`·`POST /internal/purge` | 30일 지난 챗봇 대화 + 만료·로그아웃한 로그인 세션 삭제 → `{chat_sessions, auth_sessions}` (지운 수) | 404 `not_found`(`CRON_SECRET` 없음 = 꺼짐), 401 `auth.required`(비밀 값 틀림) |
+
+- 인증: `Authorization: Bearer <CRON_SECRET>` (환경변수 `CRON_SECRET`, 16자 이상). Swagger에 숨김
+- **예약 작업이 하루 1번 불러야 함** (Vercel Cron 등). 부르지 않으면 30일 보관 정리가 되지 않음. Vercel Cron은 GET + 이 헤더를 자동으로 보냄 (`vercel.json` 설정은 배포 담당이)
+
 ## 8. 변경 이력
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-12 | 4 | 에러 `internal`(500) 추가 (처리하지 못한 예외도 같은 형식) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-11 | 4·5·6·7 | 챗봇 API 7절 신설(`/chatbot/ask`, `/chatbot/sessions` 목록·상세·삭제), 에러 `chatbot.unavailable`(503)·`rate_limited`에 챗봇 호출 추가, 챗봇의 `booking.service` 호출, `BookingCreate.lang` 5개 언어·`department_code` 값, `residency` 칸 제안 | A (**B 확인 필요**) | `backend-A-chatbot` → `backend` |
 | 2026-11-04 | 1·4 | 새 모듈 `fx/`(A, 환율), 에러 `fx.unavailable`(503). `DELETE /me` 탈퇴(비밀번호 확인) | A | — |
