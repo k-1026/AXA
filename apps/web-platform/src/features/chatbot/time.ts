@@ -1,5 +1,5 @@
 // 날짜·시간은 모두 한국 시간(KST) 기준으로 표시
-const TZ = 'Asia/Seoul';
+import { KST as TZ } from '../../lib/common';
 
 /** YYYY-MM-DD (KST) */
 export function kstDay(iso: string | Date): string {

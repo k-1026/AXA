@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CalendarIcon, DaeguSkyline, PencilIcon, PlusIcon } from './icons';
 import { ScheduleEntry } from './ScheduleEntry';
+import { KST } from '../../lib/common';
 import type { ScheduleItem } from './sampleData';
 
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
 type RangeFormat = Intl.DateTimeFormat & { formatRange(a: Date, b: Date): string };
 
 function formatRange(start: string, end: string, lang: string) {
-  const fmt = new Intl.DateTimeFormat(lang, { month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' });
+  const fmt = new Intl.DateTimeFormat(lang, { month: 'long', day: 'numeric', timeZone: KST });
   return (fmt as RangeFormat).formatRange(new Date(`${start}T00:00:00+09:00`), new Date(`${end}T00:00:00+09:00`));
 }
 

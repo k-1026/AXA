@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MenuIcon, PlusIcon, SendIcon, TranslateIcon } from '../features/chatbot/icons';
-import { useChatText } from '../features/chatbot/ChatMessages';
+import { useLocalized } from '../lib/common';
 import { useVisualViewport } from '../features/chatbot/useVisualViewport';
 import { CalendarIcon, InfoIcon } from '../features/mypage/icons';
 import { useHospitals } from '../features/hospital/useHospitals';
@@ -11,8 +11,8 @@ import { ConsultMessages } from '../features/consult/ConsultMessages';
 import { BookingForm } from '../features/consult/BookingForm';
 import { HospitalThumb } from '../features/consult/HospitalThumb';
 import { ClipboardIcon } from '../features/consult/icons';
-import { isConsultHours } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
+import { hospitalNames } from '../features/hospital/name';
 
 const QUICK = [
   { key: 'booking', Icon: CalendarIcon },
@@ -24,7 +24,7 @@ const QUICK = [
 // 병원 상세의 "병원에 상담하기"로 들어오면 ?hospital=<id> 로 그 병원 상담을 연다
 export function ConsultPage() {
   const { t } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized();
   const consult = useConsultThreads();
   const hospitals = useHospitals();
   const [params, setParams] = useSearchParams();
@@ -46,10 +46,10 @@ export function ConsultPage() {
     if (hospitals.status !== 'ready') return;
     const h = hospitals.data.items.find((x) => x.id === wanted);
     if (h) {
-      consult.open({ hospitalId: h.id, name: { ko: h.name, en: h.nameEn }, dept: h.depts[0], district: h.district, photo: h.photo });
+      consult.open({ hospitalId: h.id, name: hospitalNames(h), dept: h.depts[0], district: h.district, photo: h.photo });
     }
     setParams({}, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // 주소의 병원 id나 병원 데이터 준비 상태가 바뀔 때만 실행. consult는 렌더마다 새 객체라 일부러 뺌 (넣으면 매번 다시 실행)
   }, [wanted, hospitals.status]);
 
   useEffect(() => {
@@ -60,12 +60,13 @@ export function ConsultPage() {
   }, [drawer]);
 
   const active = consult.active;
-  const open = consult.mode === 'demo' || isConsultHours();
+  // "담당자 응답 가능" 표시는 데모에서만. 실제 회원 상담은 아직 병원이 답하는 기능이 연결되지 않았다
+  const demo = consult.mode === 'demo';
 
   // 화면에 열려 있는 상담의 답변은 읽은 것으로 처리
   useEffect(() => {
     if (active?.unread) consult.select(active.hospitalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // consult는 렌더마다 새 객체라 의존성에서 일부러 뺌 (열린 상담·안 읽은 수가 바뀔 때만 실행)
   }, [active?.hospitalId, active?.unread]);
 
   const submit = (e: FormEvent) => {
@@ -80,7 +81,7 @@ export function ConsultPage() {
       <ConsultSidebar
         activeId={active?.hospitalId}
         search={consult.search}
-        demo={consult.mode === 'demo'}
+        demo={demo}
         onSelect={(id) => {
           consult.select(id);
           setForm(false);
@@ -119,7 +120,7 @@ export function ConsultPage() {
                 <h1 id="consult-title">{text(active.name)}</h1>
                 <p className="consult-meta">
                   {t(`dept.${active.dept}`)} · {t(`district.${active.district}`)}
-                  <span className={open ? 'consult-online is-on' : 'consult-online'}>{t(open ? 'consult.staffOnline' : 'consult.staffOffline')}</span>
+                  {demo && <span className="consult-online is-on">{t('consult.staffOnline')}</span>}
                 </p>
               </div>
               <div className="consult-head-actions">

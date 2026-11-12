@@ -2,8 +2,7 @@
   "header": {
     "language": "Language",
     "currency": "Currency",
-    "login": "Log in / Sign up",
-    "chatbot": "Chatbot"
+    "login": "Log in / Sign up"
   },
   "nav": {
     "title": "Menu",
@@ -141,7 +140,6 @@
       "edit": "Edit",
       "add": "Add plan",
       "directions": "Directions",
-      "more": "Plan options",
       "tag": {
         "userAdded": "Added by you",
         "experience": "Experience",
@@ -218,12 +216,12 @@
     "draft": "This is a draft that has not yet had legal review. It may change.",
     "back": "My page",
     "notFound": "We couldn't find this document.",
-    "koreanOnly": "This document is currently available in Korean only."
+    "koreanOnly": "This document is currently available in Korean only.",
+    "translated": "This is a translation. If it differs from the Korean original, the Korean original prevails."
   },
   "auth": {
     "requiredTitle": "Please log in",
     "requiredDesc": "Your saved hospitals, visit history and Daegu schedule are available after you log in.",
-    "comingSoon": "Member login is coming soon. For now you can look around with a demo account.",
     "demo": "Try the demo account",
     "demoNote": "The demo account also shows sample data. Saved hospitals and your visit log stay in this browser only.",
     "demoBadge": "Demo",
@@ -279,11 +277,9 @@
     "delete": "Delete chat",
     "confirmDelete": "Delete the chat from {{title}}? This cannot be undone.",
     "saveNote": {
-      "guest": "Log in to save your chats",
       "demo": "Demo chats are not saved",
       "member": "Chats are saved automatically"
     },
-    "login": "Log in",
     "settings": "Settings",
     "summary": {
       "none": "New chat",
@@ -335,7 +331,8 @@
       "login": "Please log in again.",
       "notFound": "This conversation was not found. Please ask again in a new chat.",
       "validation": "Please check your question (up to 1,000 characters).",
-      "error": "Couldn't get an answer. Please try again."
+      "error": "Couldn't get an answer. Please try again.",
+      "tooManySessions": "You have too many saved conversations. Please delete some past conversations."
     },
     "card": {
       "hospitalList": "{{count}} clinics (by name, not a ranking)",
@@ -350,13 +347,28 @@
       "submitLater": "Demo stage: sending opens once the booking request API is connected.",
       "registered": "Registered for foreign patients",
       "staffLangs": "Staff speak: {{langs}}",
-      "aiTranslation": "AI translation chat"
+      "aiTranslation": "AI translation chat",
+      "listNote": "Listed in name order. This is not a recommendation or ranking.",
+      "suggestBasis": "Suggested only by how well each clinic matches the conditions you gave (language support, opening day, available time). This is not a judgment of medical quality, skill or results. All are registered foreign-patient facilities. MediDaegu is a registered patient facilitator and may receive a referral fee from hospitals; the fee does not affect the order.",
+      "priceNote": "Public non-covered prices for Korean patients (demo values). The final cost may differ, so please check with the clinic.",
+      "reasons": {
+        "staffLang": "Staff speak {{lang}}",
+        "aiTranslation": "AI translation chat available",
+        "openOn": "Open on {{day}} ({{hours}})",
+        "slotsOn": "Consultation slots on {{date}}",
+        "inDistrict": "In {{district}}"
+      }
     },
     "consent": {
       "privacy": "Collection and use of personal data",
       "health": "Processing of health information",
       "overseas_transfer": "Processing by overseas AI (cross-border transfer)"
-    }
+    },
+    "loadingHistory": "Loading this conversation…",
+    "loadFailed": "Couldn't load this conversation.",
+    "retry": "Try again",
+    "deleteFailed": "Couldn't delete the conversation. Please try again shortly.",
+    "dismiss": "Close"
   },
   "consult": {
     "threads": "Hospital chats",
@@ -374,7 +386,6 @@
     "empty": "Send your first message to the hospital staff. The hospital replies directly.",
     "staffLabel": "{{name}} · Staff",
     "staffOnline": "Within consultation hours",
-    "staffOffline": "Outside consultation hours",
     "hospitalInfo": "Hospital info",
     "requestBooking": "Request booking",
     "notice": "Ask the hospital staff anything before your visit.",
@@ -396,9 +407,11 @@
     "status": {
       "pending": "Pending",
       "confirmed": "Confirmed",
-      "declined": "Unavailable",
+      "rejected": "Unavailable",
       "cancelled": "Cancelled",
-      "completed": "Visited"
+      "visited": "Visited",
+      "proposed": "New time proposed",
+      "expired": "Expired"
     },
     "quick": {
       "booking": "Booking",
@@ -422,9 +435,10 @@
       "errDate": "Choose today or a later date.",
       "changeTitle": "Change booking",
       "changeSubmit": "Request change",
-      "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then."
+      "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then.",
+      "errTime": "Please choose a time later than now."
     },
-    "completedNote": "Visit completed. You can talk with the medical staff in Aftercare."
+    "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare."
   },
   "bookings": {
     "backToChats": "Back to chats",
@@ -436,7 +450,7 @@
       "pending": "Pending",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
-      "completed": "Visited"
+      "visited": "Visited"
     },
     "sortLabel": "Sort",
     "sortVisit": "By visit date",
@@ -447,7 +461,7 @@
     "kind": "Visit consultation · Language {{lang}}",
     "number": "Booking no. {{no}}",
     "cancelledOn": "Cancelled on {{date}}",
-    "declinedNote": "The hospital said this time is not available.",
+    "rejectedNote": "The hospital said this time is not available.",
     "change": "Change booking",
     "cancel": "Cancel booking",
     "chat": "Chat",
@@ -456,7 +470,9 @@
     "changeMsg": "I requested to change my booking to {{when}}.",
     "cancelMsg": "I cancelled my booking for {{when}}.",
     "footnote": "Booking times are in Korea Standard Time (KST).",
-    "sampleNote": "Sample hospitals and bookings."
+    "sampleNote": "Sample hospitals and bookings.",
+    "proposedNote": "The hospital proposed a different time. Please check it in the consultation chat.",
+    "expiredNote": "All preferred dates have passed, so this request has expired."
   },
   "aftercare": {
     "list": "Aftercare visits",
@@ -478,5 +494,10 @@
     "errSize": "Each file can be up to 50MB.",
     "errCount": "You can send up to {{max}} files at once.",
     "aftercareButton": "Aftercare"
+  },
+  "notFoundPage": {
+    "title": "Page not found",
+    "body": "The address may have changed, or the page doesn't exist.",
+    "home": "Go to home"
   }
 }

@@ -6,7 +6,7 @@ export interface Localized {
   en: string;
 }
 
-export type ScheduleKind = 'hospital' | 'experience' | 'tour';
+type ScheduleKind = 'hospital' | 'experience' | 'tour';
 
 export interface ScheduleItem {
   id: string;

@@ -13,17 +13,18 @@ const QUICK: { topic: Topic; Icon: () => JSX.Element }[] = [
 interface Props {
   onSend: (text: string) => void;
   onTopic: (topic: Topic) => void;
+  busy: boolean; // 답을 기다리거나 지난 대화를 불러오는 중: 보내기만 막고 입력은 그대로 둔다
 }
 
 // 화면 아래에 붙어 있는 빠른 메뉴 + 입력창 + 안내 문구
-export function ChatComposer({ onSend, onTopic }: Props) {
+export function ChatComposer({ onSend, onTopic, busy }: Props) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
   const [quickOpen, setQuickOpen] = useState(true);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() || busy) return;
     onSend(text);
     setText('');
   };
@@ -33,7 +34,7 @@ export function ChatComposer({ onSend, onTopic }: Props) {
       {quickOpen && (
         <div className="chat-quick" id="chat-quick">
           {QUICK.map(({ topic, Icon }) => (
-            <button key={topic} type="button" onClick={() => onTopic(topic)}>
+            <button key={topic} type="button" disabled={busy} onClick={() => onTopic(topic)}>
               <Icon />
               {t(`chat.topic.${topic}`)}
             </button>
@@ -58,8 +59,9 @@ export function ChatComposer({ onSend, onTopic }: Props) {
           aria-label={t('chat.placeholder')}
           enterKeyHint="send"
           autoComplete="off"
+          maxLength={1000} // 서버 질문 길이 한도와 같음 (chat.api.validation)
         />
-        <button type="submit" className="chat-send" disabled={!text.trim()} aria-label={t('chat.send')}>
+        <button type="submit" className="chat-send" disabled={!text.trim() || busy} aria-label={t('chat.send')}>
           <SendIcon />
         </button>
       </form>

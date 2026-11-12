@@ -1,48 +1,54 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { onAccountReset, type AccountKey } from '../../components/account';
 import { useAuth } from '../../components/auth';
+import { searchText, uid } from '../../lib/common';
 import { SAMPLE_THREADS } from './sampleThreads';
 import type { BookingRequest, ConsultThread } from './types';
-import type { ChatText } from '../chatbot/types';
 
 // 저장 방식은 챗봇과 같음 (백엔드 연결 전)
 // - demo: 예시 상담으로 시작, 바꾼 내용은 메모리에만
 // - member: 빈 목록으로 시작, 지금은 메모리. 연결 후 save()에서 서버 저장
+// 메모리는 계정별로 나누고, 로그아웃·탈퇴하면 모두 지운다 (같은 탭의 다음 사용자에게 보이지 않게)
 // 병원 답변은 병원 담당자가 직접 쓴다. 이 화면은 답을 지어내지 않는다
 type Mode = 'demo' | 'member';
-const memory: Partial<Record<Mode, ConsultThread[]>> = {};
+const memory = new Map<AccountKey, ConsultThread[]>();
+onAccountReset(() => memory.clear());
 
-const load = (mode: Mode) => (memory[mode] ??= mode === 'demo' ? SAMPLE_THREADS : []);
-const save = (mode: Mode, list: ConsultThread[]) => {
-  memory[mode] = list;
+const load = (key: AccountKey, mode: Mode) => {
+  if (!memory.has(key)) memory.set(key, mode === 'demo' ? SAMPLE_THREADS : []);
+  return memory.get(key)!;
+};
+const save = (key: AccountKey, list: ConsultThread[]) => {
+  memory.set(key, list);
   // TODO(member): 상담 백엔드가 생기면 여기서 서버에 저장
 };
 
-const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const lastAt = (t: ConsultThread) => t.messages[t.messages.length - 1]?.at ?? '';
-const textOf = (x?: ChatText) => (!x ? '' : typeof x === 'string' ? x : `${x.ko} ${x.en}`);
 
-export type NewThread = Omit<ConsultThread, 'messages' | 'unread'>;
+type NewThread = Omit<ConsultThread, 'messages' | 'unread'>;
 
 export function useConsultThreads() {
-  const { user } = useAuth();
+  const { user, account } = useAuth();
   const mode: Mode = user?.demo ? 'demo' : 'member';
-  const [list, setList] = useState<ConsultThread[]>(() => load(mode));
+  const [list, setList] = useState<ConsultThread[]>(() => load(account, mode));
   const [activeId, setActiveId] = useState<string | null>(null);
+  const accountRef = useRef(account);
+  accountRef.current = account;
 
   useEffect(() => {
-    setList(load(mode));
+    setList(load(account, mode));
     setActiveId(null);
-  }, [mode]);
+  }, [account, mode]);
 
-  const update = useCallback(
-    (fn: (prev: ConsultThread[]) => ConsultThread[]) =>
-      setList((prev) => {
-        const next = fn(prev);
-        save(mode, next);
-        return next;
-      }),
-    [mode],
-  );
+  // 지금 계정의 메모리에만 저장 (계정이 바뀐 뒤 늦게 도착한 변경은 버림)
+  const update = useCallback((fn: (prev: ConsultThread[]) => ConsultThread[]) => {
+    const key = accountRef.current;
+    setList((prev) => {
+      const next = fn(prev);
+      save(key, next);
+      return next;
+    });
+  }, []);
 
   // 최근 대화가 있는 병원이 위로 (메시지가 없는 새 상담은 맨 위)
   const threads = useMemo(
@@ -94,7 +100,7 @@ export function useConsultThreads() {
   const search = (q: string) => {
     const s = q.trim().toLowerCase();
     if (!s) return threads;
-    return threads.filter((t) => textOf(t.name).toLowerCase().includes(s) || t.messages.some((m) => textOf(m.text).toLowerCase().includes(s)));
+    return threads.filter((t) => searchText(t.name).toLowerCase().includes(s) || t.messages.some((m) => searchText(m.text).toLowerCase().includes(s)));
   };
 
   const bookings = threads.flatMap((t) => t.messages.filter((m) => m.booking).map((m) => ({ thread: t, message: m, booking: m.booking! })));

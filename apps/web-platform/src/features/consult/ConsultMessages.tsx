@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useChatText } from '../chatbot/ChatMessages';
+import { useLocalized } from '../../lib/common';
 import { kstDay, longDate, msgTime } from '../chatbot/time';
 import { StaffIcon } from './icons';
 import { BookingCard } from './BookingCard';
@@ -9,7 +9,7 @@ import type { ConsultThread } from './types';
 // 한 병원과의 대화 전체 (날짜가 바뀌면 구분선)
 export function ConsultMessages({ thread }: { thread: ConsultThread }) {
   const { t, i18n } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized();
   const end = useRef<HTMLDivElement>(null);
   const msgs = thread.messages;
 

@@ -2,8 +2,7 @@
   "header": {
     "language": "語言",
     "currency": "貨幣",
-    "login": "登入 / 註冊",
-    "chatbot": "聊天機器人"
+    "login": "登入 / 註冊"
   },
   "nav": {
     "title": "選單",
@@ -141,7 +140,6 @@
       "edit": "編輯行程",
       "add": "新增行程",
       "directions": "路線",
-      "more": "行程選單",
       "tag": {
         "userAdded": "自行登錄",
         "experience": "體驗",
@@ -218,12 +216,12 @@
     "draft": "本文為尚未經過法律審查的草案，內容可能變更。",
     "back": "我的頁面",
     "notFound": "找不到該文件。",
-    "koreanOnly": "本文件目前僅有韓語原文。"
+    "koreanOnly": "本文件目前僅有韓語原文。",
+    "translated": "本文件為翻譯版本。如與韓文原文不一致，以韓文原文為準。"
   },
   "auth": {
     "requiredTitle": "請先登入",
     "requiredDesc": "已儲存的醫院、就診紀錄與大邱行程需登入後查看。",
-    "comingSoon": "會員登入即將推出。目前可以使用示範帳號瀏覽。",
     "demo": "使用示範帳號瀏覽",
     "demoNote": "示範帳號也會顯示範例資料，收藏和就診紀錄僅儲存在此瀏覽器中。",
     "demoBadge": "示範",
@@ -279,11 +277,9 @@
     "delete": "刪除對話",
     "confirmDelete": "要刪除 {{title}} 的對話嗎？刪除後無法復原。",
     "saveNote": {
-      "guest": "登入後可儲存對話",
       "demo": "示範對話不會被儲存",
       "member": "對話會自動儲存"
     },
-    "login": "登入",
     "settings": "設定",
     "summary": {
       "none": "新對話",
@@ -335,7 +331,8 @@
       "login": "請重新登入。",
       "notFound": "找不到此對話，請在新對話中再問一次。",
       "validation": "請確認您的問題（1,000 字以內）。",
-      "error": "未能取得回答，請再試一次。"
+      "error": "未能取得回答，請再試一次。",
+      "tooManySessions": "已儲存的對話過多，請刪除部分過去的對話。"
     },
     "card": {
       "hospitalList": "{{count}} 家醫院（依名稱排列，非排名）",
@@ -350,13 +347,28 @@
       "submitLater": "示範階段：預約申請 API 連接後即可送出。",
       "registered": "外籍患者招攬機構",
       "staffLangs": "員工語言：{{langs}}",
-      "aiTranslation": "AI 翻譯聊天"
+      "aiTranslation": "AI 翻譯聊天",
+      "listNote": "依名稱排序，並非推薦或排名。",
+      "suggestBasis": "僅依各醫院與您所說條件（應對語言、看診日、可預約時間）的符合程度提出，並非對醫療水準、技術或結果的評價。皆為已登記的外國患者招攬醫療機構。MediDaegu 為登記的患者招攬業者，可能向醫院收取仲介費，但仲介費不影響排序。",
+      "priceNote": "以韓國患者為準公開的非給付價格（示範數值）。實際費用可能不同，請向醫院確認。",
+      "reasons": {
+        "staffLang": "有會說{{lang}}的員工",
+        "aiTranslation": "可使用 AI 翻譯聊天",
+        "openOn": "{{day}}看診（{{hours}}）",
+        "slotsOn": "{{date}}有可諮詢時段",
+        "inDistrict": "位於{{district}}"
+      }
     },
     "consent": {
       "privacy": "個人資料蒐集與使用",
       "health": "健康資訊處理",
       "overseas_transfer": "境外 AI 處理（跨境傳輸）"
-    }
+    },
+    "loadingHistory": "正在載入此對話…",
+    "loadFailed": "無法載入此對話。",
+    "retry": "重試",
+    "deleteFailed": "無法刪除對話，請稍後再試。",
+    "dismiss": "關閉"
   },
   "consult": {
     "threads": "醫院諮詢",
@@ -374,7 +386,6 @@
     "empty": "請傳送第一則訊息給醫院人員，醫院會直接回覆。",
     "staffLabel": "{{name}} · 諮詢人員",
     "staffOnline": "諮詢時間內",
-    "staffOffline": "非諮詢時間",
     "hospitalInfo": "醫院資訊",
     "requestBooking": "申請預約",
     "notice": "就診前有任何問題，請詢問醫院人員。",
@@ -396,9 +407,11 @@
     "status": {
       "pending": "待確認",
       "confirmed": "已確認",
-      "declined": "無法預約",
+      "rejected": "無法預約",
       "cancelled": "已取消",
-      "completed": "已就診"
+      "visited": "已就診",
+      "proposed": "醫院提議其他時間",
+      "expired": "已過期"
     },
     "quick": {
       "booking": "預約諮詢",
@@ -422,9 +435,10 @@
       "errDate": "請選擇今天或之後的日期。",
       "changeTitle": "變更預約",
       "changeSubmit": "申請變更",
-      "changeHint": "變更後醫院會重新確認，確認前顯示為「待確認」。"
+      "changeHint": "變更後醫院會重新確認，確認前顯示為「待確認」。",
+      "errTime": "請選擇現在之後的時間。"
     },
-    "completedNote": "已完成就診，可在術後管理中與醫護人員交流。"
+    "visitedNote": "已完成就診，可在術後管理中與醫護人員交流。"
   },
   "bookings": {
     "backToChats": "返回諮詢列表",
@@ -436,7 +450,7 @@
       "pending": "待確認",
       "confirmed": "已確認",
       "cancelled": "已取消",
-      "completed": "已就診"
+      "visited": "已就診"
     },
     "sortLabel": "排序",
     "sortVisit": "依就診日期",
@@ -447,7 +461,7 @@
     "kind": "到院諮詢 · 諮詢語言 {{lang}}",
     "number": "預約編號 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
-    "declinedNote": "醫院告知此時間無法預約。",
+    "rejectedNote": "醫院告知此時間無法預約。",
     "change": "變更預約",
     "cancel": "取消預約",
     "chat": "諮詢",
@@ -456,7 +470,9 @@
     "changeMsg": "已申請將預約改為{{when}}。",
     "cancelMsg": "已取消{{when}}的預約。",
     "footnote": "預約時間以韓國時間（KST）為準。",
-    "sampleNote": "範例醫院與預約資訊。"
+    "sampleNote": "範例醫院與預約資訊。",
+    "proposedNote": "醫院提議了其他時間，請在諮詢中確認。",
+    "expiredNote": "所有希望日期皆已過去，此申請已過期。"
   },
   "aftercare": {
     "list": "術後管理紀錄",
@@ -478,5 +494,10 @@
     "errSize": "每個檔案最大50MB。",
     "errCount": "一次最多傳送{{max}}個。",
     "aftercareButton": "術後管理"
+  },
+  "notFoundPage": {
+    "title": "找不到頁面",
+    "body": "網址可能已變更，或頁面不存在。",
+    "home": "回到首頁"
   }
 }

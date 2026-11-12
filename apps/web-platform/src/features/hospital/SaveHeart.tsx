@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSavedHospitals } from './savedHospitals';
 
@@ -10,6 +10,8 @@ export function SaveHeart({ id, name }: { id: string; name: string }) {
   const { isSaved, toggle } = useSavedHospitals();
   const [popping, setPopping] = useState(false);
   const saved = isSaved(id);
+  // 카드마다 SVG id가 겹치지 않게. useId의 콜론(:r1:)은 url(#…) 참조에서 빼 둔다
+  const gradientId = `save-heart-fill-${useId().replace(/:/g, '')}`;
 
   return (
     <button
@@ -27,12 +29,12 @@ export function SaveHeart({ id, name }: { id: string; name: string }) {
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <defs>
-          <linearGradient id="save-heart-fill" x1="0.2" y1="0" x2="0.8" y2="1">
+          <linearGradient id={gradientId} x1="0.2" y1="0" x2="0.8" y2="1">
             <stop offset="0" stopColor="#fb7185" />
             <stop offset="1" stopColor="#e11d48" />
           </linearGradient>
         </defs>
-        <path className="save-heart-color" d={HEART} fill="url(#save-heart-fill)" />
+        <path className="save-heart-color" d={HEART} fill={`url(#${gradientId})`} />
         <path className="save-heart-shine" d="M7.4 9.6a2.3 2.3 0 0 1 1.9-2" />
         <path className="save-heart-line" d={HEART} />
       </svg>

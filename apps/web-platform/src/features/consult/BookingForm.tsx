@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../../i18n';
-import { todayKst } from './format';
+import { todayKst } from '../../lib/common';
+import { nowKstTime } from './format';
 import type { BookingRequest } from './types';
 
 // 상담 가능 시간 안에서 30분 단위
@@ -22,9 +23,21 @@ export function BookingForm({ initial, onSubmit, onCancel }: Props) {
   const [note, setNote] = useState(initial?.note ?? '');
   const [error, setError] = useState('');
 
+  // 오늘(한국 시간)을 고르면 이미 지난 시간은 고를 수 없다
+  const timesFor = (d: string) => (d === todayKst() ? TIMES.filter((x) => x > nowKstTime()) : TIMES);
+  const times = timesFor(date);
+
+  const changeDate = (d: string) => {
+    setDate(d);
+    setError('');
+    const ok = timesFor(d);
+    if (ok.length && !ok.includes(time)) setTime(ok[0]); // 고른 시간이 지났으면 가장 가까운 시간으로
+  };
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!date || date < todayKst()) return setError(t('consult.form.errDate'));
+    if (!timesFor(date).includes(time)) return setError(t('consult.form.errTime'));
     onSubmit({ date, time, language, note: note.trim() || undefined });
   };
 
@@ -34,12 +47,12 @@ export function BookingForm({ initial, onSubmit, onCancel }: Props) {
       <div className="consult-form-row">
         <label>
           {t('consult.form.date')}
-          <input type="date" value={date} min={todayKst()} onChange={(e) => { setDate(e.target.value); setError(''); }} />
+          <input type="date" value={date} min={todayKst()} onChange={(e) => changeDate(e.target.value)} />
         </label>
         <label>
           {t('consult.form.time')}
           <select value={time} onChange={(e) => setTime(e.target.value)}>
-            {TIMES.map((x) => (
+            {times.map((x) => (
               <option key={x} value={x}>{x}</option>
             ))}
           </select>

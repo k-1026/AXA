@@ -7,6 +7,7 @@ import { HospitalPhoto } from '../features/hospital/HospitalPhoto';
 import { instagramHandle, useHospitalName } from '../features/hospital/name';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
+import { HospitalAddress } from '../features/hospital/HospitalAddress';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -62,7 +63,7 @@ export function HospitalDetailPage() {
           </Link>
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
-            <dd lang="ko">{h.addr}</dd>
+            <dd><HospitalAddress addr={h.addr} /></dd>
             <dt>{t('popup.tel')}</dt>
             <dd>{h.tel && <a href={`tel:${h.tel}`}>{h.tel}</a>}</dd>
             <dt>{t('hospital.homepage')}</dt>
