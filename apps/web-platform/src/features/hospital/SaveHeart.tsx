@@ -11,7 +11,7 @@ export function SaveHeart({ id, name }: { id: string; name: string }) {
   const [popping, setPopping] = useState(false);
   const saved = isSaved(id);
   // 카드마다 SVG id가 겹치지 않게. useId의 콜론(:r1:)은 url(#…) 참조에서 빼 둔다
-  const gradientId = `save-heart-fill-${useId().replace(/:/g, "")}`;
+  const gradientId = `save-heart-fill-${useId().replace(/:/g, '')}`;
 
   return (
     <button
