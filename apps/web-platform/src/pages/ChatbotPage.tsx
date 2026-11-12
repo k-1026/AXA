@@ -102,9 +102,24 @@ export function ChatbotPage() {
           </div>
         )}
 
-        {active && <ChatMessages conversation={active} onChip={(c) => chat.choose(c.label, c.action)} />}
+        {chat.error && (
+          <div className="chat-delete-confirm" role="alert">
+            <p>{chat.error}</p>
+            <button type="button" onClick={chat.dismissError}>
+              {t('chat.dismiss')}
+            </button>
+          </div>
+        )}
 
-        <ChatComposer onSend={chat.send} onTopic={(topic) => chat.choose(t(`chat.topic.${topic}`), { kind: 'topic', topic })} />
+        {active && (
+          <ChatMessages conversation={active} onChip={(c) => chat.choose(c.label, c.action)} onRetry={() => chat.retryLoad(active.id)} />
+        )}
+
+        <ChatComposer
+          busy={chat.busy}
+          onSend={chat.send}
+          onTopic={(topic) => chat.choose(t(`chat.topic.${topic}`), { kind: 'topic', topic })}
+        />
       </section>
     </div>
   );

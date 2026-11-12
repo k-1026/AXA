@@ -335,7 +335,8 @@
       "login": "請重新登入。",
       "notFound": "找不到此對話，請在新對話中再問一次。",
       "validation": "請確認您的問題（1,000 字以內）。",
-      "error": "未能取得回答，請再試一次。"
+      "error": "未能取得回答，請再試一次。",
+      "tooManySessions": "已儲存的對話過多，請刪除部分過去的對話。"
     },
     "card": {
       "hospitalList": "{{count}} 家醫院（依名稱排列，非排名）",
@@ -356,7 +357,12 @@
       "privacy": "個人資料蒐集與使用",
       "health": "健康資訊處理",
       "overseas_transfer": "境外 AI 處理（跨境傳輸）"
-    }
+    },
+    "loadingHistory": "正在載入此對話…",
+    "loadFailed": "無法載入此對話。",
+    "retry": "重試",
+    "deleteFailed": "無法刪除對話，請稍後再試。",
+    "dismiss": "關閉"
   },
   "consult": {
     "threads": "醫院諮詢",

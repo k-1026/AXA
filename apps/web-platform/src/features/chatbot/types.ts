@@ -41,4 +41,6 @@ export interface Conversation {
   sample?: boolean; // 예시 데이터 (실제 상담 기록 아님)
   serverId?: string; // 회원: 서버 대화 id (POST /chatbot/ask의 session_id)
   remote?: boolean; // 회원: 서버 목록에서만 받았고 메시지는 아직 안 불러옴 (열 때 불러옴)
+  lastMessageAt?: string; // 회원: 서버 목록의 마지막 메시지 시각 (메시지를 불러오기 전 정렬용)
+  loadFailed?: boolean; // 회원: 메시지 불러오기 실패 (네트워크 등). 다시 시도 버튼을 보여 줌
 }

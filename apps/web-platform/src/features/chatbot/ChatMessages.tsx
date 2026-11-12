@@ -9,6 +9,7 @@ import type { ChatMessage, ChatText, Chip, Conversation } from './types';
 interface Props {
   conversation: Conversation;
   onChip: (chip: Chip) => void;
+  onRetry: () => void; // 지난 대화 불러오기 다시 시도
 }
 
 // 한국어 화면은 한국어, 그 밖의 언어는 영어 (예시 데이터). 사용자가 입력한 대화는 그대로
@@ -47,7 +48,7 @@ function BotActions({ text }: { text: string }) {
   );
 }
 
-export function ChatMessages({ conversation, onChip }: Props) {
+export function ChatMessages({ conversation, onChip, onRetry }: Props) {
   const { t, i18n } = useTranslation();
   const text = useChatText();
   const navigate = useNavigate();
@@ -64,6 +65,18 @@ export function ChatMessages({ conversation, onChip }: Props) {
   return (
     <div className="chat-log" role="log" aria-live="polite">
       {conversation.sample && <p className="chat-sample-note">{t('chat.sampleNote')}</p>}
+      {/* 회원의 지난 대화: 메시지를 불러오는 중 / 실패 */}
+      {conversation.remote &&
+        (conversation.loadFailed ? (
+          <p className="chat-sample-note" role="alert">
+            {t('chat.loadFailed')}{' '}
+            <button type="button" className="chat-retry" onClick={onRetry}>
+              {t('chat.retry')}
+            </button>
+          </p>
+        ) : (
+          <p className="chat-pending">{t('chat.loadingHistory')}</p>
+        ))}
       {msgs.map((m, i) => {
         const showDay = i === 0 || kstDay(m.at) !== kstDay(msgs[i - 1].at);
         return (

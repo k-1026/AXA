@@ -335,7 +335,8 @@
       "login": "Please log in again.",
       "notFound": "This conversation was not found. Please ask again in a new chat.",
       "validation": "Please check your question (up to 1,000 characters).",
-      "error": "Couldn't get an answer. Please try again."
+      "error": "Couldn't get an answer. Please try again.",
+      "tooManySessions": "You have too many saved conversations. Please delete some past conversations."
     },
     "card": {
       "hospitalList": "{{count}} clinics (by name, not a ranking)",
@@ -356,7 +357,12 @@
       "privacy": "Collection and use of personal data",
       "health": "Processing of health information",
       "overseas_transfer": "Processing by overseas AI (cross-border transfer)"
-    }
+    },
+    "loadingHistory": "Loading this conversation…",
+    "loadFailed": "Couldn't load this conversation.",
+    "retry": "Try again",
+    "deleteFailed": "Couldn't delete the conversation. Please try again shortly.",
+    "dismiss": "Close"
   },
   "consult": {
     "threads": "Hospital chats",

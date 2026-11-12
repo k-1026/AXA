@@ -8,6 +8,7 @@ import { GREETING, SAMPLE_CONVERSATIONS } from './sampleConversations';
 import { replyToChip, replyToText, type BotReply } from './replies';
 import { dotDate } from './time';
 import type { ChatMessage, ChipAction, ChatText, Conversation } from './types';
+import { useChatText } from './ChatMessages';
 
 // 대화 저장 방식 (마이페이지와 같은 구조)
 // - guest: 로그인 전. 이 화면을 보는 동안만 메모리에 두고 저장하지 않음
@@ -23,7 +24,7 @@ onAccountReset(() => memory.clear());
 // 서버 에러 코드 → 화면 문구 키 (chat.api.*)
 const API_ERRORS: Record<string, string> = {
   network: 'network',
-  rate_limited: 'rateLimited',
+  rate_limited: 'rateLimited', // detail.limit이 sessions면 tooManySessions (askServer)
   'chatbot.unavailable': 'unavailable',
   'auth.required': 'login',
   not_found: 'notFound',
@@ -57,6 +58,11 @@ function newConversation(): Conversation {
 
 const textOf = (x: ChatText) => (typeof x === 'string' ? x : `${x.ko} ${x.en}`);
 
+/** 마지막 활동 시각: 화면에 있는 마지막 메시지, 아직 안 불러온 서버 대화는 서버의 last_message_at */
+export function lastActivity(c: Conversation): string {
+  return c.messages[c.messages.length - 1]?.at ?? c.lastMessageAt ?? c.createdAt;
+}
+
 export function useConversations() {
   const { t, i18n } = useTranslation();
   const { user, account, token } = useAuth();
@@ -85,6 +91,8 @@ export function useConversations() {
   }, []);
 
   const loading = useRef(new Set<string>()); // 메시지를 불러오는 중인 대화 (같은 요청을 두 번 보내지 않게)
+  const deleted = useRef(new Set<string>()); // 첫 답을 기다리는 중에 지운 대화 (답이 오면 서버 대화도 지움)
+  const [error, setError] = useState<string | null>(null); // 대화 삭제 실패 등 화면 위에 보여 줄 안내
 
   // 회원: 서버의 지난 대화 목록 (이미 화면에 있는 대화는 그대로)
   useEffect(() => {
@@ -98,7 +106,7 @@ export function useConversations() {
           const known = new Set(prev.map((c) => c.serverId).filter(Boolean));
           const fromServer: Conversation[] = rows
             .filter((r) => !known.has(r.id))
-            .map((r) => ({ id: r.id, serverId: r.id, createdAt: r.created_at, messages: [], remote: true }));
+            .map((r) => ({ id: r.id, serverId: r.id, createdAt: r.created_at, lastMessageAt: r.last_message_at, messages: [], remote: true }));
           return fromServer.length ? [...prev, ...fromServer] : prev;
         }, owner);
       })
@@ -108,46 +116,55 @@ export function useConversations() {
     };
   }, [mode, token, update]);
 
-  // 목록은 최근 생성순
+  // 목록은 마지막 메시지가 최근인 순 (서버 목록과 같은 기준)
   // (예시는 +09:00, 새 대화는 UTC 형식이라 문자열이 아닌 시각으로 비교)
-  const sorted = useMemo(() => [...list].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)), [list]);
+  const sorted = useMemo(() => [...list].sort((a, b) => Date.parse(lastActivity(b)) - Date.parse(lastActivity(a))), [list]);
 
   // 고른 대화가 없으면 시작 전 대화를 보여준다
   const active = sorted.find((c) => c.id === activeId) ?? sorted.find(isBlank) ?? sorted[0] ?? null;
 
   // 회원: 서버에서만 받은 대화를 열면 메시지를 불러온다 (첫 인사 + 저장된 글)
+  // 불러오는 동안은 입력을 막아(busy) 새 질문이 불러온 글에 덮이지 않게 한다
   useEffect(() => {
-    if (!active?.remote || !active.serverId || !token || loading.current.has(active.id)) return;
+    if (!active?.remote || active.loadFailed || !active.serverId || !token || loading.current.has(active.id)) return;
     const { id, serverId, createdAt } = active;
     const owner = accountRef.current;
     loading.current.add(id);
     getChatSession(token, serverId)
       .then((d) =>
-        update((prev) =>
-          prev.map((c) =>
-            c.id !== id
-              ? c
-              : {
-                  ...c,
-                  remote: false,
-                  messages: [
-                    { id: uid(), role: 'bot', text: GREETING, at: createdAt },
-                    ...d.messages.map((m): ChatMessage => ({
-                      id: uid(),
-                      role: m.role === 'user' ? 'user' : 'bot',
-                      text: m.content,
-                      at: m.created_at,
-                      ...(m.role === 'assistant' ? { ai: true } : {}),
-                    })),
-                  ],
-                },
-          ),
+        update(
+          (prev) =>
+            prev.map((c) =>
+              c.id !== id
+                ? c
+                : {
+                    ...c,
+                    remote: false,
+                    messages: [
+                      { id: uid(), role: 'bot', text: GREETING, at: createdAt },
+                      ...d.messages.map((m): ChatMessage => ({
+                        id: uid(),
+                        role: m.role === 'user' ? 'user' : 'bot',
+                        text: m.content,
+                        at: m.created_at,
+                        // 응급 안내·거절 문구(refused)는 고정 문구라 "AI 생성" 표시를 하지 않는다
+                        ...(m.role === 'assistant' ? { ai: !m.refused } : {}),
+                      })),
+                    ],
+                  },
+            ),
           owner,
         ),
       )
-      .catch(() => update((prev) => withBlank(prev.filter((c) => c.id !== id)), owner)) // 서버에서 지워짐(30일 등)
+      .catch((e) => {
+        // 서버에서 지워진 대화(30일 정리 등)만 목록에서 뺀다. 그 밖의 오류는 남겨 두고 다시 시도할 수 있게
+        if (e instanceof ApiError && e.code === 'not_found') update((prev) => withBlank(prev.filter((c) => c.id !== id)), owner);
+        else update((prev) => prev.map((c) => (c.id === id ? { ...c, loadFailed: true } : c)), owner);
+      })
       .finally(() => loading.current.delete(id));
   }, [active, token, update]);
+
+  const retryLoad = (id: string) => update((prev) => prev.map((c) => (c.id === id ? { ...c, loadFailed: false } : c)));
 
   const startNew = () => {
     const blank = sorted.find(isBlank);
@@ -159,7 +176,17 @@ export function useConversations() {
 
   const remove = (id: string) => {
     const target = list.find((c) => c.id === id);
-    if (mode === 'member' && token && target?.serverId) deleteChatSession(token, target.serverId).catch(() => {});
+    if (!target) return;
+    const owner = accountRef.current;
+    if (target.messages.some((m) => m.pending)) deleted.current.add(id); // 답이 오면 그때 생긴 서버 대화도 지움 (askServer)
+    if (mode === 'member' && token && target.serverId) {
+      deleteChatSession(token, target.serverId).catch((e) => {
+        if (e instanceof ApiError && e.code === 'not_found') return; // 이미 서버에 없음
+        // 지우지 못했으면 목록에 되돌리고 알려 준다
+        update((prev) => (prev.some((c) => c.id === id) ? prev : [target, ...prev]), owner);
+        setError(t('chat.deleteFailed'));
+      });
+    }
     update((prev) => withBlank(prev.filter((c) => c.id !== id)));
     if (id === active?.id) setActiveId(null);
   };
@@ -200,18 +227,28 @@ export function useConversations() {
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'unknown';
       if (code === 'not_found') serverId = undefined; // 서버에서 지워진 대화 → 다음 질문은 새 대화로
-      patch = { text: t(`chat.api.${API_ERRORS[code] ?? 'error'}`), failed: true };
+      // 429는 한도 종류(detail.limit)에 따라 문구가 다르다: sessions = 저장된 대화 수 한도
+      const sessionsFull = code === 'rate_limited' && e instanceof ApiError && e.detail.limit === 'sessions';
+      patch = { text: t(`chat.api.${sessionsFull ? 'tooManySessions' : API_ERRORS[code] ?? 'error'}`), failed: true };
     }
-    update((prev) =>
-      prev.map((c) =>
-        c.id !== conv.id ? c : { ...c, serverId, messages: c.messages.map((m) => (m.id === waitId ? { ...m, ...patch, pending: false } : m)) },
-      ),
+    // 답을 기다리는 동안 사용자가 이 대화를 지웠다면, 그 사이 서버에 새로 생긴 대화도 지운다
+    if (deleted.current.has(conv.id)) {
+      deleted.current.delete(conv.id);
+      if (serverId && serverId !== conv.serverId) deleteChatSession(token, serverId).catch(() => setError(t('chat.deleteFailed')));
+      return;
+    }
+    update(
+      (prev) =>
+        prev.map((c) =>
+          c.id !== conv.id ? c : { ...c, serverId, messages: c.messages.map((m) => (m.id === waitId ? { ...m, ...patch, pending: false } : m)) },
+        ),
       owner,
     );
   };
 
-  const busy = !!active?.messages.some((m) => m.pending);
-  const shown = (x: ChatText) => (typeof x === 'string' ? x : i18n.language === 'ko' ? x.ko : x.en);
+  // 답을 기다리는 중이거나, 지난 대화의 메시지를 아직 불러오지 못했으면 입력을 막는다
+  const busy = !!active && (active.messages.some((m) => m.pending) || !!active.remote);
+  const shown = useChatText();
 
   const send = (text: string) => {
     if (!active || !text.trim() || busy) return;
@@ -237,5 +274,19 @@ export function useConversations() {
     );
   };
 
-  return { mode, busy, conversations: sorted, active, select: setActiveId, startNew, remove, send, choose, search };
+  return {
+    mode,
+    busy,
+    conversations: sorted,
+    active,
+    select: setActiveId,
+    startNew,
+    remove,
+    retryLoad,
+    send,
+    choose,
+    search,
+    error,
+    dismissError: () => setError(null),
+  };
 }

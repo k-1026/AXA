@@ -335,7 +335,8 @@
       "login": "Vui lòng đăng nhập lại.",
       "notFound": "Không tìm thấy cuộc trò chuyện này. Hãy hỏi lại trong cuộc trò chuyện mới.",
       "validation": "Vui lòng kiểm tra câu hỏi (tối đa 1.000 ký tự).",
-      "error": "Không nhận được câu trả lời. Vui lòng thử lại."
+      "error": "Không nhận được câu trả lời. Vui lòng thử lại.",
+      "tooManySessions": "Bạn có quá nhiều cuộc trò chuyện đã lưu. Vui lòng xóa bớt các cuộc trò chuyện cũ."
     },
     "card": {
       "hospitalList": "{{count}} phòng khám (theo tên, không xếp hạng)",
@@ -356,7 +357,12 @@
       "privacy": "Thu thập và sử dụng thông tin cá nhân",
       "health": "Xử lý thông tin sức khỏe",
       "overseas_transfer": "Xử lý bởi AI ở nước ngoài (chuyển ra nước ngoài)"
-    }
+    },
+    "loadingHistory": "Đang tải cuộc trò chuyện…",
+    "loadFailed": "Không tải được cuộc trò chuyện này.",
+    "retry": "Thử lại",
+    "deleteFailed": "Không xóa được cuộc trò chuyện. Vui lòng thử lại sau.",
+    "dismiss": "Đóng"
   },
   "consult": {
     "threads": "Tư vấn theo bệnh viện",

@@ -2682,6 +2682,18 @@ body.chat-open {
   font-size: 0.8rem;
 }
 
+/* 지난 대화 불러오기 실패 → 다시 시도 */
+.chat-retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .chat-day {
   display: flex;
   align-items: center;

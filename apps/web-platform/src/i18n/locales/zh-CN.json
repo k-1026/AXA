@@ -335,7 +335,8 @@
       "login": "请重新登录。",
       "notFound": "找不到此对话，请在新对话中再问一次。",
       "validation": "请检查您的问题（1,000 字以内）。",
-      "error": "未能获得回答，请重试。"
+      "error": "未能获得回答，请重试。",
+      "tooManySessions": "已保存的对话过多，请删除部分过去的对话。"
     },
     "card": {
       "hospitalList": "{{count}} 家医院（按名称排列，非排名）",
@@ -356,7 +357,12 @@
       "privacy": "个人信息收集与使用",
       "health": "健康信息处理",
       "overseas_transfer": "境外 AI 处理（跨境传输）"
-    }
+    },
+    "loadingHistory": "正在加载此对话…",
+    "loadFailed": "无法加载此对话。",
+    "retry": "重试",
+    "deleteFailed": "无法删除对话，请稍后再试。",
+    "dismiss": "关闭"
   },
   "consult": {
     "threads": "医院咨询",
