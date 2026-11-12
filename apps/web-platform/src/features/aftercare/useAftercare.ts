@@ -1,0 +1,81 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { onAccountReset, type AccountKey } from '../../components/account';
+import { useAuth } from '../../components/auth';
+import { uid } from '../../lib/common';
+import { useConsultThreads } from '../consult/useConsultThreads';
+import { SAMPLE_AFTERCARE } from './sampleAftercare';
+import { displayStatus } from '../consult/types';
+import type { AftercareMessage, Attachment } from './types';
+
+// 사후 관리 대상 = 방문 완료로 보이는 예약만 (확정 + 방문 일시 지남, 예약 내역 기반)
+// 저장 방식은 상담과 같음: demo는 예시로 시작해 메모리에만, member는 백엔드 연결 전까지 메모리
+type Mode = 'demo' | 'member';
+type Store = Record<string, { messages: AftercareMessage[]; unread: number }>;
+// 메모리는 계정별로 나누고, 로그아웃·탈퇴하면 모두 지운다
+const memory = new Map<AccountKey, Store>();
+onAccountReset(() => {
+  // 보낸 사진·영상의 임시 주소(blob:)도 풀어 준다
+  memory.forEach((store) =>
+    Object.values(store).forEach((v) =>
+      v.messages.forEach((m) => m.attachments?.forEach((a) => a.url.startsWith('blob:') && URL.revokeObjectURL(a.url))),
+    ),
+  );
+  memory.clear();
+});
+const load = (key: AccountKey, mode: Mode): Store => {
+  if (!memory.has(key)) memory.set(key, mode === 'demo' ? SAMPLE_AFTERCARE : {});
+  return memory.get(key)!;
+};
+
+
+export function useAftercare() {
+  const { user, account } = useAuth();
+  const mode: Mode = user?.demo ? 'demo' : 'member';
+  const consult = useConsultThreads();
+  const [store, setStore] = useState<Store>(() => load(account, mode));
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const accountRef = useRef(account);
+  accountRef.current = account;
+
+  useEffect(() => {
+    setStore(load(account, mode));
+    setActiveId(null);
+  }, [account, mode]);
+
+  const update = useCallback((fn: (prev: Store) => Store) => {
+    const key = accountRef.current; // 계정이 바뀐 뒤의 늦은 변경이 다른 계정 메모리에 들어가지 않게
+    setStore((prev) => {
+      const next = fn(prev);
+      memory.set(key, next);
+      // TODO(member): 백엔드가 생기면 여기서 서버 저장 (사진·영상은 서버에 올린 주소로 교체)
+      return next;
+    });
+  }, []);
+
+  // 방문일이 최근인 순
+  const visits = useMemo(
+    () =>
+      consult.bookings
+        .filter((b) => displayStatus(b.booking) === 'visited') // 확정 + 방문 일시 지남 (consult/types.ts)
+        .map((b) => ({ id: b.message.id, thread: b.thread, booking: b.booking, ...(store[b.message.id] ?? { messages: [], unread: 0 }) }))
+        .sort((a, b) => `${b.booking.date}T${b.booking.time}`.localeCompare(`${a.booking.date}T${a.booking.time}`)),
+    [consult.bookings, store],
+  );
+  const active = visits.find((v) => v.id === activeId) ?? visits[0] ?? null;
+
+  const select = (id: string) => {
+    setActiveId(id);
+    update((prev) => (prev[id]?.unread ? { ...prev, [id]: { ...prev[id], unread: 0 } } : prev));
+  };
+
+  const send = (text: string, attachments: Attachment[]) => {
+    if (!active || (!text.trim() && !attachments.length)) return;
+    const msg: AftercareMessage = { id: uid(), from: 'user', at: new Date().toISOString(), text: text.trim() || undefined, attachments: attachments.length ? attachments : undefined };
+    update((prev) => {
+      const cur = prev[active.id] ?? { messages: [], unread: 0 };
+      return { ...prev, [active.id]: { ...cur, messages: [...cur.messages, msg] } };
+    });
+  };
+
+  return { mode, visits, active, select, send };
+}
