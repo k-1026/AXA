@@ -296,6 +296,14 @@ def test_signup_with_display_name(client):
     assert client.get("/api/v1/me", headers=auth(token)).json()["display_name"] == "Lan"
 
 
+def test_patch_display_name_trimmed_and_blank_is_null(client):
+    token = signup(client, display_name="Lan")
+    r = client.patch("/api/v1/me", headers=auth(token), json={"display_name": "  Mai  "})
+    assert r.json()["display_name"] == "Mai"
+    r = client.patch("/api/v1/me", headers=auth(token), json={"display_name": "   "})
+    assert r.status_code == 200 and r.json()["display_name"] is None
+
+
 def test_signup_blank_display_name_is_null(client):
     token = signup(client, display_name="   ")
     assert client.get("/api/v1/me", headers=auth(token)).json()["display_name"] is None
