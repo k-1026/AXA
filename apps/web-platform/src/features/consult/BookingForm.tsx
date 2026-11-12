@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../../i18n';
-import { nowKstTime, todayKst } from './format';
+import { todayKst } from '../../lib/common';
+import { nowKstTime } from './format';
 import type { BookingRequest } from './types';
 
 // 상담 가능 시간 안에서 30분 단위

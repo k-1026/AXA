@@ -4,19 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { BotIcon, CopyIcon, ThumbIcon } from './icons';
 import { AnswerText, ChatCards } from './ChatCards';
 import { kstDay, longDate, msgTime } from './time';
-import type { ChatMessage, ChatText, Chip, Conversation } from './types';
+import { useLocalized } from '../../lib/common';
+import type { ChatMessage, Chip, Conversation } from './types';
 
 interface Props {
   conversation: Conversation;
   onChip: (chip: Chip) => void;
   onRetry: () => void; // 지난 대화 불러오기 다시 시도
 }
-
-// 한국어 화면은 한국어, 그 밖의 언어는 영어 (예시 데이터). 사용자가 입력한 대화는 그대로
-export const useChatText = () => {
-  const { i18n } = useTranslation();
-  return (x: ChatText) => (typeof x === 'string' ? x : i18n.language === 'ko' ? x.ko : x.en);
-};
 
 function BotActions({ text }: { text: string }) {
   const { t } = useTranslation();
@@ -50,7 +45,7 @@ function BotActions({ text }: { text: string }) {
 
 export function ChatMessages({ conversation, onChip, onRetry }: Props) {
   const { t, i18n } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized(); // 예시 데이터는 한국어 화면에서 한국어, 그 밖에는 영어
   const navigate = useNavigate();
   const end = useRef<HTMLDivElement>(null);
   const msgs = conversation.messages;

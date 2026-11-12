@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useChatText } from '../chatbot/ChatMessages';
+import { useLocalized } from '../../lib/common';
 import { kstDay, longDate, msgTime } from '../chatbot/time';
 import { StaffIcon } from '../consult/icons';
 import type { AftercareMessage, Attachment } from './types';
@@ -18,7 +18,7 @@ export function AttachmentView({ a }: { a: Attachment }) {
 // 한 방문(진료·시술)에 대한 의료진과의 대화
 export function AftercareMessages({ messages, hospital, sample }: { messages: AftercareMessage[]; hospital: string; sample?: boolean }) {
   const { t, i18n } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized();
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

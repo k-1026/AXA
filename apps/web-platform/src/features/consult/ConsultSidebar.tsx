@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CloseIcon, SearchIcon } from '../chatbot/icons';
-import { useChatText } from '../chatbot/ChatMessages';
+import { useLocalized } from '../../lib/common';
 import { CalendarIcon, InfoIcon } from '../mypage/icons';
 import { HospitalThumb } from './HospitalThumb';
 import { shortDate } from './format';
@@ -19,7 +19,7 @@ interface Props {
 // 왼쪽 병원별 상담 목록. 병원 1곳 = 1줄 (날짜와 상관없이 한 상담에 쌓임)
 export function ConsultSidebar({ activeId, search, demo, onSelect, onClose }: Props) {
   const { t, i18n } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized();
   const [query, setQuery] = useState('');
   const items = search(query);
 

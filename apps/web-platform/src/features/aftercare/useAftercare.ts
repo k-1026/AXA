@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { onAccountReset, type AccountKey } from '../../components/account';
 import { useAuth } from '../../components/auth';
+import { uid } from '../../lib/common';
 import { useConsultThreads } from '../consult/useConsultThreads';
 import { SAMPLE_AFTERCARE } from './sampleAftercare';
 import { displayStatus } from '../consult/types';
@@ -26,7 +27,6 @@ const load = (key: AccountKey, mode: Mode): Store => {
   return memory.get(key)!;
 };
 
-const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function useAftercare() {
   const { user, account } = useAuth();

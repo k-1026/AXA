@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { createAccountList } from '../../components/account';
+import { uid } from '../../lib/common';
 
 // 방문 기록(개인 다이어리). 본인만 쓰고 본인만 본다: 후기가 아니므로 서버로 보내거나 병원 화면에 표시하지 않는다
 export interface VisitRecord {
@@ -19,7 +20,7 @@ const store = createAccountList<VisitRecord>('visitLog');
 const add = (input: VisitInput) =>
   store.set([
     ...store.get(),
-    { ...input, id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`, createdAt: new Date().toISOString() },
+    { ...input, id: uid(), createdAt: new Date().toISOString() },
   ]);
 const update = (id: string, input: VisitInput) =>
   store.set(store.get().map((r) => (r.id === id ? { ...r, hospitalId: undefined, ...input } : r)));

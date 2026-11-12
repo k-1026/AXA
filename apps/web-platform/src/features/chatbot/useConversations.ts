@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { onAccountReset, type AccountKey } from '../../components/account';
 import { ApiError } from '../../components/api';
 import { useAuth } from '../../components/auth';
+import { searchText, uid, useLocalized } from '../../lib/common';
 import { askChatbot, chatLang, deleteChatSession, getChatSession, listChatSessions } from './chatApi';
 import { GREETING, SAMPLE_CONVERSATIONS } from './sampleConversations';
 import { replyToChip, replyToText, type BotReply } from './replies';
 import { dotDate } from './time';
 import type { ChatMessage, ChipAction, ChatText, Conversation } from './types';
-import { useChatText } from './ChatMessages';
 
 // 대화 저장 방식 (마이페이지와 같은 구조). 챗봇은 로그인한 사람만 쓴다 (main.tsx RequireLogin, plan-step7 결정 4)
 // - demo: 데모 계정. 예시 대화로 시작, 바꾼 내용은 메모리에만 (탭을 닫으면 사라짐)
@@ -47,7 +47,6 @@ function save(key: AccountKey, list: Conversation[]) {
   memory.set(key, list);
 }
 
-const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const now = () => new Date().toISOString();
 
 function newConversation(): Conversation {
@@ -55,7 +54,6 @@ function newConversation(): Conversation {
   return { id: uid(), createdAt: at, messages: [{ id: uid(), role: 'bot', text: GREETING, at }] };
 }
 
-const textOf = (x: ChatText) => (typeof x === 'string' ? x : `${x.ko} ${x.en}`);
 
 /** 마지막 활동 시각: 화면에 있는 마지막 메시지, 아직 안 불러온 서버 대화는 서버의 last_message_at */
 export function lastActivity(c: Conversation): string {
@@ -247,7 +245,7 @@ export function useConversations() {
 
   // 답을 기다리는 중이거나, 지난 대화의 메시지를 아직 불러오지 못했으면 입력을 막는다
   const busy = !!active && (active.messages.some((m) => m.pending) || !!active.remote);
-  const shown = useChatText();
+  const shown = useLocalized();
 
   const send = (text: string) => {
     if (!active || !text.trim() || busy) return;
@@ -269,7 +267,7 @@ export function useConversations() {
         dotDate(c.createdAt).includes(s) ||
         (c.topic && t(`chat.summary.${c.topic}`).toLowerCase().includes(s)) ||
         // 모든 대화에 있는 인사말은 빼고 찾는다
-        c.messages.some((m) => m.text !== GREETING && textOf(m.text).toLowerCase().includes(s)),
+        c.messages.some((m) => m.text !== GREETING && searchText(m.text).toLowerCase().includes(s)),
     );
   };
 

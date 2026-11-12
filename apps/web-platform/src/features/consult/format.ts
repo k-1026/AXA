@@ -1,5 +1,5 @@
 // 상담 화면 날짜 표시 (한국 시간)
-const TZ = 'Asia/Seoul';
+import { KST as TZ } from '../../lib/common';
 
 /** 목록 날짜: "11월 10일" / "Nov 10" */
 export const shortDate = (iso: string, lang: string) =>
@@ -20,9 +20,6 @@ export function bookingDateFull(date: string, time: string, lang: string) {
   const hm = new Intl.DateTimeFormat(lang, { timeZone: TZ, hour: 'numeric', minute: '2-digit' }).format(d);
   return `${date.replace(/-/g, '.')} (${wd}) ${hm}`;
 }
-
-/** 오늘 (YYYY-MM-DD, 한국 시간) */
-export const todayKst = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
 
 /** 지금 시각 (HH:mm, 한국 시간) */
 export const nowKstTime = () =>

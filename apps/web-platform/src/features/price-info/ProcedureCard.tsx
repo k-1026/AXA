@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { Currency } from '../../components/currency';
 import { formatConverted } from '../../components/exchangeRates';
+import { useLocalized } from '../../lib/common';
 import type { Procedure, ProcedureCategory } from './procedures';
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 export function ProcedureCard({ procedure: p, category, currency, rate }: Props) {
   const { t, i18n } = useTranslation();
   // 병원 이름과 같은 규칙: 한국어 외 모든 언어는 영어로 통일
-  const label = (x: { ko: string; en: string }) => (i18n.language === 'ko' ? x.ko : x.en);
+  const label = useLocalized();
   // 영어로 보일 때는 영어 글꼴·하이픈 줄바꿈 (중국어 글꼴은 영문 폭이 넓어 좁은 카드에서 단어가 잘림)
   const labelLang = i18n.language === 'ko' ? undefined : 'en';
 

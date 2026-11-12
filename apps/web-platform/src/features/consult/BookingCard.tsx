@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../../i18n';
+import { KST } from '../../lib/common';
 import { CalendarIcon, ChevronRightIcon, GlobeIcon, InfoIcon } from '../mypage/icons';
 import { bookingDateTime } from './format';
 import { displayStatus, type BookingRequest, type DisplayStatus } from './types';
@@ -41,7 +42,7 @@ export function BookingCard({ booking, sentAt }: { booking: BookingRequest; sent
       {open && (
         <dl className="consult-booking-detail">
           <dt>{t('consult.sentAt')}</dt>
-          <dd>{new Date(sentAt).toLocaleString(i18n.language, { timeZone: 'Asia/Seoul' })}</dd>
+          <dd>{new Date(sentAt).toLocaleString(i18n.language, { timeZone: KST })}</dd>
           <dt>{t('consult.note')}</dt>
           <dd>{booking.note || '—'}</dd>
         </dl>

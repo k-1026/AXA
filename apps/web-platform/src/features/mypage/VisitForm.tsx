@@ -3,12 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { matchHospitals } from '../map/HospitalSearch';
 import { useHospitalName } from '../hospital/name';
 import type { Hospital } from '../hospital/types';
+import { todayKst } from '../../lib/common';
 import type { VisitInput } from './visitLog';
 
 const MAX_SUGGESTIONS = 8;
-
-// 방문 날짜 기본값은 오늘 (한국 시간)
-const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
 
 interface Props {
   hospitals: Hospital[];
@@ -23,7 +21,7 @@ export function VisitForm({ hospitals, initial, onSubmit, onCancel }: Props) {
   const nameOf = useHospitalName();
   const [hospitalName, setHospitalName] = useState(initial?.hospitalName ?? '');
   const [hospitalId, setHospitalId] = useState(initial?.hospitalId);
-  const [date, setDate] = useState(initial?.date ?? today());
+  const [date, setDate] = useState(initial?.date ?? todayKst()); // 기본값은 오늘 (한국 시간)
   const [note, setNote] = useState(initial?.note ?? '');
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
@@ -41,14 +39,14 @@ export function VisitForm({ hospitals, initial, onSubmit, onCancel }: Props) {
     const name = hospitalName.trim();
     const text = note.trim();
     if (!name) return setError(t('mypage.visits.errHospital'));
-    if (!date || date > today()) return setError(t('mypage.visits.errDate'));
+    if (!date || date > todayKst()) return setError(t('mypage.visits.errDate'));
     if (!text) return setError(t('mypage.visits.errNote'));
     setError('');
     onSubmit({ hospitalId, hospitalName: name, date, note: text });
     if (!initial) {
       setHospitalName('');
       setHospitalId(undefined);
-      setDate(today());
+      setDate(todayKst());
       setNote('');
     }
   };
@@ -98,7 +96,7 @@ export function VisitForm({ hospitals, initial, onSubmit, onCancel }: Props) {
         </label>
         <label className="visit-field">
           {t('mypage.visits.date')}
-          <input type="date" value={date} max={today()} onChange={(e) => setDate(e.target.value)} />
+          <input type="date" value={date} max={todayKst()} onChange={(e) => setDate(e.target.value)} />
         </label>
       </div>
       <label className="visit-field">

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n';
-import { useChatText } from '../features/chatbot/ChatMessages';
+import { KST, useLocalized } from '../lib/common';
 import { ArrowLeftIcon, CalendarIcon, InfoIcon, PencilIcon, PinIcon } from '../features/mypage/icons';
 import { BookingForm } from '../features/consult/BookingForm';
 import { HospitalThumb } from '../features/consult/HospitalThumb';
@@ -30,7 +30,7 @@ const group = (b: { booking: BookingRequest }) => GROUP[displayStatus(b.booking)
 // 상담에서 신청한 예약 모아 보기. 변경·취소는 환자가 하고, 확정·방문 완료 표시는 병원이 한다
 export function BookingsPage() {
   const { t, i18n } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized();
   const navigate = useNavigate();
   const consult = useConsultThreads();
   const [filter, setFilter] = useState<Filter>('all');
@@ -134,7 +134,7 @@ export function BookingsPage() {
                   )}
                   {status === 'cancelled' &&
                     booking.cancelledAt &&
-                    t('bookings.cancelledOn', { date: new Date(booking.cancelledAt).toLocaleDateString(i18n.language, { timeZone: 'Asia/Seoul' }) })}
+                    t('bookings.cancelledOn', { date: new Date(booking.cancelledAt).toLocaleDateString(i18n.language, { timeZone: KST }) })}
                   {status === 'rejected' && t('bookings.rejectedNote')}
                   {status === 'proposed' && t('bookings.proposedNote')}
                   {status === 'expired' && t('bookings.expiredNote')}

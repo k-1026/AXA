@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRightIcon } from './icons';
-import type { Localized, ScheduleItem } from './sampleData';
+import { useLocalized } from '../../lib/common';
+import type { ScheduleItem } from './sampleData';
 
 // 병원 방문은 "직접 등록" 표시로 사용자가 넣은 일정임을 보여준다
 const TAG_KEY: Record<ScheduleItem['kind'], string> = {
@@ -10,8 +11,8 @@ const TAG_KEY: Record<ScheduleItem['kind'], string> = {
 };
 
 export function ScheduleEntry({ item }: { item: ScheduleItem }) {
-  const { t, i18n } = useTranslation();
-  const label = (x: Localized) => (i18n.language === 'ko' ? x.ko : x.en);
+  const { t } = useTranslation();
+  const label = useLocalized();
   const [, month, day] = item.date.split('-');
   const isHospital = item.kind === 'hospital';
 
@@ -27,7 +28,7 @@ export function ScheduleEntry({ item }: { item: ScheduleItem }) {
           <span className={`mp-tag ${isHospital ? 'tag-blue' : 'tag-green'}`}>{t(TAG_KEY[item.kind])}</span>
         </p>
         <p className="mp-entry-place">
-          {item.place.map(label).join(' · ')}
+          {item.place.map((x) => label(x)).join(' · ')}
           {item.mapQuery && (
             <>
               {' · '}

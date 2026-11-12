@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MenuIcon, PlusIcon, SendIcon, TranslateIcon } from '../features/chatbot/icons';
-import { useChatText } from '../features/chatbot/ChatMessages';
+import { useLocalized } from '../lib/common';
 import { useVisualViewport } from '../features/chatbot/useVisualViewport';
 import { CalendarIcon, InfoIcon } from '../features/mypage/icons';
 import { useHospitals } from '../features/hospital/useHospitals';
@@ -23,7 +23,7 @@ const QUICK = [
 // 병원 상세의 "병원에 상담하기"로 들어오면 ?hospital=<id> 로 그 병원 상담을 연다
 export function ConsultPage() {
   const { t } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized();
   const consult = useConsultThreads();
   const hospitals = useHospitals();
   const [params, setParams] = useSearchParams();

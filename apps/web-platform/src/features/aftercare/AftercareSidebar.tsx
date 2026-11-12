@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { CloseIcon } from '../chatbot/icons';
-import { useChatText } from '../chatbot/ChatMessages';
+import { useLocalized } from '../../lib/common';
 import { InfoIcon } from '../mypage/icons';
 import { HospitalThumb } from '../consult/HospitalThumb';
 import { bookingDateFull } from '../consult/format';
@@ -19,7 +19,7 @@ interface Props {
 // 왼쪽 사후 관리 내역: 방문을 마친 예약 1건 = 1줄
 export function AftercareSidebar({ visits, activeId, demo, onSelect, onClose }: Props) {
   const { t, i18n } = useTranslation();
-  const text = useChatText();
+  const text = useLocalized();
 
   return (
     <aside className="chat-sidebar consult-sidebar" aria-label={t('aftercare.list')}>

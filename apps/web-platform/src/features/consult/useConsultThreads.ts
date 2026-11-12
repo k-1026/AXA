@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { onAccountReset, type AccountKey } from '../../components/account';
 import { useAuth } from '../../components/auth';
+import { searchText, uid } from '../../lib/common';
 import { SAMPLE_THREADS } from './sampleThreads';
 import type { BookingRequest, ConsultThread } from './types';
-import type { ChatText } from '../chatbot/types';
 
 // 저장 방식은 챗봇과 같음 (백엔드 연결 전)
 // - demo: 예시 상담으로 시작, 바꾼 내용은 메모리에만
@@ -23,9 +23,7 @@ const save = (key: AccountKey, list: ConsultThread[]) => {
   // TODO(member): 상담 백엔드가 생기면 여기서 서버에 저장
 };
 
-const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const lastAt = (t: ConsultThread) => t.messages[t.messages.length - 1]?.at ?? '';
-const textOf = (x?: ChatText) => (!x ? '' : typeof x === 'string' ? x : `${x.ko} ${x.en}`);
 
 export type NewThread = Omit<ConsultThread, 'messages' | 'unread'>;
 
@@ -102,7 +100,7 @@ export function useConsultThreads() {
   const search = (q: string) => {
     const s = q.trim().toLowerCase();
     if (!s) return threads;
-    return threads.filter((t) => textOf(t.name).toLowerCase().includes(s) || t.messages.some((m) => textOf(m.text).toLowerCase().includes(s)));
+    return threads.filter((t) => searchText(t.name).toLowerCase().includes(s) || t.messages.some((m) => searchText(m.text).toLowerCase().includes(s)));
   };
 
   const bookings = threads.flatMap((t) => t.messages.filter((m) => m.booking).map((m) => ({ thread: t, message: m, booking: m.booking! })));
