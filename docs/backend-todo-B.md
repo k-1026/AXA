@@ -16,18 +16,20 @@
 
 ## ~11/4 · 기반 (A와 같이)
 
+> 2026-11-12: 결정 12·13 이후 기반은 A가 Supabase 방식으로 완료. B의 10/30 셋업 코드는 커밋하지 않고 stash에 보관함
+
 - [ ] A와 `docs/backend-contracts.md` 초안 확정 (상태 코드, 토큰, 에러 코드, 함수 10개, `BookingCreate`)
 - [ ] `proposed` 거절 후 상태 결정 → `backend-decisions.md`
-- [ ] 팀원 PC Docker Desktop 가능 여부 확인 (안 되면 공용 호스팅 DB, 가상 데이터만)
-- [ ] 루트 `docker-compose.yml`: `pgvector/pgvector` 이미지, `CREATE EXTENSION vector;`
-- [ ] `backend/src/main.py`, `core/` 구조 같이 잡기 (B: `db.py`, A: `security.py`)
-- [ ] `core/config.py`: 환경변수(DB URL 등), `.env.example`에 항목 추가
-- [ ] `core/db.py`: SQLAlchemy 2 엔진·세션, `get_db()` 의존성, 시간은 `timestamptz`(UTC)
-- [ ] `core/errors.py`: `{code, message, detail}` 형식 (같이)
-- [ ] `backend/alembic/` 초기화 + 첫 마이그레이션 (`vector` 확장 포함) — **마이그레이션 파일은 B만 생성**
-- [ ] `GET /api/v1/health` (DB 연결 확인 포함)
-- [ ] 테스트 DB 방식 정하기 (별도 DB 또는 트랜잭션 롤백) + `backend/tests/` 기본 설정
-- [ ] 브랜치 이름 규칙 수정 PR: `backend/B-*`는 `backend` 브랜치와 충돌해 git이 거부 → `backend-B-*` (roles 4절, AGENTS.md 3절, decisions 8번)
+- [x] ~~팀원 PC Docker Desktop 가능 여부 확인~~ → 필요 없음 (결정 12: Supabase)
+- [x] ~~루트 `docker-compose.yml`~~ → 대체 (결정 12: Docker 안 씀, 파일 삭제)
+- [x] `backend/src/main.py`, `core/` 구조 — A가 작성 (main 반영됨)
+- [x] `core/config.py`·`.env.example` — A가 작성 (Supabase·JWT·ECOS·CRON)
+- [x] `core/db.py` — A가 작성 (`NullPool`, prepared statement 끔, `UTCDateTime`)
+- [x] `core/errors.py` — A가 작성. 남은 것: 없는 경로 404를 `not_found` 형식으로 (A와 상의, [review-backend-B-setup-2026-11-12.md](review-backend-B-setup-2026-11-12.md) 4절)
+- [x] `backend/alembic/` — 주인이 A로 바뀜 (결정 13, 0001~0005 A 작성). `vector` 확장은 아직 없음 → 챗봇 벡터 검색 시작할 때 A에게 요청
+- [x] `GET /api/v1/health` — 있음 (서버만 확인). DB 연결 확인 추가 여부는 A와 결정
+- [x] 테스트 DB 방식 — A가 메모리 SQLite로 정함 (`backend/tests/conftest.py`)
+- [x] 브랜치 이름 규칙 `backend-B-*` — main 반영됨 (결정 8)
 
 ## 11/5~8 · 요청서 상태 흐름 (11/9 시연)
 
