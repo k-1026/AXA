@@ -5,7 +5,7 @@ import { MoreMenu } from './MoreMenu';
 import { BotIcon, CloseIcon, GearIcon, InfoIcon, PlusIcon, SearchIcon } from './icons';
 import { dayGroup, dotDate, listTime } from './time';
 import type { Conversation } from './types';
-import type { ChatMode } from './useConversations';
+import { lastActivity, type ChatMode } from './useConversations';
 
 interface Props {
   mode: ChatMode;
@@ -48,7 +48,7 @@ export function ChatSidebar({ mode, activeId, search, onNew, onSelect, onDelete,
       <div className="chat-history">
         {items.length === 0 && <p className="chat-history-empty">{t(query ? 'chat.noResults' : 'chat.noHistory')}</p>}
         {GROUPS.map((g) => {
-          const group = items.filter((c) => dayGroup(c.createdAt, now) === g);
+          const group = items.filter((c) => dayGroup(lastActivity(c), now) === g); // 목록 순서(마지막 메시지)와 같은 기준
           if (!group.length) return null;
           return (
             <section key={g} className="chat-history-group">
@@ -71,7 +71,7 @@ export function ChatSidebar({ mode, activeId, search, onNew, onSelect, onDelete,
                           {c.sample && <span className="chat-sample-tag">{t('chat.sample')}</span>}
                         </strong>
                         <span>
-                          {listTime(c.createdAt, i18n.language)} · {t(c.topic ? `chat.summary.${c.topic}` : 'chat.summary.none')}
+                          {listTime(lastActivity(c), i18n.language)} · {t(c.topic ? `chat.summary.${c.topic}` : 'chat.summary.none')}
                         </span>
                       </span>
                     </button>
@@ -92,9 +92,9 @@ export function ChatSidebar({ mode, activeId, search, onNew, onSelect, onDelete,
           <InfoIcon />
           {t(`chat.saveNote.${mode}`)}
         </p>
-        <Link to={mode === 'guest' ? '/login' : '/mypage'} state={{ from: '/chatbot' }} className="chat-settings">
+        <Link to="/mypage" className="chat-settings">
           <GearIcon />
-          {t(mode === 'guest' ? 'chat.login' : 'chat.settings')}
+          {t('chat.settings')}
         </Link>
       </div>
     </aside>

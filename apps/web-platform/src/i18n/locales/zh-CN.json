@@ -2,8 +2,7 @@
   "header": {
     "language": "语言",
     "currency": "货币",
-    "login": "登录 / 注册",
-    "chatbot": "聊天机器人"
+    "login": "登录 / 注册"
   },
   "nav": {
     "title": "菜单",
@@ -141,7 +140,6 @@
       "edit": "编辑日程",
       "add": "添加日程",
       "directions": "路线",
-      "more": "日程菜单",
       "tag": {
         "userAdded": "自行登记",
         "experience": "体验",
@@ -218,12 +216,12 @@
     "draft": "本文为尚未经过法律审查的草案，内容可能变更。",
     "back": "我的页面",
     "notFound": "找不到该文件。",
-    "koreanOnly": "本文件目前仅有韩语原文。"
+    "koreanOnly": "本文件目前仅有韩语原文。",
+    "translated": "本文件为翻译版本。如与韩文原文不一致，以韩文原文为准。"
   },
   "auth": {
     "requiredTitle": "请先登录",
     "requiredDesc": "已保存的医院、就诊记录和大邱行程需登录后查看。",
-    "comingSoon": "会员登录即将推出。目前可以使用演示账号浏览。",
     "demo": "使用演示账号浏览",
     "demoNote": "演示账号也会显示示例数据，收藏和就诊记录仅保存在此浏览器中。",
     "demoBadge": "演示",
@@ -279,11 +277,9 @@
     "delete": "删除对话",
     "confirmDelete": "要删除 {{title}} 的对话吗？删除后无法恢复。",
     "saveNote": {
-      "guest": "登录后可保存对话",
       "demo": "演示对话不会被保存",
       "member": "对话会自动保存"
     },
-    "login": "登录",
     "settings": "设置",
     "summary": {
       "none": "新对话",
@@ -324,7 +320,55 @@
     "placeholder": "请输入您的问题",
     "send": "发送",
     "disclaimer": "AI 回答仅供参考。诊疗和预约请向相关医院确认。",
-    "cancel": "取消"
+    "cancel": "取消",
+    "api": {
+      "thinking": "正在准备回答…",
+      "aiGenerated": "AI 生成",
+      "medicalNotice": "这不是医疗咨询。诊断和治疗由医务人员判断。",
+      "network": "无法连接服务器，请稍后再试。",
+      "rateLimited": "提问过多，请稍后再试。",
+      "unavailable": "聊天机器人暂时无法使用，请稍后再试。",
+      "login": "请重新登录。",
+      "notFound": "找不到此对话，请在新对话中再问一次。",
+      "validation": "请检查您的问题（1,000 字以内）。",
+      "error": "未能获得回答，请重试。",
+      "tooManySessions": "已保存的对话过多，请删除部分过去的对话。"
+    },
+    "card": {
+      "hospitalList": "{{count}} 家医院（按名称排列，非排名）",
+      "suggestions": "符合条件的医院 {{count}} 家",
+      "prices": "公开非医保价格",
+      "draft": "咨询申请草稿",
+      "hospital": "医院",
+      "department": "科室",
+      "slots": "希望时间（当地时间）",
+      "consents": "提交前同意",
+      "submit": "提交申请",
+      "submitLater": "演示阶段：预约申请 API 接入后即可提交。",
+      "registered": "外国患者招揽机构",
+      "staffLangs": "员工语言：{{langs}}",
+      "aiTranslation": "AI 翻译聊天",
+      "listNote": "按名称排序，并非推荐或排名。",
+      "suggestBasis": "仅根据各医院与您所说条件（接待语言、就诊日、可预约时间）的符合程度提出，并非对医疗水平、技术或结果的评价。均为已登记的外国患者招揽医疗机构。MediDaegu 为登记的患者招揽机构，可能向医院收取中介费，但中介费不影响排序。",
+      "priceNote": "以韩国患者为准公开的非医保价格（演示数值）。实际费用可能不同，请向医院确认。",
+      "reasons": {
+        "staffLang": "有会说{{lang}}的员工",
+        "aiTranslation": "可使用 AI 翻译聊天",
+        "openOn": "{{day}}就诊（{{hours}}）",
+        "slotsOn": "{{date}}有可咨询时段",
+        "inDistrict": "位于{{district}}"
+      }
+    },
+    "consent": {
+      "privacy": "个人信息收集与使用",
+      "health": "健康信息处理",
+      "overseas_transfer": "境外 AI 处理（跨境传输）"
+    },
+    "loadingHistory": "正在加载此对话…",
+    "loadFailed": "无法加载此对话。",
+    "retry": "重试",
+    "deleteFailed": "无法删除对话，请稍后再试。",
+    "dismiss": "关闭"
   },
   "consult": {
     "threads": "医院咨询",
@@ -342,7 +386,6 @@
     "empty": "请给医院工作人员发送第一条消息，医院会直接回复。",
     "staffLabel": "{{name}} · 咨询人员",
     "staffOnline": "咨询时间内",
-    "staffOffline": "非咨询时间",
     "hospitalInfo": "医院信息",
     "requestBooking": "申请预约",
     "notice": "就诊前有任何问题，请咨询医院工作人员。",
@@ -364,9 +407,11 @@
     "status": {
       "pending": "待确认",
       "confirmed": "已确认",
-      "declined": "无法预约",
+      "rejected": "无法预约",
       "cancelled": "已取消",
-      "completed": "已就诊"
+      "visited": "已就诊",
+      "proposed": "医院提议其他时间",
+      "expired": "已过期"
     },
     "quick": {
       "booking": "预约咨询",
@@ -390,9 +435,10 @@
       "errDate": "请选择今天或之后的日期。",
       "changeTitle": "更改预约",
       "changeSubmit": "申请更改",
-      "changeHint": "更改后医院会重新确认，确认前显示为“待确认”。"
+      "changeHint": "更改后医院会重新确认，确认前显示为“待确认”。",
+      "errTime": "请选择现在之后的时间。"
     },
-    "completedNote": "已完成就诊，可在术后管理中与医护人员交流。"
+    "visitedNote": "已完成就诊，可在术后管理中与医护人员交流。"
   },
   "bookings": {
     "backToChats": "返回咨询列表",
@@ -404,7 +450,7 @@
       "pending": "待确认",
       "confirmed": "已确认",
       "cancelled": "已取消",
-      "completed": "已就诊"
+      "visited": "已就诊"
     },
     "sortLabel": "排序",
     "sortVisit": "按就诊日期",
@@ -415,7 +461,7 @@
     "kind": "到院咨询 · 咨询语言 {{lang}}",
     "number": "预约编号 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
-    "declinedNote": "医院告知该时间无法预约。",
+    "rejectedNote": "医院告知该时间无法预约。",
     "change": "更改预约",
     "cancel": "取消预约",
     "chat": "咨询",
@@ -424,7 +470,9 @@
     "changeMsg": "已申请将预约改为{{when}}。",
     "cancelMsg": "已取消{{when}}的预约。",
     "footnote": "预约时间以韩国时间（KST）为准。",
-    "sampleNote": "示例医院和预约信息。"
+    "sampleNote": "示例医院和预约信息。",
+    "proposedNote": "医院提议了其他时间，请在咨询中确认。",
+    "expiredNote": "所有希望日期均已过去，此申请已过期。"
   },
   "aftercare": {
     "list": "术后管理记录",
@@ -446,5 +494,10 @@
     "errSize": "每个文件最大50MB。",
     "errCount": "一次最多发送{{max}}个。",
     "aftercareButton": "术后管理"
+  },
+  "notFoundPage": {
+    "title": "找不到页面",
+    "body": "网址可能已更改，或页面不存在。",
+    "home": "返回首页"
   }
 }

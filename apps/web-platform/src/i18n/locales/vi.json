@@ -2,8 +2,7 @@
   "header": {
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",
-    "login": "Đăng nhập / Đăng ký",
-    "chatbot": "Chatbot"
+    "login": "Đăng nhập / Đăng ký"
   },
   "nav": {
     "title": "Menu",
@@ -141,7 +140,6 @@
       "edit": "Sửa lịch",
       "add": "Thêm lịch",
       "directions": "Chỉ đường",
-      "more": "Tùy chọn lịch",
       "tag": {
         "userAdded": "Bạn tự thêm",
         "experience": "Trải nghiệm",
@@ -218,12 +216,12 @@
     "draft": "Đây là bản nháp chưa được rà soát pháp lý và có thể thay đổi.",
     "back": "Trang của tôi",
     "notFound": "Không tìm thấy tài liệu.",
-    "koreanOnly": "Tài liệu này hiện chỉ có bản tiếng Hàn."
+    "koreanOnly": "Tài liệu này hiện chỉ có bản tiếng Hàn.",
+    "translated": "Đây là bản dịch. Nếu có khác biệt với bản gốc tiếng Hàn, bản gốc tiếng Hàn được ưu tiên."
   },
   "auth": {
     "requiredTitle": "Vui lòng đăng nhập",
     "requiredDesc": "Bệnh viện đã lưu, lịch sử khám và lịch trình Daegu sẽ hiển thị sau khi đăng nhập.",
-    "comingSoon": "Đăng nhập thành viên sắp ra mắt. Hiện tại bạn có thể xem thử bằng tài khoản demo.",
     "demo": "Xem thử bằng tài khoản demo",
     "demoNote": "Tài khoản demo cũng hiển thị dữ liệu mẫu. Bệnh viện đã lưu và nhật ký khám chỉ lưu trong trình duyệt này.",
     "demoBadge": "Demo",
@@ -279,11 +277,9 @@
     "delete": "Xóa hội thoại",
     "confirmDelete": "Xóa hội thoại ngày {{title}}? Không thể hoàn tác.",
     "saveNote": {
-      "guest": "Đăng nhập để lưu hội thoại",
       "demo": "Hội thoại demo không được lưu",
       "member": "Hội thoại được lưu tự động"
     },
-    "login": "Đăng nhập",
     "settings": "Cài đặt",
     "summary": {
       "none": "Hội thoại mới",
@@ -324,7 +320,55 @@
     "placeholder": "Nhập câu hỏi của bạn",
     "send": "Gửi",
     "disclaimer": "Câu trả lời AI chỉ mang tính thông tin. Vui lòng xác nhận việc khám và đặt lịch với bệnh viện.",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "api": {
+      "thinking": "Đang chuẩn bị câu trả lời…",
+      "aiGenerated": "Do AI tạo",
+      "medicalNotice": "Đây không phải tư vấn y tế. Chẩn đoán và điều trị do nhân viên y tế quyết định.",
+      "network": "Không kết nối được máy chủ. Vui lòng thử lại sau.",
+      "rateLimited": "Quá nhiều câu hỏi. Vui lòng thử lại sau.",
+      "unavailable": "Chatbot hiện không khả dụng. Vui lòng thử lại sau.",
+      "login": "Vui lòng đăng nhập lại.",
+      "notFound": "Không tìm thấy cuộc trò chuyện này. Hãy hỏi lại trong cuộc trò chuyện mới.",
+      "validation": "Vui lòng kiểm tra câu hỏi (tối đa 1.000 ký tự).",
+      "error": "Không nhận được câu trả lời. Vui lòng thử lại.",
+      "tooManySessions": "Bạn có quá nhiều cuộc trò chuyện đã lưu. Vui lòng xóa bớt các cuộc trò chuyện cũ."
+    },
+    "card": {
+      "hospitalList": "{{count}} phòng khám (theo tên, không xếp hạng)",
+      "suggestions": "{{count}} phòng khám phù hợp điều kiện",
+      "prices": "Giá dịch vụ ngoài bảo hiểm công khai",
+      "draft": "Bản nháp yêu cầu tư vấn",
+      "hospital": "Phòng khám",
+      "department": "Chuyên khoa",
+      "slots": "Thời gian mong muốn (giờ địa phương)",
+      "consents": "Đồng ý trước khi gửi",
+      "submit": "Gửi yêu cầu",
+      "submitLater": "Giai đoạn demo: có thể gửi khi API yêu cầu đặt lịch được kết nối.",
+      "registered": "Cơ sở tiếp nhận bệnh nhân nước ngoài",
+      "staffLangs": "Nhân viên nói: {{langs}}",
+      "aiTranslation": "Chat dịch bằng AI",
+      "listNote": "Sắp xếp theo tên. Đây không phải là gợi ý hay xếp hạng.",
+      "suggestBasis": "Chỉ được gợi ý dựa trên mức độ phù hợp với điều kiện bạn đưa ra (ngôn ngữ hỗ trợ, ngày khám, giờ trống). Đây không phải là đánh giá về chất lượng y tế, tay nghề hay kết quả. Tất cả đều là cơ sở y tế đã đăng ký thu hút bệnh nhân nước ngoài. MediDaegu là đơn vị thu hút bệnh nhân đã đăng ký và có thể nhận phí môi giới từ bệnh viện; phí này không ảnh hưởng đến thứ tự.",
+      "priceNote": "Giá ngoài bảo hiểm công bố cho bệnh nhân Hàn Quốc (giá trị minh họa). Chi phí thực tế có thể khác, vui lòng hỏi bệnh viện.",
+      "reasons": {
+        "staffLang": "Nhân viên nói {{lang}}",
+        "aiTranslation": "Có trò chuyện dịch AI",
+        "openOn": "Mở cửa {{day}} ({{hours}})",
+        "slotsOn": "Có lịch tư vấn ngày {{date}}",
+        "inDistrict": "Tại {{district}}"
+      }
+    },
+    "consent": {
+      "privacy": "Thu thập và sử dụng thông tin cá nhân",
+      "health": "Xử lý thông tin sức khỏe",
+      "overseas_transfer": "Xử lý bởi AI ở nước ngoài (chuyển ra nước ngoài)"
+    },
+    "loadingHistory": "Đang tải cuộc trò chuyện…",
+    "loadFailed": "Không tải được cuộc trò chuyện này.",
+    "retry": "Thử lại",
+    "deleteFailed": "Không xóa được cuộc trò chuyện. Vui lòng thử lại sau.",
+    "dismiss": "Đóng"
   },
   "consult": {
     "threads": "Tư vấn theo bệnh viện",
@@ -342,7 +386,6 @@
     "empty": "Hãy gửi tin nhắn đầu tiên cho nhân viên bệnh viện. Bệnh viện sẽ trả lời trực tiếp.",
     "staffLabel": "{{name}} · Nhân viên tư vấn",
     "staffOnline": "Trong giờ tư vấn",
-    "staffOffline": "Ngoài giờ tư vấn",
     "hospitalInfo": "Thông tin bệnh viện",
     "requestBooking": "Đặt lịch",
     "notice": "Hãy hỏi nhân viên bệnh viện mọi thắc mắc trước khi đến khám.",
@@ -364,9 +407,11 @@
     "status": {
       "pending": "Chờ xác nhận",
       "confirmed": "Đã xác nhận",
-      "declined": "Không thể đặt",
+      "rejected": "Không thể đặt",
       "cancelled": "Đã hủy",
-      "completed": "Đã khám"
+      "visited": "Đã khám",
+      "proposed": "Đề xuất giờ khác",
+      "expired": "Đã hết hạn"
     },
     "quick": {
       "booking": "Hỏi đặt lịch",
@@ -390,9 +435,10 @@
       "errDate": "Hãy chọn hôm nay hoặc ngày sau đó.",
       "changeTitle": "Đổi lịch",
       "changeSubmit": "Gửi yêu cầu đổi",
-      "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\"."
+      "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\".",
+      "errTime": "Vui lòng chọn thời gian sau hiện tại."
     },
-    "completedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
+    "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
   },
   "bookings": {
     "backToChats": "Quay lại danh sách tư vấn",
@@ -404,7 +450,7 @@
       "pending": "Chờ xác nhận",
       "confirmed": "Đã xác nhận",
       "cancelled": "Đã hủy",
-      "completed": "Đã khám"
+      "visited": "Đã khám"
     },
     "sortLabel": "Sắp xếp",
     "sortVisit": "Theo ngày khám",
@@ -415,7 +461,7 @@
     "kind": "Tư vấn tại viện · Ngôn ngữ {{lang}}",
     "number": "Mã đặt lịch {{no}}",
     "cancelledOn": "Ngày hủy {{date}}",
-    "declinedNote": "Bệnh viện cho biết không thể đặt vào thời gian này.",
+    "rejectedNote": "Bệnh viện cho biết không thể đặt vào thời gian này.",
     "change": "Đổi lịch",
     "cancel": "Hủy lịch",
     "chat": "Tư vấn",
@@ -424,7 +470,9 @@
     "changeMsg": "Tôi đã yêu cầu đổi lịch sang {{when}}.",
     "cancelMsg": "Tôi đã hủy lịch hẹn {{when}}.",
     "footnote": "Giờ hẹn theo giờ Hàn Quốc (KST).",
-    "sampleNote": "Bệnh viện và lịch hẹn mẫu."
+    "sampleNote": "Bệnh viện và lịch hẹn mẫu.",
+    "proposedNote": "Bệnh viện đã đề xuất giờ khác. Vui lòng kiểm tra trong phần tư vấn.",
+    "expiredNote": "Tất cả ngày mong muốn đã qua nên yêu cầu này đã hết hạn."
   },
   "aftercare": {
     "list": "Lịch sử chăm sóc sau khám",
@@ -446,5 +494,10 @@
     "errSize": "Mỗi tệp tối đa 50MB.",
     "errCount": "Mỗi lần gửi tối đa {{max}} tệp.",
     "aftercareButton": "Chăm sóc sau khám"
+  },
+  "notFoundPage": {
+    "title": "Không tìm thấy trang",
+    "body": "Địa chỉ có thể đã thay đổi hoặc trang không tồn tại.",
+    "home": "Về trang chủ"
   }
 }

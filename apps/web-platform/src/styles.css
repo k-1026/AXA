@@ -1329,22 +1329,6 @@ a {
   height: 14px;
 }
 
-.mp-icon-button {
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 8px;
-  background: none;
-  color: var(--text-muted);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.mp-icon-button:hover {
-  background: var(--surface-muted);
-}
-
 .mp-add {
   margin-top: 4px;
   font-size: 1rem;
@@ -1436,13 +1420,6 @@ a {
 .mp-check input:focus-visible + .mp-check-box {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-.mp-card-foot {
-  margin-top: auto;
-  padding-top: 18px;
-  border-top: 1px solid #e4e8ee;
-  font-size: 1rem;
 }
 
 /* 내 계정 */
@@ -2090,7 +2067,6 @@ a {
   .mp-entry-dot { grid-area: dot; margin-top: 4px; }
   .mp-entry-time { grid-area: time; padding: 0; }
   .mp-entry-body { grid-area: body; }
-  .mp-icon-button { grid-area: more; }
 
   .mp-entry + .mp-entry::after {
     left: 40px;
@@ -2680,6 +2656,18 @@ body.chat-open {
   background: var(--c-blue-08);
   color: var(--c-blue);
   font-size: 0.8rem;
+}
+
+/* 지난 대화 불러오기 실패 → 다시 시도 */
+.chat-retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .chat-day {
@@ -3776,7 +3764,7 @@ body.chat-open {
   color: #15803d;
 }
 
-.consult-status.is-declined {
+.consult-status.is-rejected {
   background: #fde7e5;
   color: #b42318;
 }
@@ -4164,9 +4152,15 @@ body.chat-open {
   text-decoration: none;
 }
 
-.consult-status.is-cancelled {
+.consult-status.is-cancelled,
+.consult-status.is-expired {
   background: #eceff3;
   color: #5d6875;
+}
+
+.consult-status.is-proposed {
+  background: #fdf0d5;
+  color: #9a5b00;
 }
 
 /* 예약 관리 (/mypage/bookings) */
@@ -4427,7 +4421,7 @@ body.chat-open {
   }
 }
 
-.consult-status.is-completed {
+.consult-status.is-visited {
   background: #e4edfd;
   color: #1f5fc8;
 }
@@ -4518,4 +4512,132 @@ body.chat-open {
 .aftercare-pending button svg {
   width: 14px;
   height: 14px;
+}
+
+/* ---- 챗봇 AI 답 (7d): 답 문장·카드·AI 표시 ---- */
+.chat-answer p + p {
+  margin-top: 6px;
+}
+
+.chat-pending {
+  color: var(--c-ink-70);
+  font-style: italic;
+}
+
+.chat-bubble.is-failed {
+  border-color: #e5a3a3;
+  background: #fff6f6;
+}
+
+.chat-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.chat-card {
+  padding: 12px 14px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 10px;
+  background: var(--c-blue-08);
+}
+
+.chat-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.chat-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-card-hospital {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--c-white);
+  font-size: 0.92rem;
+}
+
+.chat-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chat-card-badges em {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--c-blue-08);
+  color: var(--c-blue);
+  font-size: 0.8rem;
+  font-style: normal;
+}
+
+.chat-card-reasons,
+.chat-card-note {
+  color: var(--c-ink-70);
+  font-size: 0.82rem;
+}
+
+.chat-card-note {
+  margin: 8px 0 0;
+}
+
+.chat-card dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.chat-card dd {
+  margin: 0;
+}
+
+.chat-card fieldset {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.chat-card button:disabled {
+  padding: 6px 18px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--c-blue-25);
+  color: var(--c-ink-55);
+}
+
+.chat-ai-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0 !important;
+  color: var(--c-ink-70);
+  font-size: 0.8rem !important;
+}
+
+.chat-ai-badge {
+  padding: 0 8px;
+  border: 1px solid var(--c-ink-55);
+  border-radius: 8px;
+}
+
+/* 화면 언어 주소 아래의 한국어 원문 (택시·지도 앱용) */
+.addr-original {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.85em;
 }

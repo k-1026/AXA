@@ -14,7 +14,9 @@ export function HospitalsPage() {
   const state = useHospitals();
   // 필터는 주소(?dept=&district=)에 저장 → 상세에서 뒤로 와도 유지
   const [params, setParams] = useSearchParams();
-  const dept = params.get('dept') as DepartmentKey | null;
+  // 주소에 모르는 진료과가 들어오면 필터 없이 (빈 목록이 되지 않게)
+  const rawDept = params.get('dept');
+  const dept = DEPARTMENTS.includes(rawDept as DepartmentKey) ? (rawDept as DepartmentKey) : null;
   const district = params.get('district');
   const [shown, setShown] = useState(PAGE_SIZE);
 

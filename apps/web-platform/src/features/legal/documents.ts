@@ -5,6 +5,10 @@ import type { LegalDocument, Text } from './types';
 import { PRIVACY } from './privacy';
 import { TERMS } from './terms';
 import { AI_NOTICE } from './aiNotice';
+import en from './translations/en.json';
+import zhTW from './translations/zh-TW.json';
+import zhCN from './translations/zh-CN.json';
+import vi from './translations/vi.json';
 
 const L = (ko: string, en: string): Text => ({ ko, en });
 
@@ -27,15 +31,19 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
     updated: '2026-11-03',
     sections: [
       {
-        heading: L('1. 이 서비스가 하지 않는 일', '1. What this service does not do'),
+        heading: L('1. 병원 소개와 수수료', '1. Introducing hospitals and fees'),
         body: [
           L(
-            '한국 의료법은 영리 목적으로 환자를 병원에 소개·알선·유인하는 행위를 제한합니다 (의료법 제27조 제3항). 그래서 MediDaegu는 병원 순위·"추천"·"최저가"·할인율·후기·전후 사진을 보여주지 않고, 병원에서 입점비·광고비·예약 수수료를 받지 않습니다.',
-            'Korean medical law restricts introducing, brokering or inducing patients to hospitals for profit (Medical Service Act, Article 27(3)). So MediDaegu does not show rankings, "recommended" or "lowest price" labels, discount rates, reviews or before-and-after photos, and does not take listing fees, ad fees or booking commissions from hospitals.',
+            '한국 의료법은 영리 목적으로 환자를 병원에 소개·알선·유인하는 행위를 제한하고, 등록한 외국인환자 유치업자의 유치 행위는 예외로 둡니다 (의료법 제27조 제3항 제2호). MediDaegu는 등록 외국인환자 유치업자라는 가정으로 설계·시연하는 서비스이며, 입점 병원으로부터 건당 중개수수료를 받는 구조입니다. 수수료는 법령이 정한 상한 안에서만 받고, 이용자(환자)에게는 받지 않습니다.',
+            'Korean medical law restricts introducing, brokering or inducing patients to hospitals for profit, with an exception for registered international patient facilitators (Medical Service Act, Article 27(3)(2)). MediDaegu is designed and demonstrated on the assumption that it is a registered facilitator, and its model is a per-case brokerage fee paid by partner hospitals. Fees stay within the legal cap, and patients are not charged.',
           ),
           L(
-            '목록과 지도는 거리·가나다순으로만 정렬합니다.',
-            'Lists and maps are sorted only by distance or alphabetical order.',
+            '목록과 지도는 거리·가나다순으로만 정렬합니다. 챗봇은 입력한 조건(진료과·지역·언어 등)에 맞는 병원을 제안할 수 있지만, 의료 수준을 비교한 순위가 아닙니다. 병원 순위·"최고"·"최저가"·할인율·후기·전후 사진은 보여주지 않습니다.',
+            'Lists and maps are sorted only by distance or alphabetical order. The chatbot may suggest hospitals that match the conditions you enter (department, area, language, etc.), but this is not a ranking of medical quality. We do not show rankings, "best" or "lowest price" labels, discount rates, reviews or before-and-after photos.',
+          ),
+          L(
+            '챗봇은 병원에 보낼 상담 요청서 초안을 함께 만들 수 있습니다. 요청서는 이용자가 확인하고 직접 제출하며, 예약 확정은 병원이 합니다.',
+            'The chatbot can help you prepare a draft consultation request. You review and submit it yourself, and the hospital confirms any booking.',
           ),
         ],
       },
@@ -71,7 +79,23 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
   },
 ];
 
-// 한국어 외 언어는 영어로 표시 (병원 이름과 같은 규칙). 영어본이 없으면 한국어 원문
-export const pickText = (x: Text, lang: string) => (lang !== 'ko' && x.en ? x.en : x.ko);
+// 번역본: 한국어 원문 문자열을 키로 한 언어별 JSON (원문이 바뀌면 키가 안 맞아 원문으로 돌아감)
+// 누락 확인: apps/web-platform 에서 node scripts/check-legal-translations.mjs
+const TRANSLATIONS: Record<string, Record<string, string>> = { en, 'zh-TW': zhTW, 'zh-CN': zhCN, vi };
+
+// ko → 원문. 그 외 → 문서 안 해당 언어 → 번역 파일 → 영어(문서 안 → 번역 파일) → 한국어 원문
+export const pickText = (x: Text, lang: string): string => {
+  if (lang === 'ko') return x.ko;
+  return (
+    (x as unknown as Record<string, string | undefined>)[lang] ??
+    TRANSLATIONS[lang]?.[x.ko] ??
+    x.en ??
+    TRANSLATIONS.en[x.ko] ??
+    x.ko
+  );
+};
+
+// 이 언어로 번역된 문서인지 (제목이 한국어 원문 그대로가 아니면 번역본)
+export const isTranslated = (x: Text, lang: string) => lang !== 'ko' && pickText(x, lang) !== x.ko;
 
 export const findLegalDocument =(slug: string | undefined) => LEGAL_DOCUMENTS.find((d) => d.slug === slug);

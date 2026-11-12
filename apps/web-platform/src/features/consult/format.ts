@@ -1,5 +1,5 @@
 // 상담 화면 날짜 표시 (한국 시간)
-const TZ = 'Asia/Seoul';
+import { KST as TZ } from '../../lib/common';
 
 /** 목록 날짜: "11월 10일" / "Nov 10" */
 export const shortDate = (iso: string, lang: string) =>
@@ -21,13 +21,6 @@ export function bookingDateFull(date: string, time: string, lang: string) {
   return `${date.replace(/-/g, '.')} (${wd}) ${hm}`;
 }
 
-/** 오늘 (YYYY-MM-DD, 한국 시간) */
-export const todayKst = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
-
-/** 지금이 상담 가능 시간(평일·토 09:00–18:00)인지 */
-export function isConsultHours(now = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, weekday: 'short', hour: '2-digit', hourCycle: 'h23' }).formatToParts(now);
-  const hour = Number(parts.find((p) => p.type === 'hour')?.value);
-  const weekday = parts.find((p) => p.type === 'weekday')?.value;
-  return weekday !== 'Sun' && hour >= 9 && hour < 18;
-}
+/** 지금 시각 (HH:mm, 한국 시간) */
+export const nowKstTime = () =>
+  new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());

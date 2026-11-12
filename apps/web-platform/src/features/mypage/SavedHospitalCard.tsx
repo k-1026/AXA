@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSavedHospitals } from '../hospital/savedHospitals';
 import { ArrowRightIcon, GlobeIcon, HeartIcon, PinIcon } from './icons';
-import { SAVED_DEPTS, type Localized, type SavedHospital } from './sampleData';
+import { useLocalized } from '../../lib/common';
+import { SAVED_DEPTS, type SavedHospital } from './sampleData';
 
 // 저장한 병원 카드. 하트를 누르면 찜 해제
 export function SavedHospitalCard({ hospital: h }: { hospital: SavedHospital }) {
   const { t, i18n } = useTranslation();
-  const label = (x: Localized) => (i18n.language === 'ko' ? x.ko : x.en);
+  const label = useLocalized();
   const { toggle } = useSavedHospitals();
   const dept = SAVED_DEPTS.find((d) => d.key === h.dept)!;
 

@@ -4,6 +4,7 @@ import { HospitalPhoto } from './HospitalPhoto';
 import { SaveHeart } from './SaveHeart';
 import { instagramHandle, useHospitalName } from './name';
 import type { Hospital } from './types';
+import { HospitalAddress } from './HospitalAddress';
 
 export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
   const { t } = useTranslation();
@@ -26,7 +27,7 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
         </h2>
         <dl className="hospital-facts">
           <dt>{t('popup.addr')}</dt>
-          <dd lang="ko">{h.addr}</dd>
+          <dd><HospitalAddress addr={h.addr} /></dd>
           <dt>{t('popup.tel')}</dt>
           <dd>{h.tel && <a href={`tel:${h.tel}`}>{h.tel}</a>}</dd>
           <dt>{t('hospital.homepage')}</dt>

@@ -4,6 +4,7 @@ import { useSavedHospitals } from '../hospital/savedHospitals';
 import { useVisitLog } from './visitLog';
 import { useHospitals } from '../hospital/useHospitals';
 import { SAMPLE_MYPAGE, type MyPageData, type SavedHospital } from './sampleData';
+import { hospitalNames } from '../hospital/name';
 
 // 데모 계정은 예시 데이터, 실제 회원은 (백엔드 연결 전까지) 빈 상태에서 시작
 const EMPTY: MyPageData = {
@@ -32,7 +33,7 @@ export function useMyPageData(): { data: MyPageData; saved: SavedHospital[]; dem
         id: h.id,
         savedAt: e.savedAt,
         dept: h.depts[0],
-        name: { ko: h.name, en: h.nameEn },
+        name: hospitalNames(h),
         area: { ko: area, en: area },
         treatments: [],
         languages: [],

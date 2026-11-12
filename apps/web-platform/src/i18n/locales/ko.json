@@ -2,8 +2,7 @@
   "header": {
     "language": "언어",
     "currency": "통화",
-    "login": "로그인 / 회원가입",
-    "chatbot": "챗봇"
+    "login": "로그인 / 회원가입"
   },
   "nav": {
     "title": "메뉴",
@@ -141,7 +140,6 @@
       "edit": "일정 수정",
       "add": "일정 추가",
       "directions": "길찾기",
-      "more": "일정 메뉴",
       "tag": {
         "userAdded": "직접 등록",
         "experience": "체험",
@@ -218,12 +216,12 @@
     "draft": "법률 검토 전 초안입니다. 내용은 바뀔 수 있습니다.",
     "back": "마이페이지",
     "notFound": "문서를 찾을 수 없어요.",
-    "koreanOnly": "이 문서는 아직 한국어 원문만 있습니다."
+    "koreanOnly": "이 문서는 아직 한국어 원문만 있습니다.",
+    "translated": "이 문서는 번역본이에요. 한국어 원문과 내용이 다르면 한국어 원문이 우선해요."
   },
   "auth": {
     "requiredTitle": "로그인이 필요해요",
     "requiredDesc": "저장한 병원, 방문 기록, 나의 대구 일정은 로그인한 뒤에 볼 수 있어요.",
-    "comingSoon": "회원 로그인은 준비 중이에요. 지금은 데모 계정으로 화면을 둘러볼 수 있어요.",
     "demo": "데모 계정으로 둘러보기",
     "demoNote": "데모 계정은 예시 데이터를 함께 보여주며, 찜과 방문 기록은 이 브라우저에만 저장돼요.",
     "demoBadge": "데모",
@@ -279,11 +277,9 @@
     "delete": "대화 삭제",
     "confirmDelete": "{{title}} 대화를 삭제할까요? 삭제하면 되돌릴 수 없어요.",
     "saveNote": {
-      "guest": "로그인하면 대화가 저장돼요",
       "demo": "데모 대화는 저장되지 않아요",
       "member": "대화는 자동으로 저장됩니다"
     },
-    "login": "로그인",
     "settings": "설정",
     "summary": {
       "none": "새 대화",
@@ -324,7 +320,55 @@
     "placeholder": "궁금한 내용을 입력해 주세요",
     "send": "보내기",
     "disclaimer": "AI 답변은 정보 안내용입니다. 진료·예약은 해당 병원에 확인해 주세요.",
-    "cancel": "취소"
+    "cancel": "취소",
+    "api": {
+      "thinking": "답을 준비하고 있어요…",
+      "aiGenerated": "AI 생성",
+      "medicalNotice": "의료 상담이 아닙니다. 진단·치료는 의료진이 판단해요.",
+      "network": "서버에 연결할 수 없어요. 잠시 뒤 다시 시도해 주세요.",
+      "rateLimited": "질문이 너무 많아요. 잠시 뒤 다시 시도해 주세요.",
+      "unavailable": "지금은 챗봇을 사용할 수 없어요. 잠시 뒤 다시 시도해 주세요.",
+      "login": "로그인이 필요해요. 다시 로그인해 주세요.",
+      "notFound": "이 대화를 찾을 수 없어요. 새 대화로 다시 질문해 주세요.",
+      "validation": "질문을 확인해 주세요 (1,000자 이하).",
+      "error": "답을 받지 못했어요. 다시 시도해 주세요.",
+      "tooManySessions": "저장된 대화가 너무 많아요. 지난 대화를 지워 주세요."
+    },
+    "card": {
+      "hospitalList": "병원 {{count}}곳 (이름순, 순위 아님)",
+      "suggestions": "조건에 맞는 병원 {{count}}곳",
+      "prices": "공공 비급여 가격",
+      "draft": "상담 요청서 초안",
+      "hospital": "병원",
+      "department": "진료과",
+      "slots": "희망 일시 (병원 현지 시간)",
+      "consents": "제출 전 동의",
+      "submit": "요청 보내기",
+      "submitLater": "시연 단계: 제출은 예약 요청 API가 연결되면 열려요.",
+      "registered": "외국인환자 유치기관",
+      "staffLangs": "직원 응대: {{langs}}",
+      "aiTranslation": "AI 번역 채팅",
+      "listNote": "이름순으로 보여 줘요. 추천이나 순위가 아니에요.",
+      "suggestBasis": "말씀하신 조건(응대 언어, 진료 요일, 가능한 시간)에 얼마나 맞는지로만 골랐어요. 의료 수준·실력·결과를 평가한 것이 아니에요. 모두 외국인환자 유치 등록 의료기관이에요. 메디대구는 등록 유치업자로서 병원으로부터 중개수수료를 받을 수 있지만, 수수료는 순서에 영향을 주지 않아요.",
+      "priceNote": "한국인 환자 기준으로 공개된 비급여 가격이에요(시연용 값). 실제 비용은 다를 수 있으니 병원에 확인하세요.",
+      "reasons": {
+        "staffLang": "{{lang}} 응대 직원",
+        "aiTranslation": "AI 번역 채팅 가능",
+        "openOn": "{{day}} 진료 ({{hours}})",
+        "slotsOn": "{{date}} 상담 가능 시간 있음",
+        "inDistrict": "{{district}} 위치"
+      }
+    },
+    "consent": {
+      "privacy": "개인정보 수집·이용",
+      "health": "건강정보 처리",
+      "overseas_transfer": "해외 AI 처리(국외 이전)"
+    },
+    "loadingHistory": "지난 대화를 불러오고 있어요…",
+    "loadFailed": "지난 대화를 불러오지 못했어요.",
+    "retry": "다시 시도",
+    "deleteFailed": "대화를 삭제하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
+    "dismiss": "닫기"
   },
   "consult": {
     "threads": "병원별 상담",
@@ -342,7 +386,6 @@
     "empty": "병원 담당자에게 첫 메시지를 보내 보세요. 답변은 병원이 직접 드려요.",
     "staffLabel": "{{name}} · 상담 담당자",
     "staffOnline": "상담 가능 시간",
-    "staffOffline": "상담 시간 외",
     "hospitalInfo": "병원 정보",
     "requestBooking": "예약 신청",
     "notice": "방문 전 궁금한 내용을 병원 담당자에게 문의하세요.",
@@ -364,9 +407,11 @@
     "status": {
       "pending": "확인 대기",
       "confirmed": "예약 확정",
-      "declined": "예약 불가",
+      "rejected": "예약 불가",
       "cancelled": "예약 취소",
-      "completed": "방문 완료"
+      "visited": "방문 완료",
+      "proposed": "다른 시간 제안",
+      "expired": "기간 만료"
     },
     "quick": {
       "booking": "예약 문의",
@@ -390,9 +435,10 @@
       "errDate": "오늘 이후 날짜를 선택해 주세요.",
       "changeTitle": "예약 변경",
       "changeSubmit": "변경 요청",
-      "changeHint": "변경하면 병원이 다시 확인해요. 확인 전까지 \"확인 대기\"로 표시돼요."
+      "changeHint": "변경하면 병원이 다시 확인해요. 확인 전까지 \"확인 대기\"로 표시돼요.",
+      "errTime": "지금 이후 시간을 선택해 주세요."
     },
-    "completedNote": "방문을 마쳤어요. 사후 관리에서 의료진과 대화할 수 있어요."
+    "visitedNote": "방문을 마쳤어요. 사후 관리에서 의료진과 대화할 수 있어요."
   },
   "bookings": {
     "backToChats": "상담 목록으로",
@@ -404,7 +450,7 @@
       "pending": "확인 대기",
       "confirmed": "예약 확정",
       "cancelled": "취소",
-      "completed": "방문 완료"
+      "visited": "방문 완료"
     },
     "sortLabel": "정렬",
     "sortVisit": "방문 예정일 순",
@@ -415,7 +461,7 @@
     "kind": "방문 상담 · 상담 언어 {{lang}}",
     "number": "예약번호 {{no}}",
     "cancelledOn": "취소일 {{date}}",
-    "declinedNote": "병원에서 이 일정으로는 예약이 어렵다고 알려 왔어요.",
+    "rejectedNote": "병원에서 이 일정으로는 예약이 어렵다고 알려 왔어요.",
     "change": "예약 변경",
     "cancel": "예약 취소",
     "chat": "상담하기",
@@ -424,7 +470,9 @@
     "changeMsg": "예약 일정을 {{when}}(으)로 변경 요청했어요.",
     "cancelMsg": "{{when}} 예약을 취소했어요.",
     "footnote": "예약 시간은 한국 시간(KST) 기준이에요.",
-    "sampleNote": "예시 병원 및 예약 정보예요."
+    "sampleNote": "예시 병원 및 예약 정보예요.",
+    "proposedNote": "병원에서 다른 시간을 제안했어요. 상담에서 확인해 주세요.",
+    "expiredNote": "희망 날짜가 모두 지나 요청이 만료됐어요."
   },
   "aftercare": {
     "list": "사후 관리 내역",
@@ -446,5 +494,10 @@
     "errSize": "파일 1개는 50MB까지 보낼 수 있어요.",
     "errCount": "한 번에 {{max}}개까지 보낼 수 있어요.",
     "aftercareButton": "사후 관리"
+  },
+  "notFoundPage": {
+    "title": "페이지를 찾을 수 없어요",
+    "body": "주소가 바뀌었거나 없는 페이지예요.",
+    "home": "메인으로"
   }
 }

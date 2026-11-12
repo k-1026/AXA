@@ -4,7 +4,7 @@ export interface Text {
   en?: string;
 }
 
-export interface LegalSection {
+interface LegalSection {
   heading?: Text;
   subheading?: Text; // 장 안의 작은 제목
   body?: Text[]; // 문단
