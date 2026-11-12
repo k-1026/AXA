@@ -3,7 +3,7 @@ import { createAccountList } from '../../components/account';
 import { uid } from '../../lib/common';
 
 // 방문 기록(개인 다이어리). 본인만 쓰고 본인만 본다: 후기가 아니므로 서버로 보내거나 병원 화면에 표시하지 않는다
-export interface VisitRecord {
+interface VisitRecord {
   id: string;
   hospitalId?: string; // 목록에서 고른 병원. 직접 입력했으면 없음
   hospitalName: string;

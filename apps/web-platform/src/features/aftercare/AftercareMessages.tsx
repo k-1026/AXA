@@ -5,7 +5,7 @@ import { kstDay, longDate, msgTime } from '../chatbot/time';
 import { StaffIcon } from '../consult/icons';
 import type { AftercareMessage, Attachment } from './types';
 
-export function AttachmentView({ a }: { a: Attachment }) {
+function AttachmentView({ a }: { a: Attachment }) {
   return a.kind === 'image' ? (
     <a href={a.url} target="_blank" rel="noopener noreferrer" className="aftercare-media">
       <img src={a.url} alt={a.name} />

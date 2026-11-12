@@ -25,7 +25,7 @@ const save = (key: AccountKey, list: ConsultThread[]) => {
 
 const lastAt = (t: ConsultThread) => t.messages[t.messages.length - 1]?.at ?? '';
 
-export type NewThread = Omit<ConsultThread, 'messages' | 'unread'>;
+type NewThread = Omit<ConsultThread, 'messages' | 'unread'>;
 
 export function useConsultThreads() {
   const { user, account } = useAuth();

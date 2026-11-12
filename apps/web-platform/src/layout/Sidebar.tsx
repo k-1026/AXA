@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-export const NAV_ITEMS = [
+const NAV_ITEMS = [
   { to: '/', key: 'main' },
   { to: '/hospitals', key: 'hospitals' },
   { to: '/prices', key: 'prices' },

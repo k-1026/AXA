@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { createAccountList } from '../../components/account';
 
 // 찜한 병원. 찜 백엔드 연결 전이라 지금은 이 브라우저에만 저장한다
-export interface SavedEntry {
+interface SavedEntry {
   id: string;
   savedAt: string; // ISO 시각, "최근 저장순" 정렬용
 }

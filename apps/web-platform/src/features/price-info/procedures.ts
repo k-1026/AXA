@@ -3,7 +3,7 @@ import type { DepartmentKey } from '../hospital/types';
 // 출처: 팀 문서 "병원별 시술 모음.docx" (진료과별 대표 진료·시술 분류, 자료 확인 2026-11-02)
 
 // 가격은 범위만 표시. 근거 없는 숫자를 넣지 않도록 출처·기준일을 함께 적는다
-export interface PriceRange {
+interface PriceRange {
   min: number;
   max: number;
   source: string;

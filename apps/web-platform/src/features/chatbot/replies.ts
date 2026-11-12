@@ -33,7 +33,7 @@ const has = (text: string, words: string[]) => {
   return words.some((w) => s.includes(w.toLowerCase()));
 };
 
-export const topicChips = (t: TFunction): Chip[] =>
+const topicChips = (t: TFunction): Chip[] =>
   (['hospital', 'price', 'interpret', 'tour'] as Topic[]).map((topic) => ({
     label: t(`chat.topic.${topic}`),
     action: { kind: 'topic', topic },

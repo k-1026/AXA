@@ -26,7 +26,7 @@ export interface BookingRequest {
   treatment?: ChatText; // 병원이 기록한 진료·시술 이름 (방문 완료로 보일 때 표시)
 }
 
-export interface ConsultMessage {
+interface ConsultMessage {
   id: string;
   from: 'staff' | 'user';
   text?: ChatText;
