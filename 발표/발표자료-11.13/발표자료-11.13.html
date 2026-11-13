@@ -70,6 +70,28 @@ table.calc td:first-child, table.calc td.num { white-space: nowrap; }
 .flow .card .day { font-size: 12px; font-weight: 700; color: var(--accent); }
 .flow .card + .card::before { content: "→"; position: absolute; left: -17px; top: 50%; transform: translate(-50%, -50%); color: var(--neutral); font-size: 18px; line-height: 1; }
 
+/* 2장 감정 곡선 (painpoint/journey_map.html) */
+.jm { display: grid; grid-template-columns: 84px repeat(5, 1fr); grid-template-rows: auto 170px auto auto; column-gap: 8px; padding: 14px 16px 12px; }
+.jm .lab { font-weight: 800; font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--border); }
+.jm .st { background: var(--accent); color: #fff; text-align: center; font-weight: 800; font-size: 14px; border-radius: var(--radius-sm); padding: 7px 4px; margin-bottom: 4px; }
+.jm .st small { display: block; font-weight: 500; font-size: 11px; opacity: .85; }
+.jm .c { text-align: center; padding: 8px 6px; font-size: 13px; line-height: 1.4; border-top: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; }
+.jm .pn { font-weight: 700; color: var(--pain); }
+.jm .pn.off { color: var(--neutral); font-weight: 600; }
+.jm .op { color: var(--good); font-weight: 600; }
+.jm .ev { color: var(--text-muted); font-size: 11px; font-weight: 500; }
+.jm .curve { grid-column: 2 / span 5; border-top: 1px solid var(--border); position: relative; }
+.jm .curve svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.jm .el { font: 600 12px var(--font); fill: var(--text-muted); text-anchor: middle; }
+.jm .tag { vertical-align: 1px; }
+.jm .dot { position: relative; }
+.jm .dot::before { content: ""; position: absolute; left: 50%; top: calc(var(--y) / 120 * 100%); width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: var(--accent); }
+.jm .dot.low::before { width: 17px; height: 17px; margin: -8.5px 0 0 -8.5px; background: var(--pain); }
+.jm .dot span { position: absolute; left: 0; right: 0; top: calc(var(--y) / 120 * 100% - 26px); text-align: center; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.jm .dot.low span { color: var(--pain); font-weight: 800; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stats .card { padding: 12px 16px; }
+
 /* 3장 밸류체인 */
 .chain { display: grid; grid-template-columns: 150px repeat(5, 1fr); gap: 6px; font-size: 13px; }
 .chain .h { font-weight: 700; color: var(--ink); background: var(--surface-muted); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
@@ -162,29 +184,56 @@ table.calc td:first-child, table.calc td.num { white-space: nowrap; }
 <section class="slide">
   <div class="eyebrow">① 페인포인트</div>
   <h1>린이 막히는 곳은 <em>"고르는 단계"</em> — 정보가 비어 있다</h1>
-  <p class="lead">VOC 대신 데이터·공식·통계 근거 21건 + 가정 3건 · 점수 = 빈도 × 강도 × 해결 가능성 (최대 125)</p>
+  <p class="lead">린의 여정 5단계 감정 곡선 — 최저점은 ② 비교·결정 · 감정은 가정, 페인포인트는 데이터·공식·통계 근거 21건</p>
   <div class="body">
-    <div class="grid" style="grid-template-columns: 1.35fr 1fr;">
-      <div class="card" style="padding: 8px 10px;">
-        <table>
-          <tr><th>후보</th><th>여정 단계</th><th>빈도</th><th>강도</th><th>해결</th><th>점수</th></tr>
-          <tr class="top"><td><span class="tag t-pain">Top 1</span> 진료시간 정보 없음</td><td>② 비교·결정</td><td class="num">5</td><td class="num">4</td><td class="num">4</td><td class="num"><b>80</b></td></tr>
-          <tr class="top"><td><span class="tag t-pain">Top 2</span> 등록 병원 상세 부족</td><td>① 알아보기</td><td class="num">5</td><td class="num">3</td><td class="num">5</td><td class="num"><b>75</b></td></tr>
-          <tr class="top"><td><span class="tag t-pain">Top 3</span> 피부·성형 가격 기준 없음</td><td>② 비교·결정</td><td class="num">5</td><td class="num">4</td><td class="num">3</td><td class="num"><b>60</b></td></tr>
-          <tr><td><span class="tag t-neu">보류</span> 병원 응답 대기</td><td>③ 상담 예약</td><td class="num">3</td><td class="num">5</td><td class="num">3</td><td class="num">45</td></tr>
-          <tr><td><span class="tag t-neu">보류</span> 귀국 후 단절</td><td>⑤ 귀국 후</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">27</td></tr>
-          <tr><td><span class="tag t-neu">보류</span> 동의서 이해 · 예약 확인서</td><td>③·④</td><td class="num" colspan="3">해결 1 (병원·제도 몫)</td><td class="num">9 · 6</td></tr>
-        </table>
-        <p class="muted" style="font-size:12.5px; margin: 8px 4px 0;">"병원 응답 대기"는 강도가 가장 높지만 환자 쪽 근거가 가정뿐 → 인터뷰 뒤 다시 봄</p>
+    <div class="card jm">
+      <div></div>
+      <div class="st">① 알아보기<small>대만 · 검색·SNS</small></div>
+      <div class="st">② 비교·결정<small>대만 · 병원 상세</small></div>
+      <div class="st">③ 상담 예약<small>대만 · 챗봇·요청서</small></div>
+      <div class="st">④ 방문·진료<small>대구 · 병원</small></div>
+      <div class="st">⑤ 귀국 후 관리<small>대만 · 채팅</small></div>
+
+      <div class="lab">감정 <span class="as" style="font-size:10px">가정</span></div>
+      <div class="curve">
+        <svg viewBox="0 0 1000 120" preserveAspectRatio="none" aria-label="감정 곡선: 알아보기 -1, 비교·결정 -2 최저점, 상담 예약 -1, 방문·진료 0, 귀국 후 관리 -1">
+          <rect x="0" y="0" width="1000" height="44" fill="var(--good-soft)" opacity=".6"/>
+          <line x1="0" y1="44" x2="1000" y2="44" stroke="var(--border)" stroke-dasharray="4 4"/>
+          <path d="M100,70 C170,70 230,100 300,100 C370,100 430,70 500,70 C570,70 630,44 700,44 C770,44 830,70 900,70" fill="none" stroke="var(--accent)" stroke-width="3" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <svg viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true" style="pointer-events:none">
+          <text x="8" y="22" class="el" style="text-anchor:start">+</text><text x="8" y="114" class="el" style="text-anchor:start">−</text>
+        </svg>
+        <div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(5,1fr);">
+          <div class="dot" style="--y:70"><span>−1 정보 부족</span></div>
+          <div class="dot low" style="--y:100"><span>−2 최저점</span></div>
+          <div class="dot" style="--y:70"><span>−1 기다림</span></div>
+          <div class="dot" style="--y:44"><span>0 계획대로</span></div>
+          <div class="dot" style="--y:70"><span>−1 물을 곳 부족</span></div>
+        </div>
       </div>
-      <div class="grid" style="grid-template-rows: repeat(3, 1fr); gap: 10px;">
-        <div class="card"><div class="big">26.1% <small>진료시간 채움</small></div><p>대구 병원 월요일 진료시간 — 피부과 21.4%, 성형외과 14.1%. 플랫폼마다 표시 기준도 다름</p></div>
-        <div class="card"><div class="big">13 / 145 <small>상세 정보 있는 등록 병원</small></div><p>메디컬코리아 대구 등록 병원 중 통역 언어·진료시간 등 상세가 있는 곳</p></div>
-        <div class="card"><div class="big">0곳 <small>미용 시술 공공 가격</small></div><p>심평원 비급여에 의원급 미용 시술 가격 없음 → 플랫폼엔 병원이 정한 이벤트가뿐</p></div>
-      </div>
+
+      <div class="lab">페인포인트</div>
+      <div class="c pn"><div><span class="tag t-pain">Top 2</span> 등록 병원<br>상세 정보 부족</div><span class="ev">E03 E04 E05 E06</span></div>
+      <div class="c pn"><div><span class="tag t-pain">Top 1</span> 진료시간 정보 없음</div><div><span class="tag t-pain">Top 3</span> 가격 기준 없음</div><span class="ev">E01 E04 · E02 E07</span></div>
+      <div class="c pn off"><div>병원 답 기다림</div><span class="ev">가정 · 보류</span></div>
+      <div class="c pn off"><div>동의서 이해 어려움</div><span class="ev">E13 · 의료진 몫</span></div>
+      <div class="c pn off"><div>귀국 후 진료성<br>상담 창구 없음</div><span class="ev">E15 · 2027-05 전</span></div>
+
+      <div class="lab">기회</div>
+      <div class="c op">등록 병원 상세를<br>5개 언어로 한곳에</div>
+      <div class="c op">출처·확인일 붙은 진료시간<br>가격 위치 표시</div>
+      <div class="c op">AI 요약·답장 초안으로<br>병원 응답 단축</div>
+      <div class="c op">길찾기 · 병원 연락처</div>
+      <div class="c op">사후관리 지원 병원<br>채팅 연결</div>
+    </div>
+    <div class="stats">
+      <div class="card"><div class="big">26.1% <small>진료시간 채움</small></div><p style="font-size:13.5px;margin-top:4px;">대구 병원 월요일 진료시간 — 피부과 21.4%, 성형외과 14.1%</p></div>
+      <div class="card"><div class="big">13 / 145 <small>상세 정보 있는 등록 병원</small></div><p style="font-size:13.5px;margin-top:4px;">통역 언어·진료시간 등 상세가 있는 곳</p></div>
+      <div class="card"><div class="big">0곳 <small>미용 시술 공공 가격</small></div><p style="font-size:13.5px;margin-top:4px;">심평원 비급여에 의원급 미용 시술 가격 없음</p></div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: painpoint/painpoint_def.md · evidence.csv (E01 심평원 API · E02 심평원 비급여 · E03 메디컬코리아 CSV) · 점수는 팀 판정</span><span class="no">2 / 6</span></div>
+  <div class="foot"><span class="src">출처: painpoint/journey_map.html · painpoint_def.md · evidence.csv (E01 심평원 API · E02 심평원 비급여 · E03 메디컬코리아 CSV) · Top 순위는 팀 판정</span><span class="no">2 / 6</span></div>
 </section>
 
 <!-- 3 밸류체인 -->
