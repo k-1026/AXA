@@ -2,61 +2,48 @@
 
 > 작성 2026-11-13 · 대상: [voc_classified.csv](voc_classified.csv) · 기준: [voc_rules.md](voc_rules.md)
 > 수업 기준: 무작위 10건을 사람이 다시 판정 → **불일치 3건 이상이면 판정 규칙을 고쳐 다시 분류**
+> **1차 결과: 3/10 일치 → 규칙 수정 필요** (아래)
 
 ## 하는 법
 
-1. **아래 "원문"만 보고** 팀이 단계 · 유형 · 강도 · 원인 묶음을 직접 적는다 (Claude 판정은 맨 아래에 따로 있음. 먼저 보지 말 것)
-2. 여정과 무관하면 "해당 없음"
-3. 다 적은 뒤 맨 아래 Claude 판정과 비교해 "일치" 칸에 O/X
-4. X가 3개 이상이면 다른 이유를 적고 Claude Code에 규칙 수정·재분류 요청
+claude.ai 아티팩트 "메디대구 VOC 검수" 페이지에서 원문·번역만 보고 단계·유형·강도·원인 묶음을 고른 뒤 저장. 10건을 다 저장하면 Claude 판정과 비교한 결과가 열림. 원문은 [voc_classified.csv](voc_classified.csv)의 `댓글_id`로 확인.
 
 ## 뽑은 방법
 
 판정이 난 1,331건(크리에이터 제외)에서 **분류·검토 7건 + 해당 없음 3건**을 무작위로 뽑음 (Python `random.Random(20261113)`). 해당 없음도 섞은 이유: 제가 관련 있는 댓글을 빼먹었는지도 확인하려고.
 
-## 팀 판정 (빈칸)
+## 검수 결과 (2026-11-13)
 
-| # | voc_id | 원문 (번역) | 단계 | 유형 | 강도 | 원인 묶음 | 판정자 |
-|---|---|---|---|---|---|---|---|
-| 1 | Y1-012 | "In South Korea, people legally are not allowed to disclose the names of clinics they went to or how much they paid for the treatments (unless if they have a sponsorship…). I'm not sure how that extends to foreign travellers but it could be a reason why its often not disclosed." (한국에선 다녀온 병원 이름·가격을 법적으로 공개 못 해서 안 알려주는 것 같다) | | | | | |
-| 2 | Y1-023 | "…Prices will vary based off of many different factors (ie foreigner "tax" being charged more than locals, skin condition, treatment recommendations, clinic location, promotions, interpreter services etc)… it makes more sense to direct the general public to contact the clinic directly to request for a quote" (가격은 외국인 추가 요금·피부 상태·통역 등으로 달라지니 클리닉에 직접 견적을 받는 게 맞다) | | | | | |
-| 3 | Y3-017 | "I wonder how they come up with this "skin age"… I expect "skin age" is calculated for each customer as their real age + however much they think they can sell." (피부 나이는 실제 나이 + 팔 수 있을 만큼 더한 숫자 같다) | | | | | |
-| 4 | Y3-091 | "That mask application was perfection 🙌🙌🙌" (마스크 바르는 솜씨가 완벽하다) | | | | | |
-| 5 | Y3-175 | "That's so awesome! What's the apprenticeship?" (멋지다, 무슨 견습이야?) | | | | | |
-| 6 | Y3-183 | "I would love to do it too. Bit the question how much it costs? ❤" (나도 받고 싶은데 얼마야?) | | | | | |
-| 7 | Y3-267 | "I wish you told us how much it all costs😂" (전부 얼마였는지 알려줬으면) | | | | | |
-| 8 | Y3-593 | "Whose stem cells?? There are no stem cells in healthy normal blood. Fact." (누구 줄기세포? 정상 혈액엔 줄기세포가 없다) | | | | | |
-| 9 | Y5-168 | "Can you give us the doctor's name, address, and phone number? The surgery is very natural. I want to have it done too." (의사 이름·주소·전화번호를 알려달라, 나도 받고 싶다) | | | | | |
-| 10 | Y6-028 | "ありがとう❤" (고마워) | | | | | |
-
-## 결과
+검수 페이지(claude.ai 아티팩트 "메디대구 VOC 검수")에서 팀원 1명이 원문만 보고 판정.
 
 | 항목 | 값 |
 |---|---|
-| 일치 | __ / 10 |
-| 불일치 | __ 건 |
-| 규칙 수정 필요 (3건 이상) | 예 / 아니오 |
-| 검수일 · 판정자 | |
+| 완전 일치 (네 칸 모두) | **3 / 10** |
+| 칸별 일치 | 원인 6 · 유형 6 · 강도 7 · 단계 3 |
+| 불일치 | **7건** |
+| 규칙 수정 필요 (3건 이상) | **예** |
+| 검수일 · 판정자 | 2026-11-13 · 팀원 1명 |
 
----
+| # | voc_id | 팀 판정 | Claude 판정 | 일치 | 다른 이유 |
+|---|---|---|---|---|---|
+| 1 | Y1-012 | 해당 없음 | ① 알아보기 · 불만 · 강도 1 · 병원 정보 공유 제약 | X | 팀: 여정과 무관 / Claude: 병원 정보 공개 제약 불만 |
+| 2 | Y1-023 | ② 비교·결정 · 불만 · 강도 1 · 외국인 가격·결제 불신 | ② 비교·결정 · 불만 · 강도 1 · 외국인 가격·결제 불신 | O |  |
+| 3 | Y3-017 | ④ 방문·진료 · 불만 · 강도 2 · 상술·과잉 진단 불신 | ④ 방문·진료 · 불만 · 강도 2 · 상술·과잉 진단 불신 | O |  |
+| 4 | Y3-091 | ① 알아보기 · 칭찬 · 강도 1 · 한국 시술 기대 | 해당 없음 | X | 팀: 시술 칭찬 / Claude: 관리사 솜씨 칭찬이라 해당 없음 |
+| 5 | Y3-175 | ① 알아보기 · 칭찬 · 강도 1 · 한국 시술 기대 | 해당 없음 | X | 팀: 한국 시술 기대 / Claude: 견습 질문이라 해당 없음 |
+| 6 | Y3-183 | ① 알아보기 · 질문 · 강도 1 · 가격 정보 없음 | ② 비교·결정 · 질문 · 강도 1 · 가격 정보 없음 | X | 가격 질문의 단계 (팀 ①, Claude ②) |
+| 7 | Y3-267 | ① 알아보기 · 불만 · 강도 1 · 가격 정보 없음 | ② 비교·결정 · 불만 · 강도 1 · 가격 정보 없음 | X | 가격 질문의 단계 (팀 ①, Claude ②) |
+| 8 | Y3-593 | ① 알아보기 · 불만 · 강도 1 · 효과 판단 어려움 | ② 비교·결정 · 불만 · 강도 1 · 광고·과장 정보 불신 | X | 단계와 원인 (팀: ① 효과 의문, Claude: ② 과장 광고) |
+| 9 | Y5-168 | ② 비교·결정 · 요청 · 강도 1 · 병원 이름·위치 정보 없음 | ① 알아보기 · 질문 · 강도 1 · 병원 이름·위치 정보 없음 | X | 단계와 유형 (팀: ② 요청, Claude: ① 질문) |
+| 10 | Y6-028 | 해당 없음 | 해당 없음 | O |  |
 
-<details>
-<summary>Claude 판정 (팀 판정을 다 적은 뒤 열기)</summary>
+### 불일치에서 보이는 것
 
-| # | voc_id | 단계 | 유형 | 강도 | 원인 묶음 | 일치 (O/X) | 다른 이유 |
-|---|---|---|---|---|---|---|---|
-| 1 | Y1-012 | ① 알아보기 | 불만 | 1 | 병원 정보 공유 제약 | | |
-| 2 | Y1-023 | ② 비교·결정 | 불만 | 1 | 외국인 가격·결제 불신 | | |
-| 3 | Y3-017 | ④ 방문·진료 | 불만 | 2 | 상술·과잉 진단 불신 | | |
-| 4 | Y3-091 | 해당 없음 | | | | | |
-| 5 | Y3-175 | 해당 없음 | | | | | |
-| 6 | Y3-183 | ② 비교·결정 | 질문 | 1 | 가격 정보 없음 | | |
-| 7 | Y3-267 | ② 비교·결정 | 불만 | 1 | 가격 정보 없음 | | |
-| 8 | Y3-593 | ② 비교·결정 | 불만 | 1 | 광고·과장 정보 불신 | | |
-| 9 | Y5-168 | ① 알아보기 | 질문 | 1 | 병원 이름·위치 정보 없음 | | |
-| 10 | Y6-028 | 해당 없음 | | | | | |
+1. **① 알아보기 / ② 비교·결정 경계가 가장 많이 갈림 (4건)** — 팀은 가격 질문을 ①, 병원 정보 요청을 ②로 봄. Claude는 반대. 지금 규칙(“말하는 시점으로 판정”)으로는 둘을 가를 수 없음
+2. **"해당 없음" 경계 (3건)** — 팀은 시술 칭찬·관심(Y3-091, Y3-175)을 칭찬으로 넣고, 법 규제 추측(Y1-012)은 뺌
+3. **원인 1건·유형 1건** — 줄기세포 의문(Y3-593)을 효과 의문으로 볼지 과장 광고로 볼지, 연락처 요청(Y5-168)을 질문으로 볼지 요청으로 볼지
 
-</details>
+→ 규칙을 고쳐 다시 분류한 뒤, 새로 뽑은 10건으로 한 번 더 검수 (수업 기준)
 
 ## 출처
 
