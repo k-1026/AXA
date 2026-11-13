@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>포지셔닝 맵</title>
+<!-- theme:begin (design/theme.css, design/inline_theme.py로 갱신) -->
+<style>
+/* 메디대구 문서용 공통 테마 — apps/web-platform/src/styles.css의 색·글꼴·모서리를 그대로 가져옴
+   쓰는 곳: painpoint/*.html · bm/bm_canvas.html · spec/userflow.html
+   규칙: 색은 아래 토큰만 쓰고, 페이지 안에서 새 색을 만들지 않음 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+:root {
+  /* 웹사이트와 같은 값 */
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-muted: #eef1f5;
+  --border: #d7dce3;
+  --text: #1f2933;
+  --ink: #172b4d;
+  --text-muted: #5b6673;
+  --accent: #1f6feb;
+  --accent-soft: #e3edfd;
+  --accent-line: rgb(31 111 235 / 0.25);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow-hover: 0 4px 16px rgb(31 111 235 / 0.12);
+  /* 문서용 의미 색 (웹사이트 파랑과 겹치지 않게 최소한만) */
+  --pain: #d6336c;        /* Top 3 · 최저점 · 손 넘김 */
+  --pain-soft: #fdeef3;
+  --assume: #b26a00;      /* 가정값 · [가정] */
+  --assume-soft: #fff6e5;
+  --good: #2b8a3e;        /* 기회 · 해소 */
+  --good-soft: #ebf7ee;
+  --neutral: #8a94a3;     /* 보류 · 범위 밖 */
+  --font: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+}
+/* 다크 모드 없음 — 웹사이트(apps/web-platform)도 늘 밝은 화면이라 문서도 같게 둠 */
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
+
+/* 한 장(1280×720) 레이아웃 */
+.page { width: 1280px; height: 720px; margin: 0 auto; padding: 24px 36px 14px; display: flex; flex-direction: column; gap: 12px; }
+.page.tall { height: auto; min-height: 720px; }
+
+/* 머리 */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 6px; }
+.eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { color: var(--text-muted); font-size: 13.5px; margin-top: 6px; }
+.pill { background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+
+/* 카드 */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.card-sm { border-radius: var(--radius-sm); padding: 8px 10px; }
+.card h2, .card h3 { margin: 0 0 4px; color: var(--ink); }
+.card h2 { font-size: 13px; font-weight: 800; display: flex; align-items: baseline; gap: 6px; }
+.card h2 .n { color: var(--accent); }
+.card h2 small { color: var(--text-muted); font-weight: 600; font-size: 11px; }
+
+/* 작은 부품 */
+.chip { display: inline-block; background: var(--surface-muted); color: var(--text); border-radius: 999px; padding: 1px 9px; font-size: 11.5px; margin: 0 3px 3px 0; }
+.chip.accent { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--pain); color: #fff; font-size: 11px; font-weight: 800; margin-right: 4px; vertical-align: 1px; }
+.badge.muted { background: var(--neutral); }
+.badge.accent { background: var(--accent); }
+.ev { color: var(--text-muted); font-size: 10.5px; }
+.src { color: var(--text-muted); font-size: 10.5px; margin-top: auto; }
+.assume { color: var(--assume); font-weight: 700; }
+.pain-t { color: var(--pain); font-weight: 700; }
+.good-t { color: var(--good); font-weight: 700; }
+.muted-t { color: var(--neutral); }
+.foot { color: var(--text-muted); font-size: 11px; display: flex; justify-content: space-between; gap: 16px; margin-top: auto; }
+
+/* 표 */
+table.t { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; font-size: 12.5px; }
+table.t th { background: var(--surface-muted); color: var(--text-muted); text-align: left; font-size: 11.5px; font-weight: 700; padding: 8px 10px; }
+table.t td { padding: 7px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+table.t tr.hl td { background: var(--pain-soft); }
+
+/* 설명 상자 */
+.callout { border-radius: var(--radius-sm); padding: 11px 14px; font-size: 12.5px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.callout b { color: var(--ink); }
+.callout.good { background: var(--good-soft); border-color: transparent; }
+.callout.solid { background: var(--accent); color: #fff; border: 0; }
+.callout.solid b { color: #fff; }
+</style>
+<!-- theme:end -->
+<style>
+  .grid2 { display: grid; grid-template-columns: 640px 1fr; gap: 12px; }
+  .map { padding: 6px 8px; }
+  .map svg { display: block; width: 100%; height: auto; }
+  .gap { fill: var(--good-soft); stroke: var(--good); stroke-dasharray: 5 4; }
+  .gapt { font: 800 12px var(--font); fill: var(--good); }
+  .mid { stroke: var(--border); stroke-dasharray: 4 4; }
+  .ax { stroke: var(--text-muted); stroke-width: 1.4; }
+  .axl { font: 600 11px var(--font); fill: var(--text-muted); }
+  .axt { font: 800 12px var(--font); fill: var(--ink); }
+  .pt { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+  .pt.us { fill: var(--accent); stroke: var(--accent); }
+  .pl { font: 800 13px var(--font); fill: var(--ink); }
+  .pl.us { fill: var(--accent); font-size: 15px; }
+  .ps { font: 500 10.5px var(--font); fill: var(--text-muted); }
+  .side { display: flex; flex-direction: column; gap: 10px; }
+  .side .card { padding: 10px 14px; }
+  .layer { display: grid; grid-template-columns: 58px 1fr; gap: 5px 8px; font-size: 12.5px; align-items: baseline; }
+  .layer b { color: var(--ink); }
+  .tg { display: inline-block; font-size: 10px; font-weight: 800; border-radius: 5px; padding: 0 4px; margin-right: 3px; vertical-align: 1px; }
+  .tg.f { background: var(--good-soft); color: var(--good); }
+  .tg.i { background: var(--assume-soft); color: var(--assume); }
+  .tg.u { background: var(--surface-muted); color: var(--neutral); }
+  table.t td { font-size: 11.8px; line-height: 1.45; }
+  table.t td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  table.t tr.us td { background: var(--accent-soft); }
+</style>
+</head>
+<body>
+<div class="page tall">
+  <div class="head">
+    <div>
+      <div class="eyebrow">market · 포지셔닝 맵</div>
+      <h1>대안 5개 사이에서 메디대구는 <em>"공공 근거 + 예약 연결"</em> 빈자리에</h1>
+      <div class="lede">"메디대구가 없다면 린은 무엇으로 해결하나" → 세 층(직접·간접·대체재) 5개 · 점 위치는 팀 해석 [I] · 칸 근거·URL은 market/competitors.md</div>
+    </div>
+    <span class="pill">직접 2 · 간접 2 · 대체재 1</span>
+  </div>
+
+  <div class="grid2">
+    <div class="card map"><svg viewBox="0 0 640 420" role="img" aria-label="포지셔닝 맵: 가로 정보 근거, 세로 연결 깊이">
+  <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--text-muted)"/></marker></defs>
+  <rect x="330" y="72" width="250" height="134" rx="12" class="gap"/>
+  <text x="572" y="92" class="gapt" text-anchor="end">빈자리 — 공공 근거 + 예약 연결</text>
+  <line x1="60" y1="210" x2="580" y2="210" class="mid"/><line x1="320" y1="40" x2="320" y2="380" class="mid"/>
+  <line x1="60" y1="380" x2="586" y2="380" class="ax" marker-end="url(#m)"/><line x1="60" y1="380" x2="60" y2="30" class="ax" marker-end="url(#m)"/>
+  <text x="62" y="398" class="axl">병원·제휴처가 올린 정보 (광고·상품가)</text>
+  <text x="580" y="398" class="axl" text-anchor="end">공공데이터·공식 목록</text>
+  <text x="320" y="416" class="axt" text-anchor="middle">정보 근거 →</text>
+  <text x="52" y="376" class="axl" text-anchor="end">정보만</text>
+  <text x="52" y="44" class="axl" text-anchor="end">예약</text><text x="52" y="58" class="axl" text-anchor="end">까지</text>
+  <text x="20" y="210" class="axt" text-anchor="middle" transform="rotate(-90 20 210)">연결 깊이 →</text>
+  <circle cx="122" cy="88" r="9" class="pt "/><text x="136" y="86" class="pl " text-anchor="start">② 강남언니 UNNI</text><text x="136" y="101" class="ps" text-anchor="start">직접 · 광고 · 이벤트가</text>
+  <circle cx="164" cy="142" r="9" class="pt "/><text x="178" y="140" class="pl " text-anchor="start">③ 크리에이트립</text><text x="178" y="155" class="ps" text-anchor="start">간접 · 여행 예약 상품</text>
+  <circle cx="221" cy="60" r="9" class="pt "/><text x="235" y="58" class="pl " text-anchor="start">① 트립닥</text><text x="235" y="73" class="ps" text-anchor="start">직접 · 여정 전체 · 병원 무료</text>
+  <circle cx="195" cy="292" r="9" class="pt "/><text x="209" y="290" class="pl " text-anchor="start">⑤ 현상 유지</text><text x="209" y="305" class="ps" text-anchor="start">대체재 · 지인·검색 → 직접 연락</text>
+  <circle cx="518" cy="305" r="9" class="pt "/><text x="504" y="303" class="pl " text-anchor="end">④ 메디컬코리아</text><text x="504" y="318" class="ps" text-anchor="end">간접 · 공식 목록 · 예약 없음</text>
+  <circle cx="497" cy="156" r="13" class="pt us"/><text x="477" y="154" class="pl us" text-anchor="end">메디대구</text><text x="477" y="169" class="ps" text-anchor="end">공공 출처 + 상담 예약 연결</text>
+</svg></div>
+    <div class="side">
+      <div class="card"><h2>세 층 선택지 5개</h2>
+        <div class="layer">
+          <span class="chip accent">직접</span><div><b>① 트립닥</b> · <b>② 강남언니 UNNI</b> — 앱에서 병원 찾기 → 상담·예약</div>
+          <span class="chip accent">간접</span><div><b>③ 크리에이트립</b> (여행 예약 안의 피부과) · <b>④ 메디컬코리아</b> (공공 안내)</div>
+          <span class="chip accent">대체재</span><div><b>⑤ 현상 유지</b> — 지인 추천·검색 → 병원에 직접 연락</div>
+        </div>
+        <div class="ev" style="margin-top:6px">후보 9개에서 압축 · 트립닥터(대구 본사, 출시 전)는 지켜볼 대상 · VOC 없음 (팀 결정 11/12)</div>
+      </div>
+      <div class="card"><h2>핵심 가치 — 메인 화면 문구 확인 <small>2026-11-13</small></h2>
+        <div style="font-size:12.3px; line-height:1.65">
+          <div><span class="tg f">F</span>트립닥 "낯선 곳에서도 안심할 수 있도록, 의료 여정을 연결합니다"</div>
+          <div><span class="tg f">F</span>강남언니 "내 선택에 확신을" + 이벤트가·할인율</div>
+          <div><span class="tg f">F</span>크리에이트립 "KOREA YOUR WAY" — 여행·뷰티·의료 예약</div>
+          <div><span class="tg f">F</span>메디컬코리아 "Where your days begin again" — 등록 병원 검색</div>
+          <div><span class="tg i">I</span>현상 유지 — 화면 없음, 지인 신뢰·추가 비용 없음</div>
+        </div>
+      </div>
+      <div class="callout"><b>우리만 다른 점</b> — 대구 등록 병원의 진료시간·가격 범위를 <b>공공데이터 출처·확인일</b>과 함께 자기 언어로 → 상담 예약, 병원은 AI 초안으로 답장<br><span class="ev">위협 [I]: 트립닥은 병원 무료 + 대구 병원 최소 19곳 — 진료시간 출처를 정리하면 빈자리가 좁아짐</span></div>
+    </div>
+  </div>
+
+  <table class="t">
+    <tr><th>대안</th><th>대상 고객</th><th>핵심 가치</th><th>가격·수익 방식</th><th>채널</th><th>강점 / 약점</th></tr>
+    <tr class=""><td>① 트립닥</td><td><span class="tg f">F</span>해외 의료관광객 (일·대만·중·영미·러)</td><td><span class="tg f">F</span>상담~회복까지 여정 연결</td><td><span class="tg f">F</span>병원 입점비·월 이용료·유치 수수료 0 <span class="tg u">U</span>실제 수익원</td><td><span class="tg f">F</span>앱·웹앱 4개 언어, 구글 예약</td><td><span class="tg i">I</span>대구 병원 19곳+ / 진료시간 출처 섞임</td></tr>
+    <tr class=""><td>② 강남언니 UNNI</td><td><span class="tg f">F</span>미용의료 소비자 (일·중·대만·영미·태국)</td><td><span class="tg f">F</span>"내 선택에 확신을" · 이벤트가</td><td><span class="tg f">F</span>병원 성과형 광고비 = 매출 81.13% (2023)</td><td><span class="tg f">F</span>앱·웹 + 서울 언니가이드 센터</td><td><span class="tg i">I</span>외국인 예약 70만 건 / 병원 이벤트가, 대구 <span class="tg u">U</span></td></tr>
+    <tr class=""><td>③ 크리에이트립</td><td><span class="tg f">F</span>방한 관광객, 뷰티·의료 고객 대만 약 43%</td><td><span class="tg f">F</span>여행·뷰티·의료 예약 한 앱</td><td><span class="tg f">F</span>제휴처 입점·예약 <span class="tg u">U</span>수수료율</td><td><span class="tg f">F</span>웹·앱 14개 언어, 등록 유치사업자</td><td><span class="tg i">I</span>여행 동선 결제 / 의료 정보 얕음, 서울 중심</td></tr>
+    <tr class=""><td>④ 메디컬코리아</td><td><span class="tg f">F</span>외국인 환자, 유치기관·사업자</td><td><span class="tg f">F</span>공식 등록 병원 검색·통계</td><td><span class="tg i">I</span>공공 예산, 과금 없음</td><td><span class="tg f">F</span>웹 4개 언어, 지원센터·챗봇</td><td><span class="tg i">I</span>법정 목록 신뢰 / 대구 상세 13곳, 예약 없음</td></tr>
+    <tr class=""><td>⑤ 현상 유지</td><td><span class="tg f">F</span>병원 선택 경로 지인 55.2% · 검색 17.1% (2018)</td><td><span class="tg i">I</span>지인·검색 믿고 병원에 직접 묻기</td><td><span class="tg i">I</span>환자 무료, 병원 직접 응대</td><td><span class="tg i">I</span>지인·SNS·구글 → 병원 메신저</td><td><span class="tg i">I</span>비용 없음 / 답 기다림, 비교 기준 없음</td></tr>
+    <tr class="us"><td>메디대구</td><td><span class="tg f">F</span>해외 거주 대만 미용 방문객 · 지불자 등록 피부·성형 의원</td><td><span class="tg i">I</span><b>공공 출처 붙은 대구 병원 정보 + 상담 예약</b></td><td><span class="tg f">F</span>수수료 5~10% 또는 구독 월 20만~40만 원 (가정값)</td><td><span class="tg f">F</span>환자 웹 5개 언어·챗봇, 병원 대시보드</td><td><span class="tg i">I</span>공공 근거·대구 특화 / 확보 병원 0곳, 결제·통역 없음</td></tr>
+  </table>
+  <div class="foot"><span>태그: F 확인한 사실 · I 팀 해석 · U 미확인 · 근거·URL·확인일: market/competitors.md · research/company/</span><span>2026-11-13 · 메디대구</span></div>
+</div>
+</body>
+</html>
