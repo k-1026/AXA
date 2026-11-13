@@ -100,6 +100,14 @@ table.calc td:first-child, table.calc td.num { white-space: nowrap; }
 .chain .c { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; line-height: 1.45; }
 .chain .c.core { border-color: var(--accent); }
 .chain .c.out { color: var(--neutral); background: transparent; border-style: dashed; }
+.chain.vc2 { grid-template-columns: 120px repeat(5, 1fr); font-size: 15px; row-gap: 6px; }
+.chain.vc2 .c { padding: 12px 10px; line-height: 1.5; }
+.chain.vc2 .h { font-size: 14.5px; }
+.chain.vc2 .rl { font-size: 14px; }
+.chain .c.pb { border-color: var(--pain); background: var(--pain-soft); }
+.chain .c.core { border-color: var(--accent); background: #fbfdff; }
+.chain .dn { text-align: center; color: var(--accent); font-weight: 800; font-size: 18px; line-height: 1; }
+.chain .rl.ar { visibility: hidden; padding: 0; }
 
 /* 4장 BM 캔버스 */
 .canvas { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: 1fr 1fr auto; gap: 8px; flex: 1; min-height: 0; }
@@ -239,41 +247,37 @@ table.calc td:first-child, table.calc td.num { white-space: nowrap; }
 <!-- 3 밸류체인 -->
 <section class="slide">
   <div class="eyebrow">② 밸류체인 · 팀 검토 반영</div>
-  <h1>우리는 <em>탐색·비교 → 상담 예약</em>에 서고, 정산에서 돈을 받는다</h1>
-  <p class="lead">산업 7단계 중 메디대구가 닿는 줄기를 5단계로 잘라 활동·이해관계자·돈·데이터 네 층으로 그림</p>
+  <h1>단계마다 <em>막히는 곳·새는 돈</em>을 메디대구가 이렇게 푼다</h1>
+  <p class="lead">산업 7단계 중 메디대구가 닿는 줄기 5단계 · 위: 지금의 병목·비용 → 아래: 메디대구의 해소 방법</p>
   <div class="body">
-    <div class="chain">
+    <div class="chain vc2">
       <div></div>
       <div class="h">1 병원 데이터·입점</div><div class="h core">2 탐색·비교</div><div class="h core">3 상담 예약·확정</div><div class="h">4 방문·진료</div><div class="h">5 사후관리·정산</div>
 
-      <div class="rl">메디대구 기능</div>
-      <div class="c">데이터 파이프라인 (심평원·메디컬코리아) · 병원 입점</div>
-      <div class="c core"><b>AI 챗봇</b> · 가격 위치 표시 · 5개 언어 지도</div>
-      <div class="c core"><b>상담 예약</b> · <b>병원 대시보드</b> (확정은 병원)</div>
-      <div class="c out">미포함 — 진료·체류는 병원 몫</div>
-      <div class="c">사후관리 채팅 · 방문 완료 → <b>월 정산</b></div>
+      <div class="rl">지금의<br>병목 · 비용</div>
+      <div class="c pb"><span class="tag t-pain">B1</span> 진료시간 빈칸 — 대구 병원 채움 <b>26.1%</b></div>
+      <div class="c pb"><span class="tag t-pain">B2</span> 등록 병원 상세 <b>13 / 145곳</b> · 미용 시술 공공 가격 <b>0곳</b> → 비교 기준 없음</div>
+      <div class="c pb"><span class="tag t-pain">B3</span> 외국어 문의를 코디가 번역·작성 → 병원 응답 대기 <span class="as">[가정]</span></div>
+      <div class="c out">범위 밖 — 진료·체류는 병원 몫</div>
+      <div class="c pb"><span class="tag t-assume">C1</span> 병원 중개비용 중첩 (유치업체·광고) · <span class="tag t-assume">C2</span> 수수료 기준(진료비·완납)을 병원만 앎</div>
 
-      <div class="rl">병목 · 비용</div>
-      <div class="c"><span class="tag t-pain">B1</span> 진료시간 빈칸 (채움 26.1%)</div>
-      <div class="c"></div>
-      <div class="c"><span class="tag t-pain">B2</span> 병원 응답 대기 <span class="as">[가정]</span></div>
-      <div class="c"></div>
-      <div class="c"><span class="tag t-assume">C1</span> 병원 중개비용 중첩 · <span class="tag t-assume">C2</span> 요금 항목 분리 — 구독료(대시보드)와 유치 수수료(진료비 대비 %)는 별개</div>
+      <div class="rl ar">↓</div>
+      <div class="dn">↓</div><div class="dn">↓</div><div class="dn">↓</div><div class="dn"></div><div class="dn">↓</div>
 
-      <div class="rl">기회</div>
-      <div class="c"><span class="tag t-good">★ O1</span> 공공데이터 + <b>출처·확인일</b> — 경쟁사 중 출처를 내세우는 곳 없음</div>
-      <div class="c"><span class="tag t-good">O3</span> 수요 데이터 → 대시보드</div>
-      <div class="c"><span class="tag t-good">O2</span> AI 요약·답장 초안 (코디 승인 후 발송)</div>
-      <div class="c"></div>
-      <div class="c"></div>
+      <div class="rl" style="color: var(--accent);">메디대구가<br>푸는 법</div>
+      <div class="c core"><b>공공데이터 파이프라인</b> (심평원·메디컬코리아) + 빈칸 직접 수집, 칸마다 <b>출처·확인일</b></div>
+      <div class="c core"><b>5개 언어 지도·병원 상세</b> · 가격 위치 표시 (공공 자료 있는 항목만) · <b>AI 챗봇</b></div>
+      <div class="c core"><b>상담 예약 요청서</b> → 병원 대시보드 <b>AI 요약·답장 초안</b>, 코디 승인 후 발송·확정</div>
+      <div class="c out">길찾기·병원 연락처만</div>
+      <div class="c core"><b>방문 완료 건만 수수료</b> 또는 구독 — 병원이 고름 · 병원 건별 입력 + 환자 확인으로 <b>월 정산</b></div>
     </div>
     <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
-      <div class="card"><h3><span class="tag t-good">먼저 간다</span> O1 공공데이터 + 출처·확인일</h3><p>데이터가 이미 있고(대구 병원 4,242곳) 환자가 떠나는 비교 단계를 메움. 단 빈칸 채우기가 먼저</p></div>
-      <div class="card"><h3><span class="tag t-acc">빠른 성과</span> O2 AI 답장 초안</h3><p>B2 대기를 줄이는 병원 쪽 도구. AI 도구 일부는 이미 구현</p></div>
-      <div class="card"><h3><span class="tag t-assume">풀어야 할 것</span> 정산 근거</h3><p>건당 수수료의 기준(진료비·완납)은 병원만 앎 → 병원 건별 입력 + 환자 확인으로 맞춤</p></div>
+      <div class="card"><h3><span class="tag t-good">먼저 간다</span> B1·B2 → 공공데이터 + 출처</h3><p>데이터가 이미 있고(대구 병원 4,242곳) 환자가 떠나는 비교 단계를 메움. 경쟁사 중 출처를 내세우는 곳 없음</p></div>
+      <div class="card"><h3><span class="tag t-acc">빠른 성과</span> B3 → AI 답장 초안</h3><p>병원 응답 대기를 줄이는 코디용 도구. AI 도구 일부는 이미 구현</p></div>
+      <div class="card"><h3><span class="tag t-assume">풀어야 할 것</span> C2 → 정산 근거</h3><p>진료비·완납은 병원만 앎 → 병원 건별 입력 + 환자 확인으로 맞춤</p></div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md · step5_분석.md (5-4 쟁점, 5-5 우선순위) · 검토요청 · 병원 수: 심평원 API</span><span class="no">3 / 6</span></div>
+  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md · step5_분석.md (5-4 쟁점, 5-5 우선순위) · 26.1%·13/145·0곳: painpoint/evidence.csv E01~E03 · 병원 수: 심평원 API</span><span class="no">3 / 6</span></div>
 </section>
 
 <!-- 4 BM 캔버스 -->
