@@ -114,7 +114,9 @@
     "lunchSat": "점심시간 (토)",
     "rcvWeek": "접수시간 (평일)",
     "rcvSat": "접수시간 (토)",
-    "noPhoto": "대표사진 없음"
+    "noPhoto": "대표사진 없음",
+    "consultBtn": "상담하기",
+    "reserveBtn": "예약하기"
   },
   "prices": {
     "pending": "가격 확인 중",
@@ -499,5 +501,22 @@
     "title": "페이지를 찾을 수 없어요",
     "body": "주소가 바뀌었거나 없는 페이지예요.",
     "home": "메인으로"
+  },
+  "reserve": {
+    "title": "예약하기",
+    "back": "병원 정보로",
+    "pickDate": "날짜 선택",
+    "pickTime": "시간 선택",
+    "prevMonth": "이전 달",
+    "nextMonth": "다음 달",
+    "available": "예약 가능",
+    "unavailable": "예약 불가·휴진",
+    "dateFirst": "달력에서 예약 가능한 날짜를 먼저 골라 주세요",
+    "submit": "예약 신청하기",
+    "note": "예약 가능 시간은 예시예요. 병원 일정이 연결되면 실제 시간으로 바뀌어요. 확정은 병원이 해요.",
+    "doneTitle": "예약 신청 완료",
+    "doneBody": "병원이 확인하면 예약이 확정돼요. 확정 전까지는 예약 관리에서 \"확인 대기\"로 보여요.",
+    "toBookings": "예약 관리로",
+    "toConsult": "이 병원과 상담하기"
   }
 }

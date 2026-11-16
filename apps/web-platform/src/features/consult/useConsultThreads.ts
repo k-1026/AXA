@@ -97,6 +97,14 @@ export function useConsultThreads() {
   const send = (text: string) => active && text.trim() && append(active.hospitalId, { text: text.trim() });
   const requestBooking = (b: Omit<BookingRequest, 'status'>) => active && append(active.hospitalId, { booking: { ...b, status: 'pending' } });
 
+  // 병원 목록의 "예약하기"에서 신청: 그 병원 상담이 없으면 만들고, 상담에 예약 요청을 남긴다 (확정은 병원이 한다)
+  const requestBookingFor = (thread: NewThread, b: Omit<BookingRequest, 'status'>) =>
+    update((prev) => {
+      const list = prev.some((t) => t.hospitalId === thread.hospitalId) ? prev : [{ ...thread, messages: [], unread: 0 }, ...prev];
+      const msg = { id: uid(), from: 'user' as const, at: new Date().toISOString(), booking: { ...b, status: 'pending' as const } };
+      return list.map((t) => (t.hospitalId === thread.hospitalId ? { ...t, messages: [...t.messages, msg] } : t));
+    });
+
   const search = (q: string) => {
     const s = q.trim().toLowerCase();
     if (!s) return threads;
@@ -105,5 +113,5 @@ export function useConsultThreads() {
 
   const bookings = threads.flatMap((t) => t.messages.filter((m) => m.booking).map((m) => ({ thread: t, message: m, booking: m.booking! })));
 
-  return { mode, threads, active, select, open, send, requestBooking, changeBooking, cancelBooking, search, bookings };
+  return { mode, threads, active, select, open, send, requestBooking, requestBookingFor, changeBooking, cancelBooking, search, bookings };
 }

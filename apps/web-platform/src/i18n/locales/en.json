@@ -114,7 +114,9 @@
     "lunchSat": "Lunch break (Sat)",
     "rcvWeek": "Reception (weekdays)",
     "rcvSat": "Reception (Sat)",
-    "noPhoto": "No photo available"
+    "noPhoto": "No photo available",
+    "consultBtn": "Consult",
+    "reserveBtn": "Book"
   },
   "prices": {
     "pending": "Price being checked",
@@ -499,5 +501,22 @@
     "title": "Page not found",
     "body": "The address may have changed, or the page doesn't exist.",
     "home": "Go to home"
+  },
+  "reserve": {
+    "title": "Book a visit",
+    "back": "Back to hospitals",
+    "pickDate": "Choose a date",
+    "pickTime": "Choose a time",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "available": "Available",
+    "unavailable": "Unavailable / closed",
+    "dateFirst": "Choose an available date on the calendar first",
+    "submit": "Request booking",
+    "note": "Available times are examples. They will show the hospital’s real schedule once connected. The hospital confirms the booking.",
+    "doneTitle": "Booking request sent",
+    "doneBody": "Your booking is confirmed once the hospital checks it. Until then it shows as \"Waiting for confirmation\" in My bookings.",
+    "toBookings": "Go to My bookings",
+    "toConsult": "Consult this hospital"
   }
 }

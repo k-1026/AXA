@@ -114,7 +114,9 @@
     "lunchSat": "午休（週六）",
     "rcvWeek": "掛號時間（平日）",
     "rcvSat": "掛號時間（週六）",
-    "noPhoto": "暫無代表照片"
+    "noPhoto": "暫無代表照片",
+    "consultBtn": "諮詢",
+    "reserveBtn": "預約"
   },
   "prices": {
     "pending": "價格確認中",
@@ -499,5 +501,22 @@
     "title": "找不到頁面",
     "body": "網址可能已變更，或頁面不存在。",
     "home": "回到首頁"
+  },
+  "reserve": {
+    "title": "預約",
+    "back": "返回醫院資訊",
+    "pickDate": "選擇日期",
+    "pickTime": "選擇時間",
+    "prevMonth": "上個月",
+    "nextMonth": "下個月",
+    "available": "可預約",
+    "unavailable": "不可預約·休診",
+    "dateFirst": "請先在日曆中選擇可預約的日期",
+    "submit": "送出預約申請",
+    "note": "可預約時間為範例。連接醫院行程後將顯示實際時間。預約由醫院確認。",
+    "doneTitle": "預約申請已送出",
+    "doneBody": "醫院確認後預約即成立。確認前在預約管理中顯示為「等待確認」。",
+    "toBookings": "前往預約管理",
+    "toConsult": "諮詢這家醫院"
   }
 }

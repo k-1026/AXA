@@ -114,7 +114,9 @@
     "lunchSat": "Nghỉ trưa (Thứ 7)",
     "rcvWeek": "Giờ tiếp nhận (ngày thường)",
     "rcvSat": "Giờ tiếp nhận (Thứ 7)",
-    "noPhoto": "Chưa có ảnh đại diện"
+    "noPhoto": "Chưa có ảnh đại diện",
+    "consultBtn": "Tư vấn",
+    "reserveBtn": "Đặt lịch"
   },
   "prices": {
     "pending": "Đang xác nhận giá",
@@ -499,5 +501,22 @@
     "title": "Không tìm thấy trang",
     "body": "Địa chỉ có thể đã thay đổi hoặc trang không tồn tại.",
     "home": "Về trang chủ"
+  },
+  "reserve": {
+    "title": "Đặt lịch khám",
+    "back": "Quay lại thông tin bệnh viện",
+    "pickDate": "Chọn ngày",
+    "pickTime": "Chọn giờ",
+    "prevMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "available": "Còn chỗ",
+    "unavailable": "Hết chỗ / nghỉ",
+    "dateFirst": "Vui lòng chọn một ngày còn chỗ trên lịch trước",
+    "submit": "Gửi yêu cầu đặt lịch",
+    "note": "Giờ trống chỉ là ví dụ. Khi kết nối lịch của bệnh viện sẽ hiển thị giờ thực tế. Bệnh viện sẽ xác nhận lịch hẹn.",
+    "doneTitle": "Đã gửi yêu cầu đặt lịch",
+    "doneBody": "Lịch hẹn được xác nhận sau khi bệnh viện kiểm tra. Trước đó, lịch sẽ hiển thị \"Chờ xác nhận\" trong Quản lý đặt lịch.",
+    "toBookings": "Đến Quản lý đặt lịch",
+    "toConsult": "Tư vấn với bệnh viện này"
   }
 }
