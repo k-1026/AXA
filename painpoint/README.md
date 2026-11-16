@@ -11,6 +11,6 @@
 | 4 | [journey_3actors.md](journey_3actors.md) · [.html](journey_3actors.html) | 환자 · 코디 · 운영자 세 여정, 손 넘김 H0~H5와 측정 신호 |
 | 5 | [painpoint_def.md](painpoint_def.md) · [priority.html](priority.html) | 점수표, Top 3 진술문, 보류 목록, 근거 분류 검수표 · 우선순위 매트릭스 한 장 |
 
-**Top 3** — ① 진료시간 정보 없음 (80) · ② 등록 병원 상세 정보 부족 (75) · ③ 피부·성형 가격 기준 없음 (60)
+**Top 3 (v2, 11/16 VOC 보강)** — ① 등록 병원 상세 정보 부족 (75) · ② 진료시간 정보 없음 (64, v1 80) · ③ 피부·성형 가격 기준 없음 (60, VOC 1위) — [voc_반영_재검토.md](voc_반영_재검토.md)
 
 팀이 할 일: painpoint_def.md의 근거 분류 검수 10건 채우기 · 감정·생각 [가정] 칸 인터뷰로 확인
