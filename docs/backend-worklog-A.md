@@ -17,6 +17,18 @@
 
 ## 기록
 
+### 2026-11-16 · backend-A-hospital · Claude
+- 한 일: **병원 데이터 API** — 테이블 `hospitals`·`departments`·`hospital_departments`·`hospital_hours`(마이그레이션 `0006`), 적재 `modules/hospital/loader.py` + `backend/scripts/load_hospitals.py`(ykiho로 upsert, 행 삭제 X, 새 파일에 없는 병원은 `closed`), `GET /hospitals`(필터 `sggu`·`dept`·`registered`·`ids`, 정렬 `name`·`distance`만, 그 밖 422, 폐업 제외), `GET /hospitals/{id}`(진료시간·출처·수집일, 없으면 404 `not_found`), `hospital.service.get_basic()`
+- 팀 결정(2026-11-16): **병원 정보는 전체, 상담·예약은 등록 병원만** → 응답에 `is_registered_facility`·`can_request`(= 등록 유치의료기관 + 영업 중). 정렬에는 반영 X (해외진출법 제24조①3, compliance 2-1)
+- 스키마 2절과 다른 점: `type_name_ko`(종별 이름)·`hospital_hours.day_order`(요일 정렬) 추가. 진료시간 값이 없으면 휴진으로 단정하지 않고 `unknown`
+- 실제 데이터 확인(로컬 SQLite): 4,242곳 적재, 목록 4,233곳(폐업 9 제외), 등록 126곳 = 요청 가능 126곳. 진료과: 내과 1,301·피부과 818·안과 300·성형외과 256 (내과·안과는 심평원 진료과목 코드 기준이라 프론트 `hospitals.json` 1,267곳과 기준이 다름 → 프론트와 맞출 것)
+- 바뀐 계약: 없음 (5절 `HospitalBasic` 칸을 처음 정함: id·ykiho·name_ko/en·type_code·sggu·addr_ko·tel·is_registered_facility·is_demo·can_request) → B 확인
+- 마이그레이션: 있음 `0006` (SQLite에서 upgrade·downgrade·upgrade 확인, Supabase는 아직)
+- 테스트: 백엔드 134개 통과 (병원 9개 추가)
+- 다음 할 일: 등록 파일(`daegu_registered_institutions.csv`)·내과/안과 파일이 `research-data`에만 있음 → 적재 때 `--registered-csv`·`--dgsbjt-json`으로 경로를 주거나 main에 합친 뒤 실행. 시연용 가상 병원(`is_demo`) 시드 만들 때 `can_request`에 포함. 요청서 API에서 `get_basic().can_request`가 false면 막기(에러 코드는 contracts 4절에 새로 추가 필요)
+- B에게 요청: `HospitalBasic` 칸 확인
+- 막힌 것·질문: 이 PC에서 `alembic` 실행 파일이 정책에 막힘 → `uv run python -m alembic -c backend/alembic.ini …`로 실행
+
 ### 2026-11-12 · backend-review-fix · Claude
 - 한 일: 코드 리뷰(`docs/review-branches-2026-11-12.md`, ai 브랜치) 반영. 공통 500 `internal`(ASGI 미들웨어) · 동시 가입 409 · 정리 API `/internal/purge`(`CRON_SECRET`) · 환율 ECOS 실패 뒤 10분 저장값·첫 요청 경쟁 · 로그인 시도 제한 `auth.too_many_attempts` · 챗봇 새 대화를 한 트랜잭션으로 · auth 세션 함수 commit 규칙 통일 · PATCH display_name 공백 · JWT HS256 고정 · 가입 동의 현재 버전 검사 · `patient_uuid`를 core/security로 · `.env.example`(`CRON_SECRET` 추가, `JWT_ALGORITHM` 삭제)
 - 바뀐 계약: **있음** 1·4·7-1절 (변경 이력에 기록) → **B 승인 필요**
