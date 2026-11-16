@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메디대구 진행 발표</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* 색·글꼴은 design/theme.css(웹사이트와 같은 값)에서 가져옴 */
+:root {
+  --bg: #f6f8fb; --surface: #ffffff; --surface-muted: #eef1f5; --border: #d7dce3;
+  --text: #1f2933; --ink: #172b4d; --text-muted: #5b6673;
+  --accent: #1f6feb; --accent-soft: #e3edfd; --accent-line: rgb(31 111 235 / 0.25);
+  --pain: #d6336c; --pain-soft: #fdeef3;
+  --assume: #b26a00; --assume-soft: #fff6e5;
+  --good: #2b8a3e; --good-soft: #ebf7ee;
+  --neutral: #8a94a3;
+  --radius: 16px; --radius-sm: 10px;
+  --font: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: #2b3440; font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; overflow: hidden; word-break: keep-all; overflow-wrap: break-word; }
+
+/* 16:9 한 장 = 1280×720, 화면 크기에 맞춰 축소·확대 */
+#stage { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; transform-origin: center center; }
+.slide { position: absolute; inset: 0; background: var(--bg); padding: 40px 56px 0; display: none; flex-direction: column; }
+.slide.on { display: flex; }
+
+.eyebrow { color: var(--accent); font-size: 15px; font-weight: 700; letter-spacing: .02em; }
+h1 { margin: 6px 0 4px; font-size: 34px; line-height: 1.25; color: var(--ink); letter-spacing: -.01em; }
+h1 em { font-style: normal; color: var(--accent); }
+.lead { margin: 0 0 18px; font-size: 17px; color: var(--text-muted); }
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; }
+.foot { height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); }
+.foot .src { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.foot .no { font-weight: 700; color: var(--ink); }
+
+.grid { display: grid; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+.card h3 { margin: 0 0 8px; font-size: 17px; color: var(--ink); }
+.card p, .card li { font-size: 14.5px; line-height: 1.55; margin: 0; }
+.card ul { margin: 0; padding-left: 18px; }
+.card li + li { margin-top: 4px; }
+.muted { color: var(--text-muted); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; vertical-align: 2px; }
+.t-pain { background: var(--pain-soft); color: var(--pain); }
+.t-good { background: var(--good-soft); color: var(--good); }
+.t-assume { background: var(--assume-soft); color: var(--assume); }
+.t-acc { background: var(--accent-soft); color: var(--accent); }
+.t-neu { background: var(--surface-muted); color: var(--text-muted); }
+.big { font-size: 30px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.big small { font-size: 15px; font-weight: 600; color: var(--text-muted); }
+.as { color: var(--assume); font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { color: var(--text-muted); font-weight: 600; font-size: 12.5px; background: var(--surface-muted); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.top td { background: #fbfcff; }
+table.calc td { padding: 6px 6px; }
+table.calc td:first-child, table.calc td.num { white-space: nowrap; }
+
+/* 1장 */
+.cover { justify-content: center; }
+.cover h1 { font-size: 46px; }
+.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px; margin-top: 26px; }
+.flow .card { position: relative; padding: 16px; }
+.flow .card .day { font-size: 12px; font-weight: 700; color: var(--accent); }
+.flow .card + .card::before { content: "→"; position: absolute; left: -17px; top: 50%; transform: translate(-50%, -50%); color: var(--neutral); font-size: 18px; line-height: 1; }
+
+/* 2장 감정 곡선 (painpoint/journey_map.html) */
+.jm { display: grid; grid-template-columns: 84px repeat(5, 1fr); grid-template-rows: auto 170px auto auto; column-gap: 8px; padding: 14px 16px 12px; }
+.jm .lab { font-weight: 800; font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--border); }
+.jm .st { background: var(--accent); color: #fff; text-align: center; font-weight: 800; font-size: 14px; border-radius: var(--radius-sm); padding: 7px 4px; margin-bottom: 4px; }
+.jm .st small { display: block; font-weight: 500; font-size: 11px; opacity: .85; }
+.jm .c { text-align: center; padding: 8px 6px; font-size: 13px; line-height: 1.4; border-top: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; }
+.jm .pn { font-weight: 700; color: var(--pain); }
+.jm .pn.off { color: var(--neutral); font-weight: 600; }
+.jm .op { color: var(--good); font-weight: 600; }
+.jm .ev { color: var(--text-muted); font-size: 11px; font-weight: 500; }
+.jm .curve { grid-column: 2 / span 5; border-top: 1px solid var(--border); position: relative; }
+.jm .curve svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.jm .el { font: 600 12px var(--font); fill: var(--text-muted); text-anchor: middle; }
+.jm .tag { vertical-align: 1px; }
+.jm .dot { position: relative; }
+.jm .dot::before { content: ""; position: absolute; left: 50%; top: calc(var(--y) / 120 * 100%); width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: var(--accent); }
+.jm .dot.low::before { width: 17px; height: 17px; margin: -8.5px 0 0 -8.5px; background: var(--pain); }
+.jm .dot span { position: absolute; left: 0; right: 0; top: calc(var(--y) / 120 * 100% - 26px); text-align: center; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.jm .dot.low span { color: var(--pain); font-weight: 800; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stats .card { padding: 12px 16px; }
+
+/* 3장 밸류체인 */
+.chain { display: grid; grid-template-columns: 150px repeat(5, 1fr); gap: 6px; font-size: 13px; }
+.chain .h { font-weight: 700; color: var(--ink); background: var(--surface-muted); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+.chain .h.core { background: var(--accent); color: #fff; }
+.chain .rl { font-weight: 700; color: var(--text-muted); padding: 8px 4px; font-size: 12.5px; }
+.chain .c { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; line-height: 1.45; }
+.chain .c.core { border-color: var(--accent); }
+.chain .c.out { color: var(--neutral); background: transparent; border-style: dashed; }
+.chain.vc2 { grid-template-columns: 120px repeat(5, 1fr); font-size: 15px; row-gap: 6px; }
+.chain.vc2 .c { padding: 12px 10px; line-height: 1.5; }
+.chain.vc2 .h { font-size: 14.5px; }
+.chain.vc2 .rl { font-size: 14px; }
+.chain .c.pb { border-color: var(--pain); background: var(--pain-soft); }
+.chain .c.core { border-color: var(--accent); background: #fbfdff; }
+.chain .dn { text-align: center; color: var(--accent); font-weight: 800; font-size: 18px; line-height: 1; }
+.chain .rl.ar { visibility: hidden; padding: 0; }
+
+/* 4장 BM 캔버스 */
+.canvas { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: 1fr 1fr auto; gap: 8px; flex: 1; min-height: 0; }
+.canvas .card { padding: 11px 13px; border-radius: var(--radius-sm); }
+.canvas .card h3 { font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+.canvas .card p, .canvas .card li { font-size: 12.8px; line-height: 1.45; }
+.canvas .vp { grid-column: 3; grid-row: 1 / span 2; border-color: var(--accent); background: #fbfdff; }
+.canvas .kp { grid-column: 1; grid-row: 1 / span 2; }
+.canvas .ka { grid-column: 2; grid-row: 1; }
+.canvas .kr { grid-column: 2; grid-row: 2; }
+.canvas .cr { grid-column: 4; grid-row: 1; }
+.canvas .ch { grid-column: 4; grid-row: 2; }
+.canvas .cs { grid-column: 5; grid-row: 1 / span 2; }
+.canvas .cost { grid-column: 1 / span 3; grid-row: 3; }
+.canvas .rev { grid-column: 4 / span 2; grid-row: 3; }
+
+/* 6장 플로우 (spec/userflow.html 그림을 그대로 옮김) */
+.ufcard { padding: 8px 12px; }
+.ufsvg { display: block; height: 392px; width: auto; max-width: 100%; margin: 0 auto; }
+.ufsvg .nd { fill: var(--surface); stroke: var(--border); stroke-width: 1.3; }
+.ufsvg .nd.main { stroke: var(--accent-line); }
+.ufsvg .nd.opt { stroke-dasharray: 5 4; }
+.ufsvg .nd.ex { fill: var(--pain-soft); stroke: var(--pain); stroke-width: 1.2; }
+.ufsvg .nd.end { fill: var(--accent); stroke: none; }
+.ufsvg .nd.start { fill: var(--accent-soft); stroke: var(--accent-line); }
+.ufsvg .dm { fill: var(--surface-muted); stroke: var(--text-muted); stroke-width: 1.2; }
+.ufsvg .t1 { font: 700 13px var(--font); fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+.ufsvg .t2 { font: 500 10.5px var(--font); fill: var(--text-muted); text-anchor: middle; dominant-baseline: central; }
+.ufsvg .tq { font: 700 11px var(--font); fill: var(--text); text-anchor: middle; dominant-baseline: central; }
+.ufsvg .tex { font: 700 11.5px var(--font); fill: var(--pain); text-anchor: middle; dominant-baseline: central; }
+.ufsvg .tend { font: 700 12.5px var(--font); fill: #fff; text-anchor: middle; dominant-baseline: central; }
+.ufsvg .us { font: 800 10.5px var(--font); fill: var(--accent); }
+.ufsvg .ar { stroke: var(--text-muted); stroke-width: 1.5; fill: none; }
+.ufsvg .ar.dash { stroke-dasharray: 5 4; }
+.ufsvg .ar.ex { stroke: var(--pain); }
+.ufsvg .lb { font: 600 10.5px var(--font); fill: var(--text-muted); }
+.ufsvg .lb.y { fill: var(--good); }
+.ufsvg .lb.n { fill: var(--pain); }
+.ufsvg .lane { fill: var(--accent-soft); opacity: .55; }
+.ufsvg .lanet { font: 800 12px var(--font); fill: var(--accent); }
+.ufsvg .rowt { font: 800 12px var(--font); fill: var(--ink); }
+.ufb { display: grid; grid-template-columns: 1fr 1.1fr 1.2fr; gap: 12px; }
+.ufb .card { padding: 9px 14px; }
+.ufb .card h3 { font-size: 14px; margin-bottom: 4px; }
+.ufb .card p, .ufb .card li { font-size: 12.8px; line-height: 1.45; }
+
+/* 넘김 표시 */
+#nav { position: fixed; right: 14px; bottom: 10px; color: #cfd6df; font: 12px var(--font); }
+@media print {
+  body { background: #fff; overflow: visible; }
+  #stage { position: static; transform: none !important; width: 1280px; height: auto; }
+  .slide { display: flex !important; position: relative; width: 1280px; height: 720px; page-break-after: always; }
+  #nav { display: none; }
+  @page { size: 1280px 720px; margin: 0; }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 표지 -->
+<section class="slide cover">
+  <div class="eyebrow">AXA · 데이터 2팀 · 진행 발표</div>
+  <h1>메디대구 — 문제에서 <em>사업 모델·화면 흐름</em>까지</h1>
+  <p class="lead">대구 등록 병원과 외국인 환자를 잇는 AI 의료관광 플랫폼 · 지금까지 정한 것</p>
+  <div class="flow">
+    <div class="card"><div class="day">페인포인트</div><h3>무엇이 막히나</h3><p>근거 21건으로 후보 7개를 점수화 → <b>Top 3</b></p></div>
+    <div class="card"><div class="day">밸류체인</div><h3>어디에 서나</h3><p>5단계 네 층 맵, 병목 2·비용 2·기회 3 → <b>우선 기회 O1</b></p></div>
+    <div class="card"><div class="day">BM 캔버스 v2</div><h3>누가 돈을 내나</h3><p>12블록 캔버스 + 레드팀 3관점 21개 지적 → <b>v2</b></p></div>
+    <div class="card"><div class="day">시나리오·플로우·IA</div><h3>어떻게 쓰나</h3><p>As-Is → To-Be, 유저 스토리 7개, 예외 5개 → <b>MVP 범위</b></p></div>
+  </div>
+  <div class="grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 14px;">
+    <div class="card"><p class="muted">주인공 (가정 페르소나)</p><p><b>린</b> — 29세 타이베이 직장인, 3박 4일 대구 여행 중 피부 시술 1회</p></div>
+    <div class="card"><p class="muted">왜 대만인가</p><p>대구 대만 환자 2025년 <b>1,495명</b>, 전년보다 <b>+500.4%</b></p></div>
+    <div class="card"><p class="muted">우리 위치</p><p>"등록 외국인환자 유치사업자" 가정으로 설계·시연 (등록 전)</p></div>
+  </div>
+  <div class="body"></div>
+  <div class="foot"><span class="src">출처: painpoint/ · valuechain/ · bm/ · spec/ · 대만 환자 수: 한국보건산업진흥원 2025 외국인환자 유치실적 통계 (bm_canvas 1절 확인값)</span><span class="no">1 / 6</span></div>
+</section>
+
+<!-- 2 페인포인트 -->
+<section class="slide">
+  <div class="eyebrow">① 페인포인트</div>
+  <h1>린이 막히는 곳은 <em>"고르는 단계"</em> — 정보가 비어 있다</h1>
+  <p class="lead">린의 여정 5단계 감정 곡선 — 최저점은 ② 비교·결정 · 감정은 가정, 페인포인트는 데이터·공식·통계 근거 21건</p>
+  <div class="body">
+    <div class="card jm">
+      <div></div>
+      <div class="st">① 알아보기<small>대만 · 검색·SNS</small></div>
+      <div class="st">② 비교·결정<small>대만 · 병원 상세</small></div>
+      <div class="st">③ 상담 예약<small>대만 · 챗봇·요청서</small></div>
+      <div class="st">④ 방문·진료<small>대구 · 병원</small></div>
+      <div class="st">⑤ 귀국 후 관리<small>대만 · 채팅</small></div>
+
+      <div class="lab">감정 <span class="as" style="font-size:10px">가정</span></div>
+      <div class="curve">
+        <svg viewBox="0 0 1000 120" preserveAspectRatio="none" aria-label="감정 곡선: 알아보기 -1, 비교·결정 -2 최저점, 상담 예약 -1, 방문·진료 0, 귀국 후 관리 -1">
+          <rect x="0" y="0" width="1000" height="44" fill="var(--good-soft)" opacity=".6"/>
+          <line x1="0" y1="44" x2="1000" y2="44" stroke="var(--border)" stroke-dasharray="4 4"/>
+          <path d="M100,70 C170,70 230,100 300,100 C370,100 430,70 500,70 C570,70 630,44 700,44 C770,44 830,70 900,70" fill="none" stroke="var(--accent)" stroke-width="3" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <svg viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true" style="pointer-events:none">
+          <text x="8" y="22" class="el" style="text-anchor:start">+</text><text x="8" y="114" class="el" style="text-anchor:start">−</text>
+        </svg>
+        <div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(5,1fr);">
+          <div class="dot" style="--y:70"><span>−1 정보 부족</span></div>
+          <div class="dot low" style="--y:100"><span>−2 최저점</span></div>
+          <div class="dot" style="--y:70"><span>−1 기다림</span></div>
+          <div class="dot" style="--y:44"><span>0 계획대로</span></div>
+          <div class="dot" style="--y:70"><span>−1 물을 곳 부족</span></div>
+        </div>
+      </div>
+
+      <div class="lab">페인포인트</div>
+      <div class="c pn"><div><span class="tag t-pain">Top 2</span> 등록 병원<br>상세 정보 부족</div><span class="ev">E03 E04 E05 E06</span></div>
+      <div class="c pn"><div><span class="tag t-pain">Top 1</span> 진료시간 정보 없음</div><div><span class="tag t-pain">Top 3</span> 가격 기준 없음</div><span class="ev">E01 E04 · E02 E07</span></div>
+      <div class="c pn off"><div>병원 답 기다림</div><span class="ev">가정 · 보류</span></div>
+      <div class="c pn off"><div>동의서 이해 어려움</div><span class="ev">E13 · 의료진 몫</span></div>
+      <div class="c pn off"><div>귀국 후 진료성<br>상담 창구 없음</div><span class="ev">E15 · 2027-05 전</span></div>
+
+      <div class="lab">기회</div>
+      <div class="c op">등록 병원 상세를<br>5개 언어로 한곳에</div>
+      <div class="c op">출처·확인일 붙은 진료시간<br>가격 위치 표시</div>
+      <div class="c op">AI 요약·답장 초안으로<br>병원 응답 단축</div>
+      <div class="c op">길찾기 · 병원 연락처</div>
+      <div class="c op">사후관리 지원 병원<br>채팅 연결</div>
+    </div>
+    <div class="stats">
+      <div class="card"><div class="big">26.1% <small>진료시간 채움</small></div><p style="font-size:13.5px;margin-top:4px;">대구 병원 월요일 진료시간 — 피부과 21.4%, 성형외과 14.1%</p></div>
+      <div class="card"><div class="big">13 / 145 <small>상세 정보 있는 등록 병원</small></div><p style="font-size:13.5px;margin-top:4px;">통역 언어·진료시간 등 상세가 있는 곳</p></div>
+      <div class="card"><div class="big">0곳 <small>미용 시술 공공 가격</small></div><p style="font-size:13.5px;margin-top:4px;">심평원 비급여에 의원급 미용 시술 가격 없음</p></div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: painpoint/journey_map.html · painpoint_def.md · evidence.csv (E01 심평원 API · E02 심평원 비급여 · E03 메디컬코리아 CSV) · Top 순위는 팀 판정</span><span class="no">2 / 6</span></div>
+</section>
+
+<!-- 3 밸류체인 -->
+<section class="slide">
+  <div class="eyebrow">② 밸류체인 · 팀 검토 반영</div>
+  <h1>단계마다 <em>막히는 곳·새는 돈</em>을 메디대구가 이렇게 푼다</h1>
+  <p class="lead">산업 7단계 중 메디대구가 닿는 줄기 5단계 · 위: 지금의 병목·비용 → 아래: 메디대구의 해소 방법</p>
+  <div class="body">
+    <div class="chain vc2">
+      <div></div>
+      <div class="h">1 병원 데이터·입점</div><div class="h core">2 탐색·비교</div><div class="h core">3 상담 예약·확정</div><div class="h">4 방문·진료</div><div class="h">5 사후관리·정산</div>
+
+      <div class="rl">지금의<br>병목 · 비용</div>
+      <div class="c pb"><span class="tag t-pain">B1</span> 진료시간 빈칸 — 대구 병원 채움 <b>26.1%</b></div>
+      <div class="c pb"><span class="tag t-pain">B3</span> 등록 병원 상세 <b>13 / 145곳</b> · 미용 시술 공공 가격 <b>0곳</b> → 비교 기준 없음</div>
+      <div class="c pb"><span class="tag t-pain">B2</span> 외국어 문의를 코디가 번역·작성 → 병원 응답 대기 <span class="as">[가정]</span></div>
+      <div class="c out">범위 밖 — 진료·체류는 병원 몫</div>
+      <div class="c pb"><span class="tag t-assume">C1</span> 병원 중개비용 중첩 (유치업체·광고) · <span class="tag t-assume">C2</span> 월 구독료가 수수료 상한에 걸리는지 [U]</div>
+
+      <div class="rl ar">↓</div>
+      <div class="dn">↓</div><div class="dn">↓</div><div class="dn">↓</div><div class="dn"></div><div class="dn">↓</div>
+
+      <div class="rl" style="color: var(--accent);">메디대구가<br>푸는 법</div>
+      <div class="c core"><b>공공데이터 파이프라인</b> (심평원·메디컬코리아) + 빈칸 직접 수집, 칸마다 <b>출처·확인일</b></div>
+      <div class="c core"><b>5개 언어 지도·병원 상세</b> · 가격 위치 표시 (공공 자료 있는 항목만) · <b>AI 챗봇</b></div>
+      <div class="c core"><b>상담 예약 요청서</b> → 병원 대시보드 <b>AI 요약·답장 초안</b>, 코디 승인 후 발송·확정</div>
+      <div class="c out">길찾기·병원 연락처만</div>
+      <div class="c core"><b>방문 완료 건만 수수료</b> 또는 구독 — 병원이 고름 · 구독은 대시보드 이용료로 분리, 출시 전 복지부 질의</div>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card"><h3><span class="tag t-good">먼저 간다</span> B1·B3 → 공공데이터 + 출처</h3><p>데이터가 이미 있고(대구 병원 4,242곳) 환자가 떠나는 비교 단계를 메움. 경쟁사 중 출처를 내세우는 곳 없음</p></div>
+      <div class="card"><h3><span class="tag t-acc">빠른 성과</span> B2 → AI 답장 초안</h3><p>병원 응답 대기를 줄이는 코디용 도구. AI 도구 일부는 이미 구현</p></div>
+      <div class="card"><h3><span class="tag t-assume">풀어야 할 것</span> 정산 근거</h3><p>진료비·완납은 병원만 앎 → 병원 건별 입력 + 환자 확인으로 월 정산</p></div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md · step5_분석.md (5-4 쟁점, 5-5 우선순위) (4-0 병목·비용 → 해소 표) · 26.1%·13/145·0곳: painpoint/evidence.csv E01~E03 · 병원 수: 심평원 API</span><span class="no">3 / 6</span></div>
+</section>
+
+<!-- 4 BM 캔버스 -->
+<section class="slide">
+  <div class="eyebrow">③ AX BM 캔버스 v2</div>
+  <h1>쓰는 사람은 환자, <em>돈 내는 사람은 등록 병원</em> (양면 시장)</h1>
+  <p class="lead">Top 1 아이디어: 진료시간·가격 범위·등록 여부를 출처와 함께 자기 언어로 → 챗봇으로 상담 예약 → 병원은 AI 초안으로 빨리 답함</p>
+  <div class="canvas">
+    <div class="card kp"><h3>핵심 파트너</h3><ul><li>심평원·공공데이터포털, 메디컬코리아, 행안부(폐업), 한국은행 ECOS</li><li>LLM 제공자 (Gemini → Nemotron 자동 전환)</li><li>입점 병원 · 대구시·특구 <span class="as">[가정]</span></li></ul></div>
+    <div class="card ka"><h3>핵심 활동</h3><ul><li><b>병원 데이터 관리</b> — 공공데이터 갱신, 진료시간·미용 가격 빈칸 수집</li><li><b>AI 상담 운영</b> — 다국어 챗봇, 요청서 요약·답장 초안 (발송은 코디 승인 후)</li><li><b>입점 영업</b> · 월 정산</li></ul></div>
+    <div class="card kr"><h3>핵심 자원</h3><ul><li>공공데이터 가공본 (대상 1,267곳, 칸마다 출처·확인일)</li><li>유치업자 등록 (자본금·보증보험 각 1억 원 이상)</li><li>5개 언어 UI · 챗봇 도구 11개</li></ul></div>
+    <div class="card vp"><h3>가치 제안</h3><p><b>환자</b> — 대구 병원의 진료시간·등록 여부와 <b>공공 자료가 있는 항목의 가격 범위</b>를 출처·확인일과 함께 내 언어로, 상담 예약까지 한곳에서</p><p style="margin-top:10px;"><b>병원</b> — 외국어 상담 요청을 AI가 요약·번역·답장 초안으로 정리 → 빨리 답하고, 유입·전환·응답 시간으로 성과 확인</p><p style="margin-top:10px;" class="muted">AI 역할마다 사람 검토 지점: 발송은 코디 승인, 확정은 코디, 진단은 의료진</p></div>
+    <div class="card cr"><h3>고객 관계</h3><ul><li>환자: 셀프 + AI 챗봇 (병원 정보는 가입 없이, 챗봇·예약은 로그인)</li><li>병원: 셀프 대시보드 + 입점 온보딩</li></ul></div>
+    <div class="card ch"><h3>채널</h3><ul><li>환자 웹 (5개 언어·지도·챗봇)</li><li>병원 대시보드</li><li>메디컬코리아·병원 홈페이지 링크</li></ul></div>
+    <div class="card cs"><h3>고객 세그먼트</h3><p><b>사용자</b> — 해외 거주 외국인 환자, 1순위 대만 미용·외래 단기 방문객 (국내 거주자는 정보 열람만)</p><p style="margin-top:8px;"><b>지불자</b> — 대구 등록 유치의료기관 145곳 중 <b>피부·성형 의원</b></p><p style="margin-top:8px;" class="muted">확보 병원·LOI 지금 0곳</p></div>
+    <div class="card cost"><h3>비용 구조</h3><p>고정: 등록 요건(자본금·보증보험) · 인건비 · 호스팅 &nbsp;|&nbsp; 변동: LLM 사용량 · 정산·CS · 빈칸 수작업 &nbsp;|&nbsp; 리스크: 동의·국외 이전, 법률 검토, LLM 요금 변경</p></div>
+    <div class="card rev"><h3>수익원</h3><p><b>주: 수수료</b> — 방문 완료·완납 1건 진료비의 % (월 정산) · 선택: <b>구독</b> (대시보드 이용료, 유치 수수료와 별개) · 보조: 일반 광고 배너 (병원 광고 아님)</p></div>
+  </div>
+  <div class="foot"><span class="src">출처: bm/bm_canvas.md v2 · bm/vpc.md · 등록 병원 145곳: 메디컬코리아 CSV · 등록 요건: 의료해외진출법 시행규칙 제4조</span><span class="no">4 / 6</span></div>
+</section>
+
+<!-- 5 수익모델·레드팀 -->
+<section class="slide">
+  <div class="eyebrow">③ 수익모델 · 레드팀 검증</div>
+  <h1>병원이 <em>수수료·구독 중 하나를 고른다</em></h1>
+  <p class="lead">금액은 모두 가정값 (확인값은 법정 상한·환자 수뿐) → 다음 시장 검증에서 숫자를 채움 · 계산은 다시 해서 맞는지 확인함</p>
+  <div class="body">
+    <div class="grid" style="grid-template-columns: 1fr 1.15fr 1fr;">
+      <div class="card">
+        <h3>수익모델 — 입점 병원이 요금제를 고름</h3>
+        <table style="font-size: 13.5px;">
+          <tr><th>유형</th><th>판단</th></tr>
+          <tr class="top"><td style="white-space:nowrap"><b>수수료</b><br><span class="muted">등록 병원</span></td><td><span class="tag t-acc">주 · 선택 B</span> 방문 완료·완납 1건 진료비의 %, 월 정산. 온 환자에 대해서만 냄</td></tr>
+          <tr class="top"><td style="white-space:nowrap"><b>구독</b><br><span class="muted">등록 병원</span></td><td><span class="tag t-acc">주 · 선택 A</span> 대시보드(AI 요약·번역·지표) 월 이용료. 유치 수수료(진료비 대비 %)와 <b>다른 개념</b> — 환자 연결 대가는 넣지 않음</td></tr>
+          <tr><td style="white-space:nowrap">광고<br><span class="muted">일반 광고주</span></td><td><span class="tag t-neu">보조·나중</span> 한국 화장품·관광 등, 병원 광고 아님</td></tr>
+        </table>
+        <p class="muted" style="margin-top:8px; font-size:12.5px;">법정 상한: 유치 수수료 ÷ 그 환자 총 진료비 ≤ 의원 30% · 병원 20% · 상급종합 15% (확인값)</p>
+      </div>
+      <div class="card">
+        <h3>가격 가설 · 손익분기</h3>
+        <p>수수료: 방문 완료 1건 진료비의 <b class="as">5~10%</b>, 기준 7% · 구독: <b class="as">월 20만~40만 원</b></p>
+        <p style="margin-top:8px;">→ 예상 월 10건의 <b style="color: var(--pain);">약 7~9배</b>가 필요</p>
+      </div>
+      <div class="card">
+        <h3>레드팀 3관점 · 지적 21개</h3>
+        <p class="muted">투자자 · 고객(환자·코디) · 경쟁사 역할의 AI 검토자 3명이 v1을 읽기 전용으로 공격, 지적마다 문서 문장을 인용</p>
+        <div style="display:flex; gap:14px; margin: 8px 0 8px;">
+          <div><div class="big" style="color: var(--good);">16</div><p class="muted">반영</p></div>
+          <div><div class="big">1</div><p class="muted">일부 반영</p></div>
+          <div><div class="big" style="color: var(--assume);">2</div><p class="muted">추가 확인</p></div>
+          <div><div class="big" style="color: var(--neutral);">2</div><p class="muted">보류·반박</p></div>
+        </div>
+        <p style="font-size:12.8px;">처리 규칙: 치명 → 바로 반영 · 중요 → 반영 또는 확인 · 참고 → 보류 이유 · <b>두 관점이 같은 지적이면 한 단계 올림</b> · 근거 파일이 있으면 반박</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: bm/revenue_platform.md 1~3절 (재계산) · redteam_log.md · .claude/agents/redteam-*.md · 상한: 통합 고시 제2·3조 · 환자 수: 진흥원 통계 · 80.3%: 전국 대만 환자 피부과 비중</span><span class="no">5 / 6</span></div>
+</section>
+
+<!-- 6 시나리오·플로우·IA -->
+<section class="slide">
+  <div class="eyebrow">④ 서비스 시나리오 · 유저 플로우 · IA</div>
+  <h1>린의 <em>병원 찾기 → 상담 예약 확정</em> 흐름</h1>
+  <p class="lead" style="margin-bottom:10px;">대만 미용 단기 방문객이 병원을 고르고 상담 예약을 보내, 병원 코디가 AI 초안으로 확정하기까지 · 주 경로 + 예외 5개(분홍) · 화면 이름은 웹사이트 메뉴 그대로</p>
+  <div class="body" style="gap:10px;">
+    <div class="card ufcard">
+    <svg class="ufsvg" viewBox="0 0 1208 500" role="img" aria-label="유저 플로우: 메인, 병원 정보, 병원 상세, 가격 가이드, 로그인·회원가입, 한국 거주 확인, 챗봇, 상담/예약, 예약 관리, 병원 대시보드 요청함, 코디 승인, 확정">
+      <defs>
+        <marker id="ufa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--text-muted)"/></marker>
+        <marker id="ufap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--pain)"/></marker>
+      </defs>
+
+      <!-- ROW 1 : 찾기·비교 (왼→오) y center 62 -->
+      <text x="0" y="14" class="rowt">① 찾기 · 비교</text>
+      <rect class="nd start" x="0" y="40" width="108" height="44" rx="22"/><text class="t1" x="54" y="62">시작</text>
+      <path class="ar" d="M108,62 H146" marker-end="url(#ufa)"/>
+      <text x="150" y="32" class="us">US2</text>
+      <rect class="nd main" x="150" y="40" width="140" height="44" rx="12"/><text class="t1" x="220" y="55">메인</text><text class="t2" x="220" y="72">대구 병원 지도 · 언어</text>
+      <path class="ar" d="M290,62 H326" marker-end="url(#ufa)"/><text x="294" y="54" class="lb">필터</text>
+      <rect class="nd main" x="330" y="40" width="140" height="44" rx="12"/><text class="t1" x="400" y="55">병원 정보</text><text class="t2" x="400" y="72">목록 · 등록 배지</text>
+      <path class="ar" d="M470,62 H500" marker-end="url(#ufa)"/>
+      <path class="dm" d="M545,30 L590,62 L545,94 L500,62 z"/><text class="tq" x="545" y="56">맞는 병원</text><text class="tq" x="545" y="70">있나?</text>
+      <path class="ar" d="M590,62 H626" marker-end="url(#ufa)"/><text x="596" y="54" class="lb y">예</text>
+      <text x="630" y="32" class="us">US1</text>
+      <rect class="nd main" x="630" y="40" width="160" height="44" rx="12"/><text class="t1" x="710" y="55">병원 상세</text><text class="t2" x="710" y="72">요일별 진료시간 · 출처·확인일</text>
+      <path class="ar" d="M790,62 H820" marker-end="url(#ufa)"/>
+      <path class="dm" d="M865,30 L910,62 L865,94 L820,62 z"/><text class="tq" x="865" y="56">진료시간</text><text class="tq" x="865" y="70">있나?</text>
+      <path class="ar dash" d="M910,62 H946" marker-end="url(#ufa)"/><text x="914" y="54" class="lb y">예</text>
+      <text x="950" y="32" class="us">US3 · 선택</text>
+      <rect class="nd main opt" x="950" y="40" width="140" height="44" rx="12"/><text class="t1" x="1020" y="55">가격 가이드</text><text class="t2" x="1020" y="72">대구 가격 범위</text>
+      <path class="ar ex dash" d="M1090,62 H1106" marker-end="url(#ufap)"/>
+      <rect class="nd ex" x="1108" y="40" width="100" height="44" rx="10"/><text class="tex" x="1158" y="55">E2 공공 자료</text><text class="tex" x="1158" y="71">없음 표시</text>
+
+      <!-- row1 exceptions -->
+      <path class="ar ex" d="M545,94 V124" marker-end="url(#ufap)"/><text x="551" y="112" class="lb n">아니오</text>
+      <rect class="nd ex" x="480" y="126" width="130" height="40" rx="10"/><text class="tex" x="545" y="140">E0 결과 없음</text><text class="t2" x="545" y="156">필터 해제 버튼</text>
+      <path class="ar ex" d="M865,94 V124" marker-end="url(#ufap)"/><text x="871" y="112" class="lb n">아니오</text>
+      <rect class="nd ex" x="800" y="126" width="130" height="40" rx="10"/><text class="tex" x="865" y="140">E1 정보 없음</text><text class="t2" x="865" y="156">병원에 묻기 버튼</text>
+
+      <!-- row1 -> row2 -->
+      <path class="ar" d="M1020,84 V206" marker-end="url(#ufa)"/><text x="1026" y="150" class="lb">챗봇에 묻고 싶다</text>
+      <path class="ar" d="M930,146 H990 Q1000,146 1000,156 V206" marker-end="url(#ufa)"/><text x="936" y="140" class="lb">병원에 묻기</text>
+
+      <!-- ROW 2 : 로그인·거주 확인·묻기·예약 (오→왼) y center 230 -->
+      <text x="0" y="196" class="rowt">② 회원가입 · 묻기 · 예약 요청</text>
+      <rect class="nd main" x="950" y="208" width="140" height="44" rx="12"/><text class="t1" x="1020" y="223">로그인 · 회원가입</text><text class="t2" x="1020" y="240">거주국 선택 · 동의</text>
+      <path class="ar" d="M950,230 H914" marker-end="url(#ufa)"/>
+      <path class="dm" d="M865,198 L910,230 L865,262 L820,230 z"/><text class="tq" x="865" y="224">한국</text><text class="tq" x="865" y="238">거주인가?</text>
+      <path class="ar" d="M820,230 H794" marker-end="url(#ufa)"/><text x="807" y="250" class="lb y" style="text-anchor:middle">아니오</text>
+      <text x="650" y="200" class="us">US4</text>
+      <rect class="nd main" x="650" y="208" width="140" height="44" rx="12"/><text class="t1" x="720" y="223">챗봇</text><text class="t2" x="720" y="240">출처 붙은 답</text>
+      <path class="ar" d="M650,230 H614" marker-end="url(#ufa)"/>
+      <path class="dm" d="M565,198 L610,230 L565,262 L520,230 z"/><text class="tq" x="565" y="224">챗봇이</text><text class="tq" x="565" y="238">답했나?</text>
+      <path class="ar" d="M520,230 H474" marker-end="url(#ufa)"/><text x="478" y="222" class="lb y">예</text>
+      <rect class="nd main" x="330" y="208" width="140" height="44" rx="12"/><text class="t1" x="400" y="223">상담/예약</text><text class="t2" x="400" y="240">날짜·언어·문의 입력</text>
+      <path class="ar" d="M330,230 H294" marker-end="url(#ufa)"/><text x="296" y="222" class="lb">보내기</text>
+      <rect class="nd main" x="150" y="208" width="140" height="44" rx="12"/><text class="t1" x="220" y="223">예약 관리</text><text class="t2" x="220" y="240">상태: 요청됨</text>
+
+      <!-- row2 exceptions -->
+      <path class="ar ex" d="M865,262 V292" marker-end="url(#ufap)"/><text x="871" y="280" class="lb n">예</text>
+      <rect class="nd ex" x="800" y="294" width="130" height="40" rx="10"/><text class="tex" x="865" y="308">E4 예약 막음</text><text class="t2" x="865" y="324">정보·챗봇만 이용</text>
+      <path class="ar ex" d="M565,262 V292" marker-end="url(#ufap)"/><text x="571" y="280" class="lb n">아니오</text>
+      <rect class="nd ex" x="490" y="294" width="150" height="40" rx="10"/><text class="tex" x="565" y="308">E3 직접 상담 요청</text><text class="t2" x="565" y="324">병원에 바로 요청 버튼</text>
+      <path class="ar" d="M490,314 H400 V256" marker-end="url(#ufa)"/>
+
+      <!-- ROW 3 : 병원 대시보드 lane -->
+      <rect class="lane" x="130" y="360" width="1078" height="132" rx="14"/>
+      <text x="0" y="372" class="rowt">③ 병원 확정</text>
+      <text x="240" y="384" class="lanet">병원 대시보드 · 코디 (US5)</text>
+      <path class="ar dash" d="M220,252 V414" marker-end="url(#ufa)"/><text x="226" y="300" class="lb">병원으로 넘어감</text>
+      <rect class="nd main" x="150" y="416" width="160" height="44" rx="12"/><text class="t1" x="230" y="431">요청함</text><text class="t2" x="230" y="448">AI 요약 · 답장 초안</text>
+      <path class="ar" d="M310,438 H352" marker-end="url(#ufa)"/><text x="314" y="430" class="lb">초안 고치기</text>
+      <path class="dm" d="M400,406 L448,438 L400,470 L352,438 z"/><text class="tq" x="400" y="432">코디가</text><text class="tq" x="400" y="446">승인했나?</text>
+      <path class="ar ex" d="M400,470 V484 H230 V464" marker-end="url(#ufap)"/><text x="300" y="480" class="lb n">아니오 · 발송 안 함</text>
+      <path class="ar" d="M448,438 H496" marker-end="url(#ufa)"/><text x="452" y="430" class="lb y">예 · 날짜 확정</text>
+      <rect class="nd main" x="500" y="416" width="150" height="44" rx="12"/><text class="t1" x="575" y="431">확정 · 답장 발송</text><text class="t2" x="575" y="448">환자 언어로</text>
+      <path class="ar dash" d="M650,438 H706" marker-end="url(#ufa)"/><text x="654" y="430" class="lb">환자 화면 갱신</text>
+      <rect class="nd end" x="710" y="416" width="190" height="44" rx="22"/><text class="tend" x="805" y="438">끝 · 예약 관리 "확정"</text>
+    </svg>
+    </div>
+    <div class="ufb">
+      <div class="card"><h3>스토리 ↔ 화면</h3><p><span class="tag t-acc">US1</span> 병원 상세 · <span class="tag t-acc">US2</span> 메인·병원 정보 · <span class="tag t-acc">US3</span> 가격 가이드 · <span class="tag t-acc">US4</span> 챗봇→예약 관리 · <span class="tag t-acc">US5</span> 병원 대시보드 요청함</p></div>
+      <div class="card"><h3>결정 · 확인 필요</h3><ul><li>챗봇은 <b>로그인 후</b> (11/12 팀 결정), 정보 열람은 로그인 없이</li><li>한국 거주 여부는 <b>회원가입 때</b> 거주국으로 판단 (11/13)</li><li>등록 배지 이름: "외국인 환자 등록 병원"?</li></ul></div>
+      <div class="card"><h3>다음</h3><ul><li><b>시장 검증</b> — 유치업체 요율, 코디 인터뷰, 지불자 병원 수</li><li><b>MVP</b> US1~US5 · 나중: US6 사후관리 · US7 방문 완료·정산</li></ul></div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: spec/userflow.html · userflow.md · scenario.md · ia.md · 페르소나 린은 가정</span><span class="no">6 / 6</span></div>
+</section>
+
+</div>
+<div id="nav">← / → 로 넘김</div>
+<script>
+const slides = [...document.querySelectorAll('.slide')];
+let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+function show(n) {
+  i = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, k) => s.classList.toggle('on', k === i));
+  history.replaceState(null, '', '#' + (i + 1));
+}
+function fit() {
+  const s = Math.min(innerWidth / 1280, innerHeight / 720);
+  document.getElementById('stage').style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+addEventListener('keydown', (e) => {
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) show(i + 1);
+  if (['ArrowLeft', 'PageUp'].includes(e.key)) show(i - 1);
+  if (e.key === 'Home') show(0);
+  if (e.key === 'End') show(slides.length - 1);
+});
+addEventListener('click', (e) => { if (e.clientX > innerWidth / 2) show(i + 1); else show(i - 1); });
+addEventListener('resize', fit);
+fit();
+show(i);
+</script>
+</body>
+</html>

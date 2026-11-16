@@ -34,7 +34,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
 
 /* 한 장(1280×720) 레이아웃 */
 .page { width: 1280px; height: 720px; margin: 0 auto; padding: 24px 36px 14px; display: flex; flex-direction: column; gap: 12px; }
