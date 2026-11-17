@@ -208,7 +208,7 @@ table.cmp tr.us td { background: var(--accent-soft); }
   <h1>메디대구 — 문제에서 <em>사업 모델·화면 흐름</em>까지</h1>
   <p class="lead">대구 등록 병원과 외국인 환자를 잇는 AI 의료관광 플랫폼 · <b>11/13 이후 바뀐 것: VOC 1,367건으로 페인포인트 재검토 · 경쟁 포지셔닝 · 경쟁사 DART 확인</b></p>
   <div class="flow">
-    <div class="card"><div class="day">페인포인트 v2</div><h3>무엇이 막히나</h3><p>근거 21건 + <b>VOC 674건</b> → Top 3 순서 변경</p></div>
+    <div class="card"><div class="day">페인포인트 v2</div><h3>무엇이 막히나</h3><p>근거 21건 + <b>VOC 674건 + 대만·대구 90건</b> → Top 3 순서 변경</p></div>
     <div class="card"><div class="day">밸류체인</div><h3>어디에 서나</h3><p>병목·비용 → 메디대구 해소 (병목 3·비용 2) → <b>우선 기회 O1</b></p></div>
     <div class="card"><div class="day">경쟁 · BM</div><h3>누구와 겨루고 누가 내나</h3><p>대안 5개 포지셔닝 + BM 캔버스 v2 · 레드팀 21개</p></div>
     <div class="card"><div class="day">유저 플로우</div><h3>어떻게 쓰나</h3><p>회원가입에서 거주 확인 → 챗봇 → 예약 · 예외 5개</p></div>
@@ -219,7 +219,7 @@ table.cmp tr.us td { background: var(--accent-soft); }
     <div class="card"><p class="muted">우리 위치</p><p>"등록 외국인환자 유치사업자" 가정으로 설계·시연 (등록 전)</p></div>
   </div>
   <div class="body"></div>
-  <div class="foot"><span class="src">출처: painpoint/ · valuechain/ · market/ · bm/ · spec/ · 대만 환자 수: 한국보건산업진흥원 2025 외국인환자 유치실적 통계 (bm_canvas 1절 확인값)</span><span class="no">1 / 8</span></div>
+  <div class="foot"><span class="src">출처: painpoint/ · valuechain/ · market/ · bm/ · spec/ · 대만 환자 수: 한국보건산업진흥원 2025 외국인환자 유치실적 통계 (bm_canvas 1절 확인값)</span><span class="no">1 / 9</span></div>
 </section>
 
 <!-- 2 VOC -->
@@ -247,14 +247,45 @@ table.cmp tr.us td { background: var(--accent-soft); }
       <div class="grid" style="grid-template-rows: auto auto auto; gap: 10px;">
         <div class="card"><h3>대표 목소리</h3><p>"시술 전 요금 확인·정산을 끝내라, 한국 클리닉에서 요금 분쟁이 있었다" <span class="muted">— 좋아요 8,100 (Y6)</span></p><p style="margin-top:6px">"日本語でのカウンセリングはできますでしょうか？" <span class="muted">— 인스타 #韓国肌管理</span></p></div>
         <div class="card"><h3>어떻게 분류했나</h3><p>Claude Code가 규칙(단계·유형·강도·원인)으로 1차 분류 → 팀원이 무작위 10건씩 6회 검수, 규칙 v1 → v3. 수업 기준(불일치 3건 미만)은 <b>미통과</b> → <b>원인 묶음 건수만</b> 근거로, 단계·강도 비율은 참고만</p></div>
-        <div class="card"><h3><span class="tag t-assume">한계</span> 서울 · 영어·일본어</h3><p>영상 속 병원은 모두 서울, 댓글은 영어 1,007 · 일본어 324 · <b>중국어 5건(모두 해당 없음)</b> → 대만·대구 목소리는 아직 없음. 기존 데이터 근거를 <b>보강</b>만 함</p></div>
+        <div class="card"><h3><span class="tag t-assume">한계</span> 서울 · 영어·일본어</h3><p>영상 속 병원은 모두 서울, 댓글은 영어 1,007 · 일본어 324 · <b>중국어 5건(모두 해당 없음)</b> → 대만·대구 목소리가 없어 <b>11/17 2차 수집</b> (다음 장)</p></div>
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: painpoint/voc_classified.csv · voc_rules.md · voc_review.md (유튜브 Y1~Y8, 수집 2026-11-13) · voc/instagram_韓国肌管理_comments.json (인스타 30건, 분류 전) · 작성자 아이디는 저장하지 않음</span><span class="no">2 / 8</span></div>
+  <div class="foot"><span class="src">출처: painpoint/voc_classified.csv · voc_rules.md · voc_review.md (유튜브 Y1~Y8, 수집 2026-11-13) · voc/instagram_韓国肌管理_comments.json (인스타 30건, 분류 전) · 작성자 아이디는 저장하지 않음</span><span class="no">2 / 9</span></div>
 </section>
 
-<!-- 3 페인포인트 -->
+<!-- 3 VOC 2차 -->
+<section class="slide">
+  <div class="eyebrow">① VOC 2차 — 대만 · 대구 (11/17)</div>
+  <h1>대만 사람들도 대구에서 먼저 막힌 건 <em>"어느 병원인지 모르겠다"</em></h1>
+  <p class="lead">대만 커뮤니티 <b>Dcard "大邱 醫美" 글 7개</b> + 대만·일본인 대구 시술 브이로그 등 <b>유튜브 8개 영상 댓글</b> → 시술·병원 이야기 <b>90건 분류 (대구 51건)</b></p>
+  <div class="body">
+    <div class="grid" style="grid-template-columns: 1.25fr 1fr;">
+      <div class="card">
+        <h3>원인 묶음별 건수 <span class="muted" style="font-weight:500;font-size:13px">— 막대 = 전체, 오른쪽 = 대구</span></h3>
+        <div class="vocbar" style="margin-top:8px">
+          <span class="hd">원인 묶음</span><span></span><span class="hd" style="text-align:right">건수</span><span class="hd">대구</span>
+          <span class="nm">병원 이름·위치 정보 없음</span><span class="tr"><i style="width:100%"></i></span><span class="n">14</span><span class="v">10</span>
+          <span class="nm">외국어 상담 가능 여부</span><span class="tr"><i style="width:57%"></i></span><span class="n">8</span><span class="v">6</span>
+          <span class="nm">세금 환급·외국인 가격</span><span class="tr"><i style="width:57%"></i></span><span class="n">8</span><span class="v">6</span>
+          <span class="nm">효과 판단 어려움</span><span class="tr"><i style="width:50%"></i></span><span class="n">7</span><span class="v">4</span>
+          <span class="nm">병원 고르는 기준 부족</span><span class="tr"><i style="width:43%"></i></span><span class="n">6</span><span class="v">1</span>
+          <span class="nm"><span class="tag t-acc" style="font-size:10.5px">신규</span> 예약 채널</span><span class="tr"><i style="width:36%"></i></span><span class="n">5</span><span class="v">4</span>
+          <span class="nm">가격 정보 없음</span><span class="tr"><i style="width:36%"></i></span><span class="n">5</span><span class="v">3</span>
+          <span class="nm" style="color:var(--good)">본국 대비 가격 강점</span><span class="tr"><i class="good" style="width:50%"></i></span><span class="n" style="color:var(--good)">7</span><span class="v">칭찬</span>
+        </div>
+      </div>
+      <div class="grid" style="grid-template-rows: auto auto auto; gap: 10px;">
+        <div class="card"><h3>대표 목소리 (대만, 대구)</h3><p>"大邱是小地方，比起釜山首爾資訊超級少，韓國人也不用谷歌地圖找不到評價" <span class="muted">— 대구는 서울·부산보다 정보가 아주 적고 구글 리뷰도 없다 (Dcard)</span></p><p style="margin-top:6px">"每次去都想打！但怕踩雷都沒去" <span class="muted">— 실패가 무서워 결국 못 했다</span></p></div>
+        <div class="card"><h3>새로 보인 것</h3><ul><li><b>예약 채널</b> — 대만인은 카카오톡이 없고 <b>LINE</b>을 씀, "LINE 예약 돼서 골랐다"</li><li><b>세금 환급(退稅)</b> 되나? 질문 반복</li><li>대구 강점: 이른 출발·늦은 귀국 직항 → "대구로 짧게 의료미용"</li></ul></div>
+        <div class="card"><h3><span class="tag t-assume">한계</span> 90건 · 사람 검수 전</h3><p>Claude 분류만, 팀 검수 10건 예정 · Dcard가 빠른 요청을 막아 대구 글 약 20개 중 7개만 읽음 · 작성자 정보 저장 안 함</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: painpoint/voc_대만대구.md · voc_tw_classified.csv · voc/dcard_大邱醫美_posts.json · 유튜브 8개 영상 (2026-11-17 수집)</span><span class="no">3 / 9</span></div>
+</section>
+
+<!-- 4 페인포인트 -->
 <section class="slide">
   <div class="eyebrow">① 페인포인트 v2 — VOC 반영</div>
   <h1>린이 막히는 곳은 <em>"고르는 단계"</em> — 정보가 비어 있다</h1>
@@ -302,15 +333,15 @@ table.cmp tr.us td { background: var(--accent-soft); }
       <div class="c op">사후관리 지원 병원<br>채팅 연결</div>
     </div>
     <div class="rk">
-      <div class="card"><div class="big">Top 1 · 75 <span class="chg up">↑ v1 2위</span></div><p style="font-size:13.5px;margin-top:4px;"><b>등록 병원 상세 부족</b> — 상세 있는 곳 13 / 145 · VOC "병원 이름·위치·외국어 상담" 58건</p></div>
+      <div class="card"><div class="big">Top 1 · 75 <span class="chg up">↑ v1 2위</span></div><p style="font-size:13.5px;margin-top:4px;"><b>등록 병원 상세 부족</b> — 상세 있는 곳 13 / 145 · VOC 58건 + <b>대만·대구 14건(1위)</b></p></div>
       <div class="card"><div class="big">Top 2 · 64 <span class="chg dn">↓ v1 1위 80</span></div><p style="font-size:13.5px;margin-top:4px;"><b>진료시간 정보 없음</b> — 채움 26.1% · VOC는 5건뿐 → 빈도 5 → 4</p></div>
       <div class="card"><div class="big">Top 3 · 60 <span class="chg eq">= VOC 1위</span></div><p style="font-size:13.5px;margin-top:4px;"><b>가격 기준 없음</b> — 미용 공공 가격 0곳 · VOC 242건, 8개 영상 전부</p></div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: painpoint/journey_map.html · painpoint_def.md · evidence.csv (E01 심평원 API · E02 심평원 비급여 · E03 메디컬코리아 CSV) · voc_classified.csv · 점수 = 빈도 × 강도 × 해결 가능성, 팀 결정 A안 (11/16)</span><span class="no">3 / 8</span></div>
+  <div class="foot"><span class="src">출처: painpoint/journey_map.html · painpoint_def.md · evidence.csv (E01 심평원 API · E02 심평원 비급여 · E03 메디컬코리아 CSV) · voc_classified.csv · 점수 = 빈도 × 강도 × 해결 가능성, 팀 결정 A안 (11/16)</span><span class="no">4 / 9</span></div>
 </section>
 
-<!-- 4 밸류체인 -->
+<!-- 5 밸류체인 -->
 <section class="slide">
   <div class="eyebrow">② 밸류체인 · 팀 검토 반영</div>
   <h1>단계마다 <em>막히는 곳·새는 돈</em>을 메디대구가 이렇게 푼다</h1>
@@ -343,10 +374,10 @@ table.cmp tr.us td { background: var(--accent-soft); }
       <div class="card"><h3><span class="tag t-assume">풀어야 할 것</span> 정산 근거</h3><p>진료비·완납은 병원만 앎 → 병원 건별 입력 + 환자 확인으로 월 정산</p></div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md · step5_분석.md (5-4 쟁점, 5-5 우선순위) (4-0 병목·비용 → 해소 표) · 26.1%·13/145·0곳: painpoint/evidence.csv E01~E03 · 병원 수: 심평원 API</span><span class="no">4 / 8</span></div>
+  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md · step5_분석.md (5-4 쟁점, 5-5 우선순위) (4-0 병목·비용 → 해소 표) · 26.1%·13/145·0곳: painpoint/evidence.csv E01~E03 · 병원 수: 심평원 API</span><span class="no">5 / 9</span></div>
 </section>
 
-<!-- 5 경쟁 -->
+<!-- 6 경쟁 -->
 <section class="slide">
   <div class="eyebrow">② 경쟁 · 포지셔닝 (11/13~16)</div>
   <h1>대안 5개 사이에서 메디대구는 <em>"공공 근거 + 예약 연결"</em> 빈자리에</h1>
@@ -388,10 +419,10 @@ table.cmp tr.us td { background: var(--accent-soft); }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: market/competitors.md · positioning_map.html · research/company/강남언니-UNNI.md (DART 감사보고서 2023~2025) · 점 위치는 팀 해석 [I]</span><span class="no">5 / 8</span></div>
+  <div class="foot"><span class="src">출처: market/competitors.md · positioning_map.html · research/company/강남언니-UNNI.md (DART 감사보고서 2023~2025) · 점 위치는 팀 해석 [I]</span><span class="no">6 / 9</span></div>
 </section>
 
-<!-- 6 BM 캔버스 -->
+<!-- 7 BM 캔버스 -->
 <section class="slide">
   <div class="eyebrow">③ AX BM 캔버스 v2</div>
   <h1>쓰는 사람은 환자, <em>돈 내는 사람은 등록 병원</em> (양면 시장)</h1>
@@ -407,10 +438,10 @@ table.cmp tr.us td { background: var(--accent-soft); }
     <div class="card cost"><h3>비용 구조</h3><p>고정: 등록 요건(자본금·보증보험) · 인건비 · 호스팅 &nbsp;|&nbsp; 변동: LLM 사용량 · 정산·CS · 빈칸 수작업 &nbsp;|&nbsp; 리스크: 동의·국외 이전, 법률 검토, LLM 요금 변경</p></div>
     <div class="card rev"><h3>수익원</h3><p><b>주: 수수료</b> — 방문 완료·완납 1건 진료비의 % (월 정산) · 선택: <b>구독</b> (대시보드 이용료, 유치 수수료와 별개) · 보조: 일반 광고 배너 (병원 광고 아님)</p></div>
   </div>
-  <div class="foot"><span class="src">출처: bm/bm_canvas.md v2 · bm/vpc.md · 등록 병원 145곳: 메디컬코리아 CSV · 등록 요건: 의료해외진출법 시행규칙 제4조</span><span class="no">6 / 8</span></div>
+  <div class="foot"><span class="src">출처: bm/bm_canvas.md v2 · bm/vpc.md · 등록 병원 145곳: 메디컬코리아 CSV · 등록 요건: 의료해외진출법 시행규칙 제4조</span><span class="no">7 / 9</span></div>
 </section>
 
-<!-- 7 수익모델·레드팀 -->
+<!-- 8 수익모델·레드팀 -->
 <section class="slide">
   <div class="eyebrow">③ 수익모델 · 레드팀 검증</div>
   <h1>병원이 <em>수수료·구독 중 하나를 고른다</em></h1>
@@ -446,10 +477,10 @@ table.cmp tr.us td { background: var(--accent-soft); }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: bm/revenue_platform.md 1~3절 (재계산) · redteam_log.md · .claude/agents/redteam-*.md · 상한: 통합 고시 제2·3조 · 환자 수: 진흥원 통계 · 80.3%: 전국 대만 환자 피부과 비중</span><span class="no">7 / 8</span></div>
+  <div class="foot"><span class="src">출처: bm/revenue_platform.md 1~3절 (재계산) · redteam_log.md · .claude/agents/redteam-*.md · 상한: 통합 고시 제2·3조 · 환자 수: 진흥원 통계 · 80.3%: 전국 대만 환자 피부과 비중</span><span class="no">8 / 9</span></div>
 </section>
 
-<!-- 8 시나리오·플로우·IA -->
+<!-- 9 시나리오·플로우·IA -->
 <section class="slide">
   <div class="eyebrow">④ 서비스 시나리오 · 유저 플로우 · IA</div>
   <h1>린의 <em>병원 찾기 → 상담 예약 확정</em> 흐름</h1>
@@ -536,7 +567,7 @@ table.cmp tr.us td { background: var(--accent-soft); }
       <div class="card"><h3>다음</h3><ul><li><b>시장 검증</b> — 유치업체 요율, 코디 인터뷰, 지불자 병원 수</li><li><b>MVP</b> US1~US5 · 나중: US6 사후관리 · US7 방문 완료·정산</li></ul></div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: spec/userflow.html · userflow.md · scenario.md · ia.md · 페르소나 린은 가정</span><span class="no">8 / 8</span></div>
+  <div class="foot"><span class="src">출처: spec/userflow.html · userflow.md · scenario.md · ia.md · 페르소나 린은 가정</span><span class="no">9 / 9</span></div>
 </section>
 
 </div>
