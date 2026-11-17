@@ -14,4 +14,4 @@
 | `--neutral` | #8a94a3 | 보류 · 범위 밖 |
 | 글꼴 | Pretendard | 웹사이트와 같음 |
 
-적용된 파일: painpoint/journey_map.html · journey_3actors.html · priority.html · bm/bm_canvas.html · spec/userflow.html (모두 1280×720 한 장)
+적용된 파일: painpoint/journey_map.html · journey_3actors.html · priority.html · bm/bm_canvas.html · spec/userflow.html · spec/processflow.html (userflow·processflow는 세로로 긴 한 장, 나머지는 1280×720)
