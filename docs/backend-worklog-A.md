@@ -17,6 +17,15 @@
 
 ## 기록
 
+### 2026-11-17 (8) · backend-A-contract-reject-reason → backend-A-reject-reason · Claude
+- 한 일: **병원 직원 거절 사유 코드** (사용자 요청) — `fully_booked`·`not_offered`·`needs_consult`·`other`, 선택. `booking_events.reason`(20자, 이미 있음)에 저장 → 마이그레이션 없음. 거절이 아닌 행동에 사유·목록 밖 코드는 422
+  - **B 모듈(booking) 변경**: `models.REJECT_REASONS`, `service.staff_act(reason=)`, `schemas.StaffAction.reason`, `router_tenant` 전달 — B 리뷰 필요
+  - 같이: 대시보드 시안(`dashboard-dialogs` 브랜치, B의 `docs-dashboard-integration` 위)에 모든 버튼 확인 다이얼로그 + 요청 목록 DB 연결
+- 확인: Supabase `AXA`(0007) + 가상 병원 9001로 대시보드에서 확정·시간 제안(직접 입력)·거절(사유 저장 `fully_booked` 확인)·방문 완료·사후관리 해결됨(태그)·답장 저장
+- 바뀐 계약: 있음 2절 (거절 사유)
+- 테스트: 백엔드+AI 367개 통과 (거절 사유 3개 추가)
+- B에게 요청: ① 거절 사유 코드·계약 2절 확인 ② 대시보드 다이얼로그 PR 리뷰 ③ 환자 화면에 거절 사유를 언어별 문장으로 보일지 결정
+
 ### 2026-11-17 (2) · backend-A-hospital · Claude (로컬 확인)
 - 한 일: 프론트(5173)·백엔드(8000) 로컬 실행 확인. 백엔드를 **로컬 SQLite**(0001~0006 + 실제 데이터)로 켜면 `/hospitals`·상세·정렬 422·프론트에서 호출(CORS) 모두 정상. **Supabase 설정으로 켜면 서버는 뜨지만 DB를 쓰는 요청은 500**(`ImportError`, psycopg)
 - 원인: 이 PC의 윈도우 **스마트 앱 컨트롤이 차단 모드**(`VerifiedAndReputablePolicyState = 1`), CodeIntegrity 로그에 psycopg DLL 차단(11/17 14:59·15:34). 11/4~5에는 이 PC에서 Supabase 연결이 됐음(아래 기록) → 그 뒤 차단 모드로 바뀐 것으로 보임. B PC도 11/12 같은 증상
