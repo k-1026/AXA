@@ -194,7 +194,7 @@
     <h3 class="sec">오늘 할 일</h3>
     <div class="tiles">
       <a class="tile" href="#booking"><span class="tl">새 상담 요청</span><span class="tv" id="tNew">5</span><span class="tg">답변하러 가기 →</span></a>
-      <a class="tile hot" href="#aftercare"><span class="tl">미답변 사후관리</span><span class="tv">4</span><span class="tg">7시간 지난 문의 있음 →</span></a>
+      <a class="tile hot" href="#aftercare"><span class="tl">미답변 사후관리</span><span class="tv" id="tAc">4</span><span class="tg">7시간 지난 문의 있음 →</span></a>
       <a class="tile" href="#booking"><span class="tl">오늘 방문 예정</span><span class="tv" id="tVisit">2</span><span class="tg" id="tVisitG">11:00 · 15:30 →</span></a>
       <a class="tile" href="#receipt"><span class="tl">결제 금액 입력</span><span class="tv">1</span><span class="tg">방문 완료 R-1036 →</span></a>
     </div>
@@ -324,7 +324,7 @@
     <div id="acBody">
       <div class="grid g4">
         <div class="card kpi"><div class="l">새 문의</div><div class="v">6</div></div>
-        <div class="card kpi"><div class="l">미답변</div><div class="v" style="color:var(--bad)">4</div></div>
+        <div class="card kpi"><div class="l">미답변</div><div class="v" style="color:var(--bad)" id="kAcUn">4</div></div>
         <div class="card kpi"><div class="l">처리 중</div><div class="v">3</div></div>
         <div class="card kpi"><div class="l">이번 달 완료</div><div class="v">12</div></div>
         <div class="card kpi"><div class="l">평균 첫 답변</div><div class="v">5h 40m</div></div>
@@ -818,7 +818,7 @@
     root.querySelector('.cdraft').innerHTML = c.draft
       ? `<b>AI 답장 초안</b> (직원 승인 후 발송)<br>${esc(c.draft.k)}<div class="note" style="margin:4px 0 0">환자에게: ${esc(c.draft.o)}</div><div class="acts"><button class="btn primary" data-act="send">승인·발송</button><button class="btn" data-act="edit">고쳐서 보내기</button></div>` : '';
     root.querySelectorAll('.citem').forEach((b) => b.onclick = async () => {
-      const i = +b.dataset.i; list[i].unread = 0;
+      const i = +b.dataset.i;
       if (hook && hook.select) await hook.select(list[i]);
       renderChat(root, key, i);
     });
@@ -835,7 +835,7 @@
     // 환자에게 보내는 글은 모두 확인 창을 거친다 (AI 초안은 직원 승인 후 발송, compliance)
     const deliver = async (k, o) => {
       if (hook) { await hook.send(c, k, root); return; }
-      c.msgs.push({ f: 's', k, o, t: '방금' }); c.draft = null; c.unread = 0; renderChat(root, key, idx);
+      c.msgs.push({ f: 's', k, o, t: '방금' }); c.draft = null; c.unread = 0; renderChat(root, key, idx); updateNav();
       toast('보냈어요 (예시 — 저장 안 됨)');
     };
     const note = key === 'booking' ? '상담 답장 저장 API는 아직 없어서 화면에만 보여요.' : '환자 언어 번역은 연결 전이라 한국어 원문으로 저장돼요.';
@@ -928,7 +928,6 @@
     }));
     const i = Math.max(0, CHATS.booking.findIndex((c) => c.rid === keepId));
     renderChat(chatRoot('booking'), 'booking', i);
-    document.querySelector('#tabs button[data-t=booking] .cnt').textContent = p.length;
   }
 
   async function openThread(c) {
@@ -943,13 +942,13 @@
     const list = await call('/tenant/aftercare');
     CHATS.aftercare = list.map((th) => ({
       tid: th.id, id: 'A-' + short(th.id), who: `${NAT[th.nationality] || th.nationality} · ${LANG[th.lang] || th.lang}`,
-      unread: th.unanswered, title: (th.tags[0] || TRT[th.treatment] || '사후관리'), sub: AC_STATUS[th.status] + ' · 방문 ' + kdate(th.visited_slot),
+      status: th.status, unread: th.status === 'resolved' ? 0 : th.unanswered, title: (th.tags[0] || TRT[th.treatment] || '사후관리'), sub: AC_STATUS[th.status] + ' · 방문 ' + kdate(th.visited_slot),
       sum: th.last_message || '', tags: th.tags.length ? th.tags : [TRT[th.treatment] || '태그 없음'], msgs: [],
     }));
     let i = Math.max(0, CHATS.aftercare.findIndex((c) => c.tid === keepId));
     if (CHATS.aftercare[i]) await openThread(CHATS.aftercare[i]);
     renderChat(chatRoot('aftercare'), 'aftercare', i);
-    document.querySelector('#tabs button[data-t=aftercare] .cnt').textContent = list.filter((x) => x.unanswered).length;
+    updateNav();
   }
 
   async function setupApi() {
@@ -1042,6 +1041,8 @@
       confirmed_slot: r.confirmed_slot, msg_o: r.message_original, msg_k: r.message_translated };
   }
   function chatReq(c) {
+    const ex = !c.req && REQS.find((x) => !x.rid && x.id === c.id);
+    if (ex) { ex.demoChat = c; return ex; }
     return c.req || { rid: null, id: c.id, who: c.who, title: c.title, status: 'pending', visa: /예약확인서/.test(c.sub),
       slots: [kst(plusDays(3), '10:00'), kst(plusDays(4), '14:00')], msg_k: c.sum, demoChat: c };
   }
@@ -1093,8 +1094,9 @@
     if (out.demo) {
       r.status = NEXT[act];
       if (out.slot) r.confirmed_slot = out.slot;
-      if (r.demoChat) r.demoChat.sub = `${ST[r.status][0]} (예시)`;
-      toast(DONE[act] + ' (예시 — 저장 안 됨)'); renderReqs(); return true;
+      if (r.demoChat) { r.demoChat.sub = `${ST[r.status][0]} (예시)`; r.demoChat.unread = 0; }
+      const broot = chatRoot('booking'); renderChat(broot, 'booking', +broot.dataset.idx || 0);
+      toast(DONE[act] + ' (예시 — 저장 안 됨)'); renderReqs(); updateNav(); return true;
     }
     toast(DONE[act] + (out.confirmed_slot && act !== 'reject' ? ': ' + kdate(out.confirmed_slot) : '') + ' (DB 저장)');
     await refreshBooking(r.rid);
@@ -1130,7 +1132,7 @@
     const [p, q, c] = await Promise.all(['pending', 'proposed', 'confirmed'].map((s) => call('/tenant/booking-requests?status=' + s)));
     REQS = [...p, ...q, ...c.sort((a, b) => String(a.confirmed_slot).localeCompare(String(b.confirmed_slot)))].map(toR);
     const src = document.getElementById('reqSrc'); src.textContent = 'DB · 대기 ' + p.length + ' · 제안 ' + q.length + ' · 확정 ' + c.length; src.className = 'badge';
-    renderReqs();
+    renderReqs(); updateNav();
   }
   async function refreshBooking(keep) {
     if (!API.ready) return;
@@ -1154,7 +1156,7 @@
       },
     });
     if (!out) return;
-    if (out.demo) { c.sub = AC_STATUS[act] + ' (예시)'; if (out.body.tags) c.tags = out.body.tags; toast(AC_STATUS[act] + '(으)로 바꿨어요 (예시 — 저장 안 됨)'); renderChat(root, 'aftercare', idx); return; }
+    if (out.demo) { c.sub = AC_STATUS[act] + ' (예시)'; if (out.body.tags) c.tags = out.body.tags; if (act === 'resolved') c.unread = 0; updateNav(); toast(AC_STATUS[act] + '(으)로 바꿨어요 (예시 — 저장 안 됨)'); renderChat(root, 'aftercare', idx); return; }
     toast(AC_STATUS[act] + '(으)로 바꿨어요 (DB 저장)'); await loadAftercare(c.tid);
   }
   async function acToggle(on) {
@@ -1190,7 +1192,7 @@
       if (!out) return;
       tr.cells[3].textContent = won2(out.a); tr.cells[4].textContent = out.pay; tr.cells[5].innerHTML = `${esc(out.file)} <button class="btn" data-dlg="receipt">바꾸기</button>`; bindDlg();
       tr.cells[7].innerHTML = '<span class="badge warn">확인 중</span>'; tr.cells[8].textContent = won2(Math.round(out.a * 0.1));
-      toast(SCREEN_ONLY);
+      updateNav(); toast(SCREEN_ONLY);
     },
     async hours(b) {
       const cur = [...document.querySelectorAll('#settings .row')].find((r) => r.firstElementChild?.textContent === '진료시간')?.lastElementChild.firstChild?.textContent.trim() || '';
@@ -1253,6 +1255,16 @@
       bindDlg(); toast(SCREEN_ONLY);
     },
   };
+  // 메뉴 숫자 = 처리할 일. 상담·예약: 대기 요청 / 사후관리: 환자 글에 아직 답 안 한 대화(해결됨 제외)
+  // 진료·결제 확인: 결제 금액 API 전이라 DB에 연결되면 숨김 (가짜 숫자 X), 예시 화면에서는 "입력 대기" 줄 수
+  function updateNav() {
+    const set = (t, n, show = true) => { const el = document.querySelector(`#tabs button[data-t=${t}] .cnt`); if (el) { el.textContent = n; el.hidden = !show || !n; } };
+    const ac = CHATS.aftercare.filter((c) => c.unread).length;
+    set('booking', REQS.filter((r) => r.status === 'pending').length);
+    set('aftercare', ac);
+    set('receipt', document.querySelectorAll('#receipt .badge.bad').length, !API.ready);
+    for (const id of ['tAc', 'kAcUn']) { const e = document.getElementById(id); if (e) e.textContent = ac; }
+  }
   function bindDlg() { document.querySelectorAll('[data-dlg]').forEach((b) => b.onclick = () => DLG[b.dataset.dlg](b)); }
   bindDlg();
   document.getElementById('logoutBtn').onclick = async () => {
@@ -1264,7 +1276,7 @@
 
   // 첫 그리기는 맨 끝에서 (위의 다이얼로그 함수·상수가 모두 정의된 뒤)
   document.querySelectorAll('.chat').forEach((root) => renderChat(root, root.dataset.chat, 0));
-  render(); renderReqs(); fromHash(); connectApi();
+  render(); renderReqs(); updateNav(); fromHash(); connectApi();
 </script>
 </body>
 </html>
