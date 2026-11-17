@@ -253,3 +253,11 @@ def test_피부과는_이름에_피부과가_있는_전문_병원만(client, db_
         hours=[{"ykiho": k, "has_dermatology": "Y"} for k in ("D1", "D2", "D3")],
     ))
     assert [h["ykiho"] for h in list_hospitals(client, dept="dermatology")] == ["D1"]
+
+
+def test_성형외과도_이름에_성형외과가_있는_전문_병원만(client, db_engine, files):
+    load(db_engine, **files(
+        [hosp("P1", "예쁜성형외과의원"), hosp("P2", "바른피부과의원"), hosp("P3", "대학교병원", clCdNm="상급종합")],
+        hours=[{"ykiho": k, "has_plastic_surgery": "Y"} for k in ("P1", "P2", "P3")],
+    ))
+    assert [h["ykiho"] for h in list_hospitals(client, dept="plastic")] == ["P1"]
