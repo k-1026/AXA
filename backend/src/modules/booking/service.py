@@ -1,0 +1,177 @@
+"""예약 상태 흐름 (B 주인). 상태 전이 규칙은 **이 파일 한 곳**에만 둔다.
+
+- 환자 쪽 함수(`create_request`, `list_for_patient`, `get_for_patient`, `patient_accept`, `patient_cancel`)는
+  A의 `router_patient.py`가 부른다 (docs/backend-contracts.md 5절)
+- 병원 쪽 함수(`staff_*`)는 `router_tenant.py`(B)가 부른다. tenant_id로만 조회 → 남의 병원 요청은 404
+- 모든 상태 변경은 `booking_events`에 1건씩 남긴다 (지우지 않음)
+- TODO(A 함수 생기면): 상태 변경마다 `notification.service.notify()` 호출, 생성 시 `consent.service.require()`
+"""
+
+import uuid
+from datetime import datetime
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from core.db import utcnow
+from core.errors import AppError
+from modules.booking.models import CANCEL_REASONS, BookingEvent, BookingRequest
+from modules.tenant.models import Tenant
+
+# (현재 상태, 행동) → 다음 상태. 여기 없는 조합은 409 booking.invalid_transition
+TRANSITIONS: dict[tuple[str, str], str] = {
+    ("pending", "confirm"): "confirmed",
+    ("proposed", "confirm"): "confirmed",
+    ("pending", "reject"): "rejected",
+    ("proposed", "reject"): "rejected",
+    ("pending", "propose"): "proposed",
+    ("proposed", "propose"): "proposed",  # 다른 시간으로 다시 제안
+    ("confirmed", "visited"): "visited",
+    ("confirmed", "no_show"): "no_show",
+    # 환자
+    ("proposed", "patient_accept"): "confirmed",
+    ("pending", "patient_cancel"): "cancelled",
+    ("proposed", "patient_cancel"): "cancelled",  # 제안 거절 = 취소 (B 결정 2026-11-17)
+}
+STAFF_ACTIONS = ("confirm", "reject", "propose", "visited", "no_show")
+
+
+def _not_found() -> AppError:
+    return AppError(404, "not_found", "요청을 찾을 수 없습니다")
+
+
+def _move(
+    db: Session,
+    req: BookingRequest,
+    action: str,
+    actor_type: str,
+    actor_id: str | None,
+    *,
+    slot: datetime | None = None,
+    reason: str | None = None,
+) -> BookingRequest:
+    nxt = TRANSITIONS.get((req.status, action))
+    if nxt is None:
+        raise AppError(
+            409,
+            "booking.invalid_transition",
+            "지금 상태에서는 할 수 없는 변경입니다",
+            {"from": req.status, "action": action},
+        )
+    if action in ("confirm", "propose") and slot is None and req.confirmed_slot is None:
+        raise AppError(422, "validation", "시간을 입력하세요", {"errors": [{"loc": ["slot"], "type": "missing"}]})
+    db.add(
+        BookingEvent(
+            request_id=req.id,
+            from_status=req.status,
+            to_status=nxt,
+            actor_type=actor_type,
+            actor_id=actor_id,
+            proposed_slot=slot,
+            reason=reason,
+        )
+    )
+    if slot is not None:
+        req.confirmed_slot = slot
+    req.status = nxt
+    req.updated_at = utcnow()
+    db.commit()
+    db.refresh(req)
+    return req
+
+
+# ---------- 환자 쪽 (A가 호출) ----------
+
+
+def create_request(db: Session, patient_id: uuid.UUID, tenant_id: uuid.UUID, data: dict) -> BookingRequest:
+    """요청서 생성. 상태는 항상 pending. 등록 유치의료기관(requests_enabled)만 받음."""
+    tenant = db.get(Tenant, tenant_id)
+    if tenant is None or not tenant.requests_enabled:
+        raise _not_found()
+    dup = db.scalar(
+        select(BookingRequest.id).where(
+            BookingRequest.patient_id == patient_id,
+            BookingRequest.tenant_id == tenant_id,
+            BookingRequest.status.in_(("pending", "proposed")),
+        )
+    )
+    if dup is not None:
+        raise AppError(409, "booking.duplicate", "이 병원에 처리 안 된 요청이 이미 있습니다")
+    req = BookingRequest(patient_id=patient_id, tenant_id=tenant_id, hospital_id=tenant.hospital_id, **data)
+    db.add(req)
+    db.flush()
+    db.add(BookingEvent(request_id=req.id, from_status=None, to_status="pending", actor_type="patient", actor_id=str(patient_id)))
+    db.commit()
+    db.refresh(req)
+    return req
+
+
+def list_for_patient(db: Session, patient_id: uuid.UUID) -> list[BookingRequest]:
+    return list(
+        db.scalars(
+            select(BookingRequest)
+            .where(BookingRequest.patient_id == patient_id)
+            .order_by(BookingRequest.created_at.desc())
+        )
+    )
+
+
+def get_for_patient(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -> BookingRequest:
+    req = db.get(BookingRequest, request_id)
+    if req is None or req.patient_id != patient_id:
+        raise _not_found()  # 남의 요청도 404
+    return req
+
+
+def patient_accept(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -> BookingRequest:
+    return _move(db, get_for_patient(db, patient_id, request_id), "patient_accept", "patient", str(patient_id))
+
+
+def patient_cancel(
+    db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, reason: str | None = None
+) -> BookingRequest:
+    if reason is not None and reason not in CANCEL_REASONS:
+        raise AppError(422, "validation", "취소 사유 코드가 올바르지 않습니다", {"errors": [{"loc": ["reason"], "type": "enum"}]})
+    req = get_for_patient(db, patient_id, request_id)
+    return _move(db, req, "patient_cancel", "patient", str(patient_id), reason=reason)
+
+
+# ---------- 병원 쪽 (B router_tenant) ----------
+
+
+def staff_get(db: Session, tenant_id: uuid.UUID, request_id: uuid.UUID) -> BookingRequest:
+    req = db.get(BookingRequest, request_id)
+    if req is None or req.tenant_id != tenant_id:
+        raise _not_found()  # 다른 병원 요청은 404
+    return req
+
+
+def staff_list(
+    db: Session,
+    tenant_id: uuid.UUID,
+    status: str | None = None,
+    start: datetime | None = None,
+    end: datetime | None = None,
+) -> list[BookingRequest]:
+    q = select(BookingRequest).where(BookingRequest.tenant_id == tenant_id)
+    if status:
+        q = q.where(BookingRequest.status == status)
+    if start:
+        q = q.where(BookingRequest.created_at >= start)
+    if end:
+        q = q.where(BookingRequest.created_at < end)
+    return list(db.scalars(q.order_by(BookingRequest.created_at.desc())))
+
+
+def staff_act(
+    db: Session,
+    tenant_id: uuid.UUID,
+    staff_id: str,
+    request_id: uuid.UUID,
+    action: str,
+    slot: datetime | None = None,
+) -> BookingRequest:
+    if action not in STAFF_ACTIONS:
+        raise AppError(409, "booking.invalid_transition", "지금 상태에서는 할 수 없는 변경입니다", {"action": action})
+    req = staff_get(db, tenant_id, request_id)
+    return _move(db, req, action, "staff", staff_id, slot=slot)
