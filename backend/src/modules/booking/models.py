@@ -30,6 +30,8 @@ from modules.patient.models import LANGS
 STATUSES = ("pending", "proposed", "confirmed", "rejected", "cancelled", "expired", "visited", "no_show")
 ACTORS = ("patient", "staff", "system")
 CANCEL_REASONS = ("schedule", "cost", "interpreter", "transport", "other_hospital", "other", "none")
+# 병원 직원 거절 사유 (contracts 2절). booking_events.reason(20자)에 코드로, 문장은 프론트 i18n
+REJECT_REASONS = ("fully_booked", "not_offered", "needs_consult", "other")
 REPLY_KINDS = ("template", "free")
 
 JsonType = JSON().with_variant(JSONB(), "postgresql")
