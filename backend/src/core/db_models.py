@@ -3,6 +3,7 @@
 새 모듈에 models.py를 만들면 여기에 한 줄 추가 (A·B 공동 파일).
 """
 
+from modules.aftercare import models as aftercare_models  # noqa: F401
 from modules.auth import models as auth_models  # noqa: F401
 from modules.booking import models as booking_models  # noqa: F401
 from modules.chatbot import models as chatbot_models  # noqa: F401
