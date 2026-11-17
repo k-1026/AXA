@@ -25,6 +25,9 @@ def db_engine():
     import core.db_models  # noqa: F401 — 모든 모델 등록
 
     engine = get_engine()
+    # SQLite는 FK를 기본으로 검사하지 않음 → Postgres(Supabase)처럼 없는 병원·요청서 id를 막게
+    with engine.connect() as conn:
+        conn.exec_driver_sql("PRAGMA foreign_keys = ON")
     Base.metadata.create_all(engine)
     yield engine
     Base.metadata.drop_all(engine)

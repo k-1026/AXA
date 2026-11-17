@@ -17,6 +17,22 @@
 
 ## 기록
 
+### 2026-11-17 (4) · backend-A-migration-0007 · Claude (리뷰 반영)
+- 한 일: 점검([review-0007-2026-11-17.md](review-0007-2026-11-17.md)) 반영
+  - `consents.booking_request_id` → `booking_requests.id` FK(SET NULL, 동의 증명은 남김)를 모델과 **0007**에 추가 (Supabase 미적용이라 0008 대신 0007에 포함. SQLite는 `batch_alter_table`)
+  - 테스트 DB에서 **SQLite FK 검사 켬**(`conftest.py` `PRAGMA foreign_keys = ON`) → Postgres처럼 없는 id를 막음. 켜자 21개 실패: 없는 병원 9001로 병원 계정(B 테스트 20), 없는 요청서 id로 동의(A 1) → 새 `tests/db_rows.py`(`demo_hospital`·`demo_staff`, 가상 행)로 FK 대상 행을 먼저 만들게 고침
+  - 사후관리 답장 테스트는 아무 uuid의 직원 토큰을 썼음 → `aftercare_messages.staff_id` FK 때문에 **Postgres였다면 500**. 실제 직원 행으로 토큰을 만들게 고침
+  - 동의 테스트 2개 추가: 요청서 삭제 → 동의 남고 `booking_request_id`만 비움, 없는 요청서 id → 저장 실패
+- 확인: 실제 데이터 로컬 SQLite 복사본에서 `upgrade head` → `downgrade 0006` → `upgrade head`, 병원 4,242 유지, `foreign_key_check` 0건. ⚠️ 예전 0007을 로컬에 올렸다면 `downgrade 0006` 후 다시 `upgrade head`
+- 알게 된 것: 0001~0007 모든 CHECK 이름이 `ck_<표>_ck_<표>_<이름>`(이름 규칙이 두 번 붙음, Supabase에도 이 이름). 모델 이름(`ck_<표>_<이름>`)과 다름 → 이번엔 그대로 두고 정리 리비전은 따로
+- 바뀐 계약: 없음 · 마이그레이션: `0007` 수정 (Supabase 미적용)
+- 테스트: 백엔드+AI 368개 통과
+- 다음 할 일: 요청서 제출 API, 직원 로그인
+- B에게 요청:
+  1. B 테스트 2개(`test_booking_tenant.py`·`test_aftercare_tenant.py`)의 `_tenant`에 `demo_hospital()` 한 줄, 사후관리 흐름 테스트에 `demo_staff()` — FK 때문에 필요, 리뷰에서 확인
+  2. `seed_demo.py`가 `hospital_id=9001`(없는 병원)로 tenant를 만듦 → 로컬 SQLite는 FK 검사가 꺼져 있어 지금은 되지만 Supabase에서는 실패. 시드에 가상 병원 행(`is_demo=True`)을 먼저 넣거나 실제 `hospitals.id` 사용
+  3. 직원 토큰의 `staff_id`가 `staff_users`에 없으면 답장·사후관리 저장이 500 → `current_staff()`에서 직원 행 확인(11/12 요청 ③)은 A가 직원 로그인 만들 때 같이
+
 ### 2026-11-17 (3) · backend-A-migration-0007 · Claude
 - 한 일: **마이그레이션 `0007`** — B 모델(#28)의 `tenants`·`staff_users`·`booking_requests`·`booking_events`·`replies`·`aftercare_threads`·`aftercare_messages` + RLS. B 모델 주석대로 `tenants.hospital_id`·`booking_requests.hospital_id` → `hospitals.id` FK를 모델과 리비전에 추가 (병원 행은 지우지 않으므로 삭제 동작 없음)
 - 새 테스트 `test_migrations.py`: 빈 SQLite에 `upgrade head` → 모델과 **테이블·칸·FK**가 같은지(`compare_metadata`), `downgrade 0006` → 다시 `upgrade`. FK 하나를 일부러 빼면 실패하는 것 확인. alembic.ini를 읽지 않게 해서 다른 테스트의 로그 캡처를 끄지 않음

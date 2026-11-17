@@ -8,6 +8,7 @@ Create Date: 2026-11-17
 - 모델: backend/src/modules/tenant·booking·aftercare/models.py (B). 상태에 visited·no_show 포함 (결정 19)
 - tenants.hospital_id·booking_requests.hospital_id → hospitals.id FK (0006). 병원 행은 지우지 않으므로 삭제 동작 없음
 - 탈퇴(결정 15): booking_requests.patient_id는 SET NULL (병원 쪽 기록은 남김)
+- consents.booking_request_id(0001에서 칸만) → booking_requests.id FK, SET NULL (동의 증명은 남김)
 - 모델과 같은지는 backend/tests/test_migrations.py가 확인
 Supabase: 테이블마다 RLS를 켜고 정책은 만들지 않음 (0001과 같음)
 """
@@ -33,6 +34,7 @@ FALSE = sa.text("false")
 
 STATUSES = ("pending", "proposed", "confirmed", "rejected", "cancelled", "expired", "visited", "no_show")
 LANGS = ("ko", "en", "zh-TW", "zh-CN", "vi")
+CONSENT_FK = "fk_consents_booking_request_id_booking_requests"
 
 
 def _in(col: str, values: tuple[str, ...]) -> str:
@@ -170,11 +172,18 @@ def upgrade() -> None:
     )
     op.create_index("ix_aftercare_messages_thread", "aftercare_messages", ["thread_id", "created_at"])
 
+    # 0001에서 칸만 만들어 둔 consents.booking_request_id에 FK (SQLite는 batch = 표 다시 만들기)
+    with op.batch_alter_table("consents") as batch:
+        batch.create_foreign_key(CONSENT_FK, "booking_requests", ["booking_request_id"], ["id"],
+                                 ondelete="SET NULL")
+
     if op.get_bind().dialect.name == "postgresql":
         for t in TABLES:
             op.execute(f"ALTER TABLE {t} ENABLE ROW LEVEL SECURITY")
 
 
 def downgrade() -> None:
+    with op.batch_alter_table("consents") as batch:
+        batch.drop_constraint(CONSENT_FK, type_="foreignkey")
     for t in reversed(TABLES):
         op.drop_table(t)
