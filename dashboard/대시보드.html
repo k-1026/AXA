@@ -69,6 +69,10 @@
   .cal .d b { display:block; margin-bottom:4px; } .cal .d.today { border-color:var(--brand); background:var(--brand-soft); }
   .ev { display:block; border-radius:5px; padding:2px 5px; margin:2px 0; font-size:11px; background:var(--info-soft); color:var(--info); }
   .ev.c { background:var(--brand-soft); color:var(--brand); } .ev.p { background:var(--warn-soft); color:var(--warn); }
+  .ev.w { background:var(--muted-bg); color:var(--muted); } .ev.v { background:#fff; color:var(--brand); border:1px solid var(--brand-2); } .ev.n { background:var(--bad-soft); color:var(--bad); }
+  button.ev { width:100%; text-align:left; border:0; font:inherit; font-size:11px; cursor:pointer; } button.ev.v { border:1px solid var(--brand-2); }
+  button.ev:hover { filter:brightness(.95); } .cal .d.past { background:#fafbfc; } .cal .d small.none { color:var(--muted); }
+  .calhead { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:10px; } .calhead h3 { margin:0; }
   .plan { border:2px solid var(--line); border-radius:12px; padding:14px; cursor:pointer; } .plan.on { border-color:var(--brand); background:var(--brand-soft); }
   .plan b { display:block; font-size:15px; } .plan .p { font-size:20px; font-weight:800; margin:6px 0; }
   .sum td:last-child { text-align:right; } .sum tr.total td { font-weight:800; border-top:2px solid var(--fg); }
@@ -247,21 +251,17 @@
   <section id="booking" class="hidden">
     <h2>상담·예약</h2><p class="sub">메디대구 직접 유치로 들어온 요청. 확정은 병원이 합니다</p>
     <div class="grid g4">
-      <div class="card kpi"><div class="l">대기</div><div class="v">5</div></div>
-      <div class="card kpi"><div class="l">시간 제안함</div><div class="v">3</div></div>
-      <div class="card kpi"><div class="l">이번 주 확정</div><div class="v">9</div></div>
+      <div class="card kpi"><div class="l">대기</div><div class="v" id="kPend">5</div></div>
+      <div class="card kpi"><div class="l">시간 제안함</div><div class="v" id="kProp">3</div></div>
+      <div class="card kpi"><div class="l">이번 주 확정</div><div class="v" id="kWeek">9</div></div>
       <div class="card kpi"><div class="l">반복 변경 (2회 이상)</div><div class="v">2</div></div>
     </div>
-    <div class="card mt"><h3>이번 주 예약 캘린더 <span class="badge info">확정</span><span class="badge warn">시간 제안</span><span class="badge gray">대기</span></h3>
-      <div class="cal">
-        <div class="d"><b>월 17</b><span class="ev c">10:00 R-1040 보톡스</span><span class="ev">대기 R-1045</span></div>
-        <div class="d today"><b>화 18 · 오늘</b><span class="ev c">11:00 R-1038 토닝</span><span class="ev c">15:30 R-1039 상담</span></div>
-        <div class="d"><b>수 19</b><span class="ev p">제안 14:00 R-1042</span></div>
-        <div class="d"><b>목 20</b><span class="ev c">10:30 R-1041 흉터</span></div>
-        <div class="d"><b>금 21</b><span class="ev">대기 R-1043</span><span class="ev">대기 R-1044</span></div>
-        <div class="d"><b>토 22</b><span class="ev c">11:00 R-1037 필러</span><span class="ev p">제안 13:00 R-1046</span></div>
-        <div class="d" style="background:#fafbfc"><b>일 23</b><small style="color:var(--muted)">휴진</small></div>
-      </div>
+    <div class="card mt">
+      <div class="calhead"><h3>예약 캘린더</h3><small id="calRange" class="note" style="margin:0"></small>
+        <span class="badge info">확정</span><span class="badge warn">시간 제안</span><span class="badge gray">대기 (첫 희망 시간)</span><span class="badge" style="background:#fff;border:1px solid var(--brand-2)">방문 완료</span><span class="badge bad">미방문</span>
+        <span style="flex:1"></span><button class="btn" id="calPrev">‹ 지난주</button><button class="btn" id="calToday">이번 주</button><button class="btn" id="calNext">다음 주 ›</button></div>
+      <div class="cal" id="cal"></div>
+      <p class="note" id="calNote">일정을 누르면 요청 내용과 처리 버튼이 나와요. 시간은 한국 시간이에요.</p>
     </div>
     <div class="grid mt">
       <div class="card"><h3>요청 목록 <span class="badge ex" id="reqSrc">예시</span></h3>
@@ -988,13 +988,13 @@
     'auth.required': '로그인이 만료됐어요. 토큰을 새로 받아 주세요', 'auth.forbidden': '이 계정으로는 할 수 없어요',
   };
   const why = (e) => ERR[e.message] || ('저장하지 못했어요: ' + e.message);
-  function dialog({ title, body = '', ok = '확인', cancel = '취소', danger = false, onOk, extra }) {
+  function dialog({ title, body = '', ok = '확인', cancel = '취소', danger = false, onOk, extra, extras }) {
     return new Promise((resolve) => {
       const wrap = document.createElement('div');
       wrap.className = 'dlg-wrap';
       wrap.innerHTML = `<form class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" novalidate>
         <h3 id="dlgTitle">${esc(title)}</h3><div class="dlg-body">${body}</div><p class="dlg-err" role="alert" hidden></p>
-        <div class="dlg-acts">${extra ? `<button type="button" class="btn" data-x="extra">${esc(extra.label)}</button>` : ''}<span style="flex:1"></span>
+        <div class="dlg-acts">${(extras || (extra ? [extra] : [])).map((x, i) => `<button type="button" class="btn${x.danger ? ' danger' : x.primary ? ' primary' : ''}" data-x="extra" data-i="${i}">${esc(x.label)}</button>`).join('')}<span style="flex:1"></span>
         ${cancel ? `<button type="button" class="btn" data-x="cancel">${esc(cancel)}</button>` : ''}
         <button type="submit" class="btn ${danger ? 'danger' : 'primary'}">${esc(ok)}</button></div></form>`;
       const form = wrap.querySelector('form'), err = wrap.querySelector('.dlg-err'), back = document.activeElement;
@@ -1003,7 +1003,7 @@
       document.addEventListener('keydown', onKey);
       wrap.addEventListener('mousedown', (e) => { if (e.target === wrap) close(null); });
       wrap.querySelector('[data-x=cancel]')?.addEventListener('click', () => close(null));
-      wrap.querySelector('[data-x=extra]')?.addEventListener('click', () => { close(null); extra.onClick(); });
+      wrap.querySelectorAll('[data-x=extra]').forEach((b) => b.addEventListener('click', () => { close(null); (extras || [extra])[+b.dataset.i].onClick(); }));
       form.onsubmit = async (e) => {
         e.preventDefault();
         const sub = form.querySelector('[type=submit]');
@@ -1034,6 +1034,7 @@
     { rid: null, id: 'R-1044', who: '몽골 · 영어', title: '여드름 흉터', status: 'pending', visa: true, slots: [kst(plusDays(3), '11:00')], msg_k: '의료 비자용 예약확인서가 필요해요' },
     { rid: null, id: 'R-1042', who: '일본 · 일본어', title: '기미 치료', status: 'proposed', visa: false, slots: [kst(plusDays(1), '10:00')], confirmed_slot: kst(plusDays(1), '14:00'), msg_k: '기미 치료 예약하고 싶어요' },
     { rid: null, id: 'R-1040', who: '중국 · 간체', title: '보톡스', status: 'confirmed', visa: false, slots: [kst(todayKst(), '10:00')], confirmed_slot: kst(todayKst(), '10:00') },
+    { rid: null, id: 'R-1041', who: '대만 · 번체', title: '여드름 흉터', status: 'confirmed', visa: false, slots: [kst(plusDays(2), '10:30')], confirmed_slot: kst(plusDays(2), '10:30') },
   ];
   function toR(r) {
     return { rid: r.id, id: 'R-' + short(r.id), who: `${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`,
@@ -1123,14 +1124,16 @@
       <td>${r.confirmed_slot && r.status !== 'pending' ? esc(kdate(r.confirmed_slot)) : esc(kdate(r.slots[0]))}${r.status === 'pending' && r.slots.length > 1 ? ` <small>외 ${r.slots.length - 1}개</small>` : ''}</td>
       <td>${r.visa ? '<span class="badge warn">예약확인서 필요</span>' : '불필요'}</td><td><span class="badge ${ST[r.status][1]}">${ST[r.status][0]}</span></td><td style="white-space:nowrap">${rowActs(r)}</td></tr>`).join('')
       : '<tr><td colspan="7" class="note">처리할 요청이 없어요</td></tr>';
+    renderCal();
     tb.querySelectorAll('[data-a]').forEach((b) => b.onclick = () => {
       const r = REQS[+b.closest('tr').dataset.i];
       return b.dataset.a === 'view' ? viewProposal(r) : bookingAct(r, b.dataset.a);
     });
   }
   async function loadRequests() {
-    const [p, q, c] = await Promise.all(['pending', 'proposed', 'confirmed'].map((s) => call('/tenant/booking-requests?status=' + s)));
+    const [p, q, c, v, n] = await Promise.all(['pending', 'proposed', 'confirmed', 'visited', 'no_show'].map((s) => call('/tenant/booking-requests?status=' + s)));
     REQS = [...p, ...q, ...c.sort((a, b) => String(a.confirmed_slot).localeCompare(String(b.confirmed_slot)))].map(toR);
+    DONE_REQS = [...v, ...n].map(toR);
     const src = document.getElementById('reqSrc'); src.textContent = 'DB · 대기 ' + p.length + ' · 제안 ' + q.length + ' · 확정 ' + c.length; src.className = 'badge';
     renderReqs(); updateNav();
   }
@@ -1255,6 +1258,50 @@
       bindDlg(); toast(SCREEN_ONLY);
     },
   };
+
+  // ---------- 예약 캘린더 (요청 목록과 같은 데이터) ----------
+  let DONE_REQS = [], calWeek = 0;  // 방문 완료·미방문 (캘린더 전용), 0 = 이번 주
+  const kday = (iso) => new Date(new Date(iso).getTime() + 9 * 3600e3).toISOString().slice(0, 10);
+  const khm = (iso) => new Date(new Date(iso).getTime() + 9 * 3600e3).toISOString().slice(11, 16);
+  const EV = { confirmed: ['c', ''], proposed: ['p', '제안 '], pending: ['w', '대기 '], visited: ['v', '✓ '], no_show: ['n', '미방문 '] };
+  const calSlot = (r) => r.status === 'pending' ? r.slots[0] : r.confirmed_slot;
+  function weekDays() {
+    const t = new Date(todayKst() + 'T00:00:00Z'), mon = new Date(t.getTime() - ((t.getUTCDay() + 6) % 7) * 864e5 + calWeek * 7 * 864e5);
+    return [...Array(7)].map((_, i) => new Date(mon.getTime() + i * 864e5).toISOString().slice(0, 10));
+  }
+  function renderCal() {
+    const days = weekDays(), today = todayKst(), all = [...REQS, ...DONE_REQS].filter((r) => calSlot(r));
+    const md = (d) => `${+d.slice(5, 7)}/${+d.slice(8)}`;
+    document.getElementById('calRange').textContent = `${md(days[0])} ~ ${md(days[6])}${calWeek === 0 ? ' · 이번 주' : ''}`;
+    document.getElementById('cal').innerHTML = days.map((d, i) => {
+      const evs = all.filter((r) => kday(calSlot(r)) === d).sort((a, b) => calSlot(a).localeCompare(calSlot(b)));
+      return `<div class="d${d === today ? ' today' : d < today ? ' past' : ''}"><b>${'월화수목금토일'[i]} ${+d.slice(8)}${d === today ? ' · 오늘' : ''}</b>${evs.length
+        ? evs.map((r) => `<button type="button" class="ev ${EV[r.status][0]}" data-k="${esc(r.rid || r.id)}" title="${esc(ST[r.status][0])} · ${esc(r.who)}">${EV[r.status][1]}${khm(calSlot(r))} ${esc(r.id)} ${esc(r.title)}</button>`).join('')
+        : '<small class="none">예약 없음</small>'}</div>`;
+    }).join('');
+    document.querySelectorAll('#cal [data-k]').forEach((b) => b.onclick = () => calDetail(all.find((r) => (r.rid || r.id) === b.dataset.k)));
+    // 위 숫자 (반복 변경은 근거 데이터가 없어 예시 그대로)
+    const thisWeek = (() => { const keep = calWeek; calWeek = 0; const w = weekDays(); calWeek = keep; return w; })();
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    set('kPend', REQS.filter((r) => r.status === 'pending').length);
+    set('kProp', REQS.filter((r) => r.status === 'proposed').length);
+    set('kWeek', all.filter((r) => ['confirmed', 'visited', 'no_show'].includes(r.status) && thisWeek.includes(kday(r.confirmed_slot))).length);
+  }
+  function calDetail(r) {
+    const extras = {
+      pending: [{ label: '예약 확정', primary: true, onClick: () => bookingAct(r, 'confirm') }, { label: '시간 제안', onClick: () => bookingAct(r, 'propose') }, { label: '거절', onClick: () => bookingAct(r, 'reject') }],
+      proposed: [{ label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') }, { label: '거절', onClick: () => bookingAct(r, 'reject') }],
+      confirmed: [{ label: '방문 완료', primary: true, onClick: () => bookingAct(r, 'visited') }, { label: '미방문', onClick: () => bookingAct(r, 'no_show') }],
+    }[r.status] || [];
+    const when = r.status === 'pending' ? r.slots.map((x, i) => `${esc(kdate(x))} <small>희망 ${i + 1}</small>`).join('<br>') : esc(kdate(r.confirmed_slot));
+    return dialog({ title: `${r.id} · ${ST[r.status][0]}`, ok: '닫기', cancel: '', extras,
+      body: reqSummary(r) + `<div class="row"><span>${r.status === 'pending' ? '환자 희망 시간' : r.status === 'proposed' ? '제안한 시간' : '예약 시간'}</span><span style="text-align:right">${when}</span></div>`
+        + `<div class="row"><span>상태</span><span class="badge ${ST[r.status][1]}">${ST[r.status][0]}</span></div>` });
+  }
+  document.getElementById('calPrev').onclick = () => { calWeek--; renderCal(); };
+  document.getElementById('calNext').onclick = () => { calWeek++; renderCal(); };
+  document.getElementById('calToday').onclick = () => { calWeek = 0; renderCal(); };
+
   // 메뉴 숫자 = 처리할 일. 상담·예약: 대기 요청 / 사후관리: 환자 글에 아직 답 안 한 대화(해결됨 제외)
   // 진료·결제 확인: 결제 금액 API 전이라 DB에 연결되면 숨김 (가짜 숫자 X), 예시 화면에서는 "입력 대기" 줄 수
   function updateNav() {
