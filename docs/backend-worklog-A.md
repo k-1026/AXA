@@ -17,6 +17,15 @@
 
 ## 기록
 
+### 2026-11-17 · backend-A-hospital · Claude (Supabase 적용)
+- 한 일: **Supabase 공용 DB에 `0005`·`0006` 적용 + 병원 4,242곳 적재** ([supabase-병원-0006-적용.md](supabase-병원-0006-적용.md) 절차 그대로, macOS에서 실행). DB가 `0004`에 있어서(0005 챗봇 대화 테이블도 미적용이었음, 같은 선형 체인이라 분기 없음) `upgrade head`로 둘 다 적용. 세션 풀러(5432)로 실행 (`.env`는 6543 그대로, 실행 시만 환경변수로 바꿈)
+- 확인 (SQL): hospitals 4,242 · 등록+정상 126 · 비정상 31 · 진료과 dermatology 80 / internal 1,301 / ophthalmology 300 / plastic 70 · hospital_hours 29,694 · RLS 6개 테이블(hospitals 4개 + chat 2개) 모두 켜짐 · alembic_version `0006`
+- 바뀐 계약: 없음
+- 테스트: 없음 (DB 적용만)
+- 다음 할 일: PR 리뷰에서 0006 구조가 바뀌면 `downgrade 0005` 후 다시 적용. backend → main 머지·배포 후 `/api/v1/hospitals` 확인
+- B에게 요청: Supabase에 `chat_sessions`·`chat_messages`(0005)도 이제 있음 — 로컬 `alembic current`가 `0006`인지 확인
+- 막힌 것·질문: 없음
+
 ### 2026-11-17 · backend-A-hospital · Claude
 - 한 일: ① `backend-A-contract-hospital`을 합치고 `hospital.service.require_requestable()` (미등록 → 403 `hospital.not_requestable` `reason=unregistered`, 폐업·미확인 → `not_operating`, 없으면 404) — 요청서 API가 생기면 이것만 부름 ② `GET /hospitals?open_on=mon..sun` (그 요일 진료가 확인된 병원만, 시간 정보 없음은 제외) ③ **챗봇 병원 찾기·상세를 실제 병원 DB로**: `modules/chatbot/hospitals.py` `HospitalGateway` → `ChatService(hospitals=…)` → `ToolContext.hospitals`. 게이트웨이가 없으면(ai 테스트·eval) 가상 병원 그대로 ④ 적재: 원본 "0000~0000"은 진료로 보지 않음(`unknown`, 일요일 23곳)
 - 정한 것(사용자, 2026-11-17): 찾기·상세만 실제 DB, **조건 맞춤 제안·예약은 아직 가상 병원**. 실제 병원은 응대 언어 정보가 없어 언어로 거르지 않고 "병원에 확인" 안내(`staff_languages = []`). 상세 카드의 진료시간은 확인된 요일만(시간 정보 없는 요일은 휴진(None)으로 보이지 않게 뺌)
