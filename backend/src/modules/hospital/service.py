@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from core.errors import AppError
-from modules.hospital.models import Hospital, HospitalDepartment
+from modules.hospital.models import Hospital, HospitalDepartment, HospitalHours
 from modules.hospital.schemas import HospitalBasic, HospitalDetail, HospitalListItem, HoursOut
 
 
@@ -61,6 +61,7 @@ def list_hospitals(
     sggu: str | None = None,
     dept: str | None = None,
     registered: bool | None = None,
+    open_on: str | None = None,
     ids: list[int] | None = None,
     sort: Literal["name", "distance"] = "name",
     lat: float | None = None,
@@ -83,6 +84,10 @@ def list_hospitals(
         )
     if registered is not None:
         q = q.where(Hospital.is_registered_facility.is_(registered))
+    if open_on:  # 그 요일 진료가 확인된(open) 병원만. 시간 정보 없음(unknown)은 빼고 휴진으로 단정하지도 않음
+        q = q.where(Hospital.id.in_(
+            select(HospitalHours.hospital_id).where(HospitalHours.day == open_on, HospitalHours.state == "open")
+        ))
 
     items = [_list_item(h) for h in db.scalars(q.order_by(Hospital.name_ko, Hospital.id))]
     if sort == "distance":
@@ -117,3 +122,13 @@ def get_detail(db: Session, hospital_id: int) -> HospitalDetail:
 def get_basic(db: Session, hospital_id: int) -> HospitalBasic:
     """contracts 5절: B(대시보드)·A(요청서 제출)가 부름. 요청서 API는 `can_request`가 false면 막는다."""
     return HospitalBasic(**_basic_fields(_get(db, hospital_id)))
+
+
+def require_requestable(db: Session, hospital_id: int) -> HospitalBasic:
+    """요청서 제출 전 확인 (contracts 5절, 결정 18). 미등록·영업 중 아님이면 403 `hospital.not_requestable`."""
+    h = _get(db, hospital_id)
+    if not h.is_registered_facility:
+        raise AppError(403, "hospital.not_requestable", "상담 요청을 받을 수 없는 병원입니다", {"reason": "unregistered"})
+    if h.status_verdict != "normal":
+        raise AppError(403, "hospital.not_requestable", "상담 요청을 받을 수 없는 병원입니다", {"reason": "not_operating"})
+    return HospitalBasic(**_basic_fields(h))

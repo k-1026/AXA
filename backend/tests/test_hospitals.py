@@ -163,6 +163,7 @@ def test_상세는_진료시간_출처_포함_미등록도_정보는_준다(clie
         **files(
             [hosp("Y1", "미등록의원", hospUrl="http://example.test")],
             hours=[{"ykiho": "Y1", "trmtMonStart": "0900", "trmtMonEnd": "1800",
+                    "trmtWedStart": "0000", "trmtWedEnd": "0000",
                     "lunchWeek": "12시30분~13시30분", "noTrmtSun": "전부 휴무"}],
         ),
     )
@@ -179,6 +180,7 @@ def test_상세는_진료시간_출처_포함_미등록도_정보는_준다(clie
     assert (days["mon"]["state"], days["mon"]["open_time"], days["mon"]["close_time"]) == ("open", "09:00:00", "18:00:00")
     assert (days["mon"]["lunch_start"], days["mon"]["lunch_end"]) == ("12:30:00", "13:30:00")
     assert days["tue"]["state"] == "unknown"  # 값이 없으면 휴진으로 단정하지 않음
+    assert days["wed"]["state"] == "unknown"  # 원본 "0000~0000"은 진료로 보지 않음
     assert days["sun"]["state"] == "closed"
 
 
@@ -212,3 +214,34 @@ def test_get_basic_다른_모듈용_기본정보(db_engine, files):
         with pytest.raises(Exception) as e:
             service.get_basic(db, 999)
         assert getattr(e.value, "code", None) == "not_found"
+
+
+def test_require_requestable_등록_안됐거나_영업중_아니면_403(db_engine, files):
+    from core.errors import AppError
+    from modules.hospital import service
+
+    load(db_engine, **files(
+        [hosp("Y1", "등록의원"), hosp("Y2", "미등록의원"), hosp("Y3", "폐업등록의원")],
+        registered=[{"registration_no": "M-1", "ykiho": "Y1"}, {"registration_no": "M-3", "ykiho": "Y3"}],
+        status=[{"ykiho": "Y1", "verdict": "정상"}, {"ykiho": "Y2", "verdict": "정상"}, {"ykiho": "Y3", "verdict": "폐업"}],
+    ))
+    with Session(db_engine) as db:
+        assert service.require_requestable(db, 1).ykiho == "Y1"
+        for hid, reason in ((2, "unregistered"), (3, "not_operating")):
+            with pytest.raises(AppError) as e:
+                service.require_requestable(db, hid)
+            assert (e.value.status_code, e.value.code, e.value.detail) == (403, "hospital.not_requestable", {"reason": reason})
+        with pytest.raises(AppError) as e:
+            service.require_requestable(db, 999)
+        assert e.value.code == "not_found"
+
+
+def test_요일_필터는_그_요일_진료가_확인된_병원만(client, db_engine, files):
+    load(db_engine, **files(
+        [hosp("SAT", "토요일진료의원"), hosp("WEEK", "평일의원"), hosp("NOHRS", "시간모름의원")],
+        hours=[{"ykiho": "SAT", "trmtMonStart": "0900", "trmtMonEnd": "1800", "trmtSatStart": "0900", "trmtSatEnd": "1300"},
+               {"ykiho": "WEEK", "trmtMonStart": "0900", "trmtMonEnd": "1800"}],
+    ))
+    assert [h["ykiho"] for h in list_hospitals(client, open_on="sat")] == ["SAT"]
+    assert sorted(h["ykiho"] for h in list_hospitals(client, open_on="mon")) == ["SAT", "WEEK"]
+    assert client.get("/api/v1/hospitals", params={"open_on": "holiday"}).status_code == 422

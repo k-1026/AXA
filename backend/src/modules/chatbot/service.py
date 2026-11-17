@@ -20,6 +20,7 @@ from ai.agent.service import MAX_SESSIONS_PER_PATIENT, ChatService, ChatServiceE
 from ai.llm.client import LLMClient
 from core.errors import AppError
 from modules.chatbot.bookings import BookingGateway
+from modules.chatbot.hospitals import HospitalGateway
 from modules.chatbot.models import ChatMessage, ChatSession
 from modules.chatbot.schemas import MessageOut, SessionDetail, SessionOut
 from modules.chatbot.store import DbSessionStore
@@ -39,7 +40,8 @@ def get_limiter() -> RateLimiter:
 
 
 def _service(db: Session, llm: ChatLLM, limiter: RateLimiter) -> ChatService:
-    return ChatService(llm, sessions=DbSessionStore(db), bookings=BookingGateway(db), limiter=limiter)
+    return ChatService(llm, sessions=DbSessionStore(db), bookings=BookingGateway(db), limiter=limiter,
+                       hospitals=HospitalGateway(db))
 
 
 def _app_error(e: ChatServiceError) -> AppError:

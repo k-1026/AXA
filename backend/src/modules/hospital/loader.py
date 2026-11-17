@@ -83,7 +83,7 @@ def _hours(row: dict[str, str], now: datetime) -> list[HospitalHours]:
         cap = day.capitalize()
         open_t, close_t = _hhmm(row.get(f"trmt{cap}Start", "")), _hhmm(row.get(f"trmt{cap}End", ""))
         memo = row.get("noTrmtSun") if day == "sun" else None
-        if open_t and close_t:
+        if open_t and close_t and open_t != close_t:  # 원본 "0000~0000"(시작=끝)은 진료로 보지 않음
             state = "open"
         elif day == "sun" and "휴" in (memo or ""):
             state = "closed"
@@ -94,8 +94,8 @@ def _hours(row: dict[str, str], now: datetime) -> list[HospitalHours]:
             HospitalHours(
                 day=day,
                 day_order=i,
-                open_time=open_t,
-                close_time=close_t,
+                open_time=open_t if state == "open" else None,
+                close_time=close_t if state == "open" else None,
                 lunch_start=lunch[0] if state == "open" else None,
                 lunch_end=lunch[1] if state == "open" else None,
                 memo_ko=memo or None,

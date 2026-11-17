@@ -17,6 +17,7 @@ def list_hospitals(
     sggu: str | None = None,
     dept: str | None = None,
     registered: bool | None = None,
+    open_on: Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"] | None = None,
     ids: Annotated[str | None, Query(description="쉼표로 구분한 병원 id (조회 기록용)")] = None,
     sort: Literal["name", "distance"] = "name",
     lat: Annotated[float | None, Query(ge=-90, le=90)] = None,
@@ -33,7 +34,7 @@ def list_hospitals(
         except ValueError:
             raise AppError(422, "validation", "ids는 숫자 목록입니다", {"fields": ["ids"]}) from None
     return service.list_hospitals(
-        db, sggu=sggu, dept=dept, registered=registered, ids=id_list, sort=sort, lat=lat, lng=lng
+        db, sggu=sggu, dept=dept, registered=registered, open_on=open_on, ids=id_list, sort=sort, lat=lat, lng=lng
     )
 
 

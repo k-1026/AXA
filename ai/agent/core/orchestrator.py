@@ -122,8 +122,10 @@ class Orchestrator:
         safety_check: Callable[[str, str], safety.SafetyResult] | None = safety.check,
         today: Callable[[], date] = date.today,
         store: BookingGateway | None = None,
+        hospitals: Any = None,  # 실제 병원 DB 게이트웨이 (ToolContext.hospitals). 없으면 가상 병원
     ):
-        self.store = store or BookingStore()  # 백엔드 booking.service가 생기면 교체
+        self.store = store or BookingStore()
+        self.hospitals = hospitals  # 백엔드 booking.service가 생기면 교체
         self.llm = llm
         self.registry = registry
         self.max_steps = max_steps
@@ -180,7 +182,7 @@ class Orchestrator:
 
         ctx = ToolContext(
             patient_id=state.patient_id, language=state.language, residency=state.residency, last_user_text=user_text,
-            timezone=state.timezone, store=self.store, today=self._today(),
+            timezone=state.timezone, store=self.store, today=self._today(), hospitals=self.hospitals,
         )
         system = {
             "role": "system",
