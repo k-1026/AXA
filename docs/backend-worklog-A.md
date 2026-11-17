@@ -17,6 +17,13 @@
 
 ## 기록
 
+### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
+- 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**
+- 확인: alembic `0007` · hospitals 4,242(등록 126) 그대로 · 새 표 7개 모두 0행 · public 표 RLS 꺼진 것 0 · FK `tenants·booking_requests.hospital_id → hospitals`, `consents.booking_request_id → booking_requests` 있음
+- 서버(0007 브랜치, Supabase)로 확인: health 200, 직원 토큰(가짜 tenant)으로 `/tenant/booking-requests`·`/tenant/aftercare` 200 `[]`, `/tenant/analytics/summary` 200 → 표가 있어 500 안 남. `/tenant/me`는 직원 행이 없어 401
+- ⚠️ #29 리뷰에서 0007이 바뀌면 `downgrade 0006` 후 다시 `upgrade head` (지금 새 표는 비어 있음). 시연 데이터를 넣을 땐 실제 병원에 가짜 병원 계정을 붙이지 말고 가상 병원(`is_demo`) 행부터
+- 바뀐 계약·코드: 없음
+
 ### 2026-11-17 (6) · backend-A-migration-0007 · Claude (Supabase 연결 해결)
 - 한 일: 이 PC(스마트 앱 컨트롤 차단 모드)에서 **Supabase 연결 됨** — psycopg 바이너리(DLL)는 계속 막히지만, 설치된 **PostgreSQL 18 공식 `libpq.dll`**(서명됨)은 통과 → psycopg 순수 파이썬 구현으로 접속
   - 실행 전 (PowerShell, 그 창에서만): `$env:PATH = "C:\Program Files\PostgreSQL\18\bin;$env:PATH"; $env:PSYCOPG_IMPL = "python"`
