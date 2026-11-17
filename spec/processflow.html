@@ -146,124 +146,134 @@ table.t tr.hl td { background: var(--pain-soft); }
   <div class="head">
     <div>
       <div class="eyebrow">spec · 프로세스 플로우 (11/17 사용자 플로우와 분리)</div>
-      <h1>화면 뒤에서 <em>누가 무엇을 판단하나</em> — 환자 · 시스템 · AI · 병원 코디</h1>
-      <div class="lede">린이 화면에서 한 행동마다 메디대구 시스템·AI·병원 코디가 하는 일과 판단 · 예약 상태 이름은 백엔드(ai/agent/tools/booking_store.py)와 같음</div>
+      <h1>단계마다 <em>누가 개입하나</em> — 환자 · 메디대구 · AI · 병원 관계자</h1>
+      <div class="lede">가로 = 전체 흐름(① 찾기 → ⑥ 결과) · 세로 = 그 단계에 개입하는 사람·시스템 · 맨 윗줄(환자)만 읽으면 사용자 플로우 · 예약 상태 이름은 백엔드(booking_store.py)와 같음</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><div class="tabs"><a href="userflow.html" class="">사용자 플로우</a><a href="processflow.html" class="on">프로세스 플로우</a></div><span class="pill">4개 레인 · 판단 6개 · 예약 상태 6개</span></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><div class="tabs"><a href="userflow.html" class="">사용자 플로우</a><a href="processflow.html" class="on">프로세스 플로우</a></div><span class="pill">단계 6개 × 층 4개 · 판단 6개</span></div>
   </div>
   <div class="card flow">
-    <svg viewBox="0 0 1208 1010" role="img" aria-label="프로세스 플로우">
+    <svg viewBox="0 0 1208 860" role="img" aria-label="프로세스 플로우">
 <defs>
   <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--text-muted)"/></marker>
   <marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--pain)"/></marker>
 </defs>
-<rect class="lane" x="0" y="0" width="214" height="1010" rx="12"/>
-<rect class="laneh" x="0" y="0" width="214" height="34" rx="12"/>
-<text class="lanet" x="107" y="17">환자 (린)</text>
-<text class="lanes" x="107" y="50">웹 화면에서 하는 일</text>
-<rect class="lane alt" x="226" y="0" width="490" height="1010" rx="12"/>
-<rect class="laneh" x="226" y="0" width="490" height="34" rx="12"/>
-<text class="lanet" x="471" y="17">메디대구 시스템</text>
-<text class="lanes" x="471" y="50">판단 · 저장 · 알림</text>
-<rect class="lane" x="728" y="0" width="240" height="1010" rx="12"/>
-<rect class="laneh" x="728" y="0" width="240" height="34" rx="12"/>
-<text class="lanet" x="848" y="17">AI (챗봇 · 에이전트)</text>
-<text class="lanes" x="848" y="50">답 · 요약 · 초안</text>
-<rect class="lane alt" x="980" y="0" width="228" height="1010" rx="12"/>
-<rect class="laneh" x="980" y="0" width="228" height="34" rx="12"/>
-<text class="lanet" x="1094" y="17">병원 코디</text>
-<text class="lanes" x="1094" y="50">병원 대시보드</text>
-<text x="8" y="70" class="us">1 · 회원가입</text>
-<rect class="nd main" x="17" y="78" width="180" height="44" rx="12"/>
-<text class="t1" x="107" y="92">회원가입</text><text class="t2" x="107" y="109">거주국 선택 · 필수 동의</text>
-<path class="ar " d="M197,100 H264" marker-end="url(#a)"/>
-<path class="dm " d="M320,68 L375,100 L320,132 L265,100 z"/>
-<text class="tq" x="320" y="93">거주국이</text><text class="tq" x="320" y="107">한국?</text>
-<path class="ar ex" d="M375,100 H438" marker-end="url(#ap)"/>
-<text x="383" y="92" class="lb n" style="text-anchor:start">예</text>
-<rect class="nd ex" x="442" y="78" width="196" height="44" rx="10"/>
-<text class="tex" x="540" y="92">E4 예약 권한 끔</text><text class="t2" x="540" y="109">정보 · 챗봇만 (11/13 결정)</text>
-<path class="ar " d="M320,132 V158" marker-end="url(#a)"/>
-<text x="326" y="150" class="lb y" style="text-anchor:start">아니오</text>
-<rect class="nd ok" x="240" y="160" width="160" height="40" rx="10"/>
-<text class="tok" x="320" y="172">계정 저장</text><text class="t2" x="320" y="189">예약 가능 · 동의 버전 기록</text>
-<text x="8" y="260" class="us">2 · 병원 상세 · 가격 열기</text>
-<rect class="nd main" x="17" y="268" width="180" height="44" rx="12"/>
-<text class="t1" x="107" y="282">병원 상세 · 가격 열기</text><text class="t2" x="107" y="299">로그인 없이</text>
-<path class="ar " d="M197,290 H238" marker-end="url(#a)"/>
-<rect class="nd main" x="240" y="268" width="160" height="44" rx="12"/>
-<text class="t1" x="320" y="282">공공데이터 조회</text><text class="t2" x="320" y="299">진료시간 · 공공 가격</text>
-<path class="ar " d="M400,290 H428" marker-end="url(#a)"/>
-<path class="dm " d="M480,258 L530,290 L480,322 L430,290 z"/>
-<text class="tq" x="480" y="283">값이</text><text class="tq" x="480" y="297">있나?</text>
-<path class="ar ex" d="M530,290 H568" marker-end="url(#ap)"/>
-<text x="534" y="282" class="lb n" style="text-anchor:start">아니오</text>
-<rect class="nd ex" x="568" y="268" width="148" height="44" rx="10"/>
-<text class="tex" x="642" y="282">E1 · E2 정보 없음</text><text class="t2" x="642" y="299">숫자 안 지어냄</text>
-<path class="ar " d="M480,322 V346" marker-end="url(#a)"/>
-<text x="486" y="338" class="lb y" style="text-anchor:start">예</text>
-<rect class="nd ok" x="395" y="348" width="170" height="36" rx="10"/>
-<text class="tok" x="480" y="366">출처 · 확인일 붙여 표시</text>
-<path class="ar dash" d="M395,366 H107 V316" marker-end="url(#a)"/>
-<text x="115" y="360" class="lb " style="text-anchor:start">화면에 표시</text>
-<text x="8" y="450" class="us">3 · 챗봇 질문</text>
-<rect class="nd main" x="17" y="458" width="180" height="44" rx="12"/>
-<text class="t1" x="107" y="472">챗봇에 질문</text><text class="t2" x="107" y="489">로그인 후</text>
-<path class="ar " d="M197,480 H756" marker-end="url(#a)"/>
-<text x="210" y="472" class="lb " style="text-anchor:start">질문 전달</text>
-<rect class="nd main" x="758" y="458" width="180" height="44" rx="12"/>
-<text class="t1" x="848" y="472">공식 출처 검색</text><text class="t2" x="848" y="489">등록 병원 · 공공데이터</text>
-<path class="ar " d="M848,502 V524" marker-end="url(#a)"/>
-<path class="dm " d="M848,524 L903,556 L848,588 L793,556 z"/>
-<text class="tq" x="848" y="549">근거를</text><text class="tq" x="848" y="563">찾았나?</text>
-<path class="ar " d="M848,588 V610" marker-end="url(#a)"/>
-<text x="854" y="604" class="lb y" style="text-anchor:start">예</text>
-<rect class="nd ok" x="758" y="610" width="180" height="40" rx="10"/>
-<text class="tok" x="848" y="622">출처 붙은 답</text><text class="t2" x="848" y="639">의료 판단은 안 함</text>
-<path class="ar ex" d="M793,556 H710" marker-end="url(#ap)"/>
-<text x="748" y="550" class="lb n" style="text-anchor:start">아니오</text>
-<rect class="nd ex" x="552" y="534" width="156" height="44" rx="10"/>
-<text class="tex" x="630" y="548">E3 답 못 함</text><text class="t2" x="630" y="565">'직접 상담 요청' 버튼</text>
-<path class="ar dash" d="M758,630 H107 V502" marker-end="url(#a)"/>
-<text x="115" y="624" class="lb " style="text-anchor:start">답 표시</text>
-<text x="8" y="690" class="us">4 · 상담 예약 요청</text>
-<rect class="nd main" x="17" y="698" width="180" height="44" rx="12"/>
-<text class="t1" x="107" y="712">요청서 보내기</text><text class="t2" x="107" y="729">날짜 1~3개 · 언어 · 동의</text>
-<path class="ar " d="M197,720 H258" marker-end="url(#a)"/>
-<path class="dm " d="M320,685 L381,720 L320,755 L259,720 z"/>
-<text class="tq" x="320" y="713">요청서</text><text class="tq" x="320" y="727">검사 통과?</text>
-<text x="390" y="760" class="lb" style="text-anchor:start">검사: 등록 병원 · 빈칸 · 지난 날짜 · 필수 동의 · 같은 병원 중복</text>
-<path class="ar " d="M381,720 H482" marker-end="url(#a)"/>
-<text x="388" y="712" class="lb y" style="text-anchor:start">예</text>
-<rect class="nd ok" x="483" y="698" width="150" height="44" rx="10"/>
-<text class="tok" x="558" y="712">예약 만들기</text><text class="t2" x="558" y="729">상태 pending · 병원 알림</text>
-<path class="ar " d="M633,720 H756" marker-end="url(#a)"/>
-<rect class="nd main" x="758" y="698" width="180" height="44" rx="12"/>
-<text class="t1" x="848" y="712">요청 요약 · 답장 초안</text><text class="t2" x="848" y="729">환자 언어로</text>
-<path class="ar " d="M938,720 H1002" marker-end="url(#a)"/>
-<rect class="nd main" x="1004" y="698" width="180" height="44" rx="12"/>
-<text class="t1" x="1094" y="712">요청함에서 초안 확인</text><text class="t2" x="1094" y="729">AI 초안 고치기</text>
-<path class="ar ex" d="M320,755 V790 H107 V746" marker-end="url(#ap)"/>
-<text x="117" y="784" class="lb n" style="text-anchor:start">아니오 · 오류 안내 → 고쳐서 다시</text>
-<path class="ar " d="M1094,742 V798" marker-end="url(#a)"/>
-<path class="dm " d="M1094,798 L1144,830 L1094,862 L1044,830 z"/>
-<text class="tq" x="1094" y="823">코디가</text><text class="tq" x="1094" y="837">승인?</text>
-<path class="ar ex" d="M1144,830 H1194 V720 H1186" marker-end="url(#ap)"/>
-<text x="1150" y="824" class="lb n" style="text-anchor:start">아니오</text>
-<text x="1154" y="850" class="lb n" style="text-anchor:start">발송 안 함</text>
-<path class="ar " d="M1094,862 V886" marker-end="url(#a)"/>
-<text x="1100" y="878" class="lb y" style="text-anchor:start">예</text>
-<rect class="nd main" x="994" y="892" width="200" height="48" rx="12"/>
-<text class="t1" x="1094" y="908">확정 · 다른 날짜 제안 · 거절</text><text class="t2" x="1094" y="925">중 하나 + 답장 발송</text>
-<text x="8" y="886" class="us">5 · 결과 반영</text>
-<path class="ar " d="M994,916 H552" marker-end="url(#a)"/>
-<rect class="nd ok" x="410" y="894" width="140" height="44" rx="10"/>
-<text class="tok" x="480" y="908">상태 바꾸기</text><text class="t2" x="480" y="925">환자 알림</text>
-<path class="ar " d="M410,916 H197" marker-end="url(#a)"/>
-<rect class="nd main" x="17" y="894" width="180" height="44" rx="12"/>
-<text class="t1" x="107" y="908">예약 관리에서 확인</text><text class="t2" x="107" y="925">제안이면 수락 · 취소</text>
-<path class="ar dash" d="M107,938 V966 H480 V942" marker-end="url(#a)"/>
-<text x="147" y="960" class="lb " style="text-anchor:start">수락 → 확정 · 취소 → 취소</text>
+<rect class="lane" x="0" y="42" width="1208" height="124" rx="12"/>
+<rect class="laneh" x="0" y="42" width="104" height="124" rx="12"/>
+<text class="lanet" x="52" y="96">환자 (린)</text>
+<text class="lanet" style="font-size:10px;font-weight:600" x="52" y="114">= 사용자 플로우</text>
+<rect class="lane alt" x="0" y="174" width="1208" height="230" rx="12"/>
+<rect class="laneh" x="0" y="174" width="104" height="230" rx="12"/>
+<text class="lanet" x="52" y="281">메디대구</text>
+<text class="lanet" style="font-size:10px;font-weight:600" x="52" y="299">시스템 판단·저장</text>
+<rect class="lane" x="0" y="412" width="1208" height="200" rx="12"/>
+<rect class="laneh" x="0" y="412" width="104" height="200" rx="12"/>
+<text class="lanet" x="52" y="504">AI</text>
+<text class="lanet" style="font-size:10px;font-weight:600" x="52" y="522">챗봇 · 에이전트</text>
+<rect class="lane alt" x="0" y="620" width="1208" height="230" rx="12"/>
+<rect class="laneh" x="0" y="620" width="104" height="230" rx="12"/>
+<text class="lanet" x="52" y="727">병원 관계자</text>
+<text class="lanet" style="font-size:10px;font-weight:600" x="52" y="745">코디 · 대시보드</text>
+<rect class="nd start" x="119" y="2" width="172" height="30" rx="15"/><text class="t1" x="205" y="17">① 찾기 · 비교</text>
+<rect class="nd start" x="299" y="2" width="172" height="30" rx="15"/><text class="t1" x="385" y="17">② 로그인 · 가입</text>
+<rect class="nd start" x="479" y="2" width="172" height="30" rx="15"/><text class="t1" x="565" y="17">③ 묻기</text>
+<rect class="nd start" x="659" y="2" width="172" height="30" rx="15"/><text class="t1" x="745" y="17">④ 예약 요청</text>
+<rect class="nd start" x="839" y="2" width="172" height="30" rx="15"/><text class="t1" x="925" y="17">⑤ 병원 처리</text>
+<rect class="nd start" x="1019" y="2" width="172" height="30" rx="15"/><text class="t1" x="1105" y="17">⑥ 결과</text>
+<path d="M295,38 V860" stroke="var(--border)" stroke-dasharray="3 5" fill="none"/>
+<path d="M475,38 V860" stroke="var(--border)" stroke-dasharray="3 5" fill="none"/>
+<path d="M655,38 V860" stroke="var(--border)" stroke-dasharray="3 5" fill="none"/>
+<path d="M835,38 V860" stroke="var(--border)" stroke-dasharray="3 5" fill="none"/>
+<path d="M1015,38 V860" stroke="var(--border)" stroke-dasharray="3 5" fill="none"/>
+<rect class="nd main" x="120" y="82" width="170" height="44" rx="12"/>
+<text class="t1" x="205" y="96">병원 찾기 · 비교</text><text class="t2" x="205" y="113">메인 · 병원 정보 · 상세 · 가격</text>
+<rect class="nd main" x="300" y="82" width="170" height="44" rx="12"/>
+<text class="t1" x="385" y="96">로그인 · 회원가입</text><text class="t2" x="385" y="113">거주국 선택 · 동의</text>
+<rect class="nd main" x="480" y="82" width="170" height="44" rx="12"/>
+<text class="t1" x="565" y="96">챗봇에 질문</text><text class="t2" x="565" y="113">로그인 후</text>
+<rect class="nd main" x="660" y="82" width="170" height="44" rx="12"/>
+<text class="t1" x="745" y="96">요청서 보내기</text><text class="t2" x="745" y="113">날짜 1~3개 · 언어 · 동의</text>
+<rect class="nd main" x="1020" y="82" width="170" height="44" rx="12"/>
+<text class="t1" x="1105" y="96">예약 관리에서 확인</text><text class="t2" x="1105" y="113">제안이면 수락 · 취소</text>
+<path class="ar " d="M290,104 H296" marker-end="url(#a)"/>
+<path class="ar " d="M470,104 H476" marker-end="url(#a)"/>
+<path class="ar " d="M650,104 H656" marker-end="url(#a)"/>
+<path class="ar dash" d="M830,104 H1016" marker-end="url(#a)"/>
+<text x="925" y="96" class="lb " style="text-anchor:middle">병원 답 기다림</text>
+<path class="ar " d="M205,130 V185" marker-end="url(#a)"/>
+<rect class="nd main" x="130" y="185" width="150" height="40" rx="12"/>
+<text class="t1" x="205" y="197">공공데이터 조회</text><text class="t2" x="205" y="214">진료시간 · 공공 가격</text>
+<path class="ar " d="M205,225 V234" marker-end="url(#a)"/>
+<path class="dm " d="M205,236 L255,262 L205,288 L155,262 z"/>
+<text class="tq" x="205" y="255">값이</text><text class="tq" x="205" y="269">있나?</text>
+<path class="ar " d="M205,288 V303" marker-end="url(#a)"/>
+<text x="211" y="300" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd ok" x="125" y="305" width="160" height="34" rx="10"/>
+<text class="tok" x="205" y="322">출처·확인일 붙여 표시</text>
+<path class="ar ex" d="M155,262 H122 V375 H126" marker-end="url(#ap)"/>
+<text x="126" y="256" class="lb n" style="text-anchor:start">아니오</text>
+<rect class="nd ex" x="130" y="357" width="150" height="36" rx="10"/>
+<text class="tex" x="205" y="367">E1·E2 정보 없음</text><text class="t2" x="205" y="384">숫자 안 지어냄</text>
+<path class="ar " d="M385,130 V185" marker-end="url(#a)"/>
+<path class="dm " d="M385,187 L440,215 L385,243 L330,215 z"/>
+<text class="tq" x="385" y="208">거주국이</text><text class="tq" x="385" y="222">한국?</text>
+<path class="ar ex" d="M385,243 V258" marker-end="url(#ap)"/>
+<text x="391" y="254" class="lb n" style="text-anchor:start">예</text>
+<rect class="nd ex" x="310" y="260" width="150" height="40" rx="10"/>
+<text class="tex" x="385" y="272">E4 예약 권한 끔</text><text class="t2" x="385" y="289">정보 · 챗봇만</text>
+<path class="ar " d="M330,215 H302 V350 H306" marker-end="url(#a)"/>
+<text x="306" y="209" class="lb y" style="text-anchor:start">아니오</text>
+<rect class="nd ok" x="310" y="330" width="150" height="40" rx="10"/>
+<text class="tok" x="385" y="342">계정 저장</text><text class="t2" x="385" y="359">예약 가능 · 동의 버전</text>
+<path class="ar " d="M510,130 V423" marker-end="url(#a)"/>
+<text x="516" y="180" class="lb " style="text-anchor:start">질문 전달</text>
+<rect class="nd main" x="485" y="425" width="160" height="40" rx="12"/>
+<text class="t1" x="565" y="437">공식 출처 검색</text><text class="t2" x="565" y="454">등록 병원 · 공공데이터</text>
+<path class="ar " d="M565,465 V482" marker-end="url(#a)"/>
+<path class="dm " d="M565,484 L620,512 L565,540 L510,512 z"/>
+<text class="tq" x="565" y="505">근거를</text><text class="tq" x="565" y="519">찾았나?</text>
+<path class="ar " d="M565,540 V560" marker-end="url(#a)"/>
+<text x="571" y="554" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd ok" x="485" y="562" width="160" height="36" rx="10"/>
+<text class="tok" x="565" y="572">출처 붙은 답</text><text class="t2" x="565" y="589">의료 판단은 안 함</text>
+<path class="ar ex" d="M620,512 H640 V397" marker-end="url(#ap)"/>
+<text x="624" y="530" class="lb n" style="text-anchor:start">아니오</text>
+<rect class="nd ex" x="520" y="357" width="130" height="36" rx="10"/>
+<text class="tex" x="585" y="367">E3 답 못 함</text><text class="t2" x="585" y="384">'직접 상담 요청' 버튼</text>
+<path class="ar " d="M745,130 V188" marker-end="url(#a)"/>
+<path class="dm " d="M745,190 L807,222 L745,254 L683,222 z"/>
+<text class="tq" x="745" y="215">요청서</text><text class="tq" x="745" y="229">검사 통과?</text>
+<path class="ar ex" d="M683,222 H662 V134" marker-end="url(#ap)"/>
+<text x="657" y="160" class="lb n" style="text-anchor:end">아니오 · 오류 안내</text>
+<path class="ar " d="M745,254 V276" marker-end="url(#a)"/>
+<text x="751" y="270" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd ok" x="665" y="278" width="160" height="44" rx="10"/>
+<text class="tok" x="745" y="292">예약 만들기</text><text class="t2" x="745" y="309">상태 pending · 병원 알림</text>
+<text x="745" y="346" class="t2" style="text-anchor:middle">검사: 등록 병원 · 빈칸 · 지난 날짜</text>
+<text x="745" y="362" class="t2" style="text-anchor:middle">필수 동의 · 같은 병원 중복</text>
+<path class="ar " d="M825,300 H925 V446" marker-end="url(#a)"/>
+<rect class="nd main" x="845" y="448" width="160" height="44" rx="12"/>
+<text class="t1" x="925" y="462">요청 요약 · 답장 초안</text><text class="t2" x="925" y="479">환자 언어로</text>
+<path class="ar " d="M925,492 V636" marker-end="url(#a)"/>
+<rect class="nd main" x="840" y="638" width="170" height="44" rx="12"/>
+<text class="t1" x="925" y="652">요청함에서 초안 확인</text><text class="t2" x="925" y="669">AI 초안 고치기</text>
+<path class="ar " d="M925,682 V702" marker-end="url(#a)"/>
+<path class="dm " d="M925,704 L975,732 L925,760 L875,732 z"/>
+<text class="tq" x="925" y="725">코디가</text><text class="tq" x="925" y="739">승인?</text>
+<path class="ar ex" d="M975,732 H1010 V668 H1013" marker-end="url(#ap)"/>
+<text x="1018" y="704" class="lb n" style="text-anchor:start">아니오 · 발송 안 함</text>
+<path class="ar " d="M925,760 V786" marker-end="url(#a)"/>
+<text x="931" y="778" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd main" x="840" y="788" width="170" height="44" rx="12"/>
+<text class="t1" x="925" y="802">확정 · 제안 · 거절</text><text class="t2" x="925" y="819">중 하나 + 답장 발송</text>
+<path class="ar " d="M1010,810 H1168 V324" marker-end="url(#a)"/>
+<rect class="nd ok" x="1030" y="278" width="150" height="44" rx="10"/>
+<text class="tok" x="1105" y="292">상태 바꾸기</text><text class="t2" x="1105" y="309">환자 알림</text>
+<path class="ar " d="M1105,278 V132" marker-end="url(#a)"/>
+<text x="1099" y="200" class="lb " style="text-anchor:end">알림</text>
+<path class="ar dash" d="M1190,104 H1200 V300 H1184" marker-end="url(#a)"/>
+<text x="1196" y="200" class="lb " style="text-anchor:end">수락 · 취소</text>
+<text x="1095" y="630" class="lb" style="text-anchor:middle">병원 무응답 →</text>
+<text x="1095" y="646" class="lb" style="text-anchor:middle">expired (기한 [U])</text>
     </svg>
   </div>
   <div class="bottom">
