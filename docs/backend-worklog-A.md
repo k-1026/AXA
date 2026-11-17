@@ -17,6 +17,15 @@
 
 ## 기록
 
+### 2026-11-17 (3) · backend-A-migration-0007 · Claude
+- 한 일: **마이그레이션 `0007`** — B 모델(#28)의 `tenants`·`staff_users`·`booking_requests`·`booking_events`·`replies`·`aftercare_threads`·`aftercare_messages` + RLS. B 모델 주석대로 `tenants.hospital_id`·`booking_requests.hospital_id` → `hospitals.id` FK를 모델과 리비전에 추가 (병원 행은 지우지 않으므로 삭제 동작 없음)
+- 새 테스트 `test_migrations.py`: 빈 SQLite에 `upgrade head` → 모델과 **테이블·칸·FK**가 같은지(`compare_metadata`), `downgrade 0006` → 다시 `upgrade`. FK 하나를 일부러 빼면 실패하는 것 확인. alembic.ini를 읽지 않게 해서 다른 테스트의 로그 캡처를 끄지 않음
+- 확인: 실제 데이터가 든 로컬 SQLite(0006)에 `upgrade head` → `downgrade 0006` → `upgrade head` 정상, 병원 4,242곳 유지
+- 바뀐 계약: 없음 · 마이그레이션: 있음 `0007` (**Supabase 미적용** → 다른 PC에서 `uv run python -m alembic -c backend/alembic.ini upgrade head`, 공용 DB가 `medi`·`AXA` 둘이면 둘 다)
+- 테스트: 백엔드+AI 366개 통과
+- 다음 할 일: 요청서 제출 API (`POST /hospitals/{id}/booking-requests`: `require_requestable` + 동의 4개 + 거주 재확인 → B `booking.service.create_request`)
+- B에게 요청: 모델을 더 바꾸면 A에게 알려 주기(리비전 추가). #28 리뷰의 사후관리 비의료 제한·`health` 동의 확인
+
 ### 2026-11-17 (2) · backend-A-hospital · Claude (로컬 확인)
 - 한 일: 프론트(5173)·백엔드(8000) 로컬 실행 확인. 백엔드를 **로컬 SQLite**(0001~0006 + 실제 데이터)로 켜면 `/hospitals`·상세·정렬 422·프론트에서 호출(CORS) 모두 정상. **Supabase 설정으로 켜면 서버는 뜨지만 DB를 쓰는 요청은 500**(`ImportError`, psycopg)
 - 원인: 이 PC의 윈도우 **스마트 앱 컨트롤이 차단 모드**(`VerifiedAndReputablePolicyState = 1`), CodeIntegrity 로그에 psycopg DLL 차단(11/17 14:59·15:34). 11/4~5에는 이 PC에서 Supabase 연결이 됐음(아래 기록) → 그 뒤 차단 모드로 바뀐 것으로 보임. B PC도 11/12 같은 증상
