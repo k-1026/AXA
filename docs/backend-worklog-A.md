@@ -17,6 +17,46 @@
 
 ## 기록
 
+### 2026-11-17 (2) · backend-A-hospital · Claude (로컬 확인)
+- 한 일: 프론트(5173)·백엔드(8000) 로컬 실행 확인. 백엔드를 **로컬 SQLite**(0001~0006 + 실제 데이터)로 켜면 `/hospitals`·상세·정렬 422·프론트에서 호출(CORS) 모두 정상. **Supabase 설정으로 켜면 서버는 뜨지만 DB를 쓰는 요청은 500**(`ImportError`, psycopg)
+- 원인: 이 PC의 윈도우 **스마트 앱 컨트롤이 차단 모드**(`VerifiedAndReputablePolicyState = 1`), CodeIntegrity 로그에 psycopg DLL 차단(11/17 14:59·15:34). 11/4~5에는 이 PC에서 Supabase 연결이 됐음(아래 기록) → 그 뒤 차단 모드로 바뀐 것으로 보임. B PC도 11/12 같은 증상
+- 정한 것(사용자): **Supabase 연결 확인은 다른 PC에서**. 이 PC는 SQLite로만 확인. (대안: PostgreSQL 공식 libpq 설치 후 PATH — 서명된 DLL이라 통과 가능성, 미확인)
+- 확인: 두 Supabase 프로젝트 모두 회원·동의·세션·챗봇 대화 0건 (예전 테스트 계정은 11/5 초기화로 삭제)
+- 바뀐 계약: 없음 · 테스트: 342개 통과 (변경 없음)
+
+### 2026-11-17 · backend-A-hospital · Claude (Supabase 적용)
+- 한 일: **Supabase 공용 DB에 `0005`·`0006` 적용 + 병원 4,242곳 적재** ([supabase-병원-0006-적용.md](supabase-병원-0006-적용.md) 절차 그대로, macOS에서 실행). DB가 `0004`에 있어서(0005 챗봇 대화 테이블도 미적용이었음, 같은 선형 체인이라 분기 없음) `upgrade head`로 둘 다 적용. 세션 풀러(5432)로 실행 (`.env`는 6543 그대로, 실행 시만 환경변수로 바꿈)
+- **같은 날 두 번째 프로젝트에도 적용**: 이 PC `.env`가 `afypgiqkrohgoybqhtsi`(`aws-1`, 세션 풀러 5432 — 아래 교차 확인의 `AXA` 프로젝트로 보임)로 바뀌어 빈 DB에 `0001→0006` 전체 적용 + 병원 재적재. 아래 확인값 동일. ⚠️ 지금은 **`medi`·`AXA` 두 프로젝트 모두 같은 스키마·데이터** → 팀이 공용 DB를 하나로 정하고 각자 `.env`·Vercel 환경변수를 맞출 것
+- 확인 (SQL): hospitals 4,242 · 등록+정상 126 · 비정상 31 · 진료과 dermatology 80 / internal 1,301 / ophthalmology 300 / plastic 70 · hospital_hours 29,694 · RLS 6개 테이블(hospitals 4개 + chat 2개) 모두 켜짐 · alembic_version `0006`
+- 바뀐 계약: 없음
+- 테스트: 없음 (DB 적용만)
+- 다음 할 일: PR 리뷰에서 0006 구조가 바뀌면 `downgrade 0005` 후 다시 적용. backend → main 머지·배포 후 `/api/v1/hospitals` 확인
+- B에게 요청: Supabase에 `chat_sessions`·`chat_messages`(0005)도 이제 있음 — 로컬 `alembic current`가 `0006`인지 확인
+- 막힌 것·질문: 없음
+- 교차 확인 (백엔드 A PC, 대시보드 SQL Editor 읽기 전용, 15:2x): org `medi`의 **두 프로젝트 모두** 0006·위 숫자와 같음 + "0000~0000"을 진료로 넣은 줄 0 + public 테이블 RLS 꺼진 것 0 — `medi`(`wlzaddcemtpihtpbwkgn`) 먼저, **`AXA`(`afypgiqkrohgoybqhtsi`)는 15:22에 적재**(처음 확인 땐 비어 있었음). ⚠️ 공용 DB가 둘 → 팀이 하나로 정하고 각자 `.env`·Vercel `DATABASE_URL`을 맞출 것 (백엔드 A PC `.env` = `AXA`)
+
+### 2026-11-17 · backend-A-hospital · Claude
+- 한 일: ① `backend-A-contract-hospital`을 합치고 `hospital.service.require_requestable()` (미등록 → 403 `hospital.not_requestable` `reason=unregistered`, 폐업·미확인 → `not_operating`, 없으면 404) — 요청서 API가 생기면 이것만 부름 ② `GET /hospitals?open_on=mon..sun` (그 요일 진료가 확인된 병원만, 시간 정보 없음은 제외) ③ **챗봇 병원 찾기·상세를 실제 병원 DB로**: `modules/chatbot/hospitals.py` `HospitalGateway` → `ChatService(hospitals=…)` → `ToolContext.hospitals`. 게이트웨이가 없으면(ai 테스트·eval) 가상 병원 그대로 ④ 적재: 원본 "0000~0000"은 진료로 보지 않음(`unknown`, 일요일 23곳)
+- 정한 것(사용자, 2026-11-17): 찾기·상세만 실제 DB, **조건 맞춤 제안·예약은 아직 가상 병원**. 실제 병원은 응대 언어 정보가 없어 언어로 거르지 않고 "병원에 확인" 안내(`staff_languages = []`). 상세 카드의 진료시간은 확인된 요일만(시간 정보 없는 요일은 휴진(None)으로 보이지 않게 뺌)
+- **피부과·성형외과 = 전문 병원만 (사용자 결정 2026-11-17)**: `has_dermatology = Y` + 이름에 "피부과" → 818곳 → **80곳(모두 의원), 등록 8곳**. 대학병원·한방병원·정형외과는 빠짐. 프론트 `hospitals.json`(build-hospitals.mjs)은 아직 진료과목 코드 기준(814곳) → 프론트에 알릴 것. **성형외과도 같은 기준** (256곳 → 70곳, 등록 11곳). 실제 병원 id로 예약 초안을 만들면 아직 "병원 없음" (예약은 가상 병원 9001~)
+- 바뀐 계약: 없음 (계약 브랜치 내용을 합침. PR 순서 = `backend-A-contract-hospital` → `backend-A-hospital`)
+- 테스트: 백엔드+AI 339개 통과 (병원 +2, 챗봇 병원 3개 새로, 기존 챗봇 테스트 1개는 DB에 병원을 넣도록 고침). 실제 데이터(로컬 SQLite)로 수성구 토요일 등록 피부과 검색·상세 확인
+- 다음 할 일: 조건 맞춤 제안을 실제 DB로 (언어는 "모름", 아는 것만 이유로), 가상 병원을 DB에 `is_demo`로 넣고 예약을 거기로
+- B에게 요청: 계약 4·5절 확인 (`backend-A-contract-hospital`)
+- Supabase 적용: 이 PC는 psycopg DLL이 정책에 막혀 실행 못 함 → **다른 팀원 PC에서 실행**하기로 함. 안내 `docs/supabase-병원-0006-적용.md` (기대값을 로컬 SQLite로 미리 확인: 4,242 · 요청 가능 126 · 피부과 80 · 성형외과 70 · 진료시간 29,694). PowerShell `git show > 파일`은 UTF-16으로 저장돼 등록 병원 0곳이 됨 → 안내는 `git restore --source`, 적재는 JSON BOM도 읽게 고침
+
+### 2026-11-16 · backend-A-hospital · Claude
+- 한 일: **병원 데이터 API** — 테이블 `hospitals`·`departments`·`hospital_departments`·`hospital_hours`(마이그레이션 `0006`), 적재 `modules/hospital/loader.py` + `backend/scripts/load_hospitals.py`(ykiho로 upsert, 행 삭제 X, 새 파일에 없는 병원은 `closed`), `GET /hospitals`(필터 `sggu`·`dept`·`registered`·`ids`, 정렬 `name`·`distance`만, 그 밖 422, 폐업 제외), `GET /hospitals/{id}`(진료시간·출처·수집일, 없으면 404 `not_found`), `hospital.service.get_basic()`
+- 팀 결정(2026-11-16): **병원 정보는 전체, 상담·예약은 등록 병원만** → 응답에 `is_registered_facility`·`can_request`(= 등록 유치의료기관 + 영업 중). 정렬에는 반영 X (해외진출법 제24조①3, compliance 2-1)
+- 스키마 2절과 다른 점: `type_name_ko`(종별 이름)·`hospital_hours.day_order`(요일 정렬) 추가. 진료시간 값이 없으면 휴진으로 단정하지 않고 `unknown`
+- 실제 데이터 확인(로컬 SQLite): 4,242곳 적재, 목록 4,233곳(폐업 9 제외), 등록 126곳 = 요청 가능 126곳. 진료과: 내과 1,301·피부과 818·안과 300·성형외과 256 (내과·안과는 심평원 진료과목 코드 기준이라 프론트 `hospitals.json` 1,267곳과 기준이 다름 → 프론트와 맞출 것)
+- 바뀐 계약: 없음 (5절 `HospitalBasic` 칸을 처음 정함: id·ykiho·name_ko/en·type_code·sggu·addr_ko·tel·is_registered_facility·is_demo·can_request) → B 확인
+- 마이그레이션: 있음 `0006` (SQLite에서 upgrade·downgrade·upgrade 확인, Supabase는 아직)
+- 테스트: 백엔드 134개 통과 (병원 9개 추가)
+- 다음 할 일: 등록 파일(`daegu_registered_institutions.csv`)·내과/안과 파일이 `research-data`에만 있음 → 적재 때 `--registered-csv`·`--dgsbjt-json`으로 경로를 주거나 main에 합친 뒤 실행. 시연용 가상 병원(`is_demo`) 시드 만들 때 `can_request`에 포함. 요청서 API에서 `get_basic().can_request`가 false면 막기(에러 코드는 contracts 4절에 새로 추가 필요)
+- B에게 요청: `HospitalBasic` 칸 확인
+- 막힌 것·질문: 이 PC에서 `alembic` 실행 파일이 정책에 막힘 → `uv run python -m alembic -c backend/alembic.ini …`로 실행
+
 ### 2026-11-12 · backend-review-fix · Claude
 - 한 일: 코드 리뷰(`docs/review-branches-2026-11-12.md`, ai 브랜치) 반영. 공통 500 `internal`(ASGI 미들웨어) · 동시 가입 409 · 정리 API `/internal/purge`(`CRON_SECRET`) · 환율 ECOS 실패 뒤 10분 저장값·첫 요청 경쟁 · 로그인 시도 제한 `auth.too_many_attempts` · 챗봇 새 대화를 한 트랜잭션으로 · auth 세션 함수 commit 규칙 통일 · PATCH display_name 공백 · JWT HS256 고정 · 가입 동의 현재 버전 검사 · `patient_uuid`를 core/security로 · `.env.example`(`CRON_SECRET` 추가, `JWT_ALGORITHM` 삭제)
 - 바뀐 계약: **있음** 1·4·7-1절 (변경 이력에 기록) → **B 승인 필요**
