@@ -405,7 +405,7 @@ table.cmp tr.us td { background: var(--accent-soft); }
       <div class="c core"><b>5개 언어 지도·병원 상세</b> · 가격 위치 표시 (공공 자료 있는 항목만) · <b>AI 챗봇</b></div>
       <div class="c core"><b>상담 예약 요청서</b> → 병원 대시보드 <b>AI 요약·답장 초안</b>, 코디 승인 후 발송·확정</div>
       <div class="c out">길찾기·병원 연락처만</div>
-      <div class="c core"><b>방문 완료 건만 수수료</b> 또는 구독 — 병원이 고름 · 구독은 대시보드 이용료로 분리, 출시 전 복지부 질의</div>
+      <div class="c core"><b>결제된 진료만 10%</b> + 월 구독료 (₩69,000/₩99,000, 첫 3개월 무료) · 구독료 상한 합산 여부는 출시 전 복지부 질의</div>
     </div>
     <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
       <div class="card"><h3><span class="tag t-good">먼저 간다</span> B1·B3 → 공공데이터 + 출처</h3><p>데이터가 이미 있고(대구 병원 4,242곳) 환자가 떠나는 비교 단계를 메움. 경쟁사 중 출처를 내세우는 곳 없음</p></div>
@@ -451,7 +451,7 @@ table.cmp tr.us td { background: var(--accent-soft); }
             <tr><td>③ 크리에이트립 <span class="muted">간접</span></td><td>여행·뷰티·의료 예약 한 앱</td><td>제휴처 입점, 요율 [U]</td></tr>
             <tr><td>④ 메디컬코리아 <span class="muted">간접</span></td><td>공식 등록 병원 검색</td><td>공공 예산</td></tr>
             <tr><td>⑤ 현상 유지 <span class="muted">대체재</span></td><td>지인 55.2% · 검색 17.1% (2018)</td><td>무료</td></tr>
-            <tr class="us"><td>메디대구</td><td><b>공공 출처 붙은 대구 등록 병원 정보 + 예약</b></td><td>수수료 또는 구독</td></tr>
+            <tr class="us"><td>메디대구</td><td><b>공공 출처 붙은 대구 등록 병원 정보 + 예약</b></td><td>진료비 10% + 월 구독료</td></tr>
           </table>
         </div>
         <div class="card"><h3><span class="tag t-acc">DART</span> 강남언니(힐링페이퍼) 감사보고서</h3><p>2025 영업수익 <b>752억 원</b>(+41.9%) · 성과형 광고 78.8% · 해외(크로스보더) <b>9.5%</b> · 광고선전비 2배 → 영업이익률 24.3% → 10.0%</p><p class="muted" style="margin-top:4px">언론 숫자 4개(417억 등) 모두 DART와 일치 · 유치업자 등록 3곳 → "등록 사업자"는 우리만의 차별점 아님</p></div>
@@ -475,7 +475,7 @@ table.cmp tr.us td { background: var(--accent-soft); }
     <div class="card ch"><h3>채널</h3><ul><li>환자 웹 (5개 언어·지도·챗봇)</li><li>병원 대시보드</li><li>메디컬코리아·병원 홈페이지 링크</li></ul></div>
     <div class="card cs"><h3>고객 세그먼트</h3><p><b>사용자</b> — 해외 거주 외국인 환자, 1순위 대만 미용·외래 단기 방문객 (국내 거주자는 정보 열람만)</p><p style="margin-top:8px;"><b>지불자</b> — 대구 등록 유치의료기관 145곳 중 <b>피부·성형 의원</b></p><p style="margin-top:8px;" class="muted">확보 병원·LOI 지금 0곳</p></div>
     <div class="card cost"><h3>비용 구조</h3><p>고정: 등록 요건(자본금·보증보험) · 인건비 · 호스팅 &nbsp;|&nbsp; 변동: LLM 사용량 · 정산·CS · 빈칸 수작업 &nbsp;|&nbsp; 리스크: 동의·국외 이전, 법률 검토, LLM 요금 변경</p></div>
-    <div class="card rev"><h3>수익원</h3><p><b>주: 수수료</b> — 방문 완료·완납 1건 진료비의 % (월 정산) · 선택: <b>구독</b> (대시보드 이용료, 유치 수수료와 별개) · 보조: 일반 광고 배너 (병원 광고 아님)</p></div>
+    <div class="card rev"><h3>수익원</h3><p><b>주: 체결 진료 수수료 10%</b> — 결제 확인된 진료만 (월 정산) · <b>월 구독료</b> ₩69,000(사후관리 이용) / ₩99,000, 첫 3개월 무료 · 보조: 일반 광고 배너 (병원 광고 아님)</p></div>
   </div>
   <div class="foot"><span class="src">출처: bm/bm_canvas.md v2 · bm/vpc.md · 등록 병원 145곳: 메디컬코리아 CSV · 등록 요건: 의료해외진출법 시행규칙 제4조</span><span class="no">7 / 10</span></div>
 </section>
@@ -483,24 +483,37 @@ table.cmp tr.us td { background: var(--accent-soft); }
 <!-- 8 수익모델·레드팀 -->
 <section class="slide">
   <div class="eyebrow">③ 수익모델 · 레드팀 검증</div>
-  <h1>병원이 <em>수수료·구독 중 하나를 고른다</em></h1>
-  <p class="lead">금액은 모두 가정값 (확인값은 법정 상한·환자 수뿐) → 다음 시장 검증에서 숫자를 채움 · 계산은 다시 해서 맞는지 확인함</p>
+  <h1>병원은 <em>결제된 진료에만 10%</em> + 월 구독료</h1>
+  <p class="lead">요금안 v3.1 (11/16 팀 결정, 병원 대시보드 시안에 적용) · 금액은 경쟁사·시장 가격 기준 <b>[가정]</b> — 광고비·객단가는 언론·업체 자료 1곳씩이라 병원 인터뷰로 확인 필요</p>
   <div class="body">
     <div class="grid" style="grid-template-columns: 1fr 1.15fr 1fr;">
       <div class="card">
-        <h3>수익모델 — 입점 병원이 요금제를 고름</h3>
-        <table style="font-size: 13.5px;">
-          <tr><th>유형</th><th>판단</th></tr>
-          <tr class="top"><td style="white-space:nowrap"><b>수수료</b><br><span class="muted">등록 병원</span></td><td><span class="tag t-acc">주 · 선택 B</span> 방문 완료·완납 1건 진료비의 %, 월 정산. 온 환자에 대해서만 냄</td></tr>
-          <tr class="top"><td style="white-space:nowrap"><b>구독</b><br><span class="muted">등록 병원</span></td><td><span class="tag t-acc">주 · 선택 A</span> 대시보드(AI 요약·번역·지표) 월 이용료. 유치 수수료(진료비 대비 %)와 <b>다른 개념</b> — 환자 연결 대가는 넣지 않음</td></tr>
-          <tr><td style="white-space:nowrap">광고<br><span class="muted">일반 광고주</span></td><td><span class="tag t-neu">보조·나중</span> 한국 화장품·관광 등, 병원 광고 아님</td></tr>
+        <h3>수익모델 — 병원이 내는 돈 2가지</h3>
+        <table style="font-size: 13px;">
+          <tr><th>항목</th><th>금액 · 판단</th></tr>
+          <tr class="top"><td style="white-space:nowrap"><b>체결 진료<br>수수료</b></td><td><span class="tag t-acc">주 수익</span> 진료비의 <b>10%</b> — 방문 완료 후 병원이 결제 내역 등록 → 환자 확인 → 월 정산. 결제된 진료에만</td></tr>
+          <tr class="top"><td style="white-space:nowrap"><b>월 구독료</b><br><span class="muted">입점</span></td><td>사후관리 이용 <b>₩69,000</b> (채팅 30건, 초과 1건 ₩2,000) · 미이용 <b>₩99,000</b> · <b>첫 3개월 무료</b></td></tr>
+          <tr><td style="white-space:nowrap">광고</td><td><span class="tag t-neu">보조·나중</span> 병원 광고·이벤트가 상품은 안 팖 · 구독료를 내도 노출 순위 안 오름 · 일반 광고 배너만</td></tr>
         </table>
-        <p class="muted" style="margin-top:8px; font-size:12.5px;">법정 상한: 유치 수수료 ÷ 그 환자 총 진료비 ≤ 의원 30% · 병원 20% · 상급종합 15% (확인값)</p>
+        <p class="muted" style="margin-top:8px; font-size:12.5px;">법정 상한: 유치 수수료 ÷ 그 환자 총 진료비 ≤ 의원 30% · 병원 20% · 상급종합 15% (확인값) · 구독료가 상한에 합산되는지 <b>[U]</b> → 복지부·진흥원 질의</p>
       </div>
       <div class="card">
-        <h3>가격 가설 · 손익분기</h3>
-        <p>수수료: 방문 완료 1건 진료비의 <b class="as">5~10%</b>, 기준 7% · 구독: <b class="as">월 20만~40만 원</b></p>
-        <p style="margin-top:8px;">→ 예상 월 10건의 <b style="color: var(--pain);">약 7~9배</b>가 필요</p>
+        <h3>가격 근거 · 병원 1곳 한 달</h3>
+        <p style="font-size:13px;margin-bottom:6px;">외국인 환자 1명 데려오는 비용 (진료비 153만 원 기준 <span class="as">[가정]</span>)</p>
+        <div class="vocbar" style="grid-template-columns: 118px 1fr 92px; font-size:12.8px;">
+          <span class="nm">유치업체 상한 30%</span><span class="tr"><i style="width:100%;background:var(--neutral)"></i></span><span class="n">₩459,000</span>
+          <span class="nm">광고형 플랫폼</span><span class="tr"><i style="width:43.6%;background:var(--assume)"></i></span><span class="n">~₩200,000</span>
+          <span class="nm" style="color:var(--accent)">메디대구 10%</span><span class="tr"><i style="width:33.3%;background:var(--accent)"></i></span><span class="n">₩153,000</span>
+          <span class="nm">트립닥</span><span class="tr"><i style="width:0"></i></span><span class="n">₩0</span>
+        </div>
+        <table style="font-size:12.8px;margin-top:10px;">
+          <tr><th>시안 병원 (방문 24명, 확인 21건)</th><th style="text-align:right">금액</th></tr>
+          <tr><td>수수료 ₩32,130,000 × 10%</td><td style="text-align:right">₩3,213,000</td></tr>
+          <tr><td>월 구독료 (사후관리 이용)</td><td style="text-align:right">₩69,000</td></tr>
+          <tr class="top"><td><b>합계 = 진료비의 10.2%</b> (상한 30%의 1/3)</td><td style="text-align:right"><b>₩3,282,000</b></td></tr>
+          <tr><td class="muted">같은 24명을 광고로 받았다면</td><td style="text-align:right" class="muted">약 ₩4,800,000</td></tr>
+        </table>
+        <p class="muted" style="font-size:12px;margin-top:6px;">메디대구 월 매출: 중형 병원 10곳 ≈ ₩3,381만 · 30곳 ≈ ₩1억 · 손익분기는 인건비·마케팅비 미반영이라 <b>[U]</b></p>
       </div>
       <div class="card">
         <h3>레드팀 3관점 · 지적 21개</h3>
@@ -516,7 +529,7 @@ table.cmp tr.us td { background: var(--accent-soft); }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: bm/revenue_platform.md 1~3절 (재계산) · redteam_log.md · .claude/agents/redteam-*.md · 상한: 통합 고시 제2·3조 · 환자 수: 진흥원 통계 · 80.3%: 전국 대만 환자 피부과 비중</span><span class="no">8 / 10</span></div>
+  <div class="foot"><span class="src">출처: research/company/가격산정-경쟁사분석.md 3-3절 (v3.1) · dashboard/대시보드.html 요금·정산 (docs-dashboard-integration 브랜치) · 153만 원: 진흥원 보고서 인용 보도 · 광고 20만 원: 마케팅 업체 글 · redteam_log.md · .claude/agents/redteam-*.md · 상한: 통합 고시 제2·3조 · 환자 수: 진흥원 통계 · 80.3%: 전국 대만 환자 피부과 비중</span><span class="no">8 / 10</span></div>
 </section>
 
 <!-- 9 사용자 플로우 -->
