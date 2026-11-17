@@ -25,6 +25,7 @@
 - 테스트: 백엔드+AI 339개 통과 (병원 +2, 챗봇 병원 3개 새로, 기존 챗봇 테스트 1개는 DB에 병원을 넣도록 고침). 실제 데이터(로컬 SQLite)로 수성구 토요일 등록 피부과 검색·상세 확인
 - 다음 할 일: 조건 맞춤 제안을 실제 DB로 (언어는 "모름", 아는 것만 이유로), 가상 병원을 DB에 `is_demo`로 넣고 예약을 거기로
 - B에게 요청: 계약 4·5절 확인 (`backend-A-contract-hospital`)
+- Supabase 적용: 이 PC는 psycopg DLL이 정책에 막혀 실행 못 함 → **다른 팀원 PC에서 실행**하기로 함. 안내 `docs/supabase-병원-0006-적용.md` (기대값을 로컬 SQLite로 미리 확인: 4,242 · 요청 가능 126 · 피부과 80 · 성형외과 70 · 진료시간 29,694). PowerShell `git show > 파일`은 UTF-16으로 저장돼 등록 병원 0곳이 됨 → 안내는 `git restore --source`, 적재는 JSON BOM도 읽게 고침
 
 ### 2026-11-16 · backend-A-hospital · Claude
 - 한 일: **병원 데이터 API** — 테이블 `hospitals`·`departments`·`hospital_departments`·`hospital_hours`(마이그레이션 `0006`), 적재 `modules/hospital/loader.py` + `backend/scripts/load_hospitals.py`(ykiho로 upsert, 행 삭제 X, 새 파일에 없는 병원은 `closed`), `GET /hospitals`(필터 `sggu`·`dept`·`registered`·`ids`, 정렬 `name`·`distance`만, 그 밖 422, 폐업 제외), `GET /hospitals/{id}`(진료시간·출처·수집일, 없으면 404 `not_found`), `hospital.service.get_basic()`

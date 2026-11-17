@@ -261,3 +261,12 @@ def test_성형외과도_이름에_성형외과가_있는_전문_병원만(clien
         hours=[{"ykiho": k, "has_plastic_surgery": "Y"} for k in ("P1", "P2", "P3")],
     ))
     assert [h["ykiho"] for h in list_hospitals(client, dept="plastic")] == ["P1"]
+
+
+def test_진료과목_json에_BOM이_있어도_적재(client, db_engine, files, tmp_path):
+    import json
+
+    dg = tmp_path / "dg.json"
+    dg.write_text(json.dumps({"items": {"01": [{"ykiho": "I1"}]}}), encoding="utf-8-sig")  # PowerShell 저장 형식
+    load(db_engine, **files([hosp("I1", "내과의원")]), dgsbjt_json=dg)
+    assert [h["ykiho"] for h in list_hospitals(client, dept="internal")] == ["I1"]

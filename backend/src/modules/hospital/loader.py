@@ -66,7 +66,7 @@ def _dgsbjt(path: Path | str | None) -> dict[str, set[str]]:
     """내과·안과 ykiho 목록."""
     if path is None or not Path(path).exists():
         return {}
-    items = json.loads(Path(path).read_text(encoding="utf-8")).get("items", {})
+    items = json.loads(Path(path).read_text(encoding="utf-8-sig")).get("items", {})  # BOM 있어도 됨
     code_to_dept = {v: k for k, v in DEPARTMENTS.items()}
     return {
         code_to_dept[code]: {i["ykiho"] for i in rows}
