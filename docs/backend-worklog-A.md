@@ -26,7 +26,7 @@
 - 다음 할 일: PR 리뷰에서 0006 구조가 바뀌면 `downgrade 0005` 후 다시 적용. backend → main 머지·배포 후 `/api/v1/hospitals` 확인
 - B에게 요청: Supabase에 `chat_sessions`·`chat_messages`(0005)도 이제 있음 — 로컬 `alembic current`가 `0006`인지 확인
 - 막힌 것·질문: 없음
-- 교차 확인 (백엔드 A PC, 대시보드 SQL Editor 읽기 전용): 프로젝트 **`medi`**(`wlzaddcemtpihtpbwkgn`)에서 위 숫자 모두 같음 + "0000~0000"을 진료로 넣은 줄 0. ⚠️ 같은 org의 **`AXA` 프로젝트는 테이블이 하나도 없음** → 백엔드 A PC `.env`의 `DATABASE_URL`이 `AXA`를 가리키고 있었음. 팀 공용 DB는 `medi` (각자 `.env` 확인)
+- 교차 확인 (백엔드 A PC, 대시보드 SQL Editor 읽기 전용, 15:2x): org `medi`의 **두 프로젝트 모두** 0006·위 숫자와 같음 + "0000~0000"을 진료로 넣은 줄 0 + public 테이블 RLS 꺼진 것 0 — `medi`(`wlzaddcemtpihtpbwkgn`) 먼저, **`AXA`(`afypgiqkrohgoybqhtsi`)는 15:22에 적재**(처음 확인 땐 비어 있었음). ⚠️ 공용 DB가 둘 → 팀이 하나로 정하고 각자 `.env`·Vercel `DATABASE_URL`을 맞출 것 (백엔드 A PC `.env` = `AXA`)
 
 ### 2026-11-17 · backend-A-hospital · Claude
 - 한 일: ① `backend-A-contract-hospital`을 합치고 `hospital.service.require_requestable()` (미등록 → 403 `hospital.not_requestable` `reason=unregistered`, 폐업·미확인 → `not_operating`, 없으면 404) — 요청서 API가 생기면 이것만 부름 ② `GET /hospitals?open_on=mon..sun` (그 요일 진료가 확인된 병원만, 시간 정보 없음은 제외) ③ **챗봇 병원 찾기·상세를 실제 병원 DB로**: `modules/chatbot/hospitals.py` `HospitalGateway` → `ChatService(hospitals=…)` → `ToolContext.hospitals`. 게이트웨이가 없으면(ai 테스트·eval) 가상 병원 그대로 ④ 적재: 원본 "0000~0000"은 진료로 보지 않음(`unknown`, 일요일 23곳)
