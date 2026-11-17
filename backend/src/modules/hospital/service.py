@@ -125,7 +125,7 @@ def get_basic(db: Session, hospital_id: int) -> HospitalBasic:
 
 
 def require_requestable(db: Session, hospital_id: int) -> HospitalBasic:
-    """요청서 제출 전 확인 (contracts 5절, 결정 18). 미등록·영업 중 아님이면 403 `hospital.not_requestable`."""
+    """요청서 제출 전 확인 (contracts 5절, 결정 20). 미등록·영업 중 아님이면 403 `hospital.not_requestable`."""
     h = _get(db, hospital_id)
     if not h.is_registered_facility:
         raise AppError(403, "hospital.not_requestable", "상담 요청을 받을 수 없는 병원입니다", {"reason": "unregistered"})
