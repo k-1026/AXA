@@ -20,7 +20,7 @@
 ### 2026-11-17 · backend-A-hospital · Claude
 - 한 일: ① `backend-A-contract-hospital`을 합치고 `hospital.service.require_requestable()` (미등록 → 403 `hospital.not_requestable` `reason=unregistered`, 폐업·미확인 → `not_operating`, 없으면 404) — 요청서 API가 생기면 이것만 부름 ② `GET /hospitals?open_on=mon..sun` (그 요일 진료가 확인된 병원만, 시간 정보 없음은 제외) ③ **챗봇 병원 찾기·상세를 실제 병원 DB로**: `modules/chatbot/hospitals.py` `HospitalGateway` → `ChatService(hospitals=…)` → `ToolContext.hospitals`. 게이트웨이가 없으면(ai 테스트·eval) 가상 병원 그대로 ④ 적재: 원본 "0000~0000"은 진료로 보지 않음(`unknown`, 일요일 23곳)
 - 정한 것(사용자, 2026-11-17): 찾기·상세만 실제 DB, **조건 맞춤 제안·예약은 아직 가상 병원**. 실제 병원은 응대 언어 정보가 없어 언어로 거르지 않고 "병원에 확인" 안내(`staff_languages = []`). 상세 카드의 진료시간은 확인된 요일만(시간 정보 없는 요일은 휴진(None)으로 보이지 않게 뺌)
-- 알아 둘 것: 피부과 검색에 한방병원·정형외과가 섞여 나옴 → 진료시간 파일의 `has_dermatology`(진료과목에 피부과 있음) 기준이라 데이터 그대로. 실제 병원 id로 예약 초안을 만들면 아직 "병원 없음" (예약은 가상 병원 9001~)
+- **피부과 = 전문 병원만 (사용자 결정 2026-11-17)**: `has_dermatology = Y` + 이름에 "피부과" → 818곳 → **80곳(모두 의원), 등록 8곳**. 대학병원·한방병원·정형외과는 빠짐. 프론트 `hospitals.json`(build-hospitals.mjs)은 아직 진료과목 코드 기준(814곳) → 프론트에 알릴 것. 성형외과는 그대로(256곳, 이름 기준이면 70곳). 실제 병원 id로 예약 초안을 만들면 아직 "병원 없음" (예약은 가상 병원 9001~)
 - 바뀐 계약: 없음 (계약 브랜치 내용을 합침. PR 순서 = `backend-A-contract-hospital` → `backend-A-hospital`)
 - 테스트: 백엔드+AI 339개 통과 (병원 +2, 챗봇 병원 3개 새로, 기존 챗봇 테스트 1개는 DB에 병원을 넣도록 고침). 실제 데이터(로컬 SQLite)로 수성구 토요일 등록 피부과 검색·상세 확인
 - 다음 할 일: 조건 맞춤 제안을 실제 DB로 (언어는 "모름", 아는 것만 이유로), 가상 병원을 DB에 `is_demo`로 넣고 예약을 거기로

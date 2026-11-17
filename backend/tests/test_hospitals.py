@@ -245,3 +245,11 @@ def test_요일_필터는_그_요일_진료가_확인된_병원만(client, db_en
     assert [h["ykiho"] for h in list_hospitals(client, open_on="sat")] == ["SAT"]
     assert sorted(h["ykiho"] for h in list_hospitals(client, open_on="mon")) == ["SAT", "WEEK"]
     assert client.get("/api/v1/hospitals", params={"open_on": "holiday"}).status_code == 422
+
+
+def test_피부과는_이름에_피부과가_있는_전문_병원만(client, db_engine, files):
+    load(db_engine, **files(
+        [hosp("D1", "맑은피부과의원"), hosp("D2", "튼튼정형외과의원"), hosp("D3", "대학교병원", clCdNm="상급종합")],
+        hours=[{"ykiho": k, "has_dermatology": "Y"} for k in ("D1", "D2", "D3")],
+    ))
+    assert [h["ykiho"] for h in list_hospitals(client, dept="dermatology")] == ["D1"]

@@ -159,7 +159,9 @@ def load_hospitals(
         hr = hours.get(yk)
         depts = {d for d, ids in dept_sets.items() if yk in ids}
         if hr:
-            if hr.get("has_dermatology") == "Y":
+            # 피부과 = 진료과목에 피부과가 있고 **이름에 "피부과"가 있는 전문 병원**만 (2026-11-17 결정).
+            # 진료과목만 보면 대학병원·한방병원·정형외과까지 818곳이 섞임 → 이름 기준 80곳
+            if hr.get("has_dermatology") == "Y" and "피부과" in r.get("yadmNm", ""):
                 depts.add("dermatology")
             if hr.get("has_plastic_surgery") == "Y":
                 depts.add("plastic")
