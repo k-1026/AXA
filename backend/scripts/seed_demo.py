@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session  # noqa: E402
 import core.db_models  # noqa: E402,F401
 from core.db import Base, make_engine  # noqa: E402
 from core.security import create_access_token  # noqa: E402
+from modules.aftercare.models import AftercareMessage, AftercareThread  # noqa: E402
 from modules.booking.models import BookingEvent, BookingRequest, Reply  # noqa: E402
 from modules.tenant.models import StaffUser, Tenant  # noqa: E402
 
@@ -119,11 +120,43 @@ def main() -> None:
         # 오늘 방문 예정 2건 (확정)
         for h in (11, 15):
             add_request(db, rng, tenant, kst(today, 8), [("confirmed", kst(today, 9))], slot=kst(today, h))
-        # 대기 5건 (1건은 답장 보냄)
-        for i in range(5):
+        # 대기 5건 (1건은 답장 보냄) — 대시보드 상담 채팅에 보일 가상 문의
+        pending = [
+            ("zh-TW", "TW", "laser_toning", False, "你好，我11月20日到24日在大邱，想做雷射淨膚，請問需要幾次？",
+             "안녕하세요, 11월 20~24일 대구에 있어요. 레이저 토닝을 받고 싶은데 몇 회가 필요한가요?"),
+            ("en", "MN", "acne_scar", True, "Hello, I need a reservation confirmation letter for my medical visa. Is 21 Nov possible?",
+             "의료 비자용 예약확인서가 필요해요. 11월 21일 가능한가요?"),
+            ("zh-CN", "CN", "botox", False, "想预约肉毒素，周六可以吗？", "보톡스 예약하고 싶어요. 토요일 가능한가요?"),
+            ("vi", "VN", "melasma", False, "Tôi muốn điều trị nám, cuối tuần có lịch không?", "기미 치료를 받고 싶어요. 주말에 예약 가능한가요?"),
+            ("zh-TW", "TW", "filler", False, "請問玻尿酸的價格範圍？", "필러 가격 범위가 궁금해요."),
+        ]
+        for i, (lang, nat, trt, visa, orig, ko) in enumerate(pending):
             req = add_request(db, rng, tenant, kst(today, 9 + i), [])
-            if i == 0:
+            req.lang, req.nationality, req.treatment, req.visa_needed = lang, nat, trt, visa
+            req.message_original, req.message_translated = orig, ko
+            req.preferred_slots = [kst(today + timedelta(days=4 + i), 10).isoformat(), kst(today + timedelta(days=5 + i), 14).isoformat()]
+            if i == 4:
                 db.add(Reply(request_id=req.id, text_ko="(가상 답장)", sent_at=kst(today, 10), approved_by=staff.id))
+        # 사후관리 대화 3개 (방문 완료 요청에 연결)
+        visited = [r for r in db.query(BookingRequest).filter_by(tenant_id=tenant.id, status="visited").order_by(BookingRequest.created_at.desc()).limit(3)]
+        threads = [
+            ("new", ["붉은기"], [("patient", "做完第三天了，臉還是有點紅，這樣正常嗎？", "시술 3일째인데 얼굴이 아직 조금 빨개요. 정상인가요?", True)]),
+            ("in_progress", ["영수증 재발급"], [
+                ("patient", "保険の申請のため、英語の領収書をもう一度いただけますか？", "보험 청구 때문에 영문 영수증을 다시 받을 수 있을까요?", False),
+                ("staff", "네, 내일 오전까지 메일로 보내드릴게요.", "はい、明日の午前中までにメールでお送りします。", False)]),
+            ("resolved", ["재방문 일정"], [
+                ("patient", "下一次療程什麼時候可以做？", "다음 시술은 언제 받을 수 있나요?", False),
+                ("staff", "4주 뒤부터 가능해요. 12월 6일(토) 11시로 예약해 드릴까요?", "4週後から可能です。", False),
+                ("patient", "好的，謝謝！", "네, 감사합니다!", False)]),
+        ]
+        for req, (status, tags, msgs) in zip(visited, threads):
+            th = AftercareThread(request_id=req.id, tenant_id=tenant.id, status=status, tags=tags)
+            db.add(th)
+            db.flush()
+            for j, (sender, orig, tr, photo) in enumerate(msgs):
+                db.add(AftercareMessage(thread_id=th.id, sender=sender, staff_id=staff.id if sender == "staff" else None,
+                                        text_original=orig, text_translated=tr, has_photo=photo,
+                                        created_at=kst(today, 8) - timedelta(days=len(msgs) - j)))
         db.commit()
         token = create_access_token(str(staff.id), "staff", tenant_id=str(tenant.id))
 
