@@ -19,7 +19,7 @@
 
 ### 2026-11-17 (6) · backend-A-migration-0007 · Claude (Supabase 연결 해결)
 - 한 일: 이 PC(스마트 앱 컨트롤 차단 모드)에서 **Supabase 연결 됨** — psycopg 바이너리(DLL)는 계속 막히지만, 설치된 **PostgreSQL 18 공식 `libpq.dll`**(서명됨)은 통과 → psycopg 순수 파이썬 구현으로 접속
-  - 실행 전 (PowerShell, 그 창에서만): `$env:PATH = "C:\Program Files\PostgreSQL8in;$env:PATH"; $env:PSYCOPG_IMPL = "python"`
+  - 실행 전 (PowerShell, 그 창에서만): `$env:PATH = "C:\Program Files\PostgreSQL\18\bin;$env:PATH"; $env:PSYCOPG_IMPL = "python"`
   - 그다음 평소처럼 `uv run python -m alembic -c backend/alembic.ini upgrade head` / `uv run python -m uvicorn main:app --app-dir backend/src`
 - 확인 (읽기 전용): `.env` = `AXA`(`afypgiqkrohgoybqhtsi`) · alembic `0006` · hospitals 4,242 · 등록 126 · public 테이블 11개
 - 바뀐 계약·코드: 없음 (환경만)
