@@ -9,12 +9,15 @@ from fastapi.responses import RedirectResponse
 
 from core.config import get_settings
 from core.errors import register_error_handlers
+from modules.aftercare.router_tenant import router as aftercare_tenant_router
 from modules.auth.router import router as auth_router
+from modules.booking.router_tenant import router as booking_tenant_router
 from modules.chatbot.router import router as chatbot_router
 from modules.fx.router import router as fx_router
 from modules.hospital.router import router as hospital_router
 from modules.maintenance.router import router as maintenance_router
 from modules.patient.router import router as patient_router
+from modules.tenant.router import router as tenant_router
 
 app = FastAPI(title="AXA API", version="0.1.0")
 register_error_handlers(app)
@@ -40,6 +43,9 @@ api.include_router(fx_router)
 api.include_router(hospital_router)
 api.include_router(chatbot_router)
 api.include_router(maintenance_router)
+api.include_router(booking_tenant_router)
+api.include_router(tenant_router)
+api.include_router(aftercare_tenant_router)
 
 app.include_router(api)
 
