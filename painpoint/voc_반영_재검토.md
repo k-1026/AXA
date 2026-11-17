@@ -1,6 +1,7 @@
 # 페인포인트 재검토 — VOC 반영안 (A안 결정)
 
 > 작성 2026-11-16 · 입력: [voc_classified.csv](voc_classified.csv) (유튜브 8개 영상 1,367건 → 분류 674건) · [voc_review.md](voc_review.md) 사용 범위 · [painpoint_def.md](painpoint_def.md) v1 (11/12) · 보조: [voc/instagram_韓国肌管理_comments.json](voc/instagram_韓国肌管理_comments.json) 30건
+> **v3 갱신 (2026-11-17)**: 이 문서는 11/16 기록이라 본문 숫자는 그대로 둠. 이후 VOC를 출처 3종(유튜브 684 · 대만·대구 89 · 인스타 30 = 분류 803건)으로 넓히고 원인을 대분류 5개로 묶어 **8차 사람 검수 20/20 통과** → 최신 건수는 [painpoint_def.md](painpoint_def.md) v3. 점수·순위는 그대로
 > **결정 (2026-11-16): A안 — 점수 그대로** → [painpoint_def.md](painpoint_def.md) v2 · [priority.html](priority.html) · [journey_map.html](journey_map.html) 배지 · [README.md](README.md) 반영
 
 ## 0. VOC를 어디까지 믿나 (voc_review.md "결과를 쓸 때" 그대로)
