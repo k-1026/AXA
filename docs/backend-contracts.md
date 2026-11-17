@@ -64,6 +64,7 @@
 | `consent.required` | 422 | 필수 동의 없음 |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
+| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`. 병원 정보 조회(목록·상세)는 막지 않음 |
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
@@ -86,8 +87,9 @@
 | `consent.service.record(db, patient_id, kind, version, lang, request_id=None)` | A | A | → `ConsentOut` |
 | `notification.service.notify(patient_id, event, payload)` | A | B (상태 변경 후) | 데모는 콘솔 출력 |
 | `audit.service.log_action(db, tenant_id, actor, action, ref)` | B | A·B | 기록만 |
-| `hospital.service.get_basic(db, hospital_id)` | A | B (대시보드 병원 정보) | → `HospitalBasic` |
+| `hospital.service.get_basic(db, hospital_id)` | A | A (요청서 제출 전 확인)·B (대시보드 병원 정보) | → `HospitalBasic`(`id`, `ykiho`, `name_ko`, `name_en`, `type_code`, `sggu`, `addr_ko`, `tel`, `is_registered_facility`, `is_demo`, `can_request`) / 없으면 `not_found` |
 
+- **요청 가능 병원**: `POST /hospitals/{id}/booking-requests`는 `booking.service.create_request()`를 부르기 **전에** A가 `get_basic().can_request`를 확인하고 false면 403 `hospital.not_requestable`. `can_request` = `is_registered_facility` + `status_verdict = normal` (해외진출법 제24조 제1항 제3호, compliance 2-1). 시연용 가상 병원(`is_demo`)은 시드를 만들 때 포함 여부를 이 줄에 추가
 - 챗봇(A)도 `booking.service.list_for_patient`·`get_for_patient`를 부른다 — "내 요청 상태" 답과 제출 확인용, `modules/chatbot/bookings.py` 한 곳에서만. `booking` 모듈이 올라오기 전에는 "요청 없음"으로 동작
 
 ## 6. 요청서 입력 (`BookingCreate`, 초안)
@@ -139,6 +141,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `can_request` 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-12 | 4 | 가입 동의 `terms`·`privacy`는 현재 문서 버전(프론트 `features/legal` `updated`, 지금 `2026-11-03`)만 받음 → 아니면 422 `validation` + `detail.invalid[{kind, version, current}]` | A | `backend-review-fix` → `backend` |
 | 2026-11-12 | 4 | `auth.too_many_attempts` 구현 (로그인·`DELETE /me` 비밀번호 확인) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
