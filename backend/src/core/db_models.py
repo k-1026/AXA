@@ -9,5 +9,6 @@ from modules.booking import models as booking_models  # noqa: F401
 from modules.chatbot import models as chatbot_models  # noqa: F401
 from modules.consent import models as consent_models  # noqa: F401
 from modules.fx import models as fx_models  # noqa: F401
+from modules.hospital import models as hospital_models  # noqa: F401
 from modules.patient import models as patient_models  # noqa: F401
 from modules.tenant import models as tenant_models  # noqa: F401

@@ -167,7 +167,7 @@ backend/
 
 | 메서드·경로 | 로그인 | 하는 일 | 주의 |
 |---|---|---|---|
-| `GET /hospitals` | X | 검색·필터(지역·진료과·요일·시간·휴진·등록·요청 가능), 정렬(`distance`·`name`만) | 구독 여부로 정렬 X |
+| `GET /hospitals` | X | 검색·필터(지역·진료과·요일·시간·휴진·등록·요청 가능), 정렬(`distance`·`name`만). 구현(11/17): `sggu`·`dept`·`registered`·`open_on`·`ids`, 응답에 `is_registered_facility`·`can_request` | 구독 여부로 정렬 X |
 | `GET /hospitals/{id}` | X | 상세 + 진료시간 + 출처·수집일 + 전화·이메일 | 다른 연락 경로 항상 포함 |
 | `GET /prices/stats?item=&region=` | X | 지역 통계 | 5곳 미만 없음 |
 | `POST /chatbot/ask` | **O** | 챗봇 질문 → 답 + 카드 | 의료 판단 거절, 응급은 119 안내. 요청 횟수 제한. 상세는 [contracts 7절](backend-contracts.md) |
