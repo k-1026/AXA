@@ -1,6 +1,6 @@
 # 정보 구조 (IA) — 사이트맵 · 내비게이션 · 라벨
 
-> 작성 2026-11-12 · 입력: [userflow.md](userflow.md) · [scenario.md](scenario.md) · 실제 경로 `apps/web-platform/src/main.tsx` · 메뉴 이름 `ko.json` `nav` (5개 언어)
+> 작성 2026-11-12 · 입력: [userflow.md](userflow.md) (사용자 플로우) · [processflow.md](processflow.md) (프로세스 플로우, 11/17 분리) · [scenario.md](scenario.md) · 실제 경로 `apps/web-platform/src/main.tsx` · 메뉴 이름 `ko.json` `nav` (5개 언어)
 > 규칙: 홈에서 세 번 이내 · 라벨은 사용자의 말 · 어떤 스토리에도 안 쓰이는 화면은 MVP에서 뺌
 
 ## 1. 사이트맵 (깊이 3 이내)

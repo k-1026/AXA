@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프로세스 플로우</title>
+<!-- theme:begin (design/theme.css, design/inline_theme.py로 갱신) -->
+<style>
+/* 메디대구 문서용 공통 테마 — apps/web-platform/src/styles.css의 색·글꼴·모서리를 그대로 가져옴
+   쓰는 곳: painpoint/*.html · bm/bm_canvas.html · spec/userflow.html
+   규칙: 색은 아래 토큰만 쓰고, 페이지 안에서 새 색을 만들지 않음 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+:root {
+  /* 웹사이트와 같은 값 */
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-muted: #eef1f5;
+  --border: #d7dce3;
+  --text: #1f2933;
+  --ink: #172b4d;
+  --text-muted: #5b6673;
+  --accent: #1f6feb;
+  --accent-soft: #e3edfd;
+  --accent-line: rgb(31 111 235 / 0.25);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow-hover: 0 4px 16px rgb(31 111 235 / 0.12);
+  /* 문서용 의미 색 (웹사이트 파랑과 겹치지 않게 최소한만) */
+  --pain: #d6336c;        /* Top 3 · 최저점 · 손 넘김 */
+  --pain-soft: #fdeef3;
+  --assume: #b26a00;      /* 가정값 · [가정] */
+  --assume-soft: #fff6e5;
+  --good: #2b8a3e;        /* 기회 · 해소 */
+  --good-soft: #ebf7ee;
+  --neutral: #8a94a3;     /* 보류 · 범위 밖 */
+  --font: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+}
+/* 다크 모드 없음 — 웹사이트(apps/web-platform)도 늘 밝은 화면이라 문서도 같게 둠 */
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
+
+/* 한 장(1280×720) 레이아웃 */
+.page { width: 1280px; height: 720px; margin: 0 auto; padding: 24px 36px 14px; display: flex; flex-direction: column; gap: 12px; }
+.page.tall { height: auto; min-height: 720px; }
+
+/* 머리 */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 6px; }
+.eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { color: var(--text-muted); font-size: 13.5px; margin-top: 6px; }
+.pill { background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+
+/* 카드 */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.card-sm { border-radius: var(--radius-sm); padding: 8px 10px; }
+.card h2, .card h3 { margin: 0 0 4px; color: var(--ink); }
+.card h2 { font-size: 13px; font-weight: 800; display: flex; align-items: baseline; gap: 6px; }
+.card h2 .n { color: var(--accent); }
+.card h2 small { color: var(--text-muted); font-weight: 600; font-size: 11px; }
+
+/* 작은 부품 */
+.chip { display: inline-block; background: var(--surface-muted); color: var(--text); border-radius: 999px; padding: 1px 9px; font-size: 11.5px; margin: 0 3px 3px 0; }
+.chip.accent { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--pain); color: #fff; font-size: 11px; font-weight: 800; margin-right: 4px; vertical-align: 1px; }
+.badge.muted { background: var(--neutral); }
+.badge.accent { background: var(--accent); }
+.ev { color: var(--text-muted); font-size: 10.5px; }
+.src { color: var(--text-muted); font-size: 10.5px; margin-top: auto; }
+.assume { color: var(--assume); font-weight: 700; }
+.pain-t { color: var(--pain); font-weight: 700; }
+.good-t { color: var(--good); font-weight: 700; }
+.muted-t { color: var(--neutral); }
+.foot { color: var(--text-muted); font-size: 11px; display: flex; justify-content: space-between; gap: 16px; margin-top: auto; }
+
+/* 표 */
+table.t { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; font-size: 12.5px; }
+table.t th { background: var(--surface-muted); color: var(--text-muted); text-align: left; font-size: 11.5px; font-weight: 700; padding: 8px 10px; }
+table.t td { padding: 7px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+table.t tr.hl td { background: var(--pain-soft); }
+
+/* 설명 상자 */
+.callout { border-radius: var(--radius-sm); padding: 11px 14px; font-size: 12.5px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.callout b { color: var(--ink); }
+.callout.good { background: var(--good-soft); border-color: transparent; }
+.callout.solid { background: var(--accent); color: #fff; border: 0; }
+.callout.solid b { color: #fff; }
+</style>
+<!-- theme:end -->
+<style>
+  .flow { padding: 12px 14px 8px; }
+  .flow svg { display: block; width: 100%; height: auto; }
+  .nd { fill: var(--surface); stroke: var(--border); stroke-width: 1.3; }
+  .nd.main { stroke: var(--accent-line); }
+  .nd.opt { stroke-dasharray: 5 4; }
+  .nd.ex { fill: var(--pain-soft); stroke: var(--pain); stroke-width: 1.2; }
+  .nd.end { fill: var(--accent); stroke: none; }
+  .nd.start { fill: var(--accent-soft); stroke: var(--accent-line); }
+  .nd.ok { fill: var(--good-soft); stroke: var(--good); stroke-width: 1.1; }
+  .dm { fill: var(--surface-muted); stroke: var(--text-muted); stroke-width: 1.2; }
+  .dm.u { fill: var(--accent-soft); stroke: var(--accent); }
+  .t1 { font: 700 13px var(--font); fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+  .t2 { font: 500 10.5px var(--font); fill: var(--text-muted); text-anchor: middle; dominant-baseline: central; }
+  .tq { font: 700 11px var(--font); fill: var(--text); text-anchor: middle; dominant-baseline: central; }
+  .tex { font: 700 11.5px var(--font); fill: var(--pain); text-anchor: middle; dominant-baseline: central; }
+  .tok { font: 700 11.5px var(--font); fill: var(--good); text-anchor: middle; dominant-baseline: central; }
+  .tend { font: 700 12.5px var(--font); fill: #fff; text-anchor: middle; dominant-baseline: central; }
+  .us { font: 800 10.5px var(--font); fill: var(--accent); }
+  .ar { stroke: var(--text-muted); stroke-width: 1.5; fill: none; }
+  .ar.dash { stroke-dasharray: 5 4; }
+  .ar.dot { stroke-dasharray: 2 3; }
+  .ar.ex { stroke: var(--pain); }
+  .lb { font: 600 10.5px var(--font); fill: var(--text-muted); }
+  .lb.y { fill: var(--good); }
+  .lb.n { fill: var(--pain); }
+  .rowt { font: 800 12px var(--font); fill: var(--ink); }
+  .lane { fill: var(--surface-muted); opacity: .55; }
+  .lane.alt { fill: var(--accent-soft); opacity: .45; }
+  .laneh { fill: var(--accent); }
+  .lanet { font: 800 12.5px var(--font); fill: #fff; text-anchor: middle; dominant-baseline: central; }
+  .lanes { font: 500 10.5px var(--font); fill: var(--text-muted); text-anchor: middle; }
+  .note { fill: var(--surface-muted); stroke: none; }
+  .nt { font: 500 11.5px var(--font); fill: var(--text); }
+  .nt b, .nt .b { font-weight: 800; fill: var(--ink); }
+  .bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .bottom .card { padding: 9px 14px; font-size: 11.5px; line-height: 1.5; }
+  .bottom ul { margin: 2px 0 0; padding-left: 16px; }
+  .bottom li { margin: 1px 0; }
+  .st { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; }
+  .st code { font: 700 11.5px var(--font); background: var(--surface-muted); border-radius: 6px; padding: 1px 7px; color: var(--ink); }
+  .st code.g { background: var(--good-soft); color: var(--good); }
+  .st code.p { background: var(--pain-soft); color: var(--pain); }
+  .tabs { display: flex; gap: 8px; font-size: 12px; font-weight: 700; }
+  .tabs a { color: var(--accent); text-decoration: none; background: var(--accent-soft); border-radius: 999px; padding: 4px 12px; }
+  .tabs a.on { background: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page tall">
+  <div class="head">
+    <div>
+      <div class="eyebrow">spec · 프로세스 플로우 (11/17 사용자 플로우와 분리)</div>
+      <h1>화면 뒤에서 <em>누가 무엇을 판단하나</em> — 환자 · 시스템 · AI · 병원 코디</h1>
+      <div class="lede">린이 화면에서 한 행동마다 메디대구 시스템·AI·병원 코디가 하는 일과 판단 · 예약 상태 이름은 백엔드(ai/agent/tools/booking_store.py)와 같음</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><div class="tabs"><a href="userflow.html" class="">사용자 플로우</a><a href="processflow.html" class="on">프로세스 플로우</a></div><span class="pill">4개 레인 · 판단 6개 · 예약 상태 6개</span></div>
+  </div>
+  <div class="card flow">
+    <svg viewBox="0 0 1208 1010" role="img" aria-label="프로세스 플로우">
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--text-muted)"/></marker>
+  <marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--pain)"/></marker>
+</defs>
+<rect class="lane" x="0" y="0" width="214" height="1010" rx="12"/>
+<rect class="laneh" x="0" y="0" width="214" height="34" rx="12"/>
+<text class="lanet" x="107" y="17">환자 (린)</text>
+<text class="lanes" x="107" y="50">웹 화면에서 하는 일</text>
+<rect class="lane alt" x="226" y="0" width="490" height="1010" rx="12"/>
+<rect class="laneh" x="226" y="0" width="490" height="34" rx="12"/>
+<text class="lanet" x="471" y="17">메디대구 시스템</text>
+<text class="lanes" x="471" y="50">판단 · 저장 · 알림</text>
+<rect class="lane" x="728" y="0" width="240" height="1010" rx="12"/>
+<rect class="laneh" x="728" y="0" width="240" height="34" rx="12"/>
+<text class="lanet" x="848" y="17">AI (챗봇 · 에이전트)</text>
+<text class="lanes" x="848" y="50">답 · 요약 · 초안</text>
+<rect class="lane alt" x="980" y="0" width="228" height="1010" rx="12"/>
+<rect class="laneh" x="980" y="0" width="228" height="34" rx="12"/>
+<text class="lanet" x="1094" y="17">병원 코디</text>
+<text class="lanes" x="1094" y="50">병원 대시보드</text>
+<text x="8" y="70" class="us">1 · 회원가입</text>
+<rect class="nd main" x="17" y="78" width="180" height="44" rx="12"/>
+<text class="t1" x="107" y="92">회원가입</text><text class="t2" x="107" y="109">거주국 선택 · 필수 동의</text>
+<path class="ar " d="M197,100 H264" marker-end="url(#a)"/>
+<path class="dm " d="M320,68 L375,100 L320,132 L265,100 z"/>
+<text class="tq" x="320" y="93">거주국이</text><text class="tq" x="320" y="107">한국?</text>
+<path class="ar ex" d="M375,100 H438" marker-end="url(#ap)"/>
+<text x="383" y="92" class="lb n" style="text-anchor:start">예</text>
+<rect class="nd ex" x="442" y="78" width="196" height="44" rx="10"/>
+<text class="tex" x="540" y="92">E4 예약 권한 끔</text><text class="t2" x="540" y="109">정보 · 챗봇만 (11/13 결정)</text>
+<path class="ar " d="M320,132 V158" marker-end="url(#a)"/>
+<text x="326" y="150" class="lb y" style="text-anchor:start">아니오</text>
+<rect class="nd ok" x="240" y="160" width="160" height="40" rx="10"/>
+<text class="tok" x="320" y="172">계정 저장</text><text class="t2" x="320" y="189">예약 가능 · 동의 버전 기록</text>
+<text x="8" y="260" class="us">2 · 병원 상세 · 가격 열기</text>
+<rect class="nd main" x="17" y="268" width="180" height="44" rx="12"/>
+<text class="t1" x="107" y="282">병원 상세 · 가격 열기</text><text class="t2" x="107" y="299">로그인 없이</text>
+<path class="ar " d="M197,290 H238" marker-end="url(#a)"/>
+<rect class="nd main" x="240" y="268" width="160" height="44" rx="12"/>
+<text class="t1" x="320" y="282">공공데이터 조회</text><text class="t2" x="320" y="299">진료시간 · 공공 가격</text>
+<path class="ar " d="M400,290 H428" marker-end="url(#a)"/>
+<path class="dm " d="M480,258 L530,290 L480,322 L430,290 z"/>
+<text class="tq" x="480" y="283">값이</text><text class="tq" x="480" y="297">있나?</text>
+<path class="ar ex" d="M530,290 H568" marker-end="url(#ap)"/>
+<text x="534" y="282" class="lb n" style="text-anchor:start">아니오</text>
+<rect class="nd ex" x="568" y="268" width="148" height="44" rx="10"/>
+<text class="tex" x="642" y="282">E1 · E2 정보 없음</text><text class="t2" x="642" y="299">숫자 안 지어냄</text>
+<path class="ar " d="M480,322 V346" marker-end="url(#a)"/>
+<text x="486" y="338" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd ok" x="395" y="348" width="170" height="36" rx="10"/>
+<text class="tok" x="480" y="366">출처 · 확인일 붙여 표시</text>
+<path class="ar dash" d="M395,366 H107 V316" marker-end="url(#a)"/>
+<text x="115" y="360" class="lb " style="text-anchor:start">화면에 표시</text>
+<text x="8" y="450" class="us">3 · 챗봇 질문</text>
+<rect class="nd main" x="17" y="458" width="180" height="44" rx="12"/>
+<text class="t1" x="107" y="472">챗봇에 질문</text><text class="t2" x="107" y="489">로그인 후</text>
+<path class="ar " d="M197,480 H756" marker-end="url(#a)"/>
+<text x="210" y="472" class="lb " style="text-anchor:start">질문 전달</text>
+<rect class="nd main" x="758" y="458" width="180" height="44" rx="12"/>
+<text class="t1" x="848" y="472">공식 출처 검색</text><text class="t2" x="848" y="489">등록 병원 · 공공데이터</text>
+<path class="ar " d="M848,502 V524" marker-end="url(#a)"/>
+<path class="dm " d="M848,524 L903,556 L848,588 L793,556 z"/>
+<text class="tq" x="848" y="549">근거를</text><text class="tq" x="848" y="563">찾았나?</text>
+<path class="ar " d="M848,588 V610" marker-end="url(#a)"/>
+<text x="854" y="604" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd ok" x="758" y="610" width="180" height="40" rx="10"/>
+<text class="tok" x="848" y="622">출처 붙은 답</text><text class="t2" x="848" y="639">의료 판단은 안 함</text>
+<path class="ar ex" d="M793,556 H710" marker-end="url(#ap)"/>
+<text x="748" y="550" class="lb n" style="text-anchor:start">아니오</text>
+<rect class="nd ex" x="552" y="534" width="156" height="44" rx="10"/>
+<text class="tex" x="630" y="548">E3 답 못 함</text><text class="t2" x="630" y="565">'직접 상담 요청' 버튼</text>
+<path class="ar dash" d="M758,630 H107 V502" marker-end="url(#a)"/>
+<text x="115" y="624" class="lb " style="text-anchor:start">답 표시</text>
+<text x="8" y="690" class="us">4 · 상담 예약 요청</text>
+<rect class="nd main" x="17" y="698" width="180" height="44" rx="12"/>
+<text class="t1" x="107" y="712">요청서 보내기</text><text class="t2" x="107" y="729">날짜 1~3개 · 언어 · 동의</text>
+<path class="ar " d="M197,720 H258" marker-end="url(#a)"/>
+<path class="dm " d="M320,685 L381,720 L320,755 L259,720 z"/>
+<text class="tq" x="320" y="713">요청서</text><text class="tq" x="320" y="727">검사 통과?</text>
+<text x="390" y="760" class="lb" style="text-anchor:start">검사: 등록 병원 · 빈칸 · 지난 날짜 · 필수 동의 · 같은 병원 중복</text>
+<path class="ar " d="M381,720 H482" marker-end="url(#a)"/>
+<text x="388" y="712" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd ok" x="483" y="698" width="150" height="44" rx="10"/>
+<text class="tok" x="558" y="712">예약 만들기</text><text class="t2" x="558" y="729">상태 pending · 병원 알림</text>
+<path class="ar " d="M633,720 H756" marker-end="url(#a)"/>
+<rect class="nd main" x="758" y="698" width="180" height="44" rx="12"/>
+<text class="t1" x="848" y="712">요청 요약 · 답장 초안</text><text class="t2" x="848" y="729">환자 언어로</text>
+<path class="ar " d="M938,720 H1002" marker-end="url(#a)"/>
+<rect class="nd main" x="1004" y="698" width="180" height="44" rx="12"/>
+<text class="t1" x="1094" y="712">요청함에서 초안 확인</text><text class="t2" x="1094" y="729">AI 초안 고치기</text>
+<path class="ar ex" d="M320,755 V790 H107 V746" marker-end="url(#ap)"/>
+<text x="117" y="784" class="lb n" style="text-anchor:start">아니오 · 오류 안내 → 고쳐서 다시</text>
+<path class="ar " d="M1094,742 V798" marker-end="url(#a)"/>
+<path class="dm " d="M1094,798 L1144,830 L1094,862 L1044,830 z"/>
+<text class="tq" x="1094" y="823">코디가</text><text class="tq" x="1094" y="837">승인?</text>
+<path class="ar ex" d="M1144,830 H1194 V720 H1186" marker-end="url(#ap)"/>
+<text x="1150" y="824" class="lb n" style="text-anchor:start">아니오</text>
+<text x="1154" y="850" class="lb n" style="text-anchor:start">발송 안 함</text>
+<path class="ar " d="M1094,862 V886" marker-end="url(#a)"/>
+<text x="1100" y="878" class="lb y" style="text-anchor:start">예</text>
+<rect class="nd main" x="994" y="892" width="200" height="48" rx="12"/>
+<text class="t1" x="1094" y="908">확정 · 다른 날짜 제안 · 거절</text><text class="t2" x="1094" y="925">중 하나 + 답장 발송</text>
+<text x="8" y="886" class="us">5 · 결과 반영</text>
+<path class="ar " d="M994,916 H552" marker-end="url(#a)"/>
+<rect class="nd ok" x="410" y="894" width="140" height="44" rx="10"/>
+<text class="tok" x="480" y="908">상태 바꾸기</text><text class="t2" x="480" y="925">환자 알림</text>
+<path class="ar " d="M410,916 H197" marker-end="url(#a)"/>
+<rect class="nd main" x="17" y="894" width="180" height="44" rx="12"/>
+<text class="t1" x="107" y="908">예약 관리에서 확인</text><text class="t2" x="107" y="925">제안이면 수락 · 취소</text>
+<path class="ar dash" d="M107,938 V966 H480 V942" marker-end="url(#a)"/>
+<text x="147" y="960" class="lb " style="text-anchor:start">수락 → 확정 · 취소 → 취소</text>
+    </svg>
+  </div>
+  <div class="bottom">
+    <div class="card"><h2>예약 상태 <small>백엔드 TRANSITIONS와 같음</small></h2>
+      <div class="st">병원: <code>pending</code> 요청됨 → <code class="g">confirmed</code> 확정 · <code class="p">rejected</code> 거절 · <code>proposed</code> 제안</div>
+      <div class="st" style="margin-top:4px">환자: <code>proposed</code> → <code class="g">confirmed</code> 수락 · <code>pending</code>·<code>proposed</code> → <code class="p">cancelled</code> 취소</div>
+      <div class="st" style="margin-top:4px"><code>expired</code> 병원 무응답 만료 — 기한 <span class="assume">[U] 미정</span></div></div>
+    <div class="card"><h2>지키는 규칙</h2>
+      <ul><li><b>AI는 초안만</b>, 발송은 코디 승인 후 (BM 핵심 활동)</li><li>공공 자료가 없으면 숫자를 만들지 않음 (E1·E2)</li><li>챗봇은 의료 판단을 하지 않고 병원 상담으로 넘김 (E3)</li><li>같은 병원에 열린 요청(pending·proposed)이 있으면 새 요청 막음</li></ul></div>
+    <div class="card"><h2>담당 <small>개발 영역</small></h2>
+      <ul><li>환자 화면 · 병원 대시보드 — 프론트</li><li>회원가입 · 거주국 · 동의 · 요청서 검사 — 백엔드 A</li><li>예약 상태 · 병원 계정 · 알림 — 백엔드 B</li><li>출처 검색 · 요약 · 초안 — AI</li></ul></div>
+</div>
+  <div class="foot"><span>근거: spec/processflow.md (Mermaid) · spec/userflow.html · backend 브랜치 booking_store.py TRANSITIONS · bm/bm_canvas.md 핵심 활동</span><span>2026-11-17 · 메디대구</span></div>
+</div>
+</body>
+</html>

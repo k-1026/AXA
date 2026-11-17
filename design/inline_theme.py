@@ -18,6 +18,7 @@ PAGES = [
     "painpoint/priority.html",
     "bm/bm_canvas.html",
     "spec/userflow.html",
+    "spec/processflow.html",
 ]
 BLOCK = "<!-- theme:begin (design/theme.css, design/inline_theme.py로 갱신) -->\n<style>\n" + THEME.strip() + "\n</style>\n<!-- theme:end -->"
 LINK = re.compile(r'<link rel="stylesheet" href="\.\./design/theme\.css">')
