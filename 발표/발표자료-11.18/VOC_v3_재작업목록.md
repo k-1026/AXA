@@ -23,7 +23,7 @@
 | 2 | `painpoint/priority.html` | research-data | C-1 "VOC 5건" → 8건, 화면 VOC 숫자 v3로 |
 | 3 | `painpoint/voc_반영_재검토.md` | research-data | 11/16 기록이라 본문은 두고, 맨 위에 "v3에서 건수 갱신·8차 통과" 한 줄 |
 | 4 | `bm/redteam_log.md` | research-data | 11/16 VOC 절의 674 · 242건에 v3 숫자(803 · 가격 대분류 299) 추가 |
-| 5 | `발표자료-11.17` 1장 표지 | presentation | "VOC 674건 + 대만·대구 90건" → **VOC 803건 (출처 3종) · 8차 검수 통과** |
+| 5 | `발표자료-11.18` 1장 표지 | presentation | "VOC 674건 + 대만·대구 90건" → **VOC 803건 (출처 3종) · 8차 검수 통과** |
 | 6 | 2장 VOC 1차 | presentation | 막대를 **대분류 5개 · 출처 3종**으로, 검수 카드 "6회, 최고 6/10" → **1~8차, 8차 20/20 통과** |
 | 7 | 3장 VOC 2차 대만·대구 | presentation | 막대를 대분류로 (병원 정보 35/대구 25 1위), "90건·사람 검수 전" → 89건·8차 검수에 6건 포함 |
 | 8 | 4장 페인포인트 | presentation | Top 카드 VOC 숫자: 88 · 8 · 273, "VOC 674" 문구 |
