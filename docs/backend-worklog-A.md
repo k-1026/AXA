@@ -17,6 +17,13 @@
 
 ## 기록
 
+### 2026-11-17 (2) · backend-A-hospital · Claude (로컬 확인)
+- 한 일: 프론트(5173)·백엔드(8000) 로컬 실행 확인. 백엔드를 **로컬 SQLite**(0001~0006 + 실제 데이터)로 켜면 `/hospitals`·상세·정렬 422·프론트에서 호출(CORS) 모두 정상. **Supabase 설정으로 켜면 서버는 뜨지만 DB를 쓰는 요청은 500**(`ImportError`, psycopg)
+- 원인: 이 PC의 윈도우 **스마트 앱 컨트롤이 차단 모드**(`VerifiedAndReputablePolicyState = 1`), CodeIntegrity 로그에 psycopg DLL 차단(11/17 14:59·15:34). 11/4~5에는 이 PC에서 Supabase 연결이 됐음(아래 기록) → 그 뒤 차단 모드로 바뀐 것으로 보임. B PC도 11/12 같은 증상
+- 정한 것(사용자): **Supabase 연결 확인은 다른 PC에서**. 이 PC는 SQLite로만 확인. (대안: PostgreSQL 공식 libpq 설치 후 PATH — 서명된 DLL이라 통과 가능성, 미확인)
+- 확인: 두 Supabase 프로젝트 모두 회원·동의·세션·챗봇 대화 0건 (예전 테스트 계정은 11/5 초기화로 삭제)
+- 바뀐 계약: 없음 · 테스트: 342개 통과 (변경 없음)
+
 ### 2026-11-17 · backend-A-hospital · Claude (Supabase 적용)
 - 한 일: **Supabase 공용 DB에 `0005`·`0006` 적용 + 병원 4,242곳 적재** ([supabase-병원-0006-적용.md](supabase-병원-0006-적용.md) 절차 그대로, macOS에서 실행). DB가 `0004`에 있어서(0005 챗봇 대화 테이블도 미적용이었음, 같은 선형 체인이라 분기 없음) `upgrade head`로 둘 다 적용. 세션 풀러(5432)로 실행 (`.env`는 6543 그대로, 실행 시만 환경변수로 바꿈)
 - **같은 날 두 번째 프로젝트에도 적용**: 이 PC `.env`가 `afypgiqkrohgoybqhtsi`(`aws-1`, 세션 풀러 5432 — 아래 교차 확인의 `AXA` 프로젝트로 보임)로 바뀌어 빈 DB에 `0001→0006` 전체 적용 + 병원 재적재. 아래 확인값 동일. ⚠️ 지금은 **`medi`·`AXA` 두 프로젝트 모두 같은 스키마·데이터** → 팀이 공용 DB를 하나로 정하고 각자 `.env`·Vercel 환경변수를 맞출 것
