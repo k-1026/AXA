@@ -33,6 +33,7 @@
     "plastic": "Plastic surgery",
     "internal": "Internal medicine",
     "ophthalmology": "Ophthalmology",
+    "other": "Other",
     "notReady": "Data coming soon"
   },
   "popup": {

@@ -19,6 +19,7 @@ const DEPT_WORDS: Record<DepartmentKey, string[]> = {
   plastic: ['성형', 'plastic', '整形', 'thẩm mỹ'],
   internal: ['내과', 'internal', '内科', '內科', 'nội'],
   ophthalmology: ['안과', 'eye', 'ophthal', '眼科', 'mắt'],
+  other: [],
 };
 
 const TOPIC_WORDS: Record<Topic, string[]> = {
@@ -43,7 +44,7 @@ function askDept(t: TFunction): BotReply {
   return {
     text: t('chat.bot.askDept'),
     topic: 'hospital',
-    chips: DEPARTMENTS.map((dept) => ({ label: t(`dept.${dept}`), action: { kind: 'dept', dept } })),
+    chips: DEPARTMENTS.filter((d) => d !== 'other').map((dept) => ({ label: t(`dept.${dept}`), action: { kind: 'dept', dept } })),
   };
 }
 

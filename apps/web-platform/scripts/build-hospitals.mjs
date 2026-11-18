@@ -58,6 +58,21 @@ if (!registered) {
       '  받기: git restore --source origin/research-data -- data/processed/daegu_registered_institutions.csv',
   );
 }
+// 등록 유치기관 진료시간 직접 채움 (2026-11-18, data/etl/build_registered_hours.py 결과)
+// 심평원 API에 없는 요일을 채움. override=Y는 검증에서 API 값이 틀린 것으로 확인돼 API 값도 바꿈 (백엔드 loader와 같은 규칙)
+const manualPath = resolve(repo, 'data/processed/daegu_hours_manual.csv');
+const manualHours = new Map(
+  existsSync(manualPath) ? readCsv('daegu_hours_manual.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r]) : [],
+);
+// 10/28에 사람이 확인한 값 (중구·수성구 직접 채움, 수성구 외국인환자 유치기관). 평일·토·일 칸이 "HH:MM-HH:MM"일 때만 씀
+const oldManual = new Map();
+for (const [name, ok] of [
+  ['manual_fill_junggu_suseonggu.csv', (r) => r.fill_status === 'filled'],
+  ['suseong_foreign_patient_facilities.csv', (r) => r.ykiho && r.weekday_hours],
+]) {
+  if (!existsSync(resolve(interim, name))) continue;
+  for (const r of readCsv(name).filter(ok)) oldManual.set(r.ykiho, r);
+}
 // 홈페이지·인스타그램 (팀 수집 파일에서 사이트 병원과 맞는 곳만, 블로그·네이버 제외)
 const links = new Map(readCsv('daegu_hospital_links.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r]));
 // 대표사진 주소 (팀 수집 파일을 요양기관 기호로 맞춘 것). 사진 파일은 저장하지 않고 원래 주소로 표시
@@ -77,7 +92,38 @@ function departments(r) {
   const medical = !r.clCdNm.startsWith('치과') && !r.clCdNm.startsWith('한');
   if (medical && r.yadmNm.includes('내과')) depts.push('internal');
   if (medical && r.yadmNm.includes('안과')) depts.push('ophthalmology');
-  return depts.sort((a, b) => r.yadmNm.includes(DEPT_NAMES[b]) - r.yadmNm.includes(DEPT_NAMES[a]));
+  depts.sort((a, b) => r.yadmNm.includes(DEPT_NAMES[b]) - r.yadmNm.includes(DEPT_NAMES[a]));
+  // 4개 진료과가 아닌 등록 유치기관(치과·한방·종합병원 등)은 "기타"
+  return depts.length ? depts : ['other'];
+}
+
+// 한 요일의 진료시간: 심평원 API → 직접 채움(daegu_hours_manual) → 10/28 직접 채움 순
+const RANGE = /^(\d\d:\d\d)-(\d\d:\d\d)$/;
+const fromRange = (v) => {
+  const m = RANGE.exec((v ?? '').trim());
+  return m && m[1] < m[2] ? [m[1], m[2]] : null;
+};
+function weekOf(r) {
+  const api = DAYS.map((d) => {
+    const start = hhmm(r[`trmt${d}Start`]);
+    const end = hhmm(r[`trmt${d}End`]);
+    return start && end ? [start, end] : null;
+  });
+  const m = manualHours.get(r.ykiho);
+  if (m) {
+    const override = m.override?.toUpperCase() === 'Y';
+    return DAYS.map((d, i) => {
+      const v = m[d.toLowerCase()];
+      if (override && v === '휴진') return null;
+      return (override ? fromRange(v) ?? api[i] : api[i] ?? fromRange(v));
+    });
+  }
+  const o = oldManual.get(r.ykiho);
+  if (o && !api.some(Boolean)) {
+    const wk = fromRange(o.weekday_hours);
+    if (wk) return [wk, wk, wk, wk, wk, fromRange(o.sat_hours), fromRange(o.sun_hours)];
+  }
+  return api;
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -103,16 +149,14 @@ const collator = new Intl.Collator('ko', { ignorePunctuation: true });
 
 const items = hours
   .map((r) => ({ r, depts: departments(r) }))
-  .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos && !excluded.has(r.ykiho) && registered?.has(r.ykiho))
-  .map(({ r, depts }) => {
+  .map(({ r, depts }) => ({ r, depts, week: weekOf(r) }))
+  // 등록 유치기관 중 진료시간(평일)을 찾은 곳만 (심평원·카카오·네이버·국립중앙의료원·직접 확인, 2026-11-18)
+  .filter(({ r, week }) => r.XPos && r.YPos && !excluded.has(r.ykiho) && registered?.has(r.ykiho) && week.slice(0, 5).some(Boolean))
+  .map(({ r, depts, week }) => {
     const b = basics.get(r.ykiho) ?? {};
     const link = links.get(r.ykiho);
+    const m = manualHours.get(r.ykiho);
     const name = r.yadmNm.replace(/&amp;/g, '&');
-    const week = DAYS.map((d) => {
-      const start = hhmm(r[`trmt${d}Start`]);
-      const end = hhmm(r[`trmt${d}End`]);
-      return start && end ? [start, end] : null;
-    });
     // 빈 값은 저장하지 않음 → 화면에서 빈칸
     return {
       id: r.ykiho,
@@ -129,12 +173,12 @@ const items = hours
       lng: Number(r.XPos),
       depts,
       hours: week.some(Boolean) ? week : undefined,
-      lunchWeek: tidyTime(r.lunchWeek) || undefined,
-      lunchSat: tidyTime(r.lunchSat) || undefined,
+      lunchWeek: tidyTime(r.lunchWeek) || m?.lunch_week || undefined,
+      lunchSat: tidyTime(r.lunchSat) || m?.lunch_sat || undefined,
       rcvWeek: tidyTime(r.rcvWeek) || undefined,
       rcvSat: tidyTime(r.rcvSat) || undefined,
-      sunday: closedNote(r.noTrmtSun),
-      holiday: closedNote(r.noTrmtHoli),
+      sunday: closedNote(r.noTrmtSun) ?? (m?.sun === '휴진' ? 'closed' : undefined),
+      holiday: closedNote(r.noTrmtHoli) ?? closedNote(m?.holiday ?? ''),
       emergencyDay: yn(r.emyDayYn),
       emergencyNight: yn(r.emyNgtYn),
       parking: r.parkQty ? Number(r.parkQty) : undefined,

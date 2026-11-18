@@ -33,6 +33,7 @@
     "plastic": "整形外科",
     "internal": "內科",
     "ophthalmology": "眼科",
+    "other": "其他",
     "notReady": "資料準備中"
   },
   "popup": {
