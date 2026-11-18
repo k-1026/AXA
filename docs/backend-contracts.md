@@ -43,7 +43,7 @@
 | `sid` | 로그인 세션 id (`auth_sessions.id`) | 없음 (직원도 필요하면 B가 같은 방식으로) |
 | `exp` | 만료 시각 | 만료 시각 |
 
-- 발급: A(`auth`). 검증 의존성(`core/security.py`): `current_patient()`, `current_staff()` — 병원 API는 `current_staff()`로 받은 `tenant_id`로만 조회
+- 발급: A(`auth`). 환자 `POST /auth/patient/signup`·`login`, 병원 관계자 `POST /auth/staff/signup`(입점 = 병원 계정 + 대표 직원 `owner`, 등록 유치기관·영업 중만, `{email, password, hospital_id, registration_no, consents}`)·`POST /auth/staff/login` — **가입할 때 환자/병원을 나눔**. 직원 토큰은 세션 없음. 검증 의존성(`core/security.py`): `current_patient()`, `current_staff()` — 병원 API는 `current_staff()`로 받은 `tenant_id`로만 조회
 - `current_patient()`는 요청마다 DB에서 세션 확인: 로그아웃·만료·탈퇴(계정 삭제)면 401 `auth.required` → **로그아웃하면 그 토큰은 바로 못 씀** (`POST /auth/patient/logout`, 다른 기기 세션은 유지)
 
 ## 4. 에러 형식·코드
@@ -57,7 +57,8 @@
 | `auth.required` | 401 | 로그인 필요 |
 | `auth.forbidden` | 403 | 역할이 다름 (환자 토큰으로 병원 API 등) |
 | `auth.invalid_credentials` | 401 | 이메일 또는 비밀번호가 맞지 않음 (어느 쪽인지 알려주지 않음) |
-| `auth.email_taken` | 409 | 이미 가입된 이메일 |
+| `auth.email_taken` | 409 | 이미 가입된 이메일 (환자·직원 각각) |
+| `auth.hospital_taken` | 409 | 이미 입점한 병원 (병원 1곳 = 병원 계정 1개, 직원 가입 때) |
 | `auth.too_many_attempts` | 429 | 로그인·탈퇴 비밀번호 실패 초과: 이메일당 15분 5회, IP당 15분 20회 (`detail.retry_after` 초). 성공하면 그 이메일 기록 초기화. 지금은 서버 메모리 → 운영 전 공유 저장소로 |
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
 | `validation` | 422 | 입력 오류 |
@@ -142,6 +143,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-18 | 3·4 | 병원 관계자 가입·로그인 경로(`/auth/staff/signup`·`login`), 에러 `auth.hospital_taken`(409) | A (**B 확인 필요**) | `backend-A-contract-staff-auth` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-12 | 4 | 가입 동의 `terms`·`privacy`는 현재 문서 버전(프론트 `features/legal` `updated`, 지금 `2026-11-03`)만 받음 → 아니면 422 `validation` + `detail.invalid[{kind, version, current}]` | A | `backend-review-fix` → `backend` |
