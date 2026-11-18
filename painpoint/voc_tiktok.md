@@ -1,6 +1,6 @@
 # VOC 3차 — 틱톡 "한국 피부과 예약" 댓글 (11/18 수집)
 
-> 작성 2026-11-18 · 분류 기준: [voc_rules.md](voc_rules.md) **v6** (원인 대분류 5개) 그대로 적용 · **Claude 1차 분류 — 9차 사람 검수 4/20 미통과 (2026-11-18, [voc_review.md](voc_review.md) 9차), 건수는 아직 근거로 쓰지 않음**
+> 작성 2026-11-18 · 분류 기준: [voc_rules.md](voc_rules.md) **v6** (원인 대분류 5개) 그대로 적용 · **Claude 1차 분류 — 사람 검수 미통과 (9차 4/20 → 10차 11/20, 11차 진행 중, [voc_review.md](voc_review.md)), 건수는 아직 근거로 쓰지 않음**
 > 결과: [voc_tt_classified.csv](voc_tt_classified.csv) · 원자료: [voc/tiktok_韓国皮膚科予約_comments.json](voc/tiktok_韓国皮膚科予約_comments.json)
 > 왜 모았나: 1차(유튜브 서울·영어·일본어)·2차(대만·대구)에서 **③ 상담 예약 단계 목소리가 거의 없었음** → 검색어를 "예약"으로 잡아 그 빈칸을 보려고 함
 
