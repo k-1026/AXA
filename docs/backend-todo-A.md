@@ -43,17 +43,17 @@
 **consent (동의)**
 - [x] `consents` 모델: 종류(`terms/privacy/health/overseas_transfer`)·문구 버전·언어·시각·철회
 - [x] `consent.service.record()`, `consent.service.require()` (B도 사용)
-- [ ] 가입 시 `terms`·`privacy`, 요청서 제출 시 `health`(건강정보 칸 있을 때)·`overseas_transfer`(해외 LLM 쓸 때) **각각 따로**
+- [x] 가입 시 `terms`·`privacy`, 요청서 제출 시 `health`(건강정보 칸 있을 때)·`overseas_transfer`(해외 LLM 쓸 때) **각각 따로**
 
 **booking 환자용 router** (service는 B)
-- [ ] `POST /hospitals/{id}/booking-requests` — 동의 확인 → `booking.service.create_request()` 호출
-- [ ] `GET /me/booking-requests`, `GET /me/booking-requests/{id}` — 내 요청·상태·**승인된** 답장만
-- [ ] `POST /me/booking-requests/{id}/accept`, `/cancel`
+- [x] `POST /hospitals/{id}/booking-requests` — 동의 확인 → `booking.service.create_request()` 호출 (11/18)
+- [x] `GET /me/booking-requests`, `GET /me/booking-requests/{id}` — 내 요청·상태·**승인된** 답장만 (11/18)
+- [x] `POST /me/booking-requests/{id}/accept`, `/cancel` (11/18)
 
 **테스트**
-- [ ] 로그인 없이 제출 → 401
-- [ ] 건강정보 있는데 `health` 동의 없음 → 422 `consent.required`
-- [ ] 환자 A가 환자 B 요청 조회 → 404
+- [x] 로그인 없이 제출 → 401
+- [x] 건강정보 있는데 `health` 동의 없음 → 422 `consent.required`
+- [x] 환자 A가 환자 B 요청 조회 → 404
 - [x] 가입(중복·14세·필수 동의·입력 오류), 로그인 실패 같은 응답, 탈퇴 후 로그인 X
 - [ ] (교차) B 모듈: 환자 토큰으로 `confirm` → 403
 

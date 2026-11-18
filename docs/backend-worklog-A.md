@@ -17,6 +17,20 @@
 
 ## 기록
 
+### 2026-11-18 (3) · backend-A-booking-request · Claude
+- 한 일: **환자 예약 요청 · 내 예약 API** (`modules/booking/router_patient.py`, `schemas_patient.py`) — 흐름이 "요청서 제출"에서 "예약 요청 → 병원 확정"으로 바뀐 것에 맞춤
+  - `POST /hospitals/{hospital_id}/booking-requests` → 201 `PatientBookingOut`: `require_requestable`(미등록·영업 중 아님 403) → 입점(tenant·requests_enabled) 확인(없으면 403 `hospital.not_requestable` `reason=not_joined`) → 동의 확인 → `booking.service.create_request`(B) → 동의를 요청서에 묶어 기록(`consents.booking_request_id`)
+  - 동의 규칙: `privacy` 항상 · `health_info` 있으면 `health` · `message`/`health_info` 있으면 번역(해외 LLM)용 `overseas_transfer` → 없으면 422 `consent.required`(`detail.missing`)
+  - `residency`는 `short_term`만 (국내 거주 외국인 유치 X, 의료법 제27조 제3항 제2호) · 희망 일시 1~3개, 시간대 포함, 미래만
+  - `GET /me/booking-requests`·`/{id}` (내 것만, 남의 것 404, 답장은 `sent_at` 있는 것만) · `POST …/accept`(proposed→confirmed) · `POST …/cancel {reason?}`(pending·proposed만)
+- 공통 파일 변경 (B 승인 필요): `main.py` 라우터 1줄
+- 바뀐 계약: 있음 — 4절 `not_joined` 사유, 6절 `residency` 필수·동의 규칙 → contracts PR 따로 (`backend-A-contract-booking-request`)
+- 마이그레이션: 없음 (테이블은 0007, PR #29)
+- 테스트: 180개 통과 (새 `test_booking_patient.py` 16개: 생성·동의 묶기, 401·직원 403, 미등록·폐업·미입점 403, 없는 병원 404, 동의 3종, 국내 거주 422, 희망 시간 개수·과거, 중복 409, 내 것만·남의 것 404, 병원 확정 → 내 예약 confirmed, 제안 수락·확정 뒤 취소 409, 취소 사유)
+- 다음 할 일: 프론트 상담·내 예약 화면을 이 API로 (지금은 브라우저 저장) · 직원 로그인 · 알림 · 요청 횟수 제한
+- B에게 요청: `main.py` 1줄·`schemas_patient.py`(booking 폴더 안 A 파일) 확인
+- 막힌 것·질문: 시연하려면 공용 DB에 0007 적용 + 등록 병원 1곳에 tenant 행(입점) 필요
+
 ### 2026-11-17 (2) · backend-A-hospital · Claude (로컬 확인)
 - 한 일: 프론트(5173)·백엔드(8000) 로컬 실행 확인. 백엔드를 **로컬 SQLite**(0001~0006 + 실제 데이터)로 켜면 `/hospitals`·상세·정렬 422·프론트에서 호출(CORS) 모두 정상. **Supabase 설정으로 켜면 서버는 뜨지만 DB를 쓰는 요청은 500**(`ImportError`, psycopg)
 - 원인: 이 PC의 윈도우 **스마트 앱 컨트롤이 차단 모드**(`VerifiedAndReputablePolicyState = 1`), CodeIntegrity 로그에 psycopg DLL 차단(11/17 14:59·15:34). 11/4~5에는 이 PC에서 Supabase 연결이 됐음(아래 기록) → 그 뒤 차단 모드로 바뀐 것으로 보임. B PC도 11/12 같은 증상
