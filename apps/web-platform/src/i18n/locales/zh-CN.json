@@ -40,6 +40,7 @@
     "type": "类型",
     "addr": "地址",
     "tel": "电话",
+    "detail": "医院信息",
     "source": "来源：韩国健康保险审查评价院（{{date}} 采集）"
   },
   "hospitalType": {

@@ -40,6 +40,7 @@
     "type": "類型",
     "addr": "地址",
     "tel": "電話",
+    "detail": "醫院資訊",
     "source": "來源：韓國健康保險審查評價院（{{date}} 蒐集）"
   },
   "hospitalType": {

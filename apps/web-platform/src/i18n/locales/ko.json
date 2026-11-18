@@ -40,6 +40,7 @@
     "type": "종류",
     "addr": "주소",
     "tel": "전화",
+    "detail": "병원 정보",
     "source": "출처: 건강보험심사평가원 ({{date}} 수집)"
   },
   "hospitalType": {
