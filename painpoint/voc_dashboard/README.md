@@ -6,6 +6,7 @@
 |---|---|---|
 | **메디대구 VOC 분류 현황** (대시보드) | https://claude.ai/artifact/RT4Ejz6ssbUbTsWYiGA63u | 분류표 3개를 합친 1,488건의 요약 수치, 원인 대분류 5개 × 출처, 여정 단계별, 세부 원인 순위(참고), 출처별 표, 필터로 거르는 댓글 목록 |
 | **메디대구 VOC 검수** (검수 페이지) | https://claude.ai/artifact/4PD3ex4htBCBms6vNhuWVi | 무작위로 뽑은 댓글을 사람이 판정 기준을 보며 판정 → 모두 저장하면 Claude 판정과 일치율(출처별·칸별) 표시. 결과는 [../voc_review.md](../voc_review.md)에 기록 |
+| **틱톡 VOC 9차 검수** (검수 페이지, 11/18) | https://claude.ai/artifact/5qTS6AQtLeBVNHfP3JB87r | 틱톡 3차 VOC 20건 ([../voc_review.md](../voc_review.md) 9차와 같은 표본). 고를 때마다 판정자별로 자동 저장(`reviews/<판정자 id>`), 20건 제출 뒤에만 Claude 판정·일치율 공개, **제출 뒤 수정 잠금**. 다른 판정자의 진행 상황도 표시. Claude Code가 저장된 판정을 읽어 voc_review.md에 기록 — 코드 사본: [review_tiktok_9.html](review_tiktok_9.html) |
 
 - 두 페이지 모두 claude.ai 아티팩트라 **공유 메뉴에서 공유해야** 팀원이 열 수 있음. 대시보드를 공유하면 첨부된 분류 데이터 전체를 볼 수 있음 (작성자 아이디는 없음)
 - 대시보드 데이터는 CSV 3개를 합친 JSON 파일을 올린 것 → **분류표를 고치면 Claude Code가 파일을 다시 올려야** 반영됨
