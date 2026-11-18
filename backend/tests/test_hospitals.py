@@ -349,3 +349,24 @@ def test_출처_없는_직접_채운_행은_적재하지_않는다(client, db_en
     result = load(db_engine, **paths)
     assert result["manual_hours"] == 0
     assert detail_hours(client, list_hospitals(client)[0]["id"])["mon"]["state"] == "unknown"
+
+
+def test_override_Y면_API_값도_검증한_값으로_바꾼다(client, db_engine, files, tmp_path):
+    # 2026-11-18 카카오맵 영업정보 검증: 심평원 API 값이 실제와 다른 곳은 override=Y로 덮어씀
+    paths = files(
+        [hosp("Y1", "등록의원")],
+        registered=[{"registration_no": "M-1", "ykiho": "Y1"}],
+        hours=[{"ykiho": "Y1", "trmtMonStart": "0900", "trmtMonEnd": "1800",
+                "trmtTueStart": "0900", "trmtTueEnd": "1800", "noTrmtSun": ""}],
+    )
+    paths["manual_hours_csv"] = write_csv(tmp_path / "m.csv", MANUAL_COLS + ["override"], [{
+        "ykiho": "Y1", "mon": "10:00-20:00", "tue": "", "sat": "휴진", "lunch_week": "13:00-14:00",
+        "source_url": "https://place.example.test/1", "checked_at": "2026-11-18", "override": "Y",
+    }])
+    load(db_engine, **paths)
+    days = detail_hours(client, list_hospitals(client)[0]["id"])
+    assert (days["mon"]["open_time"], days["mon"]["close_time"]) == ("10:00:00", "20:00:00")
+    assert days["mon"]["source"] == "https://place.example.test/1"
+    assert days["tue"]["open_time"] == "09:00:00"  # 검증 값이 빈 요일은 API 그대로
+    assert days["tue"]["source"].startswith("건강보험심사평가원")
+    assert days["sat"]["state"] == "closed"

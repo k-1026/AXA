@@ -95,19 +95,22 @@ def _checked(v: str) -> datetime | None:
 
 
 def _apply_manual(hours: list[HospitalHours], row: dict[str, str]) -> bool:
-    """직접 채운 값으로 state=unknown인 요일만 채움. 하나라도 채웠으면 True."""
+    """직접 채운 값으로 state=unknown인 요일만 채움. 하나라도 채웠으면 True.
+    override=Y 행은 API 값이 있는 요일도 바꿈 (검증해서 API 값이 틀린 것으로 확인된 곳, 2026-11-18)."""
     source = row.get("source_url", "")[:200]
     checked = _checked(row.get("checked_at", ""))
     if not source or checked is None:
         return False
+    override = row.get("override", "").upper() == "Y"
     lunch_week, lunch_sat = _range(row.get("lunch_week", "")), _range(row.get("lunch_sat", ""))
     used = False
     for hh in hours:
-        if hh.state != "unknown":
+        if hh.state != "unknown" and not override:
             continue
         v = row.get(hh.day, "")
         if v == MANUAL_CLOSED:
             hh.state = "closed"
+            hh.open_time = hh.close_time = hh.lunch_start = hh.lunch_end = None  # override로 진료일 → 휴진일 때
         elif rng := _range(v):
             lunch = lunch_sat if hh.day == "sat" else (lunch_week if hh.day != "sun" else None)
             hh.state = "open"
