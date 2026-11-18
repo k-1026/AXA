@@ -7,7 +7,7 @@
 
 ## 1. 메시지 7줄 (이것만 이어 읽어도 말이 되어야 함)
 
-1. **문제** — 대구에서 시술받고 싶은 대만 환자는 고를 근거가 없다: 등록 병원 161곳 중 상세 정보 13곳, 진료시간 채움 26.1%, 미용 시술 공공 가격 0곳.
+1. **문제** — 대구에서 시술받고 싶은 대만 환자는 고를 근거가 없다: 등록 병원 161곳 중 상세 정보 7곳, 진료시간 채움 26.1%, 미용 시술 공공 가격 0곳.
 2. **해결** — 메디대구는 그 빈칸을 공공데이터 + 출처·확인일로 채워 내 언어로 보여 주고, 챗봇 → 상담 예약 → 병원 AI 답장 초안(코디 승인)까지 한 흐름으로 잇는다.
 3. **시장** — 대안 5개 중 "공공 근거 + 예약 연결" 칸이 비어 있고, 첫 시장은 대구 대만 미용·외래 환자 연 약 1,200명이다.
 4. **BM** — 병원은 결제된 진료에만 10% + 월 구독료를 내므로 환자 1명당 광고보다 싸고, 손익분기는 월 약 14건(나쁜 경우 46건)이다.
@@ -24,7 +24,7 @@
 
 | 장 | 핵심 근거 (파일) | 구성 요소 | 상태 |
 |---|---|---|---|
-| 1 문제 | `painpoint/evidence.csv` E01~E03 (26.1%·13/161·0곳) · `painpoint/voc_대만대구.md` (병원 정보 35건 1위) · `voc_classified.csv` (가격 299) · 대만 1,495명 (`bm/bm_canvas.md` 1절, 진흥원) | **인용** — Dcard 대구 글 | [근거] · VOC 대만·대구 검수 6건뿐 |
+| 1 문제 | `painpoint/evidence.csv` E01~E03 (26.1%·7/161·0곳) · `painpoint/voc_대만대구.md` (병원 정보 35건 1위) · `voc_classified.csv` (가격 299) · 대만 1,495명 (`bm/bm_canvas.md` 1절, 진흥원) | **인용** — Dcard 대구 글 | [근거] · VOC 대만·대구 검수 6건뿐 |
 | 2 해결 | `valuechain/step4_네층맵.md` 4-0 · `spec/processflow.md` · `docs/agent-spec.md` · `docs/compliance.md` v2.3 (main) | **영상** 자리 — 30초 화면 녹화 | 흐름 [근거] · 코디 25→10분 **[가정]** · 녹화 **[빈칸]** |
 | 3 시장 | `market/competitors.md` · `positioning_map.html` · `bm/revenue_platform.md` 1절 · 진흥원 2025 표 2.1 | **차트(포지셔닝 맵)** | [근거] · 경유율 10% **[가정]** · 80.3%는 전국값 |
 | 4 BM | `bm/revenue_platform.md` 2·3절 · `bm/bm_canvas.md` · 통합 고시 제2·3조 | **차트(막대)** — 환자 1명 데려오는 비용 | 153만 원 원문 미대조 **[가정]** · 구독료 상한 합산 [U] |
@@ -60,7 +60,7 @@
 ## 출처
 | 내용 | 위치 | 등급 | 기준 시점 | 확인일 |
 |---|---|---|---|---|
-| 등록 병원 161곳·상세 13곳 | 메디컬코리아 사이트 Registered Hospitals (DAEGU) https://www.medicalkorea.or.kr/en/registeredhospitals (`painpoint/evidence.csv` E03) | 공식 | 2026-11-18 | 2026-11-18 |
+| 등록 병원 161곳·상세 7곳 | 메디컬코리아 사이트 Registered Hospitals·Most Visited (DAEGU) https://www.medicalkorea.or.kr/en/registeredhospitals · /en/mostvisitedmedicalinstitutions (`painpoint/evidence.csv` E03) | 공식 | 2026-11-18 | 2026-11-18 |
 | 진료시간 채움 26.1% | 심평원 API (`evidence.csv` E01) | 공식 | 2026-10-28 수집 | 2026-11-18 |
 | 대구 대만 환자 1,495명·대구 19,243명 | 한국보건산업진흥원 외국인환자 유치실적 통계 2025 — https://www.khidi.or.kr/board?menuId=MENU00093 | 통계 | 2025 보고서 | 2026-11-18 |
 | VOC 803건·89건 | `painpoint/voc_*.csv` | 팀 수집 (공개 댓글) | 2026-11-13~17 | 2026-11-18 |
