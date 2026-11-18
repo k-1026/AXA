@@ -4925,3 +4925,43 @@ body.chat-open {
   background: var(--accent);
   color: #ffffff;
 }
+
+/* 계정 종류: 환자 / 병원 관계자 (가입할 때 나눔) */
+.auth-who {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auth-who-btn {
+  flex: 1;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-who-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* 예약 요청 때 받는 국적·단기 방문·동의 (실제 회원) */
+.booking-consents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 0 0;
+  border: 0;
+  flex-basis: 100%;
+}
+
+.booking-consents .auth-field select {
+  max-width: 260px;
+}

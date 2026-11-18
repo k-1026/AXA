@@ -518,5 +518,39 @@
     "doneBody": "醫院確認後預約即成立。確認前在預約管理中顯示為「等待確認」。",
     "toBookings": "前往預約管理",
     "toConsult": "諮詢這家醫院"
+  },
+  "booking": {
+    "nationality": "國籍",
+    "shortTerm": "我不住在韓國，是為了就診短期來訪。",
+    "agreeShare": "同意將預約申請內容提供給所選醫院。",
+    "agreeOverseas": "同意將需求內容傳送至海外 AI 服務，翻譯成醫院的語言。",
+    "err": {
+      "consentNeeded": "請勾選短期來訪確認與必要同意。",
+      "notRequestable": "這家醫院目前無法接受預約申請。",
+      "notJoined": "這家醫院尚未在 MediDaegu 接受預約，請直接聯絡醫院。",
+      "duplicate": "這家醫院已有尚未處理的申請，請到預約管理確認。",
+      "invalidTransition": "目前狀態無法執行，請重新整理。",
+      "login": "請先登入。"
+    }
+  },
+  "staff": {
+    "whoLabel": "帳號類型",
+    "whoPatient": "患者",
+    "whoStaff": "醫院人員",
+    "tabSignup": "申請入駐",
+    "email": "工作用電子郵件",
+    "submitLogin": "登入管理頁面",
+    "submitSignup": "申請入駐並開始",
+    "signupIntro": "只有已登記的外國患者招攬醫療機構可以入駐。每家醫院建立一個（代表）帳號。",
+    "hospital": "醫院",
+    "pickHospital": "請選擇醫院",
+    "regNo": "外國患者招攬醫療機構登記號碼",
+    "regNoHint": "格式：M-2009-03-01-0013",
+    "doneNoDashboard": "已登入。尚未設定管理頁面網址（VITE_DASHBOARD_URL）。",
+    "err": {
+      "hospitalTaken": "這家醫院已經入駐，請聯絡醫院代表帳號。",
+      "notRegistered": "不是已登記機構或未營業，無法入駐。",
+      "tooMany": "嘗試次數過多，請稍後再試。"
+    }
   }
 }

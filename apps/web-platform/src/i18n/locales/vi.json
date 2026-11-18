@@ -518,5 +518,39 @@
     "doneBody": "Lịch hẹn được xác nhận sau khi bệnh viện kiểm tra. Trước đó, lịch sẽ hiển thị \"Chờ xác nhận\" trong Quản lý đặt lịch.",
     "toBookings": "Đến Quản lý đặt lịch",
     "toConsult": "Tư vấn với bệnh viện này"
+  },
+  "booking": {
+    "nationality": "Quốc tịch",
+    "shortTerm": "Tôi không sống ở Hàn Quốc, chỉ đến ngắn hạn để khám chữa bệnh.",
+    "agreeShare": "Tôi đồng ý gửi nội dung yêu cầu đặt lịch cho bệnh viện đã chọn.",
+    "agreeOverseas": "Tôi đồng ý gửi ghi chú tới dịch vụ AI ở nước ngoài để dịch sang ngôn ngữ của bệnh viện.",
+    "err": {
+      "consentNeeded": "Vui lòng xác nhận lưu trú ngắn hạn và các đồng ý bắt buộc.",
+      "notRequestable": "Bệnh viện này hiện không nhận yêu cầu đặt lịch.",
+      "notJoined": "Bệnh viện này chưa nhận đặt lịch trên MediDaegu. Vui lòng liên hệ trực tiếp.",
+      "duplicate": "Bạn đã có yêu cầu chưa xử lý ở bệnh viện này. Xem trong Quản lý đặt lịch.",
+      "invalidTransition": "Không thể thực hiện ở trạng thái hiện tại. Vui lòng tải lại.",
+      "login": "Vui lòng đăng nhập."
+    }
+  },
+  "staff": {
+    "whoLabel": "Loại tài khoản",
+    "whoPatient": "Bệnh nhân",
+    "whoStaff": "Nhân viên bệnh viện",
+    "tabSignup": "Đăng ký tham gia",
+    "email": "Email công việc",
+    "submitLogin": "Đăng nhập trang quản lý",
+    "submitSignup": "Đăng ký và bắt đầu",
+    "signupIntro": "Chỉ cơ sở y tế đã đăng ký thu hút bệnh nhân nước ngoài mới tham gia được. Mỗi bệnh viện một tài khoản (đại diện).",
+    "hospital": "Bệnh viện",
+    "pickHospital": "Chọn bệnh viện",
+    "regNo": "Số đăng ký cơ sở thu hút bệnh nhân nước ngoài",
+    "regNoHint": "Định dạng: M-2009-03-01-0013",
+    "doneNoDashboard": "Đã đăng nhập. Chưa đặt địa chỉ trang quản lý (VITE_DASHBOARD_URL).",
+    "err": {
+      "hospitalTaken": "Bệnh viện này đã tham gia. Liên hệ tài khoản đại diện.",
+      "notRegistered": "Không phải cơ sở đã đăng ký hoặc không hoạt động nên không thể tham gia.",
+      "tooMany": "Thử quá nhiều lần. Vui lòng thử lại sau."
+    }
   }
 }
