@@ -119,6 +119,28 @@ def load_kakao():
 
 kakao = load_kakao()
 
+
+def load_naver():
+    """네이버 지도 교차확인 결과 (사람·AI가 채운 확인표) → {registration_no: {result, days, lunch, url, raw}}."""
+    p = D / "interim/영업정보/naver_check_2026-11-18_result.csv"
+    if not p.exists():
+        return {}
+    ko = dict(zip("월화수목금토일", DAYS))
+    out = {}
+    for r in rd("interim/영업정보/naver_check_2026-11-18_result.csv"):
+        dd = {}
+        for part in (r["naver_hours"] or "").split(" / "):
+            m = re.match(r"\s*([월화수목금토일])(?:\([^)]*\))?\s+(\d\d:\d\d-\d\d:\d\d|휴진)\s*$", part)
+            if m and (m[2] == "휴진" or m[2][:5] < m[2][6:]):
+                dd[ko[m[1]]] = m[2]
+        lm = re.search(r"점심: [^→]*→ 네이버 (\d\d:\d\d-\d\d:\d\d)", r["memo"] or "")
+        out[r["registration_no"]] = dict(result=r["result"], days=dd, lunch=lm[1] if lm else "",
+                                         url=r["naver_url"], raw=r["naver_hours"])
+    return out
+
+
+naver = load_naver()
+
 by_tel, by_name = {}, {}
 for n in nmc:
     for t in {dg(n.get("dutyTel1")), dg(n.get("dutyTel3"))} - {""}:
@@ -196,6 +218,7 @@ for r in reg:
         ls = lunch((api or {}).get("lunchSat"))
     # ── 카카오맵 영업정보로 검증 (2026-11-18 전체 확인, data/raw/영업정보/kakao_business_hours_2026-11-18.tsv) ──
     override, kres = "", ""
+    pub = dict(days)  # 공공값(심평원·NMC) — 카카오·네이버 비교용
     kk = kakao.get(r["registration_no"])
     if kk and not kk["usable"]:
         kres = "카카오 확인 불가: " + kk["reason"]
@@ -218,6 +241,34 @@ for r in reg:
                 if not days[d] and kk["days"][d]:
                     days[d] = kk["days"][d]
             lw, ls = lw or kk["lunch_week"], ls or kk["lunch_sat"]
+    # ── 네이버 지도 교차확인 (2026-11-18, naver_check_2026-11-18_result.csv) ──
+    # 규칙(팀 결정 11/18): 카카오·네이버가 다른 요일은 공공값(심평원·NMC)으로 확인 → 공공값이 카카오와 같으면 카카오 유지,
+    # 그 밖(공공값도 다르거나 없음)은 네이버 기준
+    nv = naver.get(r["registration_no"])
+    if nv and nv["result"] == "일치":
+        kres = (kres + " · " if kres else "") + "네이버 일치"
+    elif nv and nv["result"] == "다름":
+        changed = []
+        for d in DAYS:
+            n_v = nv["days"].get(d, "")
+            if not n_v or n_v == days[d]:
+                continue
+            if days[d] and pub[d] == days[d]:
+                continue  # 공공값 = 카카오 → 출처 2개, 유지
+            changed.append(d)
+            days[d] = n_v
+        if nv["lunch"]:
+            lw = nv["lunch"]
+        if changed:
+            src, url, grade = "네이버 플레이스", nv["url"], "플랫폼"
+            if status.startswith("filled_api") and any(base.get(d) for d in changed):
+                override = "Y"
+            if not status.startswith("filled_kakao"):
+                status = "filled_kakao" + ("+need_match" if not y else "")
+        kres = (kres + " · " if kres else "") + ("네이버 기준으로 변경(" + ",".join(changed) + ")" if changed else "네이버와 다름, 공공값=카카오라 유지")
+        note = (note + " | " if note else "") + "네이버: " + nv["raw"]
+    if status.startswith("filled_kakao") and any(base.get(d) and days[d] != base[d] for d in DAYS):
+        override = "Y"
     row.update(status=status, **days, lunch_week=lw, lunch_sat=ls, holiday=holiday,
                source=src, source_grade=grade, source_url=url, checked_at=CHECKED if src else "",
                verify=kres or v.get("result", ""),
