@@ -224,7 +224,7 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
           <div class="rl">병원 찾기</div>
           <div class="c as-is"><span>등록 병원 161곳 중 상세 7곳 · 진료시간은 4곳 중 1곳만</span></div>
           <div class="arr">→</div>
-          <div class="c to-be"><span>대구 병원 4,242곳을 5개 언어 지도·상세로 · <b>등록 161곳 중 159곳 진료시간 채움</b> · 칸마다 출처·확인일</span></div>
+          <div class="c to-be"><span>대구 <b>등록 유치기관 161곳</b>을 5개 언어 지도·상세로 · <b>159곳 진료시간 채움</b> · 칸마다 출처·확인일</span></div>
           <div class="rl">가격</div>
           <div class="c as-is"><span>미용 시술 공공 가격 없음 · 이벤트가 광고만 보임</span></div>
           <div class="arr">→</div>
@@ -236,10 +236,14 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
         </div>
       </div>
       <div class="grid" style="grid-template-rows: auto 1fr; gap:10px;">
-        <div class="video">
-          <div class="play">▶</div>
-          <p><b>30초 화면 녹화</b><br>병원 상세(출처·확인일) → 챗봇 → 요청서</p>
-          <span class="tag t-assume">제작 예정</span>
+        <div class="card" style="padding:14px 16px;">
+          <h3 style="font-size:16px;">AI가 하는 것 · 사람이 정하는 것</h3>
+          <table style="font-size:14.5px;">
+            <tr><td style="padding:6px 4px;">병원 찾기 · 가격 범위 안내</td><td style="padding:6px 4px;"><b>AI</b> (공공데이터만, 출처 표시)</td></tr>
+            <tr><td style="padding:6px 4px;">문의 요약 · 번역 · 답장 초안</td><td style="padding:6px 4px;"><b>AI</b> → 발송은 <b>코디 승인</b></td></tr>
+            <tr><td style="padding:6px 4px;">예약 확정 · 시간 제안</td><td style="padding:6px 4px;"><b>병원</b></td></tr>
+            <tr><td style="padding:6px 4px; border:0;">진단 · 효과 · 부작용</td><td style="padding:6px 4px; border:0;"><b>의료진</b> (AI는 거절)</td></tr>
+          </table>
         </div>
         <div class="card" style="padding:12px 14px;">
           <h3 style="font-size:16px;">숫자로 말하면</h3>
@@ -376,10 +380,10 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
     <div class="card" style="padding:6px 10px;">
       <table class="team">
         <tr><th>역할</th><th>맡은 것</th><th>AI를 쓴 곳</th><th>흔적</th></tr>
-        <tr><td>팀원 1 · 프론트 A</td><td>병원·진료시간·지도 데이터 → <b>환자 웹</b> (챗봇·병원 찾기·예약, 5개 언어)</td><td><span class="as">[팀 확인]</span></td><td><code>data/etl/</code> · 진료시간 159/161 · <code>apps/web-platform/</code></td></tr>
-        <tr><td>팀원 2 · 프론트 B</td><td>가격 데이터·규제 검토(복지부·진흥원 질의) → <b>병원 대시보드</b></td><td><span class="as">[팀 확인]</span></td><td><code>docs/compliance.md</code> · <code>apps/web-hospital/</code></td></tr>
+        <tr><td>팀원 1 · 프론트 A</td><td>병원·진료시간·지도 데이터 → <b>환자 웹</b> (챗봇·병원 찾기·예약, 5개 언어)</td><td>데이터 검증 — 진료시간 출처 교차 대조 · 화면 문구 번역 초안</td><td><code>data/etl/</code> · 진료시간 159/161 · <code>apps/web-platform/</code></td></tr>
+        <tr><td>팀원 2 · 프론트 B</td><td>가격 데이터·규제 검토(복지부·진흥원 질의) → <b>병원 대시보드</b></td><td>기획·검증 — 법령 조사 요약 · AI 레드팀으로 BM 반론 점검</td><td><code>docs/compliance.md</code> · <code>apps/web-hospital/</code></td></tr>
         <tr><td>팀원 3 · 백엔드 A</td><td>다국어·챗봇·VOC 수집 → <b>환자 쪽 API</b> (인증·동의·병원 검색·챗봇)</td><td>Claude Code VOC 1차 분류 · Gemini → Nemotron 챗봇</td><td><code>painpoint/voc_*</code> · <code>backend/</code></td></tr>
-        <tr><td>팀원 4 · 백엔드 B</td><td><b>병원 쪽 API</b> (예약 상태 흐름·병원 계정·AI 답장 승인) — 개발 단계부터 합류</td><td><span class="as">[팀 확인]</span></td><td><code>backend/</code> booking·tenant</td></tr>
+        <tr><td>팀원 4 · 백엔드 B</td><td><b>병원 쪽 API</b> (예약 상태 흐름·병원 계정·AI 답장 승인) — 개발 단계부터 합류</td><td>설계·검증 — API 설계 검토 · 테스트 코드 초안 · 코드 리뷰</td><td><code>backend/</code> booking·tenant</td></tr>
       </table>
     </div>
     <div class="trace">
