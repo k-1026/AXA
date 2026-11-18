@@ -201,14 +201,14 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
         </div>
       </div>
       <div class="grid" style="grid-template-rows: repeat(3, 1fr); gap:10px;">
-        <div class="card" style="display:flex; align-items:center; gap:18px;"><div class="big pain">13<small> / 145곳</small></div><p>대구 <b>등록</b> 유치의료기관 중 메디컬코리아에 <b>상세 정보</b>가 있는 곳</p></div>
+        <div class="card" style="display:flex; align-items:center; gap:18px;"><div class="big pain">7<small> / 161곳</small></div><p>대구 <b>등록</b> 유치의료기관 중 메디컬코리아에 <b>상세 정보</b>가 있는 곳</p></div>
         <div class="card" style="display:flex; align-items:center; gap:18px;"><div class="big pain">26.1<small>%</small></div><p>대구 병원 중 공공데이터에 <b>진료시간</b>이 채워진 비율</p></div>
         <div class="card" style="display:flex; align-items:center; gap:18px;"><div class="big pain">0<small>곳</small></div><p><b>미용 시술 공공 가격</b>이 있는 의원 (비급여 공개 대상 밖)</p></div>
       </div>
     </div>
     <div class="card" style="padding:10px 16px; background:var(--accent-soft); border-color:var(--accent-line);"><p>왜 지금 대만인가 — 대구 대만 환자 <b>2025년 1,495명, 전년보다 +500.4%</b> · 병원·시간·가격 세 근거가 모두 비어 있어 결국 "실패가 무서워 안 했다"로 끝남</p></div>
   </div>
-  <div class="foot"><span class="src">출처: painpoint/evidence.csv E01(심평원 API, 2026-10-28)·E02(심평원 비급여)·E03(메디컬코리아 CSV) · voc_classified.csv · voc_대만대구.md · voc_review.md 8차 · 대만 환자: 한국보건산업진흥원 2025 외국인환자 유치실적 통계</span><span class="no">1 / 7</span></div>
+  <div class="foot"><span class="src">출처: painpoint/evidence.csv E01(심평원 API, 2026-10-28)·E02(심평원 비급여)·E03(메디컬코리아 사이트, 2026-11-18) · voc_classified.csv · voc_대만대구.md · voc_review.md 8차 · 대만 환자: 한국보건산업진흥원 2025 외국인환자 유치실적 통계</span><span class="no">1 / 7</span></div>
 </section>
 
 <!-- 2 해결 -->
@@ -222,17 +222,17 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
         <div class="ab">
           <div></div><div class="h">As-Is — 지금</div><div></div><div class="h">To-Be — 메디대구</div>
           <div class="rl">병원 찾기</div>
-          <div class="c as-is">등록 병원 145곳 중 상세 13곳 · 진료시간은 4곳 중 1곳만</div>
+          <div class="c as-is"><span>등록 병원 161곳 중 상세 7곳 · 진료시간은 4곳 중 1곳만</span></div>
           <div class="arr">→</div>
-          <div class="c to-be">대구 병원 4,242곳을 5개 언어 지도·상세로 · 칸마다 <b>출처·확인일</b> · 등록 병원 표시</div>
+          <div class="c to-be"><span>대구 병원 4,242곳을 5개 언어 지도·상세로 · <b>등록 161곳 중 159곳 진료시간 채움</b> · 칸마다 출처·확인일</span></div>
           <div class="rl">가격</div>
-          <div class="c as-is">미용 시술 공공 가격 없음 · 이벤트가 광고만 보임</div>
+          <div class="c as-is"><span>미용 시술 공공 가격 없음 · 이벤트가 광고만 보임</span></div>
           <div class="arr">→</div>
-          <div class="c to-be">공공 자료 있는 항목만 <b>지역 가격 범위</b> + "병원에 견적 요청" (숫자 지어내지 않음)</div>
+          <div class="c to-be"><span>공공 자료 있는 항목만 <b>지역 가격 범위</b> + "병원에 견적 요청" (숫자 지어내지 않음)</span></div>
           <div class="rl">묻기 · 예약</div>
-          <div class="c as-is">외국어 문의를 코디가 직접 번역·작성 → 답 기다림</div>
+          <div class="c as-is"><span>외국어 문의를 코디가 직접 번역·작성 → 답 기다림</span></div>
           <div class="arr">→</div>
-          <div class="c to-be">챗봇 → 상담 예약 요청서 → 병원 대시보드에 <b>AI 요약·답장 초안</b> → 코디 승인 후 발송</div>
+          <div class="c to-be"><span>챗봇 → 상담 예약 요청서 → 병원 대시보드에 <b>AI 요약·답장 초안</b> → 코디 승인 후 발송</span></div>
         </div>
       </div>
       <div class="grid" style="grid-template-rows: auto 1fr; gap:10px;">
@@ -249,7 +249,7 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md 4-0 (병목 → 해소) · spec/processflow.md · docs/agent-spec.md · 25→10분: bm/revenue_platform.md 4절 [가정] · 회신: docs/compliance.md v2.3 (2026-11-17) · 병원 수: 심평원 API</span><span class="no">2 / 7</span></div>
+  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md 4-0 (병목 → 해소) · spec/processflow.md · docs/agent-spec.md · 25→10분: bm/revenue_platform.md 4절 [가정] · 회신: docs/compliance.md v2.3 (2026-11-17) · 병원 수: 심평원 API · 진료시간 159/161: data/processed/daegu_hours_manual.csv (2026-11-18)</span><span class="no">2 / 7</span></div>
 </section>
 
 <!-- 3 시장 -->
@@ -287,13 +287,13 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
           <div class="row som"><div class="k">우리 몫</div><div class="v"><b>월 약 10건</b> × 경유율 10% <span style="opacity:.85">[가정]</span></div></div>
         </div>
         <div class="card" style="padding:10px 14px;">
-          <p style="font-size:13.5px;"><span class="tag t-pain">인정</span> 트립닥은 병원 무료로 같은 병원에 들어가 있음 · 유치업자 등록 사업자도 3곳 더 있음 → 차별점은 "등록"이 아니라 <b>공공 근거 + 대구 특화</b></p>
+          <p style="font-size:13.5px;"><span class="tag t-pain">인정</span> 트립닥은 병원 무료로 같은 병원에 들어가 있음 · 유치 플랫폼(K-Dia·서울기지배 등)은 수수료 15~25%로 영업 중 → 차별점은 "등록"이 아니라 <b>공공 근거 + 대구 특화</b></p>
           <p class="muted" style="font-size:12.5px; margin-top:4px;">강남언니 2025 영업수익 752억 원 중 성과형 광고 78.8% (DART) — 광고 모델이 주류</p>
         </div>
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: market/competitors.md · positioning_map.html (점 위치는 팀 해석) · research/company/강남언니-UNNI.md (DART) · 환자 수: 진흥원 2025 통계 표 2.1 · 80.3%는 전국 대만 환자 피부과 비중으로 대신 · bm/revenue_platform.md 1절</span><span class="no">3 / 7</span></div>
+  <div class="foot"><span class="src">출처: market/competitors.md · positioning_map.html (점 위치는 팀 해석) · research/company/강남언니-UNNI.md (DART) · 유치 플랫폼 요율: research/company/ (K-Dia·서울기지배 공식 안내, 2026-11-18) · 환자 수: 진흥원 2025 통계 표 2.1 · 80.3%는 전국 대만 환자 피부과 비중으로 대신 · bm/revenue_platform.md 1절</span><span class="no">3 / 7</span></div>
 </section>
 
 <!-- 4 BM -->
@@ -338,7 +338,7 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: bm/revenue_platform.md 2절 (v4) · bm/요금안-or-검토.md (유치 플랫폼 요율: research/company/ 공식 안내 6곳) · bm/bm_canvas.md v2 · 상한: 외국인환자 유치 수수료율 통합 고시 제2·3조 · 1건 100만 원: 진흥원 「2024 신용카드 데이터로 본 외국인환자 소비패턴 분석」 1인 153만·피부과 105만 원을 건당 보정 (research/의료관광/카드데이터-153만원-근거.md) · 광고 20만 원: 마케팅 업체 글 · 병원 1곳 예시: dashboard/대시보드.html 요금·정산 (docs-dashboard-integration 브랜치)</span><span class="no">4 / 7</span></div>
+  <div class="foot"><span class="src">출처: bm/revenue_platform.md 2절 (v4) · bm/요금안-or-검토.md (유치 플랫폼 요율: research/company/ 공식 안내 6곳) · bm/bm_canvas.md v4 · 상한: 외국인환자 유치 수수료율 통합 고시 제2·3조 · 1건 100만 원: 진흥원 「2024 신용카드 데이터로 본 외국인환자 소비패턴 분석」 1인 153만·피부과 105만 원을 건당 보정 (research/의료관광/카드데이터-153만원-근거.md) · 광고 20만 원: 마케팅 업체 글 · 병원 1곳 예시: dashboard/대시보드.html 요금·정산 (docs-dashboard-integration 브랜치)</span><span class="no">4 / 7</span></div>
 </section>
 
 <!-- 5 MVP -->
@@ -370,16 +370,16 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
 <!-- 6 팀 -->
 <section class="slide">
   <div class="eyebrow">6 팀 — 이 팀이 할 수 있나?</div>
-  <h1>4명이 <em>데이터 · 규제 · AI · 개발</em>을 나눠, 모든 숫자에 출처를 달았다</h1>
+  <h1>4명이 <em>데이터 → 프론트 2 · 백엔드 2</em>로, 모든 숫자에 출처를 달았다</h1>
   <p class="lead">사람이 정하고 AI가 반복 작업을 맡음 — 작업 흔적은 전부 저장소에 남김</p>
   <div class="body">
     <div class="card" style="padding:6px 10px;">
       <table class="team">
         <tr><th>역할</th><th>맡은 것</th><th>AI를 쓴 곳</th><th>흔적</th></tr>
-        <tr><td>팀원 1 · 데이터</td><td>병원 기본·진료시간·지도 — 공공 API 수집, 빈칸 직접 채움</td><td><span class="as">[팀 확인]</span></td><td><code>data/etl/</code> · 대구 병원 4,242곳</td></tr>
-        <tr><td>팀원 2 · 가격·규제</td><td>비급여 가격 통계, 의료법·해외진출법 검토, 복지부·진흥원 질의</td><td><span class="as">[팀 확인]</span></td><td><code>docs/compliance.md</code> · 회신 반영</td></tr>
-        <tr><td>팀원 3 · 다국어·챗봇</td><td>5개 언어, 챗봇·에이전트, VOC 수집</td><td>Claude Code VOC 1차 분류 · Gemini → Nemotron 챗봇</td><td><code>ai/agent/</code> · <code>painpoint/voc_*</code></td></tr>
-        <tr><td>팀원 4 · <span class="as">[미정]</span></td><td>역할 확정 전</td><td>—</td><td>—</td></tr>
+        <tr><td>팀원 1 · 프론트 A</td><td>병원·진료시간·지도 데이터 → <b>환자 웹</b> (챗봇·병원 찾기·예약, 5개 언어)</td><td><span class="as">[팀 확인]</span></td><td><code>data/etl/</code> · 진료시간 159/161 · <code>apps/web-platform/</code></td></tr>
+        <tr><td>팀원 2 · 프론트 B</td><td>가격 데이터·규제 검토(복지부·진흥원 질의) → <b>병원 대시보드</b></td><td><span class="as">[팀 확인]</span></td><td><code>docs/compliance.md</code> · <code>apps/web-hospital/</code></td></tr>
+        <tr><td>팀원 3 · 백엔드 A</td><td>다국어·챗봇·VOC 수집 → <b>환자 쪽 API</b> (인증·동의·병원 검색·챗봇)</td><td>Claude Code VOC 1차 분류 · Gemini → Nemotron 챗봇</td><td><code>painpoint/voc_*</code> · <code>backend/</code></td></tr>
+        <tr><td>팀원 4 · 백엔드 B</td><td><b>병원 쪽 API</b> (예약 상태 흐름·병원 계정·AI 답장 승인) — 개발 단계부터 합류</td><td><span class="as">[팀 확인]</span></td><td><code>backend/</code> booking·tenant</td></tr>
       </table>
     </div>
     <div class="trace">
@@ -390,7 +390,7 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
       <div class="card"><div class="n">2</div><p>공식 기관 질의 회신 (복지부·진흥원)</p></div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: CLAUDE.md 역할 · docs/backend-roles.md · painpoint/voc_review.md · bm/redteam_log.md · .claude/agents/redteam-*.md · ai/agent/eval/results/ · git log origin/main (2026-11-18) · 공개 저장소라 실명 대신 역할로 표기</span><span class="no">6 / 7</span></div>
+  <div class="foot"><span class="src">출처: subject/framework.md 8절 역할 (제안 v0, 팀 확인 중) · CLAUDE.md · docs/backend-roles.md · painpoint/voc_review.md · bm/redteam_log.md · .claude/agents/redteam-*.md · ai/agent/eval/results/ · git log origin/main (2026-11-18) · 공개 저장소라 실명 대신 역할로 표기</span><span class="no">6 / 7</span></div>
 </section>
 
 <!-- 7 요청 -->
@@ -400,17 +400,17 @@ table.team td:first-child { font-weight: 800; color: var(--ink); white-space: no
   <div class="body">
     <div class="ask">
       <div class="k">요청</div>
-      <div class="s">대구 <em>등록 피부·성형 의원 3곳의 코디 인터뷰</em>를 연결해 주시면,<br>손익분기를 가장 크게 흔드는 가정을 12/4 전에 확인하겠습니다.</div>
+      <div class="s">대구에 있는 <em>대만 유학생·여행객 5명을 사용자 테스트</em>에 연결해 주시면,<br>린이 혼자 예약 요청까지 가는지 12/4 전에 판정하겠습니다.</div>
       <div class="u">MVP <span class="url">배포 후 기입</span> · 피치덱 <span class="url">발표/피치덱-11.18/</span></div>
     </div>
     <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
-      <div class="card"><h3>① 1건 진료비</h3><p>100만 원 <span class="as">[추정]</span> → 50만 원이면 손익분기 22 → 46건</p></div>
-      <div class="card"><h3>② 지불 의향</h3><p>결제된 진료 10% + 월 구독료를 낼지 · 지금 LOI 0곳</p></div>
-      <div class="card"><h3>③ 상담 처리 시간</h3><p>코디 1건 25분 → AI 초안 후 10분 <span class="as">[가정]</span> — 구독료의 근거</p></div>
+      <div class="card"><h3>① 사람 테스트</h3><p>지금은 AI 평가만 통과 (12/12) · 완료율·걸린 시간으로 "혼자 예약 요청까지" 판정 — <b>이 요청으로 확인</b></p></div>
+      <div class="card"><h3>② 1건 진료비</h3><p>100만 원 <span class="as">[추정]</span> → 50만 원이면 손익분기 22 → 46건 · 카드 보고서 대만·대구 값으로 확인</p></div>
+      <div class="card"><h3>③ 지불 의향</h3><p>기본 13% / 프리미엄 월 15만 + 8%를 낼지 · LOI 0곳 → 업계 공개 요율 15~25%로 대신 비교</p></div>
     </div>
     <div class="card" style="padding:14px 18px; background:var(--accent-soft); border-color:var(--accent-line);"><p><b>12/4까지 우리가 할 것</b> — MVP 배포 URL (가상 데이터, 실제 제출 막음) · 팀 밖 3~5명 사람 테스트 → 가설 판정 · 대만·대구 1건 진료비 확인</p></div>
   </div>
-  <div class="foot"><span class="src">출처: bm/revenue_platform.md 3절 (민감도) · 4절 (코디 시간 가정) · bm/bm_canvas.md (LOI 0곳) · docs/pitch/outline.md 4절 가정 목록</span><span class="no">7 / 7</span></div>
+  <div class="foot"><span class="src">출처: ai/agent/eval/results/ (시나리오 12/12) · bm/revenue_platform.md 2절 v4 (민감도) · bm/요금안-or-검토.md 2-4절 (업계 요율) · bm/bm_canvas.md (LOI 0곳) · docs/pitch/outline.md 4절 가정 목록</span><span class="no">7 / 7</span></div>
 </section>
 
 </div>
