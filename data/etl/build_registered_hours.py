@@ -6,6 +6,8 @@
      data/processed/daegu_hours_manual.csv          (백엔드 로더용: ykiho 확정 + 새로 채운 행만, API 빈 요일 보충)
 우선순위: 심평원 10/28 → 심평원 11/18 재수집 → 국립중앙의료원 → (사람이 직접)
 실행: python data/etl/fetch_registered_hours.py 다음에 python data/etl/build_registered_hours.py
+공개 저장소에는 합친 결과(data/processed/daegu_hours_manual.csv) 하나만 올림. 카카오·네이버 확인 원본과
+중간표(interim/영업정보/kakao_*·naver_check_*·registered_hours_*·registered_match_candidates.csv)는 로컬에만 보관 (.gitignore)
 """
 
 import csv

@@ -28,3 +28,11 @@ data/raw/유치기관/대구광역시 수성구_외국인 환자 유치 등록 �
 data/raw/의료기관/서울시 의료관광허가 의료기관 정보 (한국어)(2015년).csv
 # - 외부 사이트 자료 (비공개)
 data/raw/비급여진료/*_대구_*.csv
+# - 진료시간 작업 파일 (카카오맵·네이버 지도 확인 원본·중간표, 2026-11-18)
+#   공개본은 합친 결과 하나만: data/processed/daegu_hours_manual.csv (행마다 출처 URL·등급·확인일)
+data/raw/영업정보/kakao_business_hours_*.tsv
+data/interim/영업정보/kakao_targets_*.csv
+data/interim/영업정보/naver_check_*
+data/interim/영업정보/registered_hours_fill.csv
+data/interim/영업정보/registered_hours_verify.csv
+data/interim/영업정보/registered_match_candidates.csv
