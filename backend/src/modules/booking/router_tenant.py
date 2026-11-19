@@ -52,7 +52,8 @@ def act(
     body: StaffAction | None = None,
 ):
     return service.staff_act(
-        db, _tenant(staff), staff.staff_id, request_id, action.replace("-", "_"), body.slot if body else None
+        db, _tenant(staff), staff.staff_id, request_id, action.replace("-", "_"),
+        body.slot if body else None, reason=body.reason if body else None,
     )
 
 

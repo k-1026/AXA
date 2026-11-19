@@ -69,6 +69,15 @@
 - B에게 요청: 결정 21·contracts 4절 확인. 대시보드는 `get_basic()`을 쓰므로 영향 없음
 - AI 담당에게: `ai/agent/tools/chat_tools.py` `registered_only` 인자는 백엔드에선 효과 없음(항상 등록만) → 도구 설명·가상 병원 데이터도 맞출지 확인
 
+### 2026-11-17 (8) · backend-A-contract-reject-reason → backend-A-reject-reason · Claude
+- 한 일: **병원 직원 거절 사유 코드** (사용자 요청) — `fully_booked`·`not_offered`·`needs_consult`·`other`, 선택. `booking_events.reason`(20자, 이미 있음)에 저장 → 마이그레이션 없음. 거절이 아닌 행동에 사유·목록 밖 코드는 422
+  - **B 모듈(booking) 변경**: `models.REJECT_REASONS`, `service.staff_act(reason=)`, `schemas.StaffAction.reason`, `router_tenant` 전달 — B 리뷰 필요
+  - 같이: 대시보드 시안(`dashboard-dialogs` 브랜치, B의 `docs-dashboard-integration` 위)에 모든 버튼 확인 다이얼로그 + 요청 목록 DB 연결
+- 확인: Supabase `AXA`(0007) + 가상 병원 9001로 대시보드에서 확정·시간 제안(직접 입력)·거절(사유 저장 `fully_booked` 확인)·방문 완료·사후관리 해결됨(태그)·답장 저장
+- 바뀐 계약: 있음 2절 (거절 사유)
+- 테스트: 백엔드+AI 367개 통과 (거절 사유 3개 추가)
+- B에게 요청: ① 거절 사유 코드·계약 2절 확인 ② 대시보드 다이얼로그 PR 리뷰 ③ 환자 화면에 거절 사유를 언어별 문장으로 보일지 결정
+
 ### 2026-11-18 (3) · backend-A-booking-request · Claude
 - 한 일: **환자 예약 요청 · 내 예약 API** (`modules/booking/router_patient.py`, `schemas_patient.py`) — 흐름이 "요청서 제출"에서 "예약 요청 → 병원 확정"으로 바뀐 것에 맞춤
   - `POST /hospitals/{hospital_id}/booking-requests` → 201 `PatientBookingOut`: `require_requestable`(미등록·영업 중 아님 403) → 입점(tenant·requests_enabled) 확인(없으면 403 `hospital.not_requestable` `reason=not_joined`) → 동의 확인 → `booking.service.create_request`(B) → 동의를 요청서에 묶어 기록(`consents.booking_request_id`)
