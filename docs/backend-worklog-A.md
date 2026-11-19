@@ -57,6 +57,18 @@
 - 다음 할 일: 요청서 제출 API (`POST /hospitals/{id}/booking-requests`: `require_requestable` + 동의 4개 + 거주 재확인 → B `booking.service.create_request`)
 - B에게 요청: 모델을 더 바꾸면 A에게 알려 주기(리비전 추가). #28 리뷰의 사후관리 비의료 제한·`health` 동의 확인
 
+### 2026-11-17 (5) · backend-A-contract-registered → backend-A-registered-only · Claude
+- 한 일: **병원 정보 공개도 등록 병원만** (결정 21, 결정 20 변경 — 복지부·진흥원 회신: 외국어 병원 정보 웹도 유치행위로 평가될 수 있음)
+  - `hospital.service`: `PUBLIC_REGISTERED_ONLY = True` 한 곳에서 거름 → `GET /hospitals`(`ids`·`registered=false` 포함)는 등록 병원만, 미등록 상세는 없는 병원과 같은 404 `not_found`. 챗봇 찾기·상세도 이 서비스를 쓰므로 같이 적용(`registered_only=False`여도 미등록 X). `get_basic`·`require_requestable`(내부)은 그대로
+  - **DB는 4,242곳 그대로** (등록 명단이 바뀌면 적재가 `is_registered_facility`만 갱신, FK 대상 유지)
+  - 테스트: `files()`가 등록 명단을 안 받으면 모두 등록으로 적재(정렬·필터 테스트 유지), 새 규칙 테스트 — 목록 등록만·DB 전체 유지, 명단에서 빠지면 공개에서 빠지고 다시 등록되면 같은 id, 미등록 상세 404, 챗봇 `registered_only=False`·미등록 상세 카드 없음
+- 확인 (실제 데이터 로컬 SQLite): 목록 126(미등록 0, 요청 가능 126) · 피부과 8 · 성형외과 11 · 내과 36 · 안과 8 · 미등록 상세 404 · DB 4,242
+- 바뀐 계약: 있음 4절 + 결정 21 (`backend-A-contract-registered`, **B 확인 필요**)
+- 테스트: 백엔드+AI 366개 통과
+- 다음 할 일: 프론트 정적 `hospitals.json`도 등록 병원만 (프론트 브랜치), `compliance.md` 2-1·3절 5번 갱신(docs-compliance 쪽)
+- B에게 요청: 결정 21·contracts 4절 확인. 대시보드는 `get_basic()`을 쓰므로 영향 없음
+- AI 담당에게: `ai/agent/tools/chat_tools.py` `registered_only` 인자는 백엔드에선 효과 없음(항상 등록만) → 도구 설명·가상 병원 데이터도 맞출지 확인
+
 ### 2026-11-18 (4) · backend-A-staff-auth · Claude
 - 한 일: **가입할 때 환자/병원 관계자 나눔** — 병원 쪽 가입·로그인 (`modules/auth/staff.py`)
   - `POST /auth/staff/signup` {email, password, hospital_id, registration_no, consents} → 201 직원 토큰: 등록 유치기관·영업 중만(`require_requestable`, 403/404) → 병원 1곳 = 계정 1개(이미 입점 409 `auth.hospital_taken`) → `tenants`(requests_enabled=True, 등록번호) + `staff_users`(owner) 생성
