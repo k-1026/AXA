@@ -154,6 +154,11 @@
   .btn:focus-visible, .dlg input:focus-visible, .dlg select:focus-visible, .dlg textarea:focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
   input[type=date], input[type=url] { font:inherit; font-size:0.9rem; border:1px solid var(--line); border-radius:10px; padding:0 12px; height:40px; background:#fff; color:var(--fg); }
   textarea { height:auto; padding:8px 12px; resize:vertical; }
+  #toasts { position:fixed; right:20px; bottom:20px; z-index:70; display:flex; flex-direction:column; align-items:flex-end; gap:8px; max-width:min(420px, calc(100vw - 40px)); }
+  .toast { display:flex; align-items:flex-start; gap:10px; padding:10px 12px 10px 14px; border-radius:10px; color:#fff; font-size:14px; line-height:1.45; background:var(--brand); box-shadow:0 6px 18px rgba(16,24,40,.18); }
+  .toast.bad { background:var(--bad); }
+  .toast-x { border:0; background:none; color:inherit; font-size:18px; line-height:1; padding:0 2px; cursor:pointer; opacity:.85; }
+  .toast-x:hover { opacity:1; }
 </style>
 </head>
 <body>
@@ -797,7 +802,22 @@
   }
   // HOOKS[key]가 있으면(백엔드 연결) 버튼·전송·대화 선택을 API로 처리, 없으면 예시 데이터로 화면만 바뀜
   const HOOKS = {};
-  const toast = (msg, bad) => { const el = document.createElement('div'); el.textContent = msg; el.style.cssText = `position:fixed;right:20px;bottom:20px;z-index:70;padding:10px 14px;border-radius:10px;color:#fff;font-size:14px;background:${bad ? 'var(--bad)' : 'var(--brand)'}`; document.body.append(el); setTimeout(() => el.remove(), 2600); };
+  // 알림: 오른쪽 아래에 위로 쌓임. 성공은 5초 뒤 사라지고 마우스를 올리면 멈춤, 오류는 닫기(×)를 누를 때까지 남음
+  const toast = (msg, bad) => {
+    let box = document.getElementById('toasts');
+    if (!box) { box = document.createElement('div'); box.id = 'toasts'; box.setAttribute('aria-live', 'polite'); document.body.append(box); }
+    const el = document.createElement('div');
+    el.className = 'toast' + (bad ? ' bad' : '');
+    el.setAttribute('role', bad ? 'alert' : 'status');
+    const text = document.createElement('span'); text.textContent = msg;
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'toast-x'; x.setAttribute('aria-label', '알림 닫기'); x.textContent = '×';
+    x.onclick = () => el.remove();
+    el.append(text, x); box.append(el);
+    if (bad) return; // 오류는 직접 닫을 때까지
+    let timer = setTimeout(() => el.remove(), 5000);
+    el.onmouseenter = () => clearTimeout(timer);
+    el.onmouseleave = () => { timer = setTimeout(() => el.remove(), 2000); };
+  };
   function renderChat(root, key, idx) {
     const list = CHATS[key];
     if (!list.length) {
