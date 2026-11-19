@@ -157,7 +157,8 @@
         "text": "要做的事",
         "placeholder": "例：去西门市场夜市",
         "save": "添加",
-        "cancel": "取消"
+        "cancel": "取消",
+        "noTime": "不指定"
       }
     },
     "checklist": {

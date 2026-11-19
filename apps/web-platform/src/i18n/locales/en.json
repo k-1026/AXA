@@ -157,7 +157,8 @@
         "text": "Plan",
         "placeholder": "e.g. Seomun Market night market",
         "save": "Add",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "noTime": "No time"
       }
     },
     "checklist": {

@@ -157,7 +157,8 @@
         "text": "Việc cần làm",
         "placeholder": "VD: Đi chợ đêm Seomun",
         "save": "Thêm",
-        "cancel": "Hủy"
+        "cancel": "Hủy",
+        "noTime": "Không chọn giờ"
       }
     },
     "checklist": {

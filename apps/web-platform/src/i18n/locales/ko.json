@@ -157,7 +157,8 @@
         "text": "할 일",
         "placeholder": "예: 서문시장 야시장 가기",
         "save": "추가",
-        "cancel": "취소"
+        "cancel": "취소",
+        "noTime": "선택 안 함"
       }
     },
     "checklist": {

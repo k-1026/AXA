@@ -13,6 +13,8 @@ interface Props {
 }
 
 const MAX_TEXT = 60;
+// 시간은 목록에서 한 번 고르면 바로 닫히게 (브라우저 시간 입력창은 고른 뒤에도 열려 있음). 07:00~22:30, 30분 단위
+const TIMES = Array.from({ length: 32 }, (_, i) => `${String(7 + Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`);
 
 // 여행 기간 표시: 언어별 날짜 형식 (예: 11월 20일 – 22일, Nov 20 – 22)
 // formatRange는 ES2021 타입이라 tsconfig(ES2020)에 맞춰 타입만 보강
@@ -37,9 +39,10 @@ export function ScheduleCard({ start, end, items }: Props) {
   const from = start || all[0]?.date;
   const to = end || all[all.length - 1]?.date;
 
+  const today = todayKst();
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!date || !text.trim()) return;
+    if (!date || date < today || !text.trim()) return; // 지난 날짜는 등록 안 함
     add({ date, time, text: text.trim() });
     setText('');
     setTime('');
@@ -59,22 +62,32 @@ export function ScheduleCard({ start, end, items }: Props) {
         </p>
       )}
       {all.length > 0 && (
-        <ol className="mp-timeline">
-          {all.map((item) => (
-            <ScheduleEntry key={item.id} item={item} onRemove={mine.has(item.id) ? () => remove(item.id) : undefined} />
-          ))}
-        </ol>
+        // 일정이 많으면 이 안에서만 스크롤 (카드 높이는 그대로)
+        <div className="mp-timeline-scroll">
+          <ol className="mp-timeline">
+            {all.map((item) => (
+              <ScheduleEntry key={item.id} item={item} onRemove={mine.has(item.id) ? () => remove(item.id) : undefined} />
+            ))}
+          </ol>
+        </div>
       )}
 
       {open ? (
         <form className="mp-plan-form" onSubmit={submit}>
           <label>
             <span>{t('mypage.schedule.form.date')}</span>
-            <input type="date" value={date} required onChange={(e) => setDate(e.target.value)} />
+            <input type="date" value={date} min={today} required onChange={(e) => setDate(e.target.value)} />
           </label>
           <label>
             <span>{t('mypage.schedule.form.time')}</span>
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+            <select value={time} onChange={(e) => setTime(e.target.value)}>
+              <option value="">{t('mypage.schedule.form.noTime')}</option>
+              {TIMES.map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="mp-plan-text">
             <span>{t('mypage.schedule.form.text')}</span>
@@ -91,7 +104,7 @@ export function ScheduleCard({ start, end, items }: Props) {
             <button type="button" className="mp-plan-cancel" onClick={() => setOpen(false)}>
               {t('mypage.schedule.form.cancel')}
             </button>
-            <button type="submit" className="mp-plan-save" disabled={!date || !text.trim()}>
+            <button type="submit" className="mp-plan-save" disabled={!date || date < today || !text.trim()}>
               {t('mypage.schedule.form.save')}
             </button>
           </div>
