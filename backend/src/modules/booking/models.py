@@ -48,7 +48,7 @@ class BookingRequest(Base):
     # 탈퇴하면 계정 행을 바로 지움(결정 15) → 병원 쪽 기록은 남기고 연결만 끊음
     patient_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("patients.id", ondelete="SET NULL"))
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id", ondelete="CASCADE"))
-    hospital_id: Mapped[int] = mapped_column(BigInteger)
+    hospital_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("hospitals.id"))  # FK는 A 리비전 0007
     status: Mapped[str] = mapped_column(String(12), default="pending")
     lang: Mapped[str] = mapped_column(String(8))
     nationality: Mapped[str] = mapped_column(String(2))  # ISO 3166-1 alpha-2

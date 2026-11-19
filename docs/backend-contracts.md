@@ -65,7 +65,7 @@
 | `consent.required` | 422 | 필수 동의 없음 |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
-| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`. 병원 정보 조회(목록·상세)는 막지 않음 |
+| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`. 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
@@ -143,6 +143,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
 | 2026-11-17 | 2 | 병원 직원 거절에 사유 코드(`fully_booked`/`not_offered`/`needs_consult`/`other`, 선택) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-contract-reject-reason` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
