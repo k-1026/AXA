@@ -3,7 +3,8 @@
 결과는 챗봇 카드 형식(`ai/agent/schemas.py` HospitalBrief·HospitalDetailData)에 맞춘 dict.
 - 진료과는 카드에 한국어 이름으로 (가상 병원 데이터와 같게), 지역은 "대구" 뺀 구·군 이름
 - 응대 언어 정보는 공공데이터에 없음 → `staff_languages = []`, `ai_translation_chat = False` (병원에 확인 안내는 도구가)
-- 상담 요청 가능 = `can_request` (등록 유치의료기관 + 영업 중, 결정 20)
+- 공개는 등록 병원만 (결정 21, `hospital.service`가 거름) → `registered_only=False`여도 미등록 병원은 안 나옴, 상세는 None
+- 상담 요청 가능 = `can_request` (등록 유치의료기관 + 영업 중)
 - 조건 맞춤 제안·예약은 아직 가상 병원 (2026-11-17 결정: 찾기·상세만 연결)
 """
 

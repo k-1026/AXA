@@ -23,7 +23,7 @@ def list_hospitals(
     lat: Annotated[float | None, Query(ge=-90, le=90)] = None,
     lng: Annotated[float | None, Query(ge=-180, le=180)] = None,
 ):
-    """로그인 없이. 모든 병원 정보 + 등록 여부(`is_registered_facility`)·요청 가능(`can_request`).
+    """로그인 없이. **등록 유치의료기관만** (결정 21) + 요청 가능(`can_request` = 등록 + 영업 중).
 
     정렬은 `name`·`distance`만 (그 밖은 422). 등록·요금제 여부로 순서를 바꾸지 않음.
     """
@@ -40,5 +40,5 @@ def list_hospitals(
 
 @router.get("/hospitals/{hospital_id}", response_model=HospitalDetail)
 def get_hospital(hospital_id: int, db: Annotated[Session, Depends(get_db)]):
-    """로그인 없이. 상세 + 진료시간 + 출처·수집일. 미등록 병원도 정보는 같게, `can_request`만 false."""
+    """로그인 없이. 상세 + 진료시간 + 출처·수집일. 미등록 병원은 없는 병원과 같은 404 (결정 21)."""
     return service.get_detail(db, hospital_id)
