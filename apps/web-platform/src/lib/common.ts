@@ -11,8 +11,8 @@ export const KST = 'Asia/Seoul';
 /** 오늘 (YYYY-MM-DD, 한국 시간) */
 export const todayKst = () => new Intl.DateTimeFormat('en-CA', { timeZone: KST }).format(new Date());
 
-/** 한국어·영어는 꼭, 그 밖의 화면 언어(zh-TW·zh-CN·vi)는 있으면 쓰는 글. 사용자가 입력한 글은 문자열 그대로 */
-export type KoEn = { ko: string; en: string; 'zh-TW'?: string; 'zh-CN'?: string; vi?: string };
+/** 한국어·영어는 꼭, 그 밖의 화면 언어(zh-TW·zh-CN·vi·ja)는 있으면 쓰는 글. 사용자가 입력한 글은 문자열 그대로 */
+export type KoEn = { ko: string; en: string; 'zh-TW'?: string; 'zh-CN'?: string; vi?: string; ja?: string };
 
 /**
  * 화면 언어의 글이 있으면 그것, 없으면 영어 (병원 이름처럼 한국어·영어만 있는 데이터는 영어로). 문자열은 그대로
