@@ -94,11 +94,11 @@ table.t tr.hl td { background: var(--pain-soft); }
 </style>
 <!-- theme:end -->
 <style>
-  .board { flex: 1; display: grid; grid-template-columns: 92px repeat(5, 1fr); grid-template-rows: auto 1fr 1fr 118px 1fr 1.25fr 1fr; column-gap: 8px; row-gap: 0; padding: 14px 18px 8px; }
+  .board { flex: 1; display: grid; grid-template-columns: 92px repeat(5, 1fr); grid-template-rows: auto 1fr 1fr 150px 1fr 1.15fr 1fr; column-gap: 8px; row-gap: 0; padding: 8px 18px 4px; }
   .lab { font-weight: 800; font-size: 12.5px; color: var(--ink); display: flex; align-items: center; border-top: 1px solid var(--border); }
-  .stage { background: var(--accent); color: #fff; text-align: center; font-weight: 800; font-size: 14px; border-radius: var(--radius-sm); padding: 9px 4px; margin-bottom: 4px; }
+  .stage { background: var(--accent); color: #fff; text-align: center; font-weight: 800; font-size: 14px; border-radius: var(--radius-sm); padding: 6px 4px; margin-bottom: 4px; }
   .stage small { display: block; font-weight: 500; font-size: 11px; opacity: .85; }
-  .c { text-align: center; padding: 8px 6px; font-size: 12.5px; border-top: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; }
+  .c { text-align: center; padding: 4px 6px; font-size: 12.5px; border-top: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; }
   .think { color: var(--text-muted); }
   .pain { font-weight: 700; color: var(--pain); }
   .pain.off { color: var(--neutral); font-weight: 600; }
@@ -112,11 +112,11 @@ table.t tr.hl td { background: var(--pain-soft); }
 <div class="page">
   <div class="head">
     <div>
-      <div class="eyebrow">painpoint · 고객 여정 지도 v1</div>
+      <div class="eyebrow">painpoint · 고객 여정 지도 v2 — VOC 941건 반영 (11/19)</div>
       <h1>고객 여정 지도 — <em>린 (대만 미용의료 단기 방문객)</em></h1>
       <div class="lede">3박 4일 대구 여행에 피부 시술 1회를 믿을 만한 병원에서 받고, 귀국 후 궁금한 점을 묻고 싶다 · 위에서 아래로 행동 → 생각 → 감정 → 터치포인트 → 페인포인트 → 기회</div>
     </div>
-    <span class="pill">감정 최저점 ② 비교·결정</span>
+    <span class="pill">감정 최저점 ② 비교·결정 · VOC로도 확인</span>
   </div>
 
   <div class="card board">
@@ -134,27 +134,33 @@ table.t tr.hl td { background: var(--pain-soft); }
     <div class="c">병원 방문<br>동의서 서명·시술</div>
     <div class="c">회복 중 궁금한 점<br>병원에 묻기</div>
 
-    <div class="lab">생각 <span class="assume" style="font-size:10px;margin-left:3px">가정</span></div>
-    <div class="c think">"대구 병원 정보는<br>왜 다 한국어지?"</div>
-    <div class="c think">"일요일에도 하나?<br>이 가격 적정한가?"</div>
-    <div class="c think">"답이 언제 오지?"</div>
-    <div class="c think">"동의서를 제대로<br>이해한 걸까"</div>
-    <div class="c think">"이 붓기,<br>물어봐도 되나?"</div>
+    <div class="lab">생각 <span class="chip accent" style="font-size:10px;margin-left:3px">VOC</span></div>
+    <div class="c think">"대구는 서울·부산보다<br>정보가 훨씬 적다"<span class="ev">Dcard · 대만</span></div>
+    <div class="c think">"엔화로 얼마?<br>밤 몇 시까지 해?"<span class="ev">틱톡 · 일본어</span></div>
+    <div class="c think">"일주일째 답이 없는데<br>다음 주 출국"<span class="ev">틱톡 · 강도 2</span></div>
+    <div class="c think">"단품은 안 해 주고<br>묶음 권유 — 가지 말 걸"<span class="ev">틱톡 · 강도 3</span></div>
+    <div class="c think">"효과는 며칠<br>유지돼요?"<span class="ev">Dcard · 대만</span></div>
 
-    <div class="lab">감정 <span class="assume" style="font-size:10px;margin-left:3px">가정</span></div>
+    <div class="lab" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:2px">감정<span style="font-size:10px;font-weight:600;color:var(--accent)">━ 가정</span><span style="font-size:10px;font-weight:600;color:var(--assume)">┅ VOC</span></div>
     <div class="curve">
-      <svg viewBox="0 0 1000 118" preserveAspectRatio="none" aria-label="감정 곡선: 알아보기 -1, 비교·결정 -2 최저점, 상담 예약 -1, 방문·진료 0, 귀국 후 관리 -1">
-        <rect x="0" y="0" width="1000" height="44" fill="var(--good-soft)" opacity=".5"/>
-        <line x1="0" y1="44" x2="1000" y2="44" stroke="var(--border)" stroke-dasharray="4 4"/>
-        <path d="M100,68 C170,68 230,96 300,96 C370,96 430,68 500,68 C570,68 630,44 700,44 C770,44 830,68 900,68" fill="none" stroke="var(--accent)" stroke-width="3" vector-effect="non-scaling-stroke"/>
+      <svg viewBox="0 0 1000 150" preserveAspectRatio="none" aria-label="감정 곡선 — 가정: 알아보기 -1, 비교·결정 -2, 상담 예약 -1, 방문·진료 0, 귀국 후 -1 / VOC: -0.4, -0.7, +0.2, -0.3, +0.3">
+        <rect x="0" y="0" width="1000" height="60" fill="var(--good-soft)" opacity=".5"/>
+        <line x1="0" y1="60" x2="1000" y2="60" stroke="var(--border)" stroke-dasharray="4 4"/>
+        <path d="M100,90 C170,90 230,120 300,120 C370,120 430,90 500,90 C570,90 630,60 700,60 C770,60 830,90 900,90" fill="none" stroke="var(--accent)" stroke-width="3" vector-effect="non-scaling-stroke"/>
+        <path d="M100,72 C170,72 230,80 300,80 C370,80 430,53 500,53 C570,53 630,69 700,69 C770,69 830,51 900,51" fill="none" stroke="var(--assume)" stroke-width="3" stroke-dasharray="7 5" vector-effect="non-scaling-stroke"/>
       </svg>
-      <svg viewBox="0 0 1000 118" aria-hidden="true">
-        <text x="10" y="24" class="el" style="text-anchor:start">+</text><text x="10" y="112" class="el" style="text-anchor:start">−</text>
-        <circle cx="100" cy="68" r="7" fill="var(--accent)"/><text x="100" y="54" class="el">−1 정보 부족</text>
-        <circle cx="300" cy="96" r="9" fill="var(--pain)"/><text x="300" y="80" class="el" style="fill:var(--pain);font-weight:800">−2 최저점</text>
-        <circle cx="500" cy="68" r="7" fill="var(--accent)"/><text x="500" y="54" class="el">−1 기다림</text>
-        <circle cx="700" cy="44" r="7" fill="var(--accent)"/><text x="700" y="30" class="el">0 계획대로</text>
-        <circle cx="900" cy="68" r="7" fill="var(--accent)"/><text x="900" y="54" class="el">−1 물을 곳 부족</text>
+      <svg viewBox="0 0 1000 150" aria-hidden="true">
+        <text x="10" y="24" class="el" style="text-anchor:start">+</text><text x="10" y="144" class="el" style="text-anchor:start">−</text>
+        <circle cx="100" cy="90" r="7" fill="var(--accent)"/><text x="100" y="108" class="el">가정 −1 정보 부족</text>
+        <circle cx="300" cy="120" r="9" fill="var(--pain)"/><text x="300" y="143" class="el" style="fill:var(--pain);font-weight:800">가정 −2 최저점</text>
+        <circle cx="500" cy="90" r="7" fill="var(--accent)"/><text x="500" y="108" class="el">가정 −1 기다림</text>
+        <circle cx="700" cy="60" r="7" fill="var(--accent)"/><text x="700" y="46" class="el">가정 0 계획대로</text>
+        <circle cx="900" cy="90" r="7" fill="var(--accent)"/><text x="900" y="108" class="el">가정 −1 물을 곳 부족</text>
+        <circle cx="100" cy="72" r="6" fill="var(--assume)"/><text x="100" y="61" class="el" style="fill:var(--assume)">VOC −0.4 · 731건</text>
+        <circle cx="300" cy="80" r="7" fill="var(--assume)"/><text x="300" y="68" class="el" style="fill:var(--assume);font-weight:800">VOC −0.7 최저 · 95건</text>
+        <circle cx="500" cy="53" r="6" fill="var(--surface)" stroke="var(--assume)" stroke-width="2.5"/><text x="500" y="41" class="el" style="fill:var(--assume)">VOC +0.2 · 13건 (적음)</text>
+        <circle cx="700" cy="69" r="6" fill="var(--assume)"/><text x="700" y="88" class="el" style="fill:var(--assume)">VOC −0.3 · 78건</text>
+        <circle cx="900" cy="51" r="6" fill="var(--surface)" stroke="var(--assume)" stroke-width="2.5"/><text x="900" y="39" class="el" style="fill:var(--assume)">VOC +0.3 · 12건 (적음)</text>
       </svg>
     </div>
 
@@ -162,24 +168,24 @@ table.t tr.hl td { background: var(--pain-soft); }
     <div class="c"><div><span class="chip">검색·SNS</span><span class="chip">메디컬코리아</span></div><div><span class="chip">UNNI·트립닥</span><span class="chip accent">메디대구 지도</span></div></div>
     <div class="c"><div><span class="chip accent">병원 상세</span><span class="chip accent">가격 가이드</span></div><div><span class="chip">찜</span></div></div>
     <div class="c"><div><span class="chip accent">챗봇</span><span class="chip accent">상담 예약</span></div><div><span class="chip">병원 코디</span></div></div>
-    <div class="c"><div><span class="chip">대구 병원</span><span class="chip">의료진·통역</span></div><div><span class="chip accent">길찾기</span></div></div>
+    <div class="c"><div><span class="chip">대구 병원</span><span class="chip">의료진·통역</span></div><div><span class="chip accent">병원 주소·지도</span></div></div>
     <div class="c"><div><span class="chip accent">사후관리 채팅</span></div><div><span class="chip">의료진·코디</span></div></div>
 
     <div class="lab">페인포인트</div>
     <div class="c pain"><div><span class="badge">1</span>등록 병원 상세<br>정보 부족</div><span class="ev">E03 E04 E05 E06</span></div>
     <div class="c pain"><div><span class="badge">2</span>진료시간 정보 없음</div><div><span class="badge">3</span>가격 기준 없음</div><span class="ev">E01 E04 · E02 E07</span></div>
-    <div class="c pain off"><div>병원 답 기다림</div><span class="ev">G01 가정 · 보류</span></div>
-    <div class="c pain off"><div>동의서 이해 어려움</div><span class="ev">E13 · 의료진 몫</span></div>
+    <div class="c pain off"><div>병원 답 기다림 · 예약 창구 제각각</div><span class="ev">G01 + VOC 1건 · 채널 21건 · 팀 결정</span></div>
+    <div class="c pain off"><div>묶음 권유·공장식 응대</div><span class="ev">VOC ④ 불만 43 · 동의서 E13</span></div>
     <div class="c pain off"><div>귀국 후 진료성<br>상담 창구 없음</div><span class="ev">E15 · 2027-05 전</span></div>
 
     <div class="lab">기회</div>
     <div class="c opp">등록 병원 상세를<br>5개 언어로 한곳에</div>
     <div class="c opp">출처·확인일 붙은 진료시간<br>가격 위치 표시</div>
-    <div class="c opp">AI 요약·답장 초안으로<br>병원 응답 단축</div>
-    <div class="c opp">길찾기 · 병원 연락처</div>
+    <div class="c opp">AI 요약·답장 초안으로<br>병원 응답 단축 · 답장률 표시</div>
+    <div class="c opp">확정 금액 확인<br>병원 주소 · 연락처</div>
     <div class="c opp">사후관리 지원 병원<br>채팅 연결</div>
   </div>
-  <div class="foot"><span>근거 id: painpoint/evidence.csv (VOC 대신 데이터·공식 자료, 팀 결정 11/12) · 감정은 단계별 근거 순 강도 · 숫자 배지 = Top 3 (priority.html)</span><span>2026-11-12 · 메디대구</span></div>
+  <div class="foot"><span>근거: evidence.csv + VOC 941건 (유튜브·대만·인스타·틱톡) · 감정 가정 = 단계별 근거 순 강도 · VOC = 2×(칭찬−불만)/(칭찬+불만), 빈 원 = 건수 적음 · 배지 = Top 3</span><span>2026-11-19 v2 · 메디대구</span></div>
 </div>
 </body>
 </html>
