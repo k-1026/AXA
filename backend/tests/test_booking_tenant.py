@@ -163,6 +163,37 @@ def test_confirm_without_slot_is_422(client, db):
     assert r.status_code == 422 and r.json()["code"] == "validation"
 
 
+def test_거절_사유는_이력에_코드로_남는다(client, db):
+    p, t = _patient(db), _tenant(db)
+    req = service.create_request(db, p.id, t.id, _data())
+    r = client.post(f"/api/v1/tenant/booking-requests/{req.id}/reject", json={"reason": "fully_booked"},
+                    headers=_staff_headers(t))
+    assert r.status_code == 200 and r.json()["status"] == "rejected"
+    ev = db.query(BookingEvent).filter_by(request_id=req.id, to_status="rejected").one()
+    assert ev.reason == "fully_booked" and ev.actor_type == "staff"
+
+
+def test_거절_사유는_선택(client, db):
+    p, t = _patient(db), _tenant(db)
+    req = service.create_request(db, p.id, t.id, _data())
+    r = client.post(f"/api/v1/tenant/booking-requests/{req.id}/reject", headers=_staff_headers(t))
+    assert r.status_code == 200
+    assert db.query(BookingEvent).filter_by(request_id=req.id, to_status="rejected").one().reason is None
+
+
+def test_목록에_없는_거절_사유_또는_거절이_아닌_행동의_사유는_422(client, db):
+    p, t = _patient(db), _tenant(db)
+    req = service.create_request(db, p.id, t.id, _data())
+    bad = client.post(f"/api/v1/tenant/booking-requests/{req.id}/reject", json={"reason": "아무 말"},
+                      headers=_staff_headers(t))
+    assert bad.status_code == 422 and bad.json()["code"] == "validation"
+    wrong = client.post(f"/api/v1/tenant/booking-requests/{req.id}/confirm",
+                        json={"slot": "2026-11-21T01:00:00Z", "reason": "other"}, headers=_staff_headers(t))
+    assert wrong.status_code == 422 and wrong.json()["code"] == "validation"
+    db.refresh(req)
+    assert req.status == "pending"  # 둘 다 아무것도 바뀌지 않음
+
+
 # ---------- 대시보드 summary ----------
 
 

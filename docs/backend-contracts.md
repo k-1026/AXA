@@ -66,7 +66,7 @@
 | `consent.required` | 422 | 필수 동의 없음 |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
-| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`. 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
+| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`/`not_joined`(등록 기관이지만 메디대구 입점 안 함 = tenant 없음·`requests_enabled=false`, 예약 요청 때만). 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
@@ -100,7 +100,7 @@
 | 칸 | 타입 | 필수 | 비고 |
 |---|---|---|---|
 | `department_code` | str | O | 진료과 코드 = `departments.code` (`dermatology`, `plastic`, `internal`, `ophthalmology` …) |
-| `preferred_slots` | list[datetime(UTC)] | O | 1~3개 |
+| `preferred_slots` | list[datetime] | O | 1~3개, 시간대 포함, 지금 이후만 → UTC로 저장 |
 | `patient_timezone` | str (IANA, 예 `Asia/Taipei`) | O | 화면 표시용 |
 | `lang` | str (`ko`/`en`/`zh-TW`/`zh-CN`/`vi`) | O | 요청 언어 (`patients.preferred_lang`·프론트 번역과 같은 5개) |
 | `nationality` | str (국가 코드) | O | |
@@ -108,10 +108,23 @@
 | `visa_needed` | bool | O | |
 | `message` | str | X | 자유 입력 원문 → 번역은 백그라운드 |
 | `health_info` | str | X | 있으면 `health` 동의 필수 |
-| `consents` | list[{kind, version}] | O | `privacy` 필수, `health`·`overseas_transfer` 조건부 |
-| `residency` | str (`short_term`) | **제안** | 체류 형태. 국내 거주 외국인은 유치 대상이 아니라 요청 불가(의료법 제27조 제3항 제2호) → 지금은 챗봇 안에서만 거름(자기 신고). 사람이 쓰는 요청서에도 같은 확인이 필요해 칸 또는 계정 속성으로 추가 제안 — **B 확인 필요** |
+| `consents` | list[{kind, version}] | O | `privacy` 항상 · `health_info`가 있으면 `health` · `message`나 `health_info`가 있으면 번역(해외 LLM)용 `overseas_transfer` → 빠지면 422 `consent.required` (`detail.missing`). 받은 동의는 그 요청서에 묶어 기록(`consents.booking_request_id`) |
+| `residency` | `short_term` | O | 체류 형태(자기 신고). 국내 거주 외국인은 유치 대상이 아니라 요청 불가(의료법 제27조 제3항 제2호) → `short_term` 외에는 422 `validation` (2026-11-18 필수로) |
+| `treatment` | str | X | 진료항목 코드 (대시보드 1-2) |
 
 - 요청서의 `privacy` 동의 = **이 요청서 내용을 고른 병원에 전달**하는 데 대한 동의 (가입 때 `privacy`와 별개로 요청서마다). 법적 구조가 제3자 제공(개인정보보호법 제17조 제1항 제1호)인지 처리 위탁(제26조)인지는 **개인정보위 질의 8번 회신 후** 문구 확정 ([plan.md](../subject/plan.md) 11절)
+
+### 6-1. 환자 예약 API (A, `modules/booking/router_patient.py`)
+
+모두 **환자 로그인 필요**. 응답 `PatientBookingOut` = `BookingOut` + `replies[{text_ko, text_translated, sent_at}]`(직원이 보낸 답장만)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending` | 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.duplicate`, 422 `consent.required`·`validation` |
+| `GET /me/booking-requests` | 내 예약 요청 목록 (최근 순) | — |
+| `GET /me/booking-requests/{id}` | 상세 | 404 `not_found`(남의 것 포함) |
+| `POST /me/booking-requests/{id}/accept` | 병원이 제안한 시간 수락 `proposed → confirmed` | 409 `booking.invalid_transition` |
+| `POST /me/booking-requests/{id}/cancel` | `{reason?}` (`CANCEL_REASONS`) → `cancelled`, `pending`·`proposed`에서만 | 409, 422 |
 
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
 
@@ -146,6 +159,7 @@
 |---|---|---|---|---|
 | 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
 | 2026-11-17 | 2 | 병원 직원 거절에 사유 코드(`fully_booked`/`not_offered`/`needs_consult`/`other`, 선택) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-contract-reject-reason` → `backend` |
+| 2026-11-18 | 4·6 | 환자 예약 API 6-1절 신설, `hospital.not_requestable` 사유 `not_joined` 추가, `residency` 필수(`short_term`만), 동의 조건(`overseas_transfer` = 글 번역 때) 확정, `preferred_slots` 미래만 | A (**B 확인 필요**) | `backend-A-contract-booking-request` → `backend` |
 | 2026-11-18 | 3·4 | 병원 관계자 가입·로그인 경로(`/auth/staff/signup`·`login`), 에러 `auth.hospital_taken`(409) | A (**B 확인 필요**) | `backend-A-contract-staff-auth` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
