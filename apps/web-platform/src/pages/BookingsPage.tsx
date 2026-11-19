@@ -8,6 +8,7 @@ import { BookingForm } from '../features/consult/BookingForm';
 import { HospitalThumb } from '../features/consult/HospitalThumb';
 import { bookingDateFull } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
+import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { displayStatus, type BookingRequest, type DisplayStatus } from '../features/consult/types';
 import { LegalLinks } from '../features/legal/LegalLinks';
 
@@ -37,6 +38,7 @@ export function BookingsPage() {
   const [sort, setSort] = useState<Sort>('visit');
   const [editing, setEditing] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const all = consult.bookings;
   const count = (f: Filter) => (f === 'all' ? all.length : all.filter((b) => group(b) === f).length);
@@ -93,6 +95,11 @@ export function BookingsPage() {
         </select>
       </div>
 
+      {cancelError && (
+        <p className="consult-form-error" role="alert">
+          {cancelError}
+        </p>
+      )}
       <div className="bk-list">
         {items.length === 0 && <p className="mp-saved-empty">{t(all.length ? 'bookings.emptyFilter' : 'bookings.none')}</p>}
         {items.map(({ thread, message, booking }) => {
@@ -143,8 +150,9 @@ export function BookingsPage() {
                 {editing === key ? (
                   <BookingForm
                     initial={booking}
-                    onSubmit={(b) => {
-                      consult.changeBooking(thread.hospitalId, message.id, b, t('bookings.changeMsg', { when: bookingDateFull(b.date, b.time, i18n.language) }));
+                    member={consult.mode === 'member'}
+                    onSubmit={async (b, extra) => {
+                      await consult.changeBooking(thread.hospitalId, message.id, b, t('bookings.changeMsg', { when: bookingDateFull(b.date, b.time, i18n.language) }), extra);
                       setEditing(null);
                     }}
                     onCancel={() => setEditing(null)}
@@ -159,8 +167,13 @@ export function BookingsPage() {
                     <button
                       type="button"
                       className="is-danger"
-                      onClick={() => {
-                        consult.cancelBooking(thread.hospitalId, message.id, t('bookings.cancelMsg', { when: bookingDateFull(booking.date, booking.time, i18n.language) }));
+                      onClick={async () => {
+                        try {
+                          await consult.cancelBooking(thread.hospitalId, message.id, t('bookings.cancelMsg', { when: bookingDateFull(booking.date, booking.time, i18n.language) }));
+                          setCancelError(null);
+                        } catch (err) {
+                          setCancelError(t(bookingErrorKey(err)));
+                        }
                         setCancelling(null);
                       }}
                     >

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { todayKst } from '../lib/common';
 import { nowKstTime } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
+import { BookingConsentFields, consentReady, emptyConsent, toExtra } from '../features/consult/BookingConsentFields';
+import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { useHospitals } from '../features/hospital/useHospitals';
 import { hospitalNames, useHospitalName } from '../features/hospital/name';
 import { addDays, DAYS_AHEAD, isBookable, slotsFor } from '../features/reserve/availability';
@@ -22,6 +24,9 @@ export function ReservePage() {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [done, setDone] = useState(false);
+  const [consent, setConsent] = useState(emptyConsent);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const locale = i18n.language;
   const lastDay = addDays(today, DAYS_AHEAD - 1);
@@ -64,13 +69,24 @@ export function ReservePage() {
     setTime('');
   };
 
-  const submit = () => {
+  const member = consult.mode === 'member';
+  const submit = async () => {
     if (!date || !time) return;
-    consult.requestBookingFor(
-      { hospitalId: h.id, name: hospitalNames(h), dept: h.depts[0], district: h.district, photo: h.photo },
-      { date, time, language: locale },
-    );
-    setDone(true);
+    if (member && !consentReady(consent, false)) return setError(t('booking.err.consentNeeded'));
+    setError('');
+    setBusy(true);
+    try {
+      await consult.requestBookingFor(
+        { hospitalId: h.id, name: hospitalNames(h), dept: h.depts[0], district: h.district, photo: h.photo },
+        { date, time, language: locale },
+        member ? toExtra(consent, false) : undefined,
+      );
+      setDone(true);
+    } catch (err) {
+      setError(t(bookingErrorKey(err)));
+    } finally {
+      setBusy(false);
+    }
   };
 
   if (done) {
@@ -146,7 +162,11 @@ export function ReservePage() {
           {date && time && (
             <div className="reserve-confirm">
               <p><strong>{dateLabel(date)} {time}</strong></p>
-              <button type="button" className="reserve-submit" onClick={submit}>{t('reserve.submit')}</button>
+              {member && <BookingConsentFields value={consent} onChange={setConsent} hasNote={false} />}
+              {error && <p className="consult-form-error" role="alert">{error}</p>}
+              <button type="button" className="reserve-submit" onClick={submit} disabled={busy}>
+                {busy ? t('auth.submitting') : t('reserve.submit')}
+              </button>
             </div>
           )}
           <p className="reserve-note">{t('reserve.note')}</p>

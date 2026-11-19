@@ -33,12 +33,14 @@
     "plastic": "성형외과",
     "internal": "내과",
     "ophthalmology": "안과",
+    "other": "기타",
     "notReady": "데이터 준비 중"
   },
   "popup": {
     "type": "종류",
     "addr": "주소",
     "tel": "전화",
+    "detail": "병원 정보",
     "source": "출처: 건강보험심사평가원 ({{date}} 수집)"
   },
   "hospitalType": {
@@ -518,5 +520,39 @@
     "doneBody": "병원이 확인하면 예약이 확정돼요. 확정 전까지는 예약 관리에서 \"확인 대기\"로 보여요.",
     "toBookings": "예약 관리로",
     "toConsult": "이 병원과 상담하기"
+  },
+  "booking": {
+    "nationality": "국적",
+    "shortTerm": "한국에 살지 않고, 진료를 위해 잠시 방문합니다.",
+    "agreeShare": "예약 요청 내용을 고른 병원에 전달하는 데 동의합니다.",
+    "agreeOverseas": "요청 사항을 병원 언어로 번역하기 위해 해외 AI 서비스로 보내는 데 동의합니다.",
+    "err": {
+      "consentNeeded": "단기 방문 확인과 필수 동의를 체크해 주세요.",
+      "notRequestable": "이 병원은 지금 예약 요청을 받을 수 없어요.",
+      "notJoined": "이 병원은 아직 메디대구에서 예약을 받지 않아요. 병원에 직접 연락해 주세요.",
+      "duplicate": "이 병원에 아직 처리되지 않은 요청이 있어요. 예약 관리에서 확인해 주세요.",
+      "invalidTransition": "지금 상태에서는 할 수 없어요. 새로 고침해 주세요.",
+      "login": "로그인이 필요해요."
+    }
+  },
+  "staff": {
+    "whoLabel": "계정 종류",
+    "whoPatient": "환자",
+    "whoStaff": "병원 관계자",
+    "tabSignup": "입점 신청",
+    "email": "업무용 이메일",
+    "submitLogin": "대시보드 로그인",
+    "submitSignup": "입점 신청하고 시작하기",
+    "signupIntro": "등록 외국인환자 유치의료기관만 입점할 수 있어요. 병원 1곳에 계정 1개(대표)가 만들어져요.",
+    "hospital": "병원",
+    "pickHospital": "병원을 고르세요",
+    "regNo": "외국인환자 유치의료기관 등록번호",
+    "regNoHint": "형식: M-2009-03-01-0013 (보건복지부 등록증)",
+    "doneNoDashboard": "로그인했어요. 대시보드 주소(VITE_DASHBOARD_URL)가 설정되지 않아 이동하지 못했어요.",
+    "err": {
+      "hospitalTaken": "이미 입점한 병원이에요. 병원 대표 계정에 문의해 주세요.",
+      "notRegistered": "등록 유치의료기관이 아니거나 영업 중이 아니라 입점할 수 없어요.",
+      "tooMany": "로그인 시도가 많아요. 잠시 후 다시 시도해 주세요."
+    }
   }
 }

@@ -33,12 +33,14 @@
     "plastic": "整形外科",
     "internal": "内科",
     "ophthalmology": "眼科",
+    "other": "其他",
     "notReady": "数据准备中"
   },
   "popup": {
     "type": "类型",
     "addr": "地址",
     "tel": "电话",
+    "detail": "医院信息",
     "source": "来源：韩国健康保险审查评价院（{{date}} 采集）"
   },
   "hospitalType": {
@@ -518,5 +520,39 @@
     "doneBody": "医院确认后预约即生效。确认前在预约管理中显示为“等待确认”。",
     "toBookings": "前往预约管理",
     "toConsult": "咨询这家医院"
+  },
+  "booking": {
+    "nationality": "国籍",
+    "shortTerm": "我不住在韩国，是为了就诊短期来访。",
+    "agreeShare": "同意将预约申请内容提供给所选医院。",
+    "agreeOverseas": "同意将需求内容发送至海外 AI 服务，翻译成医院的语言。",
+    "err": {
+      "consentNeeded": "请勾选短期来访确认和必要同意。",
+      "notRequestable": "这家医院目前无法接受预约申请。",
+      "notJoined": "这家医院尚未在 MediDaegu 接受预约，请直接联系医院。",
+      "duplicate": "这家医院已有未处理的申请，请到预约管理确认。",
+      "invalidTransition": "当前状态无法执行，请刷新。",
+      "login": "请先登录。"
+    }
+  },
+  "staff": {
+    "whoLabel": "账号类型",
+    "whoPatient": "患者",
+    "whoStaff": "医院人员",
+    "tabSignup": "申请入驻",
+    "email": "工作邮箱",
+    "submitLogin": "登录管理页面",
+    "submitSignup": "申请入驻并开始",
+    "signupIntro": "只有已登记的外国患者招揽医疗机构可以入驻。每家医院创建一个（代表）账号。",
+    "hospital": "医院",
+    "pickHospital": "请选择医院",
+    "regNo": "外国患者招揽医疗机构登记号",
+    "regNoHint": "格式：M-2009-03-01-0013",
+    "doneNoDashboard": "已登录。尚未设置管理页面地址（VITE_DASHBOARD_URL）。",
+    "err": {
+      "hospitalTaken": "这家医院已经入驻，请联系医院代表账号。",
+      "notRegistered": "不是已登记机构或未营业，无法入驻。",
+      "tooMany": "尝试次数过多，请稍后再试。"
+    }
   }
 }

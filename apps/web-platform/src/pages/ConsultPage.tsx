@@ -146,8 +146,9 @@ export function ConsultPage() {
             <div className="chat-composer">
               {form && (
                 <BookingForm
-                  onSubmit={(b) => {
-                    consult.requestBooking(b);
+                  member={consult.mode === 'member'}
+                  onSubmit={async (b, extra) => {
+                    await consult.requestBooking(b, extra);
                     setForm(false);
                   }}
                   onCancel={() => setForm(false)}

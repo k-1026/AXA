@@ -859,6 +859,56 @@ a {
   color: var(--text-muted);
 }
 
+/* 지도 정보창: 닫기 버튼에 여백, 이름 줄 오른쪽에 병원 정보 버튼 */
+.hospital-map .leaflet-popup-content {
+  margin: 12px 14px 12px 16px;
+}
+
+/* leaflet.css(.leaflet-container a.leaflet-popup-close-button)보다 우선 */
+.hospital-map.leaflet-container a.leaflet-popup-close-button {
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font: 20px/28px sans-serif;
+}
+
+.hospital-map.leaflet-container a.leaflet-popup-close-button:hover {
+  background: var(--surface-muted);
+}
+
+.popup-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-right: 30px; /* 닫기 버튼 자리 */
+}
+
+.popup-head strong {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+  padding-top: 4px;
+}
+
+.popup-detail {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff !important;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.popup-detail:hover {
+  filter: brightness(0.92);
+}
+
 .popup-info {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -4924,4 +4974,44 @@ body.chat-open {
 .reserve-done-actions a.is-primary {
   background: var(--accent);
   color: #ffffff;
+}
+
+/* 계정 종류: 환자 / 병원 관계자 (가입할 때 나눔) */
+.auth-who {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auth-who-btn {
+  flex: 1;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-who-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* 예약 요청 때 받는 국적·단기 방문·동의 (실제 회원) */
+.booking-consents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 0 0;
+  border: 0;
+  flex-basis: 100%;
+}
+
+.booking-consents .auth-field select {
+  max-width: 260px;
 }

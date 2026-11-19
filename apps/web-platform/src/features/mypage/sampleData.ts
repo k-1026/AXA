@@ -25,13 +25,14 @@ export interface ChecklistItem {
 }
 
 // 저장한 병원. 진료과는 마이페이지 필터용
-export type SavedDept = 'dermatology' | 'plastic' | 'internal' | 'ophthalmology';
+export type SavedDept = 'dermatology' | 'plastic' | 'internal' | 'ophthalmology' | 'other';
 
 export const SAVED_DEPTS: { key: SavedDept; label: Localized }[] = [
   { key: 'dermatology', label: { ko: '피부과', en: 'Dermatology' } },
   { key: 'plastic', label: { ko: '성형외과', en: 'Plastic Surgery' } },
   { key: 'internal', label: { ko: '내과', en: 'Internal Medicine' } },
   { key: 'ophthalmology', label: { ko: '안과', en: 'Ophthalmology' } },
+  { key: 'other', label: { ko: '기타', en: 'Other' } },
 ];
 
 export interface SavedHospital {

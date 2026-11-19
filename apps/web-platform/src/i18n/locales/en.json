@@ -33,12 +33,14 @@
     "plastic": "Plastic surgery",
     "internal": "Internal medicine",
     "ophthalmology": "Ophthalmology",
+    "other": "Other",
     "notReady": "Data coming soon"
   },
   "popup": {
     "type": "Type",
     "addr": "Address",
     "tel": "Phone",
+    "detail": "Hospital info",
     "source": "Source: HIRA (collected {{date}})"
   },
   "hospitalType": {
@@ -518,5 +520,39 @@
     "doneBody": "Your booking is confirmed once the hospital checks it. Until then it shows as \"Waiting for confirmation\" in My bookings.",
     "toBookings": "Go to My bookings",
     "toConsult": "Consult this hospital"
+  },
+  "booking": {
+    "nationality": "Nationality",
+    "shortTerm": "I do not live in Korea and am visiting briefly for treatment.",
+    "agreeShare": "I agree to share this booking request with the selected hospital.",
+    "agreeOverseas": "I agree to send my note to an overseas AI service to translate it for the hospital.",
+    "err": {
+      "consentNeeded": "Please confirm your short-term visit and the required consents.",
+      "notRequestable": "This hospital cannot take booking requests right now.",
+      "notJoined": "This hospital does not take bookings on MediDaegu yet. Please contact the hospital directly.",
+      "duplicate": "You already have a pending request at this hospital. Check My bookings.",
+      "invalidTransition": "This is not possible in the current status. Please refresh.",
+      "login": "Please log in."
+    }
+  },
+  "staff": {
+    "whoLabel": "Account type",
+    "whoPatient": "Patient",
+    "whoStaff": "Hospital staff",
+    "tabSignup": "Join as hospital",
+    "email": "Work email",
+    "submitLogin": "Log in to dashboard",
+    "submitSignup": "Join and start",
+    "signupIntro": "Only registered foreign-patient attraction medical institutions can join. One account (owner) per hospital.",
+    "hospital": "Hospital",
+    "pickHospital": "Choose a hospital",
+    "regNo": "Foreign patient institution registration no.",
+    "regNoHint": "Format: M-2009-03-01-0013",
+    "doneNoDashboard": "Logged in. The dashboard address (VITE_DASHBOARD_URL) is not set.",
+    "err": {
+      "hospitalTaken": "This hospital has already joined. Contact its owner account.",
+      "notRegistered": "Not a registered institution or not operating, so it cannot join.",
+      "tooMany": "Too many attempts. Please try again later."
+    }
   }
 }
