@@ -1,0 +1,8 @@
+/* 메디대구 웹 색: 파랑 #1f6feb · 연하늘 #e3edfd · 남색 #172b4d · 흰색 (apps/web-platform/src/styles.css) */
+*{box-sizing:border-box;margin:0}
+html,body{width:var(--w);height:var(--h);overflow:hidden}
+body{font-family:"Microsoft JhengHei","Malgun Gothic",sans-serif;color:#fff;position:relative}
+.brand{position:absolute;display:flex;align-items:center;gap:20px;font-family:"Segoe UI","Malgun Gothic",sans-serif;font-weight:700;font-size:38px}
+.brand i{width:72px;height:72px;border-radius:50%;background:#fff;color:#1f6feb;display:grid;place-items:center;font-style:normal;font-size:28px}
+.pill{display:inline-block;background:#172b4d;color:#fff;font-weight:900;border-radius:999px}
+.chip{background:#fff;color:#1f6feb;border-radius:18px;padding:0 18px;font-style:normal}
