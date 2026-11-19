@@ -56,7 +56,7 @@ export function useAftercare() {
   const visits = useMemo(
     () =>
       consult.bookings
-        .filter((b) => displayStatus(b.booking) === 'visited') // 확정 + 방문 일시 지남 (consult/types.ts)
+        .filter((b) => displayStatus(b.booking) === 'visited') // 병원이 방문 완료 표시한 예약 (데모 계정은 확정 + 방문 일시 지남, consult/types.ts)
         .map((b) => ({ id: b.message.id, thread: b.thread, booking: b.booking, ...(store[b.message.id] ?? { messages: [], unread: 0 }) }))
         .sort((a, b) => `${b.booking.date}T${b.booking.time}`.localeCompare(`${a.booking.date}T${a.booking.time}`)),
     [consult.bookings, store],

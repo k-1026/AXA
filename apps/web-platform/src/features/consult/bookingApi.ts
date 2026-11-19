@@ -10,7 +10,7 @@ export const OVERSEAS_VERSION = '2026-11-18';
 interface ServerBooking {
   id: string;
   hospital_id: number;
-  status: BookingStatus | 'visited' | 'no_show';
+  status: BookingStatus;
   lang: string;
   preferred_slots: string[];
   department_code: string;
@@ -49,13 +49,11 @@ function kstParts(iso: string): { date: string; time: string } {
 
 export function toLocal(s: ServerBooking): BookingRequest {
   const when = kstParts(s.confirmed_slot ?? s.preferred_slots[0]);
-  // 화면 상태에는 방문 완료·노쇼가 따로 없음 → 방문 완료는 확정으로 두고 시간이 지나면 화면이 visited로 보여 줌
-  const status: BookingStatus = s.status === 'visited' ? 'confirmed' : s.status === 'no_show' ? 'cancelled' : s.status;
   return {
     ...when,
     language: s.lang,
     note: s.message_original ?? undefined,
-    status,
+    status: s.status, // 방문 완료·미방문도 서버 상태 그대로 (결정 19)
     serverId: s.id,
     bookingNo: s.status === 'confirmed' || s.status === 'visited' ? s.id.slice(0, 8).toUpperCase() : undefined,
   };

@@ -25,6 +25,7 @@ const GROUP: Record<DisplayStatus, Filter> = {
   cancelled: 'cancelled',
   rejected: 'cancelled',
   expired: 'cancelled',
+  no_show: 'cancelled', // 병원이 미방문 표시 → "취소" 묶음, 카드 상태 글자는 "미방문"
 };
 const group = (b: { booking: BookingRequest }) => GROUP[displayStatus(b.booking)];
 
@@ -145,6 +146,7 @@ export function BookingsPage() {
                   {status === 'rejected' && t('bookings.rejectedNote')}
                   {status === 'proposed' && t('bookings.proposedNote')}
                   {status === 'expired' && t('bookings.expiredNote')}
+                  {status === 'no_show' && t('bookings.noShowNote')}
                 </p>
 
                 {editing === key ? (

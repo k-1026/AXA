@@ -415,7 +415,8 @@
       "cancelled": "Cancelled",
       "visited": "Visited",
       "proposed": "New time proposed",
-      "expired": "Expired"
+      "expired": "Expired",
+      "no_show": "No-show"
     },
     "quick": {
       "booking": "Booking",
@@ -476,7 +477,8 @@
     "footnote": "Booking times are in Korea Standard Time (KST).",
     "sampleNote": "Sample hospitals and bookings.",
     "proposedNote": "The hospital proposed a different time. Please check it in the consultation chat.",
-    "expiredNote": "All preferred dates have passed, so this request has expired."
+    "expiredNote": "All preferred dates have passed, so this request has expired.",
+    "noShowNote": "The clinic marked this booking as not attended. To visit, please send a new booking request."
   },
   "aftercare": {
     "list": "Aftercare visits",
