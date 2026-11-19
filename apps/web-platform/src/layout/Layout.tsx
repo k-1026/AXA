@@ -2,8 +2,10 @@ import { Outlet, useMatch } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
+import { useDemoPatientSeed } from '../features/mypage/demoPatientSeed';
 
 export function Layout() {
+  useDemoPatientSeed(); // 시연 환자 계정이면 찜·방문 기록 예시 (한 번만)
   // 챗봇·병원 상담·사후 관리는 화면 높이에 맞춰 입력창을 아래에 붙이므로 푸터를 빼고 높이를 고정
   const chatbot = useMatch('/chatbot');
   const consult = useMatch('/booking');
