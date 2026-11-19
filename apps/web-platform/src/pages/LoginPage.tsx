@@ -6,6 +6,7 @@ import { ApiError } from '../components/api';
 import { LANGUAGES } from '../i18n';
 import { TERMS } from '../features/legal/terms';
 import { PRIVACY } from '../features/legal/privacy';
+import { StaffLoginForm, StaffSignupForm } from '../features/staff/StaffAuth';
 
 // 로그인·회원가입. 실제 계정은 백엔드에, 데모 계정은 발표·화면 확인용으로 아래에 남겨 둠
 const PASSWORD_MIN = 8; // 백엔드 규칙과 같음 (backend/src/modules/auth/schemas.py)
@@ -44,6 +45,7 @@ export function LoginPage() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [mode, setMode] = useState<Mode>('login');
+  const [who, setWho] = useState<'patient' | 'staff'>('patient');
 
   if (user) {
     return (
@@ -64,6 +66,14 @@ export function LoginPage() {
 
   return (
     <section className="mp-card auth-card">
+      {/* 가입할 때 환자 / 병원 관계자를 나눔 (계정이 따로) */}
+      <div className="auth-who" role="radiogroup" aria-label={t('staff.whoLabel')}>
+        {(['patient', 'staff'] as const).map((w) => (
+          <button key={w} type="button" role="radio" aria-checked={who === w} className={who === w ? 'auth-who-btn active' : 'auth-who-btn'} onClick={() => setWho(w)}>
+            {t(w === 'patient' ? 'staff.whoPatient' : 'staff.whoStaff')}
+          </button>
+        ))}
+      </div>
       <div className="auth-tabs" role="tablist">
         {(['login', 'signup'] as const).map((m) => (
           <button
@@ -74,12 +84,18 @@ export function LoginPage() {
             className={mode === m ? 'auth-tab active' : 'auth-tab'}
             onClick={() => setMode(m)}
           >
-            {t(m === 'login' ? 'auth.tabLogin' : 'auth.tabSignup')}
+            {t(m === 'login' ? 'auth.tabLogin' : who === 'staff' ? 'staff.tabSignup' : 'auth.tabSignup')}
           </button>
         ))}
       </div>
-      {mode === 'login' ? <LoginForm /> : <SignupForm />}
-      <DemoEntry />
+      {who === 'staff' ? (
+        mode === 'login' ? <StaffLoginForm /> : <StaffSignupForm />
+      ) : (
+        <>
+          {mode === 'login' ? <LoginForm /> : <SignupForm />}
+          <DemoEntry />
+        </>
+      )}
     </section>
   );
 }

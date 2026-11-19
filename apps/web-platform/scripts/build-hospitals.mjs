@@ -1,6 +1,8 @@
 // data/interim/영업정보/*.csv → public/data/hospitals.json
 // 피부과·성형외과·내과·안과 병원만, 한국어 가나다순으로 저장한다. 원본 데이터는 수정하지 않는다.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+// **등록 외국인환자 유치의료기관만** 내보낸다 (백엔드 결정 21, 복지부·진흥원 회신 2026-11-17:
+// 외국어 병원 정보 웹도 유치행위로 평가될 수 있음 → 미등록 병원 노출 X). 백엔드 GET /hospitals와 같은 기준
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { englishName } from './romanize.mjs';
@@ -45,6 +47,31 @@ const excluded = new Set(
     .filter((r) => r.verdict !== '정상')
     .map((r) => r.ykiho),
 );
+// 등록 유치의료기관 (요양기관 기호로 맞춘 것만). 파일이 없으면 아무 병원도 내보내지 않는다 (미등록 노출 방지)
+const registeredPath = resolve(repo, 'data/processed/daegu_registered_institutions.csv');
+const registeredRows = existsSync(registeredPath) ? readCsv('daegu_registered_institutions.csv', resolve(repo, 'data/processed')) : [];
+const registered = existsSync(registeredPath) ? new Set(registeredRows.map((r) => r.ykiho).filter(Boolean)) : null;
+if (!registered) {
+  console.warn(
+    '⚠ data/processed/daegu_registered_institutions.csv 없음 → 병원 0곳으로 저장 (미등록 병원 노출 방지).\n' +
+      '  받기: git restore --source origin/research-data -- data/processed/daegu_registered_institutions.csv',
+  );
+}
+// 등록 유치기관 진료시간 직접 채움 (2026-11-18, data/etl/build_registered_hours.py 결과)
+// 심평원 API에 없는 요일을 채움. override=Y는 검증에서 API 값이 틀린 것으로 확인돼 API 값도 바꿈 (백엔드 loader와 같은 규칙)
+const manualPath = resolve(repo, 'data/processed/daegu_hours_manual.csv');
+const manualHours = new Map(
+  existsSync(manualPath) ? readCsv('daegu_hours_manual.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r]) : [],
+);
+// 10/28에 사람이 확인한 값 (중구·수성구 직접 채움, 수성구 외국인환자 유치기관). 평일·토·일 칸이 "HH:MM-HH:MM"일 때만 씀
+const oldManual = new Map();
+for (const [name, ok] of [
+  ['manual_fill_junggu_suseonggu.csv', (r) => r.fill_status === 'filled'],
+  ['suseong_foreign_patient_facilities.csv', (r) => r.ykiho && r.weekday_hours],
+]) {
+  if (!existsSync(resolve(interim, name))) continue;
+  for (const r of readCsv(name).filter(ok)) oldManual.set(r.ykiho, r);
+}
 // 홈페이지·인스타그램 (팀 수집 파일에서 사이트 병원과 맞는 곳만, 블로그·네이버 제외)
 const links = new Map(readCsv('daegu_hospital_links.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r]));
 // 대표사진 주소 (팀 수집 파일을 요양기관 기호로 맞춘 것). 사진 파일은 저장하지 않고 원래 주소로 표시
@@ -64,7 +91,47 @@ function departments(r) {
   const medical = !r.clCdNm.startsWith('치과') && !r.clCdNm.startsWith('한');
   if (medical && r.yadmNm.includes('내과')) depts.push('internal');
   if (medical && r.yadmNm.includes('안과')) depts.push('ophthalmology');
-  return depts.sort((a, b) => r.yadmNm.includes(DEPT_NAMES[b]) - r.yadmNm.includes(DEPT_NAMES[a]));
+  depts.sort((a, b) => r.yadmNm.includes(DEPT_NAMES[b]) - r.yadmNm.includes(DEPT_NAMES[a]));
+  // 4개 진료과가 아닌 등록 유치기관(치과·한방·종합병원 등)은 "기타"
+  return depts.length ? depts : ['other'];
+}
+
+// 한 요일의 진료시간: 심평원 API → 직접 채움(daegu_hours_manual) → 10/28 직접 채움 순
+const RANGE = /^(\d\d:\d\d)-(\d\d:\d\d)$/;
+const fromRange = (v) => {
+  const m = RANGE.exec((v ?? '').trim());
+  return m && m[1] < m[2] ? [m[1], m[2]] : null;
+};
+function weekOf(r) {
+  const api = DAYS.map((d) => {
+    const start = hhmm(r[`trmt${d}Start`]);
+    const end = hhmm(r[`trmt${d}End`]);
+    return start && end ? [start, end] : null;
+  });
+  const m = manualHours.get(r.ykiho);
+  if (m) {
+    const override = m.override?.toUpperCase() === 'Y';
+    return DAYS.map((d, i) => {
+      const v = m[d.toLowerCase()];
+      if (override && v === '휴진') return null;
+      return (override ? fromRange(v) ?? api[i] : api[i] ?? fromRange(v));
+    });
+  }
+  const o = oldManual.get(r.ykiho);
+  if (o && !api.some(Boolean)) {
+    // "09:00-18:00 (외래 기본)"처럼 설명이 붙은 칸은 앞의 시간만 씀. 요일별로 다른 문장("월·금 …/화·수·목 …")은 쓰지 않음
+    const first = (v) => (/^\d\d:\d\d-\d\d:\d\d(\s*\(.*\))?$/.test((v ?? '').trim()) ? fromRange(v.trim().slice(0, 11)) : null);
+    const wk = first(o.weekday_hours);
+    if (wk) return [wk, wk, wk, wk, wk, first(o.sat_hours), first(o.sun_hours)];
+    // "월·수·목 09:00-19:00 / 화·금 09:00-20:30" → 요일별
+    const byDay = Array(5).fill(null);
+    for (const part of (o.weekday_hours ?? '').split('/')) {
+      const m = /^\s*([월화수목금·]+)\s+(\d\d:\d\d-\d\d:\d\d)\s*$/.exec(part);
+      if (m) for (const d of m[1].split('·')) if ('월화수목금'.includes(d) && d) byDay['월화수목금'.indexOf(d)] = fromRange(m[2]);
+    }
+    if (byDay.some(Boolean)) return [...byDay, first(o.sat_hours), first(o.sun_hours)];
+  }
+  return api;
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -88,18 +155,46 @@ const url = (v) => {
 // "(재)", "(의)" 같은 괄호는 정렬에서 무시
 const collator = new Intl.Collator('ko', { ignorePunctuation: true });
 
-const items = hours
-  .map((r) => ({ r, depts: departments(r) }))
-  .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos && !excluded.has(r.ykiho))
-  .map(({ r, depts }) => {
+// 심평원 목록에서 찾지 못한 등록 유치기관 (메디컬코리아에는 있음, 2026-11-18).
+// 같은 도로명 주소 건물의 심평원 좌표를 빌려 지도에 표시하고, 나머지는 메디컬코리아 영문 정보만 보여 준다
+const NO_HIRA = {
+  'M-2024-03-08-7710': { addr: '대구광역시 중구 동성로1길 77', district: '중구', type: '의원', depts: ['plastic'] },
+};
+const hoursById = new Map(hours.map((r) => [r.ykiho, r]));
+function noHiraItem(reg) {
+  const extra = NO_HIRA[reg.registration_no];
+  const near = extra && hours.find((h) => h.addr.startsWith(`${extra.addr},`) || h.addr === extra.addr);
+  if (!near) {
+    console.warn(`⚠ 심평원·좌표 없음: ${reg.registration_no} ${reg.name_en}`);
+    return null;
+  }
+  return {
+    id: reg.registration_no,
+    name: reg.name_en,
+    nameEn: reg.name_en,
+    type: extra.type,
+    district: extra.district,
+    addr: extra.addr,
+    tel: reg.tel && !reg.tel.includes('*') ? reg.tel : undefined,
+    url: reg.website ? url(reg.website) : undefined,
+    lat: Number(near.YPos),
+    lng: Number(near.XPos),
+    depts: extra.depts,
+  };
+}
+
+// 메디컬코리아 등록 유치의료기관 161곳 전부 (진료시간이 없으면 빈칸으로 표시)
+const items = registeredRows
+  .map((reg) => (reg.ykiho ? hoursById.get(reg.ykiho) : null) ?? noHiraItem(reg))
+  .filter(Boolean)
+  .filter((r) => r.id || (r.XPos && r.YPos && !excluded.has(r.ykiho)))
+  .map((r) => (r.id ? { item: r } : { r, depts: departments(r), week: weekOf(r) }))
+  .map(({ item, r, depts, week }) => {
+    if (item) return item;
     const b = basics.get(r.ykiho) ?? {};
     const link = links.get(r.ykiho);
+    const m = manualHours.get(r.ykiho);
     const name = r.yadmNm.replace(/&amp;/g, '&');
-    const week = DAYS.map((d) => {
-      const start = hhmm(r[`trmt${d}Start`]);
-      const end = hhmm(r[`trmt${d}End`]);
-      return start && end ? [start, end] : null;
-    });
     // 빈 값은 저장하지 않음 → 화면에서 빈칸
     return {
       id: r.ykiho,
@@ -116,12 +211,12 @@ const items = hours
       lng: Number(r.XPos),
       depts,
       hours: week.some(Boolean) ? week : undefined,
-      lunchWeek: tidyTime(r.lunchWeek) || undefined,
-      lunchSat: tidyTime(r.lunchSat) || undefined,
+      lunchWeek: tidyTime(r.lunchWeek) || m?.lunch_week || undefined,
+      lunchSat: tidyTime(r.lunchSat) || m?.lunch_sat || undefined,
       rcvWeek: tidyTime(r.rcvWeek) || undefined,
       rcvSat: tidyTime(r.rcvSat) || undefined,
-      sunday: closedNote(r.noTrmtSun),
-      holiday: closedNote(r.noTrmtHoli),
+      sunday: closedNote(r.noTrmtSun) ?? (m?.sun === '휴진' ? 'closed' : undefined),
+      holiday: closedNote(r.noTrmtHoli) ?? closedNote(m?.holiday ?? ''),
       emergencyDay: yn(r.emyDayYn),
       emergencyNight: yn(r.emyNgtYn),
       parking: r.parkQty ? Number(r.parkQty) : undefined,

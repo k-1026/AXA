@@ -39,3 +39,21 @@ class WithdrawRequest(BaseModel):
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class StaffSignupRequest(BaseModel):
+    """입점 병원 가입 (병원 관계자). 등록 외국인환자 유치의료기관만 → 병원 계정(tenant) + 대표 직원(owner).
+
+    프로토타입: 등록번호는 형식만 확인하고 바로 사용. 실서비스는 운영자가 사업자·등록증을 확인한 뒤 활성화 (팀 확인)
+    """
+
+    email: EmailStr
+    password: str = Field(min_length=PASSWORD_MIN, max_length=PASSWORD_MAX)
+    hospital_id: int
+    registration_no: str = Field(pattern=r"^M-\d{4}-\d{2}-\d{2}-\d{4,6}$")  # 외국인환자 유치의료기관 등록번호
+    consents: list[ConsentIn] = Field(default_factory=list, max_length=4)  # terms·privacy 필수
+
+
+class StaffLoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=PASSWORD_MAX)

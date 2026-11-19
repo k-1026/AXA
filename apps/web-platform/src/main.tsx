@@ -20,6 +20,7 @@ import { LegalPage } from './pages/LegalPage';
 import { ChatbotPage } from './pages/ChatbotPage';
 import { VisitsPage } from './pages/VisitsPage';
 import { ConsultPage } from './pages/ConsultPage';
+import { ReservePage } from './pages/ReservePage';
 import { BookingsPage } from './pages/BookingsPage';
 import { AftercarePage } from './pages/AftercarePage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -51,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="chatbot" element={<RequireLogin><ChatbotPage /></RequireLogin>} />
             {/* 상담/예약: 병원별 1:1 상담 (확정은 병원) · 사후관리: 방문 완료 예약별로 그 병원 의료진과 대화 (둘 다 로그인 필요) */}
             <Route path="booking" element={<RequireLogin><ConsultPage /></RequireLogin>} />
+            <Route path="reserve/:id" element={<RequireLogin><ReservePage /></RequireLogin>} />
             <Route path="aftercare" element={<RequireLogin><AftercarePage /></RequireLogin>} />
             {/* 위에 없는 주소는 빈 화면 대신 "페이지를 찾을 수 없어요" */}
             <Route path="*" element={<NotFoundPage />} />
