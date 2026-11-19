@@ -1,0 +1,267 @@
+<title>틱톡 VOC 14차 검수</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 위쪽 고정 진행 바 + 한 줄짜리 판정 카드 목록, 제출 뒤 결과 표 */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --ink:#1b2230; --muted:#5d6676; --line:#dde1e8;
+  --accent:#2f5bd3; --accent-soft:#e7edfc; --ok:#1f7a4d; --ok-soft:#e3f3ea; --bad:#b4372f; --bad-soft:#fbe9e7;
+  --f-head:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --f-body:"Noto Sans KR",system-ui,-apple-system,"Hiragino Sans","Microsoft YaHei",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151b; --surface:#1a1e26; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2c323d;
+  --accent:#7d9cf0; --accent-soft:#232c44; --ok:#5fc58f; --ok-soft:#173226; --bad:#f08a80; --bad-soft:#3a1f1d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b; --surface:#1a1e26; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2c323d;
+  --accent:#7d9cf0; --accent-soft:#232c44; --ok:#5fc58f; --ok-soft:#173226; --bad:#f08a80; --bad-soft:#3a1f1d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{padding-top:24px;display:flex;flex-direction:column;gap:6px}
+h1{font-family:var(--f-head);font-size:1.5rem;margin:0;text-wrap:balance}
+h2{font-family:var(--f-head);font-size:1.1rem;margin:0}
+.sub{color:var(--muted);margin:0;max-width:65ch}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.prog{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.track{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.fill{height:100%;background:var(--accent);width:0;transition:width .2s}
+.prog small{color:var(--muted);font-variant-numeric:tabular-nums}
+.status{font-size:.85rem;color:var(--muted)}
+button{font:inherit;cursor:pointer}
+.primary{background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 16px;font-weight:700}
+.primary:disabled{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+details.rules{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+details.rules summary{font-weight:700;cursor:pointer}
+.rules ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.rules b{font-weight:700}
+.note{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:.9rem}
+.list{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.card.done{border-color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;font-size:.8rem;color:var(--muted)}
+.meta .id{font-family:var(--f-mono);color:var(--ink)}
+.orig{font-size:1rem;margin:0;overflow-wrap:anywhere}
+.tr{margin:0;color:var(--muted);overflow-wrap:anywhere}
+.ctx{font-size:.8rem;color:var(--muted);margin:0}
+.row{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:start}
+.row > span{font-size:.8rem;color:var(--muted);padding-top:6px;letter-spacing:.02em}
+.seg{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.seg button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:.85rem}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.seg button:disabled{cursor:default}
+.fields[hidden]{display:none}
+.hint{margin:-2px 0 0 60px;font-size:.78rem;color:var(--muted)}
+@media (max-width:480px){.hint{margin-left:0}}
+.result{display:flex;flex-direction:column;gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile b{display:block;font-family:var(--f-head);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.tile small{color:var(--muted)}
+.pass{color:var(--ok)} .fail{color:var(--bad)}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.85rem;min-width:620px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500}
+td.m{font-variant-numeric:tabular-nums}
+.ok{background:var(--ok-soft)} .no{background:var(--bad-soft)}
+.empty{color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>틱톡 VOC 14차 검수</h1>
+    <p class="sub">틱톡 3차 VOC에서 9~13차와 겹치지 않게 새로 뽑은 20건이에요. 앞 검수에서 갈린 기준은 버튼 옆에 붙여 뒀어요. 통과: 20건 중 15건 이상 완전 일치. 고를 때마다 자동으로 저장되고, 20건을 모두 판정한 뒤 <b>제출</b>하면 Claude 판정과 일치율이 열려요. <b>제출한 뒤에도 고칠 수 있고</b>, 고치면 결과에 바로 반영돼요. 처음 제출한 판정은 따로 기록돼요.</p>
+  </header>
+
+  <div class="bar">
+    <div class="prog"><div class="track"><div class="fill" id="fill"></div></div><small id="count">0 / 20 판정</small></div>
+    <span class="status" id="status">불러오는 중…</span>
+    <button class="primary" id="submit" disabled>제출하고 결과 보기</button>
+  </div>
+
+  <details class="rules" id="rules">
+    <summary>판정 순서 (규칙 v6) 펼쳐 보기</summary>
+    <ol>
+      <li><b>판정</b> — 시술·병원·의료진·가격·예약·회복·한국에서 시술받는 일에 대한 말인가? 아니면 <b>해당 없음</b> (외모·크리에이터 칭찬, 잡담, "Same" 같은 동조, 병원 홍보, 시술 재료 감상만 있는 말)</li>
+      <li><b>원인</b> — 5개 중 하나. 가격이 들어 있으면 <b>가격</b> 먼저. 병원 정보 = 어느 병원·위치·통역·예약 방법·여행 일정·현지 이용 / 시술 정보·효과·회복 = 무슨 시술·효과·유지·회복 / 안전·통증·불신 = 위생·아픔·무서움·부작용·광고 불신 / 한국 시술 기대·신뢰 = 받고 싶다·결과가 좋다</li>
+      <li><b>단계</b> — 예약했거나 다녀왔다고 말할 때만 ③·④·⑤. 영상 속(특정) 병원 이름·연락처·예약 방법·여행 일정을 묻는 말은 <b>②</b>. 나머지(가격·시술·효과 질문, 영상 장면 반응, 가고 싶다, 특정 병원 없이 추천해 달라)는 <b>①</b></li>
+      <li><b>유형</b> — 부탁하는 말("알려 주세요", "please") = <b>요청</b> · 그냥 묻는 말 = <b>질문</b> · 긍정 표현 = <b>칭찬</b> · 문제·걱정만 = <b>불만</b></li>
+      <li><b>강도</b> — 3 실제 손해·포기 · 2 결정에 영향을 준다고 밝힘("망설여진다", "막막하다", "그래서 못 정한다") · 나머지 1</li>
+    </ol>
+  </details>
+
+  <p class="note" id="who">판정자: 확인 중</p>
+
+  <section class="result" id="result" hidden></section>
+  <section class="list" id="list" aria-label="검수할 댓글 20건"></section>
+
+  <section class="result" id="others" hidden>
+    <h2>다른 판정자</h2>
+    <div class="tablebox"><table><thead><tr><th>판정자</th><th>상태</th><th>판정</th><th>완전 일치</th></tr></thead><tbody id="othersBody"></tbody></table></div>
+  </section>
+</div>
+
+<script>
+const STAGES=["① 알아보기","② 비교·결정","③ 상담 예약","④ 방문·진료","⑤ 귀국 후 관리"];
+const TYPES=["불만","요청","질문","칭찬"];
+const SEV=["1","2","3"];
+const CAUSES=["가격","병원 정보","시술 정보·효과·회복","안전·통증·불신","한국 시술 기대·신뢰"];
+const NA="해당 없음", CL="분류";
+// 원문·번역·영상 맥락. c = Claude 판정 [판정, 단계, 유형, 강도, 원인] (제출 전에는 화면에 나오지 않음)
+const ITEMS=[
+ {id:"T09-012",lang:"영어",ctx:"네팔 현지 클리닉 홍보 영상 · 다른 사람 댓글('kata ho yo')에 단 답글",o:"ok",t:"오케이",c:[NA]},
+ {id:"T14-011",lang:"베트남어",ctx:"한국 홈케어 코칭 앱 홍보 영상 (여드름 압출 장면) · '천천히 짜면 덜 손상된다'는 댓글에 단 답글",o:"nặn đi nặn lại 1 chỗ nhiều lần nó bị tổn thương nhiều hơn đó",t:"한 곳을 여러 번 짜고 또 짜면 그게 더 손상되는 거예요",c:[NA]},
+ {id:"T50-069",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그",o:"なっちゃん肌治療お疲れ様🥰めちゃくちゃ肌綺麗✨✨",t:"피부 치료 수고했어🥰 피부 엄청 예뻐✨",c:[NA]},
+ {id:"T10-026",lang:"영어",ctx:"'한국 미용 예약' 영상 · 'Fine 클리닉에서 봬요' 댓글에 단 답글 (그 클리닉 다녀온 사람)",o:"Not going back to them. And for factory style, they’re more expensive that other factory clinics.",t:"다시는 안 가요. 공장식인데 다른 공장식 클리닉보다 비싸요",c:[CL,3,0,2,0]},
+ {id:"T13-009",lang:"영어",ctx:"서울 피부과 방문 팁 (예약 vs 워크인)",o:"Thanks for sharing! Please continue this type of content - going to Korea in April and I am overwhelmed 🧖‍♀️",t:"공유 고마워요! 이런 콘텐츠 계속 올려 주세요. 4월에 한국 가는데 너무 막막해요🧖‍♀️",c:[CL,0,1,2,1]},
+ {id:"T50-196",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그",o:"ぺろは笑った笑笑",t:"'페로'에서 웃었어ㅋㅋ",c:[NA]},
+ {id:"T50-145",lang:"일본어",ctx:"같은 영상 (채혈 장면)",o:"採血痛くなかった？！",t:"채혈 안 아팠어?!",c:[CL,0,2,1,3]},
+ {id:"T50-112",lang:"일본어",ctx:"같은 영상",o:"私も肌治療してみたい🤭痛い〜？💦",t:"나도 피부 치료 해 보고 싶다🤭 아파?💦",c:[CL,0,2,1,3]},
+ {id:"T50-035",lang:"일본어",ctx:"같은 영상 (직후 → 2주 뒤)",o:"ダウンタイム中もキレイになるまで不安やろなー🥺",t:"다운타임 동안 깨끗해질 때까지 불안하겠다🥺",c:[CL,0,0,1,2]},
+ {id:"T10-007",lang:"영어",ctx:"'한국 미용 예약' 영상 · 'Fine 클리닉에서 시술 받았다, 강추'라는 댓글에 단 답글",o:"How much was it if you don’t mind me asking?",t:"실례지만 얼마 들었어요?",c:[CL,0,2,1,0]},
+ {id:"T09-430",lang:"기타",ctx:"네팔 현지 클리닉 홍보 영상 (배우 출연)",o:"my favourite heroin pujaa ❣️💐💋",t:"내 최애 여배우 푸자❣️",c:[NA]},
+ {id:"T50-103",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그 (직후 → 2주 뒤)",o:"最初の方は、痛そう😳って、心配にもなったけど、2週間後のなっちゃん見て安心したよ〜😊👍✨",t:"처음엔 아파 보여서😳 걱정도 됐는데, 2주 뒤 모습 보고 안심했어😊👍",c:[CL,0,3,1,4]},
+ {id:"T50-062",lang:"일본어",ctx:"같은 영상",o:"痛かったねー！頑張ったね👏👏👏",t:"아팠겠다! 잘 버텼어👏",c:[CL,0,3,1,3]},
+ {id:"T10-025",lang:"영어",ctx:"'한국 미용 예약' 영상 · 'Fine 클리닉에서 봬요' 댓글 아래, 'Fine은 공장식' 답글에 동의",o:"omg literally the same exact thing for me! like nothing wrong with factory style but dont claim that ure not cause ur patients are going to expect that…",t:"헐 나도 완전 똑같았어요! 공장식이 나쁜 건 아닌데, 아니라고 광고하지는 마요. 환자들은 그걸 기대하고 가니까요…",c:[CL,3,0,1,3]},
+ {id:"T50-039",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그",o:"めーーっちゃくちゃ痛いだろうによく頑張ったね😭🩷偉かったね☺️💯💮",t:"엄~청 아팠을 텐데 잘 버텼네😭 대단해☺️",c:[CL,0,3,1,3]},
+ {id:"T10-022",lang:"영어",ctx:"'한국 미용 예약' 영상 · 'Fine 클리닉에서 봬요' 댓글에 단 답글",o:"I’ve been to Fine clinic late last year, would suggest for you to go to Cellin. Fine’s staffs aren’t very friendly, reception staffs are snobbish. The place is pretty much factory style.",t:"작년 말에 Fine 다녀왔는데, Cellin 가는 걸 추천해요. Fine은 직원들이 별로 친절하지 않고 접수 직원이 거만해요. 거의 공장식이에요",c:[CL,3,0,1,1]},
+ {id:"T31-001",lang:"일본어",ctx:"서울 클리닉 홍보 (일본어 상담 가능·전 개인실)",o:"何円でしたか？？",t:"몇 엔이었어요??",c:[CL,0,2,1,0]},
+ {id:"T50-048",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그",o:"すごいね肌治療って✨肌荒れしがちだから韓国でもいつかしてみたいなー😍",t:"피부 치료 대단하다✨ 피부가 잘 뒤집어져서 언젠가 한국에서 해 보고 싶어😍",c:[CL,0,3,1,4]},
+ {id:"T24-004",lang:"영어",ctx:"한국 클리닉 예약 앱(강남언니) 홍보 영상",o:"this is actually so helpful, thanks for sharing! apps in all Korean kinda overwhelm me 😅",t:"이거 진짜 도움 된다, 공유 고마워요! 전부 한국어인 앱은 좀 부담스러웠거든요😅",c:[CL,0,3,1,1]},
+ {id:"T10-048",lang:"영어",ctx:"'한국 미용 예약 어디서·어떻게' (크리에이터가 간 클리닉들)",o:"do they all speak english?",t:"(거기) 다 영어 해요?",c:[CL,1,2,1,1]},
+];
+const claudeOf=it=>it.c[0]===NA?{v:NA}:{v:CL,stage:STAGES[it.c[1]],type:TYPES[it.c[2]],sev:String(it.c[3]),cause:CAUSES[it.c[4]]};
+
+let answers={}, firstAnswers=null, submittedAt=null, submitted=false, canWrite=true, myId=null, db=null, user=null, saving=false, dirty=false, saveTimer=null;
+const $=s=>document.querySelector(s);
+
+function complete(a){ if(!a||!a.v) return false; if(a.v===NA) return true; return !!(a.stage&&a.type&&a.sev&&a.cause); }
+function doneCount(){ return ITEMS.filter(it=>complete(answers[it.id])).length; }
+
+function seg(name,opts,cur,id,locked){
+  const box=document.createElement("div"); box.className="seg"; box.setAttribute("role","group"); box.setAttribute("aria-label",name);
+  opts.forEach(o=>{const b=document.createElement("button"); b.type="button"; b.textContent=o; b.setAttribute("aria-pressed",String(cur===o)); b.disabled=locked;
+    b.addEventListener("click",()=>choose(id,name,o)); box.appendChild(b);});
+  return box;
+}
+function hint(txt){const p=document.createElement("p"); p.className="hint"; p.textContent=txt; return p;}
+function row(label,el){const r=document.createElement("div"); r.className="row"; const s=document.createElement("span"); s.textContent=label; r.append(s,el); return r;}
+
+function renderList(){
+  const list=$("#list"); list.textContent="";
+  const locked=!canWrite;
+  ITEMS.forEach((it,i)=>{
+    const a=answers[it.id]||{};
+    const card=document.createElement("article"); card.className="card"+(complete(a)?" done":"");
+    const meta=document.createElement("div"); meta.className="meta";
+    const n=document.createElement("span"); n.textContent=(i+1)+" / 20"; const idEl=document.createElement("span"); idEl.className="id"; idEl.textContent=it.id; const lg=document.createElement("span"); lg.textContent=it.lang;
+    meta.append(n,idEl,lg);
+    const o=document.createElement("p"); o.className="orig"; o.lang={"일본어":"ja","영어":"en","베트남어":"vi"}[it.lang]||""; o.textContent=it.o;
+    const t=document.createElement("p"); t.className="tr"; t.textContent="번역: "+it.t;
+    const c=document.createElement("p"); c.className="ctx"; c.textContent="영상: "+it.ctx;
+    card.append(meta,o,t,c,row("판정",seg("판정",[CL,NA],a.v,it.id,locked)),hint("시술에 대한 말이면 짧아도 분류: 장면 반응(아파 보인다·효과 모르겠다), '가 보고 싶다·받고 싶다', 예약 앱·클리닉이 좋다. 해당 없음은 사람 외모·크리에이터 응원·잡담·다른 사람에게 하는 설명, 시술 얘기 없이 '피부 예뻐졌다'만 있는 말. 전후·맨얼굴을 보여 달라, 예약·앱 정보가 도움 됐다도 분류. '수고했어·예쁘다'만 있으면 해당 없음"));
+    const f=document.createElement("div"); f.className="fields"; f.hidden=a.v!==CL; f.style.display=a.v===CL?"flex":""; f.style.flexDirection="column"; f.style.gap="8px";
+    f.append(row("원인",seg("cause",CAUSES,a.cause,it.id,locked)),hint("가격이 들어 있으면 가격 먼저. '결과 만족·클리닉 추천·가고 싶다'는 한국 시술 기대·신뢰. 어느 병원·위치·통역·예약 방법·예약 앱·결제 수단·환전은 병원 정보. 효과가 있다/없다·장비끼리 효과 비교는 시술 정보·효과·회복"),row("단계",seg("stage",STAGES,a.stage,it.id,locked)),hint("③·④·⑤는 본인이 예약했거나 다녀왔다고 말할 때만. 영상 속(크리에이터가 간) 병원의 이름·목록·주소·예약 방법·통역을 물으면 ②. 가격만 묻거나 그 밖의 질문·반응은 ①"),row("유형",seg("type",TYPES,a.type,it.id,locked)),hint("부탁·시키는 말(알려 줘·보여 줘·비행기표 끊어 줘·please)은 요청, 그냥 묻는 말은 질문. 물음표가 있어도 걱정·불만이 주된 내용이면 불만. 대단하다·감사·좋다가 있으면 칭찬 (감사와 부탁이 함께 있으면 요청)"),row("강도",seg("sev",SEV,a.sev,it.id,locked)),hint("2는 '망설여진다·막막하다·그래서 못 정한다'처럼 결정에 영향을 준다고 말할 때만. 3은 실제 손해·포기. 나머지는 1"));
+    card.append(f); list.appendChild(card);
+  });
+  const d=doneCount(); $("#fill").style.width=(d/20*100)+"%"; $("#count").textContent=d+" / 20 판정";
+  $("#submit").disabled=submitted||!canWrite||d<20||!db;
+  $("#submit").textContent=submitted?"제출함 · 고치면 바로 반영":"제출하고 결과 보기";
+}
+
+function choose(id,name,val){
+  if(!canWrite) return;
+  const a={...(answers[id]||{})};
+  if(name==="판정"){ a.v=val; if(val===NA){delete a.stage;delete a.type;delete a.sev;delete a.cause;} }
+  else a[name]=val;
+  answers={...answers,[id]:a}; renderList(); if(submitted) renderResult(); queueSave();
+}
+
+function queueSave(){ dirty=true; clearTimeout(saveTimer); saveTimer=setTimeout(flush,700); setStatus("저장 대기…"); }
+async function flush(extra){
+  if(!db||!myId) return;
+  if(saving){ dirty=true; return; }
+  saving=true; dirty=false;
+  const body={round:14,answers,submitted,updatedAt:new Date().toISOString(),...(firstAnswers?{firstAnswers,submittedAt}:{}),...(extra||{})};
+  try{ await db.doc("reviews14/"+myId).set(body); setStatus("저장됨 "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})); }
+  catch(e){ if(e&&e.code==="invalid_argument"){ canWrite=false; setStatus("이 계정은 저장 권한이 없어요 (보기 전용)"); renderList(); } else setStatus("저장 실패 — 잠시 뒤 다시 골라 주세요"); }
+  saving=false; if(dirty) flush();
+}
+function setStatus(s){ $("#status").textContent=s; }
+
+function score(ans){
+  let full=0, f={cause:0,stage:0,type:0,sev:0}, both=0, rows=[];
+  ITEMS.forEach(it=>{const h=ans[it.id]||{}, c=claudeOf(it); let ok;
+    if(c.v===NA||h.v===NA){ ok=c.v===h.v; }
+    else { both++; ["cause","stage","type","sev"].forEach(k=>{ if(h[k]===c[k]) f[k]++; }); ok=["cause","stage","type","sev"].every(k=>h[k]===c[k]); }
+    if(ok) full++; rows.push({it,h,c,ok});});
+  return {full,f,both,rows};
+}
+const fmt=a=>!a||!a.v?"—":a.v===NA?NA:[a.stage,a.type,a.sev,a.cause].join(" · ");
+
+function renderResult(){
+  const box=$("#result"); box.hidden=!submitted; if(!submitted) return;
+  const s=score(answers); const pass=(20-s.full)<=5;
+  box.textContent="";
+  const h=document.createElement("h2"); h.textContent="내 결과 — Claude 판정과 비교"; box.appendChild(h);
+  const tiles=document.createElement("div"); tiles.className="tiles";
+  const tile=(big,small,cls)=>{const d=document.createElement("div"); d.className="tile"; const b=document.createElement("b"); b.textContent=big; if(cls) b.className=cls; const sm=document.createElement("small"); sm.textContent=small; d.append(b,sm); return d;};
+  tiles.append(tile(s.full+" / 20","완전 일치",pass?"pass":"fail"), tile(pass?"통과":"미통과","기준: 불일치 5건 이하",pass?"pass":"fail"),
+    tile(s.f.cause+" / "+s.both,"원인 일치 (둘 다 분류한 것)"), tile(s.f.stage+" / "+s.both,"단계 일치"), tile(s.f.type+" / "+s.both,"유형 일치"), tile(s.f.sev+" / "+s.both,"강도 일치"));
+  box.appendChild(tiles);
+  const tb=document.createElement("div"); tb.className="tablebox"; const tbl=document.createElement("table");
+  tbl.innerHTML="<thead><tr><th>#</th><th>voc_id</th><th>번역</th><th>내 판정</th><th>Claude 판정</th><th>일치</th></tr></thead>";
+  const body=document.createElement("tbody");
+  s.rows.forEach((r,i)=>{const tr=document.createElement("tr"); tr.className=r.ok?"ok":"no";
+    [String(i+1),r.it.id,r.it.t,fmt(r.h),fmt(r.c),r.ok?"O":"X"].forEach((v,j)=>{const td=document.createElement("td"); td.textContent=v; if(j===0) td.className="m"; tr.appendChild(td);});
+    body.appendChild(tr);});
+  tbl.appendChild(body); tb.appendChild(tbl); box.appendChild(tb);
+  const f0=score(firstAnswers||answers).full; const fl=document.createElement("p"); fl.className="sub"; fl.textContent="처음 제출했을 때: "+f0+" / 20 · 지금(고친 뒤): "+s.full+" / 20. 아래 카드에서 고치면 이 결과가 바로 바뀌어요."; box.insertBefore(fl,tiles);
+}
+
+async function renderOthers(docs){
+  const others=docs.filter(d=>d.id!==myId&&d.exists);
+  const sec=$("#others"); sec.hidden=others.length===0; if(!others.length) return;
+  const ps=user? await user.profiles(others.map(d=>d.id)) : {};
+  const body=$("#othersBody"); body.textContent="";
+  others.forEach(d=>{const x=d.data()||{}; const ans=x.answers||{}; const n=ITEMS.filter(it=>complete(ans[it.id])).length;
+    const tr=document.createElement("tr");
+    const cells=[(ps[d.id]&&ps[d.id].name)||"팀원", x.submitted?"제출함":"판정 중", n+" / 20", (x.submitted&&submitted)? score(ans).full+" / 20" : "제출 후 공개"];
+    cells.forEach(v=>{const td=document.createElement("td"); td.textContent=v; tr.appendChild(td);}); body.appendChild(tr);});
+}
+
+$("#submit").addEventListener("click",async()=>{
+  if(doneCount()<20||submitted) return;
+  submitted=true; firstAnswers=JSON.parse(JSON.stringify(answers)); submittedAt=new Date().toISOString(); clearTimeout(saveTimer); renderList();
+  await flush();
+  renderResult(); window.scrollTo({top:0});
+});
+
+renderList();
+(async()=>{
+  const c=window.claude;
+  if(!c||!c.use){ setStatus("claude.ai에서 열어야 저장돼요"); $("#who").textContent="판정자: 로그인 정보 없음 (저장 안 됨)"; return; }
+  [db,user]=await Promise.all([c.use("db"),c.use("user")]);
+  if(!db){ setStatus("저장소에 연결되지 않았어요 — 로그인한 뒤 다시 열어 주세요"); $("#who").textContent="판정자: 연결 안 됨 (저장 안 됨)"; renderList(); return; }
+  myId=user? await user.id():null;
+  if(!myId){ setStatus("로그인한 사람만 저장할 수 있어요"); canWrite=false; renderList(); return; }
+  const me=await user.me(); $("#who").textContent="판정자: "+(me.name||"나")+" — 판정은 내 이름으로 따로 저장돼요. 다른 팀원도 같은 페이지에서 각자 검수할 수 있어요.";
+  const w=await user.can("data.write"); if(w===false){ canWrite=false; setStatus("보기 전용 — 판정을 저장할 수 없어요"); }
+  let first=true; const timer=setTimeout(()=>{ if(first) setStatus("저장소 응답이 늦어요 — 판정은 계속할 수 있어요"); },10000);
+  db.collection("reviews14").onSnapshot(snap=>{
+    const mine=snap.docs.find(d=>d.id===myId);
+    if(first){ first=false; clearTimeout(timer);
+      if(mine&&mine.exists){ const x=mine.data()||{}; answers={...(x.answers||{})}; submitted=!!x.submitted; firstAnswers=x.firstAnswers||null; submittedAt=x.submittedAt||null; setStatus(submitted?"제출함 · 고치면 결과에 바로 반영돼요":"이어서 판정하세요 (저장됨)"); }
+      else if(canWrite) setStatus("판정을 고르면 자동 저장돼요");
+      renderList(); renderResult(); }
+    renderOthers(snap.docs);
+  },e=>{ clearTimeout(timer); setStatus("저장소 연결이 끊겼어요 — 새로고침해 주세요"); });
+})();
+</script>
