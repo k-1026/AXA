@@ -128,7 +128,7 @@ table.t tr.hl td { background: var(--pain-soft); }
   .note { fill: var(--surface-muted); stroke: none; }
   .nt { font: 500 11.5px var(--font); fill: var(--text); }
   .nt b, .nt .b { font-weight: 800; fill: var(--ink); }
-  .bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .bottom .card { padding: 9px 14px; font-size: 11.5px; line-height: 1.5; }
   .bottom ul { margin: 2px 0 0; padding-left: 16px; }
   .bottom li { margin: 1px 0; }
@@ -145,9 +145,9 @@ table.t tr.hl td { background: var(--pain-soft); }
 <div class="page tall">
   <div class="head">
     <div>
-      <div class="eyebrow">spec · 프로세스 플로우 (11/17 사용자 플로우와 분리)</div>
+      <div class="eyebrow">spec · 프로세스 플로우 (11/17 사용자 플로우와 분리 · 11/19 VOC 3차 제안 표시)</div>
       <h1>단계마다 <em>누가 개입하나</em> — 환자 · 메디대구 · AI · 병원 관계자</h1>
-      <div class="lede">가로 = 전체 흐름(① 찾기 → ⑥ 결과) · 세로 = 그 단계에 개입하는 사람·시스템 · 맨 윗줄(환자)만 읽으면 사용자 플로우 · 예약 상태 이름은 백엔드(booking_store.py)와 같음</div>
+      <div class="lede">가로 = 전체 흐름(① 찾기 → ⑥ 결과) · 세로 = 그 단계에 개입하는 사람·시스템 · 맨 윗줄(환자)만 읽으면 사용자 플로우 · 예약 상태 이름은 백엔드(booking_store.py)와 같음 · <span class="assume">주황 글씨 = VOC 3차(틱톡)에서 나온 제안, 팀 결정 전</span></div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><div class="tabs"><a href="userflow.html" class="">사용자 플로우</a><a href="processflow.html" class="on">프로세스 플로우</a></div><span class="pill">단계 6개 × 층 4개 · 판단 6개</span></div>
   </div>
@@ -194,11 +194,13 @@ table.t tr.hl td { background: var(--pain-soft); }
 <text class="t1" x="745" y="96">요청서 보내기</text><text class="t2" x="745" y="113">날짜 1~3개 · 언어 · 동의</text>
 <rect class="nd main" x="1020" y="82" width="170" height="44" rx="12"/>
 <text class="t1" x="1105" y="96">예약 관리에서 확인</text><text class="t2" x="1105" y="113">제안이면 수락 · 취소</text>
+<text x="1098" y="146" class="lb" style="fill:var(--assume);font-weight:700;text-anchor:end">+ 확정이면 금액 · 병원 주소</text>
 <path class="ar " d="M290,104 H296" marker-end="url(#a)"/>
 <path class="ar " d="M470,104 H476" marker-end="url(#a)"/>
 <path class="ar " d="M650,104 H656" marker-end="url(#a)"/>
 <path class="ar dash" d="M830,104 H1016" marker-end="url(#a)"/>
 <text x="925" y="96" class="lb " style="text-anchor:middle">병원 답 기다림</text>
+<text x="925" y="122" class="lb" style="fill:var(--assume);font-weight:700;text-anchor:middle">병원별 N시간 이내 답장률 (계획)</text>
 <path class="ar " d="M205,130 V185" marker-end="url(#a)"/>
 <rect class="nd main" x="130" y="185" width="150" height="40" rx="12"/>
 <text class="t1" x="205" y="197">공공데이터 조회</text><text class="t2" x="205" y="214">진료시간 · 공공 가격</text>
@@ -265,15 +267,24 @@ table.t tr.hl td { background: var(--pain-soft); }
 <text x="931" y="778" class="lb y" style="text-anchor:start">예</text>
 <rect class="nd main" x="840" y="788" width="170" height="44" rx="12"/>
 <text class="t1" x="925" y="802">확정 · 제안 · 거절</text><text class="t2" x="925" y="819">중 하나 + 답장 발송</text>
+<text x="925" y="846" class="lb" style="fill:var(--assume);font-weight:700;text-anchor:middle">+ 확정 답장에 금액(단품·묶음) · 소요 시간</text>
 <path class="ar " d="M1010,810 H1168 V324" marker-end="url(#a)"/>
 <rect class="nd ok" x="1030" y="278" width="150" height="44" rx="10"/>
 <text class="tok" x="1105" y="292">상태 바꾸기</text><text class="t2" x="1105" y="309">환자 알림</text>
+<text x="1160" y="340" class="lb" style="fill:var(--assume);font-weight:700;text-anchor:end">+ 메신저 알림? (LINE·WhatsApp)</text>
 <path class="ar " d="M1105,278 V132" marker-end="url(#a)"/>
 <text x="1099" y="200" class="lb " style="text-anchor:end">알림</text>
 <path class="ar dash" d="M1190,104 H1200 V300 H1184" marker-end="url(#a)"/>
 <text x="1196" y="200" class="lb " style="text-anchor:end">수락 · 취소</text>
 <text x="1095" y="630" class="lb" style="text-anchor:middle">병원 무응답 →</text>
 <text x="1095" y="646" class="lb" style="text-anchor:middle">expired (기한 [U])</text>
+<text x="1044" y="680" class="lb" style="fill:var(--assume);font-weight:700">→ 답장률 표시로 (계획)</text>
+<rect class="note" x="662" y="426" width="168" height="112" rx="10" style="fill:var(--assume-soft)"/>
+<text x="672" y="446" class="lb" style="fill:var(--assume);font-weight:700">VOC 3차 · 챗봇이 받을 질문</text>
+<text x="672" y="466" class="nt">출국일 · 시술 → 맞는 병원 안내</text>
+<text x="672" y="484" class="nt">밤 몇 시까지 · 예약 방법</text>
+<text x="672" y="506" class="nt" style="fill:var(--pain)">효과 · 회복 기간은 진료 관련</text>
+<text x="672" y="524" class="nt" style="fill:var(--pain)">→ 답 안 함, 병원에 묻기(E3)</text>
     </svg>
   </div>
   <div class="bottom">
@@ -285,8 +296,10 @@ table.t tr.hl td { background: var(--pain-soft); }
       <ul><li><b>AI는 초안만</b>, 발송은 코디 승인 후 (BM 핵심 활동)</li><li>공공 자료가 없으면 숫자를 만들지 않음 (E1·E2)</li><li>챗봇은 의료 판단을 하지 않고 병원 상담으로 넘김 (E3)</li><li>같은 병원에 열린 요청(pending·proposed)이 있으면 새 요청 막음</li></ul></div>
     <div class="card"><h2>담당 <small>개발 영역</small></h2>
       <ul><li>환자 화면 · 병원 대시보드 — 프론트</li><li>회원가입 · 거주국 · 동의 · 요청서 검사 — 백엔드 A</li><li>예약 상태 · 병원 계정 · 알림 — 백엔드 B</li><li>출처 검색 · 요약 · 초안 — AI</li></ul></div>
+    <div class="card" style="background:var(--assume-soft)"><h2 style="color:var(--assume)">VOC 3차 제안 <small>틱톡 138건 · 팀 결정 전</small></h2>
+      <ul><li>무응답 불만 → 병원별 <b>N시간 이내 답장률</b> (팀 계획)</li><li>예약 채널 제각각 → <b>요청서 한 곳</b> + 메신저 알림 검토</li><li>체험가·묶음 권유 → <b>확정 답장에 금액</b></li><li>"예약했는데 위치 모름" → 확정 화면에 병원 주소</li></ul></div>
 </div>
-  <div class="foot"><span>근거: spec/processflow.md (Mermaid) · spec/userflow.html · backend 브랜치 booking_store.py TRANSITIONS · bm/bm_canvas.md 핵심 활동</span><span>2026-11-17 · 메디대구</span></div>
+  <div class="foot"><span>근거: spec/processflow.md (Mermaid) · spec/userflow.html · backend 브랜치 booking_store.py TRANSITIONS · bm/bm_canvas.md 핵심 활동</span><span>2026-11-17 · VOC 3차 제안 11-19 · 메디대구</span></div>
 </div>
 </body>
 </html>
