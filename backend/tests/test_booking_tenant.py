@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from core.security import create_access_token
+from db_rows import demo_hospital
 from modules.booking import analytics, service
 from modules.booking.models import BookingEvent, BookingRequest
 from modules.patient.models import Patient
@@ -27,6 +28,7 @@ def _patient(db: Session) -> Patient:
 
 
 def _tenant(db: Session, name: str = "예시 피부과의원", hospital_id: int = 9001, enabled: bool = True) -> Tenant:
+    demo_hospital(db, hospital_id)  # hospital_id FK (0007)
     t = Tenant(hospital_id=hospital_id, display_name=name, requests_enabled=enabled, registration_no="DEMO-0001")
     db.add(t)
     db.commit()
