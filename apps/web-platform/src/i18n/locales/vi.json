@@ -137,7 +137,8 @@
     "subtitle": "Quản lý bệnh viện đã lưu, lịch khám và chuẩn bị chuyến đi tại một nơi.",
     "stats": {
       "saved": "Bệnh viện đã lưu",
-      "visits": "Lịch sử khám"
+      "visits": "Lịch sử khám",
+      "bookings": "Quản lý lịch hẹn"
     },
     "schedule": {
       "title": "Lịch trình Daegu của tôi",
@@ -148,7 +149,8 @@
         "userAdded": "Bạn tự thêm",
         "experience": "Trải nghiệm",
         "tour": "Tham quan"
-      }
+      },
+      "empty": "Chưa có lịch trình chuyến đi. Bạn có thể xem lịch hẹn khám tại đây:"
     },
     "checklist": {
       "title": "Danh sách chuẩn bị",

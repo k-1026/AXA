@@ -137,7 +137,8 @@
     "subtitle": "在一個地方管理收藏的醫院、就診行程和旅行準備。",
     "stats": {
       "saved": "收藏的醫院",
-      "visits": "就診紀錄"
+      "visits": "就診紀錄",
+      "bookings": "預約管理"
     },
     "schedule": {
       "title": "我的大邱行程",
@@ -148,7 +149,8 @@
         "userAdded": "自行登錄",
         "experience": "體驗",
         "tour": "觀光"
-      }
+      },
+      "empty": "目前還沒有行程。醫院預約可以在這裡查看："
     },
     "checklist": {
       "title": "就診準備清單",

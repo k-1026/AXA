@@ -1133,7 +1133,7 @@ a {
 /* 요약 카드 3개 */
 .mp-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
@@ -1387,6 +1387,14 @@ a {
 .mp-add svg {
   width: 22px;
   height: 22px;
+}
+
+/* 회원은 여행 일정이 아직 없음 → 예약 관리로 안내 */
+.mp-schedule-empty {
+  position: relative;
+  margin: 8px 0 0;
+  color: #5d6875;
+  line-height: 1.6;
 }
 
 .mp-checklist {

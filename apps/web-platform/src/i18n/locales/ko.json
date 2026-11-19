@@ -137,7 +137,8 @@
     "subtitle": "관심 병원과 방문 일정, 여행 준비를 한곳에서 관리하세요.",
     "stats": {
       "saved": "저장한 병원",
-      "visits": "방문 기록"
+      "visits": "방문 기록",
+      "bookings": "예약 관리"
     },
     "schedule": {
       "title": "나의 대구 일정",
@@ -148,7 +149,8 @@
         "userAdded": "직접 등록",
         "experience": "체험",
         "tour": "관광"
-      }
+      },
+      "empty": "아직 여행 일정이 없어요. 병원 예약은 여기서 확인할 수 있어요:"
     },
     "checklist": {
       "title": "방문 준비 체크리스트",
