@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
 import type { CircleMarker as LeafletCircleMarker } from 'leaflet';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import { DEPARTMENT_COLORS } from '../hospital/filters';
 import { useHospitalName } from '../hospital/name';
@@ -73,7 +74,13 @@ export function HospitalMap({ hospitals, fetchedAt, selectedDept, focus = null }
           }}
         >
           <Popup>
-            <strong>{nameOf(h)}</strong>
+            {/* 이름 줄 오른쪽(닫기 버튼 옆)에 병원 정보 바로 가기 */}
+            <div className="popup-head">
+              <strong>{nameOf(h)}</strong>
+              <Link to={`/hospitals/${encodeURIComponent(h.id)}`} className="popup-detail">
+                {t('popup.detail')}
+              </Link>
+            </div>
             <dl className="popup-info">
               <dt>{t('popup.type')}</dt>
               <dd>{t(`hospitalType.${h.type}`, { defaultValue: h.type })}</dd>

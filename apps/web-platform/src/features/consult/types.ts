@@ -24,6 +24,7 @@ export interface BookingRequest {
   bookingNo?: string; // 병원이 확정하면 붙는 예약번호
   cancelledAt?: string; // ISO 시각
   treatment?: ChatText; // 병원이 기록한 진료·시술 이름 (방문 완료로 보일 때 표시)
+  serverId?: string; // 실제 회원: 백엔드 예약 요청 id (POST /hospitals/{id}/booking-requests)
 }
 
 interface ConsultMessage {

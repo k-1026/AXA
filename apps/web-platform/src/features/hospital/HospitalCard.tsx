@@ -48,6 +48,10 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
           </dd>
         </dl>
       </div>
+      <div className="card-actions">
+        <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="card-action">{t('hospital.consultBtn')}</Link>
+        <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="card-action is-primary">{t('hospital.reserveBtn')}</Link>
+      </div>
       <SaveHeart id={h.id} name={nameOf(h)} />
     </article>
   );

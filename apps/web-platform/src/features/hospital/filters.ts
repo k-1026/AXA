@@ -1,6 +1,6 @@
 import type { DepartmentKey } from './types';
 
-export const DEPARTMENTS: DepartmentKey[] = ['dermatology', 'plastic', 'internal', 'ophthalmology'];
+export const DEPARTMENTS: DepartmentKey[] = ['dermatology', 'plastic', 'internal', 'ophthalmology', 'other'];
 
 // 지도 점 색상
 export const DEPARTMENT_COLORS: Record<DepartmentKey, string> = {
@@ -8,6 +8,7 @@ export const DEPARTMENT_COLORS: Record<DepartmentKey, string> = {
   plastic: '#8b5cf6',
   internal: '#facc15',
   ophthalmology: '#2563eb',
+  other: '#64748b',
 };
 
 // 데이터의 구·군 이름 (2023년 대구 편입된 군위군 포함)

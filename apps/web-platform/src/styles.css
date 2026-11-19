@@ -859,6 +859,56 @@ a {
   color: var(--text-muted);
 }
 
+/* 지도 정보창: 닫기 버튼에 여백, 이름 줄 오른쪽에 병원 정보 버튼 */
+.hospital-map .leaflet-popup-content {
+  margin: 12px 14px 12px 16px;
+}
+
+/* leaflet.css(.leaflet-container a.leaflet-popup-close-button)보다 우선 */
+.hospital-map.leaflet-container a.leaflet-popup-close-button {
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font: 20px/28px sans-serif;
+}
+
+.hospital-map.leaflet-container a.leaflet-popup-close-button:hover {
+  background: var(--surface-muted);
+}
+
+.popup-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-right: 30px; /* 닫기 버튼 자리 */
+}
+
+.popup-head strong {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+  padding-top: 4px;
+}
+
+.popup-detail {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff !important;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.popup-detail:hover {
+  filter: brightness(0.92);
+}
+
 .popup-info {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -4640,4 +4690,328 @@ body.chat-open {
   margin-top: 2px;
   color: var(--text-muted);
   font-size: 0.85em;
+}
+
+/* 병원 카드: 상담하기·예약하기 (찜 하트 왼쪽, 카드 전체 링크보다 위) */
+.card-actions {
+  position: absolute;
+  left: 16px;
+  right: 60px;
+  bottom: 10px;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+}
+
+.card-action {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.card-action.is-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* 예약하기 페이지: 달력 → 시간 → 신청 */
+.reserve-page {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reserve-head h1 {
+  margin: 2px 0 0;
+  font-size: 1.4rem;
+}
+
+.reserve-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.reserve-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.reserve-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.reserve-month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reserve-month button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.reserve-month button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.reserve-cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.reserve-wd {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.reserve-day {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 0.45;
+  font-size: 0.9rem;
+}
+
+.reserve-day.is-open {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.reserve-day.is-today {
+  outline: 1px solid var(--border);
+}
+
+.reserve-day.is-selected {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.reserve-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.reserve-legend .dot {
+  width: 10px;
+  height: 10px;
+  margin-left: 8px;
+  border-radius: 3px;
+  background: var(--surface-muted);
+}
+
+.reserve-legend .dot.is-open {
+  margin-left: 0;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+}
+
+.reserve-empty,
+.reserve-selected {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.reserve-selected {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.reserve-times {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 6px;
+}
+
+.reserve-time {
+  height: 40px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.reserve-time:disabled {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  text-decoration: line-through;
+  cursor: default;
+}
+
+.reserve-time.is-selected {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.reserve-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.reserve-confirm p {
+  margin: 0;
+}
+
+.reserve-submit {
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reserve-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.reserve-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: center;
+}
+
+.reserve-done h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.reserve-done-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 1.6rem;
+}
+
+.reserve-done-name,
+.reserve-done-when {
+  margin: 0;
+  font-weight: 600;
+}
+
+.reserve-done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.reserve-done-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.reserve-done-actions a.is-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* 계정 종류: 환자 / 병원 관계자 (가입할 때 나눔) */
+.auth-who {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auth-who-btn {
+  flex: 1;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-who-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* 예약 요청 때 받는 국적·단기 방문·동의 (실제 회원) */
+.booking-consents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 0 0;
+  border: 0;
+  flex-basis: 100%;
+}
+
+.booking-consents .auth-field select {
+  max-width: 260px;
 }

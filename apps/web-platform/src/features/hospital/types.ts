@@ -1,4 +1,4 @@
-export type DepartmentKey = 'dermatology' | 'plastic' | 'internal' | 'ophthalmology';
+export type DepartmentKey = 'dermatology' | 'plastic' | 'internal' | 'ophthalmology' | 'other'; // other: 치과·한방·종합병원 등 등록 유치기관
 
 // 빈 값은 데이터에서 빠져 있음 (undefined) → 화면에서 빈칸
 export interface Hospital {
