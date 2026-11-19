@@ -40,6 +40,9 @@ class HoursOut(BaseModel):
     lunch_start: time | None
     lunch_end: time | None
     memo_ko: str | None
+    # 요일마다 출처가 다를 수 있음: 심평원 API / 직접 채운 값(병원 홈페이지 URL 등)
+    source: str
+    checked_at: datetime
 
 
 class HospitalDetail(HospitalListItem):

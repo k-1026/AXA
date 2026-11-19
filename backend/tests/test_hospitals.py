@@ -301,3 +301,103 @@ def test_진료과목_json에_BOM이_있어도_적재(client, db_engine, files, 
     dg.write_text(json.dumps({"items": {"01": [{"ykiho": "I1"}]}}), encoding="utf-8-sig")  # PowerShell 저장 형식
     load(db_engine, **files([hosp("I1", "내과의원")]), dgsbjt_json=dg)
     assert [h["ykiho"] for h in list_hospitals(client, dept="internal")] == ["I1"]
+
+
+# ── 직접 채운 진료시간 (등록 유치기관 빈칸, docs/진료시간-채움-등록기관-2026-11-18.md) ──
+
+MANUAL_COLS = ["ykiho", "mon", "tue", "wed", "thu", "fri", "sat", "sun",
+               "lunch_week", "lunch_sat", "holiday", "source_grade", "source_url", "checked_at", "note"]
+
+
+def detail_hours(client, hid):
+    r = client.get(f"/api/v1/hospitals/{hid}")
+    assert r.status_code == 200, r.text
+    return {h["day"]: h for h in r.json()["hours"]}
+
+
+def test_직접_채운_진료시간은_API에_없는_요일만_채운다(client, db_engine, files, tmp_path):
+    paths = files(
+        [hosp("Y1", "등록의원")],
+        registered=[{"registration_no": "M-1", "ykiho": "Y1"}],
+        hours=[{"ykiho": "Y1", "trmtMonStart": "0900", "trmtMonEnd": "1800", "noTrmtSun": ""}],
+    )
+    paths["manual_hours_csv"] = write_csv(tmp_path / "m.csv", MANUAL_COLS, [{
+        "ykiho": "Y1", "mon": "10:00-20:00", "tue": "10:00-19:00", "wed": "휴진", "thu": "",
+        "sat": "09:30-15:30", "lunch_week": "13:00-14:00", "lunch_sat": "",
+        "source_grade": "공식", "source_url": "https://clinic.example.test/hours", "checked_at": "2026-11-18",
+    }])
+    result = load(db_engine, **paths)
+    assert result["manual_hours"] == 1
+    days = detail_hours(client, list_hospitals(client)[0]["id"])
+
+    # API 값이 있으면 API 우선
+    assert (days["mon"]["open_time"], days["mon"]["close_time"]) == ("09:00:00", "18:00:00")
+    assert days["mon"]["source"].startswith("건강보험심사평가원")
+    # API 빈칸은 직접 채운 값, 출처·확인일은 그 행 것
+    assert (days["tue"]["state"], days["tue"]["open_time"], days["tue"]["close_time"]) == ("open", "10:00:00", "19:00:00")
+    assert (days["tue"]["lunch_start"], days["tue"]["lunch_end"]) == ("13:00:00", "14:00:00")
+    assert days["tue"]["source"] == "https://clinic.example.test/hours"
+    assert days["tue"]["checked_at"].startswith("2026-11-18")
+    assert days["sat"]["state"] == "open" and days["sat"]["lunch_start"] is None
+    # "휴진" = closed, 빈칸 = unknown (휴진으로 단정 X)
+    assert days["wed"]["state"] == "closed" and days["wed"]["open_time"] is None
+    assert days["thu"]["state"] == "unknown"
+
+
+def test_API_진료시간_행이_없어도_직접_채운_값으로_적재(client, db_engine, files, tmp_path):
+    paths = files([hosp("Y1", "등록의원")], registered=[{"registration_no": "M-1", "ykiho": "Y1"}])
+    paths["manual_hours_csv"] = write_csv(tmp_path / "m.csv", MANUAL_COLS, [{
+        "ykiho": "Y1", "mon": "9:00-18:00", "fri": "10:00-24:00", "sun": "휴진",
+        "source_url": "https://clinic.example.test", "checked_at": "2026-11-18",
+    }])
+    load(db_engine, **paths)
+    hid = list_hospitals(client)[0]["id"]
+    days = detail_hours(client, hid)
+    assert [d for d in days] == ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    assert days["mon"]["open_time"] == "09:00:00"
+    assert days["fri"]["close_time"] == "23:59:00"  # 24:00 → 23:59
+    assert days["sun"]["state"] == "closed"
+    assert days["tue"]["state"] == "unknown"
+    # 요일 필터도 직접 채운 값으로 걸린다
+    assert [h["id"] for h in list_hospitals(client, open_on="mon")] == [hid]
+
+
+def test_형식이_틀린_직접_채운_값은_무시하고_unknown(client, db_engine, files, tmp_path):
+    paths = files([hosp("Y1", "등록의원")], registered=[{"registration_no": "M-1", "ykiho": "Y1"}])
+    paths["manual_hours_csv"] = write_csv(tmp_path / "m.csv", MANUAL_COLS, [{
+        "ykiho": "Y1", "mon": "오전 10시~", "tue": "19:00-10:00", "wed": "25:00-26:00",
+        "source_url": "https://clinic.example.test", "checked_at": "2026-11-18",
+    }])
+    load(db_engine, **paths)
+    days = detail_hours(client, list_hospitals(client)[0]["id"])
+    assert {days[d]["state"] for d in ("mon", "tue", "wed")} == {"unknown"}
+    assert days["mon"]["source"].startswith("건강보험심사평가원")
+
+
+def test_출처_없는_직접_채운_행은_적재하지_않는다(client, db_engine, files, tmp_path):
+    paths = files([hosp("Y1", "등록의원")], registered=[{"registration_no": "M-1", "ykiho": "Y1"}])
+    paths["manual_hours_csv"] = write_csv(tmp_path / "m.csv", MANUAL_COLS, [{"ykiho": "Y1", "mon": "10:00-19:00"}])
+    result = load(db_engine, **paths)
+    assert result["manual_hours"] == 0
+    assert detail_hours(client, list_hospitals(client)[0]["id"])["mon"]["state"] == "unknown"
+
+
+def test_override_Y면_API_값도_검증한_값으로_바꾼다(client, db_engine, files, tmp_path):
+    # 2026-11-18 카카오맵 영업정보 검증: 심평원 API 값이 실제와 다른 곳은 override=Y로 덮어씀
+    paths = files(
+        [hosp("Y1", "등록의원")],
+        registered=[{"registration_no": "M-1", "ykiho": "Y1"}],
+        hours=[{"ykiho": "Y1", "trmtMonStart": "0900", "trmtMonEnd": "1800",
+                "trmtTueStart": "0900", "trmtTueEnd": "1800", "noTrmtSun": ""}],
+    )
+    paths["manual_hours_csv"] = write_csv(tmp_path / "m.csv", MANUAL_COLS + ["override"], [{
+        "ykiho": "Y1", "mon": "10:00-20:00", "tue": "", "sat": "휴진", "lunch_week": "13:00-14:00",
+        "source_url": "https://place.example.test/1", "checked_at": "2026-11-18", "override": "Y",
+    }])
+    load(db_engine, **paths)
+    days = detail_hours(client, list_hospitals(client)[0]["id"])
+    assert (days["mon"]["open_time"], days["mon"]["close_time"]) == ("10:00:00", "20:00:00")
+    assert days["mon"]["source"] == "https://place.example.test/1"
+    assert days["tue"]["open_time"] == "09:00:00"  # 검증 값이 빈 요일은 API 그대로
+    assert days["tue"]["source"].startswith("건강보험심사평가원")
+    assert days["sat"]["state"] == "closed"

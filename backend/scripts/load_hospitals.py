@@ -3,7 +3,7 @@
     uv run python backend/scripts/load_hospitals.py            # .env의 DATABASE_URL로
     uv run python backend/scripts/load_hospitals.py --dry-run  # 건수만 보고 저장 안 함
 
-등록 유치의료기관·내과/안과 파일은 research-data 브랜치에 있음. 없으면 건너뛰고 경고만
+등록 유치의료기관·내과/안과·진료시간 직접 채움 파일은 research-data 브랜치에 있음. 없으면 건너뛰고 경고만
 (그러면 모든 병원이 미등록 → 요청 가능한 병원 0곳).
 """
 
@@ -25,6 +25,8 @@ DEFAULTS = {
     "status_csv": "data/processed/daegu_hospital_status.csv",
     "registered_csv": "data/processed/daegu_registered_institutions.csv",
     "dgsbjt_json": "data/raw/영업정보/daegu_dgsbjt_hospitals.json",
+    # 등록 유치기관 진료시간 직접 채움 (research-data 브랜치). API 빈 요일만 채움
+    "manual_hours_csv": "data/processed/daegu_hours_manual.csv",
 }
 
 
