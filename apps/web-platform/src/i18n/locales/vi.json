@@ -150,7 +150,15 @@
         "experience": "Trải nghiệm",
         "tour": "Tham quan"
       },
-      "empty": "Chưa có lịch trình chuyến đi. Bạn có thể xem lịch hẹn khám tại đây:"
+      "remove": "Xóa",
+      "form": {
+        "date": "Ngày",
+        "time": "Giờ (không bắt buộc)",
+        "text": "Việc cần làm",
+        "placeholder": "VD: Đi chợ đêm Seomun",
+        "save": "Thêm",
+        "cancel": "Hủy"
+      }
     },
     "checklist": {
       "title": "Danh sách chuẩn bị",

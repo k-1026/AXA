@@ -150,7 +150,15 @@
         "experience": "체험",
         "tour": "관광"
       },
-      "empty": "아직 여행 일정이 없어요. 병원 예약은 여기서 확인할 수 있어요:"
+      "remove": "삭제",
+      "form": {
+        "date": "날짜",
+        "time": "시간 (선택)",
+        "text": "할 일",
+        "placeholder": "예: 서문시장 야시장 가기",
+        "save": "추가",
+        "cancel": "취소"
+      }
     },
     "checklist": {
       "title": "방문 준비 체크리스트",

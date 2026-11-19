@@ -150,7 +150,15 @@
         "experience": "Experience",
         "tour": "Sightseeing"
       },
-      "empty": "No trip schedule yet. You can check your clinic bookings here:"
+      "remove": "Delete",
+      "form": {
+        "date": "Date",
+        "time": "Time (optional)",
+        "text": "Plan",
+        "placeholder": "e.g. Seomun Market night market",
+        "save": "Add",
+        "cancel": "Cancel"
+      }
     },
     "checklist": {
       "title": "Visit checklist",

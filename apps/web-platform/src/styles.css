@@ -1389,12 +1389,97 @@ a {
   height: 22px;
 }
 
-/* 회원은 여행 일정이 아직 없음 → 예약 관리로 안내 */
-.mp-schedule-empty {
+/* 일정 추가 버튼은 <button> → 링크처럼 보이게 */
+button.mp-add {
   position: relative;
-  margin: 8px 0 0;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* 내가 넣은 일정: 날짜 · 시간(선택) · 할 일 */
+.mp-plan-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #dfe5ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.mp-plan-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
   color: #5d6875;
-  line-height: 1.6;
+}
+
+.mp-plan-form input {
+  padding: 8px 10px;
+  border: 1px solid #cfd7e0;
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+}
+
+.mp-plan-form .mp-plan-text {
+  grid-column: 1 / -1;
+}
+
+.mp-plan-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.mp-plan-actions button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mp-plan-cancel {
+  border: 1px solid #cfd7e0;
+  background: #fff;
+}
+
+.mp-plan-save {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+}
+
+.mp-plan-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mp-entry-remove {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.85rem;
+  color: #8a94a1;
+  cursor: pointer;
+}
+
+.mp-entry-remove:hover {
+  color: #c0392b;
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .mp-plan-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mp-checklist {

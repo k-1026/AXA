@@ -150,7 +150,15 @@
         "experience": "體驗",
         "tour": "觀光"
       },
-      "empty": "目前還沒有行程。醫院預約可以在這裡查看："
+      "remove": "刪除",
+      "form": {
+        "date": "日期",
+        "time": "時間（選填）",
+        "text": "要做的事",
+        "placeholder": "例：去西門市場夜市",
+        "save": "新增",
+        "cancel": "取消"
+      }
     },
     "checklist": {
       "title": "就診準備清單",

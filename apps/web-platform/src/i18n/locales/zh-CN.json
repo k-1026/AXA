@@ -150,7 +150,15 @@
         "experience": "体验",
         "tour": "观光"
       },
-      "empty": "目前还没有行程。医院预约可以在这里查看："
+      "remove": "删除",
+      "form": {
+        "date": "日期",
+        "time": "时间（选填）",
+        "text": "要做的事",
+        "placeholder": "例：去西门市场夜市",
+        "save": "添加",
+        "cancel": "取消"
+      }
     },
     "checklist": {
       "title": "就诊准备清单",
