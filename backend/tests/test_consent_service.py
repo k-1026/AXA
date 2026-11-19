@@ -4,12 +4,18 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from core.db import utcnow
 from core.errors import AppError
+from db_rows import demo_hospital
+from modules.booking import service as booking
+from modules.booking.models import BookingRequest
 from modules.consent import service
+from modules.consent.models import Consent
 from modules.patient.models import Patient
+from modules.tenant.models import Tenant
 
 
 @pytest.fixture
@@ -53,13 +59,47 @@ def test_withdrawn_consent_does_not_count(db, patient):
         service.require(db, patient.id, ["health"])
 
 
+def _request(db, patient, hospital_id: int = 9001) -> uuid.UUID:
+    """booking_requests FK(0007) → 실제 요청서 행이 있어야 요청서별 동의를 저장할 수 있음.
+    같은 병원에 처리 전 요청은 1건만(booking.duplicate) → 요청서마다 병원을 다르게."""
+    demo_hospital(db, hospital_id)
+    tenant = db.query(Tenant).filter_by(hospital_id=hospital_id).one_or_none()
+    if tenant is None:
+        tenant = Tenant(hospital_id=hospital_id, display_name=f"가상 병원 {hospital_id}", requests_enabled=True)
+        db.add(tenant)
+        db.flush()
+    r = booking.create_request(
+        db, patient.id, tenant.id,
+        dict(lang="en", nationality="TW", contact_method="email", preferred_slots=["2026-11-21T01:00:00Z"],
+             department_code="dermatology", treatment="laser_toning", visa_needed=False),
+    )
+    return r.id
+
+
 def test_request_scoped_consent(db, patient):
-    req_a, req_b = uuid.uuid4(), uuid.uuid4()
+    req_a, req_b = _request(db, patient, 9001), _request(db, patient, 9002)
     service.record(db, patient.id, "health", "v1", "en", request_id=req_a)
     db.commit()
     service.require(db, patient.id, ["health"], request_id=req_a)
     with pytest.raises(AppError):
         service.require(db, patient.id, ["health"], request_id=req_b)
+
+
+def test_요청서가_지워져도_동의_기록은_남는다(db, patient):
+    req = _request(db, patient)
+    service.record(db, patient.id, "health", "v1", "en", request_id=req)
+    db.commit()
+    db.delete(db.get(BookingRequest, req))
+    db.commit()
+    c = db.query(Consent).filter_by(patient_id=patient.id, kind="health").one()
+    db.refresh(c)
+    assert c.booking_request_id is None
+
+
+def test_없는_요청서_id로는_동의를_저장할_수_없다(db, patient):
+    with pytest.raises(IntegrityError):
+        service.record(db, patient.id, "health", "v1", "en", request_id=uuid.uuid4())
+    db.rollback()
 
 
 def test_naive_datetime_rejected(db):
