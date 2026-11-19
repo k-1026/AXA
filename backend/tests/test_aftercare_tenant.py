@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from core.security import create_access_token
+from db_rows import demo_hospital, demo_staff
 from modules.aftercare import service as aftercare
 from modules.booking import service as booking
 from modules.patient.models import Patient
@@ -30,6 +31,7 @@ def _patient(db):
 
 
 def _tenant(db, hid=9001, aftercare_on=True):
+    demo_hospital(db, hid)  # hospital_id FK (0007)
     t = Tenant(hospital_id=hid, display_name=f"가상 병원 {hid}", requests_enabled=True, aftercare_enabled=aftercare_on)
     db.add(t)
     db.commit()
@@ -98,14 +100,15 @@ def test_other_patient_cannot_open(db):
 
 def test_thread_flow_list_reply_resolve(client, db):
     p, t = _patient(db), _tenant(db)
+    staff = demo_staff(db, t.id)  # 답장의 staff_id FK → 실제 직원 행 (0007)
     r = _req(db, p, t)
     thread = aftercare.patient_open(db, p.id, r.id, "做完第三天了，臉還是有點紅", photo=True)
 
-    lst = client.get("/api/v1/tenant/aftercare", headers=_h(t)).json()
+    lst = client.get("/api/v1/tenant/aftercare", headers=_h(t, str(staff.id))).json()
     assert len(lst) == 1 and lst[0]["status"] == "new" and lst[0]["unanswered"] == 1
     assert lst[0]["lang"] == "zh-TW"
 
-    out = client.post(f"/api/v1/tenant/aftercare/{thread.id}/messages", json={"text": "사진 확인했어요"}, headers=_h(t)).json()
+    out = client.post(f"/api/v1/tenant/aftercare/{thread.id}/messages", json={"text": "사진 확인했어요"}, headers=_h(t, str(staff.id))).json()
     assert out["status"] == "in_progress"
     assert [m["sender"] for m in out["messages"]] == ["patient", "staff"]
     assert out["messages"][0]["has_photo"] is True
