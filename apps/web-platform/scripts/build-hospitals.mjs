@@ -225,6 +225,31 @@ const items = registeredRows
   })
   .sort((a, b) => collator.compare(a.name, b.name));
 
+// 시연용 가상 병원 (is_demo). 백엔드 seed_demo_shared.py와 같은 파일을 읽어 DB와 값이 같음
+// 실제 병원에는 예시 일정·예약을 붙이지 않고 이 병원으로만 시연 (compliance 2-6)
+const demoPath = resolve(repo, 'data/processed/demo/demo_hospital.json');
+if (existsSync(demoPath)) {
+  const d = JSON.parse(readFileSync(demoPath, 'utf8'));
+  const strip = (s) => s.replace(/\s*\((가상|Demo)\)\s*$/, ''); // "시연용" 표시는 화면에서 언어별로 붙임
+  const week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((k) => d.hours[k] ?? null);
+  items.push({
+    id: d.ykiho,
+    demo: true,
+    name: strip(d.name_ko),
+    nameEn: strip(d.name_en),
+    type: d.type_name_ko,
+    district: d.sggu.replace(/^대구/, ''),
+    addr: d.addr_ko,
+    lat: d.lat,
+    lng: d.lng,
+    depts: d.depts,
+    hours: week,
+    lunchWeek: d.lunch ? `${d.lunch[0]}~${d.lunch[1]}` : undefined,
+    sunday: week[6] ? undefined : 'closed',
+  });
+  items.sort((a, b) => collator.compare(a.name, b.name));
+}
+
 const basicMeta = readMeta('daegu_hospitals.json');
 const hoursMeta = readMeta('daegu_hospital_hours.json');
 
