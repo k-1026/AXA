@@ -1,6 +1,7 @@
 """챗봇 병원 찾기·상세가 실제 병원 DB(hospital.service)를 쓰는지 — POST /chatbot/ask로만 확인. 가짜 LLM.
 
 조건 맞춤 제안·예약은 아직 가상 병원(9001~) 그대로 (2026-11-17 결정: 찾기·상세만 연결).
+공개는 등록 병원만 (결정 21) → 챗봇이 `registered_only=False`로 불러도 미등록 병원은 나오지 않음.
 실제 병원은 응대 언어 정보가 없으므로 언어로 거르지 않고 "병원에 확인" 안내를 붙인다.
 """
 
@@ -40,20 +41,20 @@ def test_병원_찾기는_실제_DB_기본은_등록_병원만(client, db_engine
     assert "language" in data["note"].lower()  # 언어 정보가 없음을 알림 (언어로 거르지 않음)
 
 
-def test_등록_안_된_병원도_찾을_수_있고_요일_필터는_진료시간으로(client, db_engine, files, llm):
+def test_registered_only_false여도_미등록_병원은_안_나오고_요일_필터는_진료시간으로(client, db_engine, files, llm):
     seed(db_engine, files)
     token = signup(client)
-    llm.script += [call("search_hospitals", {"department": "피부과", "registered_only": False}), say("Two."),
+    llm.script += [call("search_hospitals", {"department": "피부과", "registered_only": False}), say("One."),
                    call("search_hospitals", {"department": "피부과", "registered_only": False, "open_on": "sat"}), say("One.")]
 
     first = cards(client.post(ASK, headers=auth(token), json={"message": "all dermatology"}))["hospital_list"]
     sat = cards(client.post(ASK, headers=auth(token), json={"message": "open on Saturday"}))["hospital_list"]
 
-    assert sorted(h["name_ko"] for h in first["hospitals"]) == ["등록피부과의원", "미등록피부과의원"]
+    assert [h["name_ko"] for h in first["hospitals"]] == ["등록피부과의원"]
     assert [h["name_ko"] for h in sat["hospitals"]] == ["등록피부과의원"]
 
 
-def test_병원_상세는_실제_진료시간_상담_가능은_등록_병원만(client, db_engine, files, llm):
+def test_병원_상세는_실제_진료시간_미등록_병원은_없는_병원처럼(client, db_engine, files, llm):
     seed(db_engine, files)
     token = signup(client)
     llm.script += [call("get_hospital", {"hospital_id": 1}), say("Details."),
@@ -61,7 +62,7 @@ def test_병원_상세는_실제_진료시간_상담_가능은_등록_병원만(
                    call("get_hospital", {"hospital_id": 999}), say("Not found.")]
 
     d1 = cards(client.post(ASK, headers=auth(token), json={"message": "hospital 1"}))["hospital_detail"]
-    d2 = cards(client.post(ASK, headers=auth(token), json={"message": "hospital 2"}))["hospital_detail"]
+    d2 = cards(client.post(ASK, headers=auth(token), json={"message": "hospital 2"}))
     missing = cards(client.post(ASK, headers=auth(token), json={"message": "hospital 999"}))
 
     assert d1["hours"]["mon"] == "09:30-18:30" and d1["hours"]["sat"] == "09:30-14:00"
@@ -69,5 +70,5 @@ def test_병원_상세는_실제_진료시간_상담_가능은_등록_병원만(
     assert "tue" not in d1["hours"]  # 시간 정보 없음 → 휴진(None)으로 보이지 않게 뺌
     assert d1["can_request_consultation"] is True and d1["tel"] == "053-000-0000"
     assert d1["hours_source"] != "demo"
-    assert d2["can_request_consultation"] is False
+    assert d2 == {}  # 미등록 병원 = 없는 병원과 같게 (카드 없음)
     assert missing == {}  # 없는 병원은 도구 오류 → 카드 없음

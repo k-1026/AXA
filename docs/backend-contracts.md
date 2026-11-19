@@ -32,6 +32,7 @@
 | `expired` | 희망 날짜가 모두 지남 | 시스템 |
 
 - 미정: 환자가 `proposed`를 거절하면? (`backend-decisions.md`에 결정되면 여기 반영)
+- **거절 사유** (`POST /tenant/booking-requests/{id}/reject` 본문 `{"reason": …}`, 선택): `fully_booked`(예약 마감) · `not_offered`(하지 않는 진료) · `needs_consult`(대면 상담 필요) · `other`(기타). `booking_events.reason`에 코드로 저장(마이그레이션 없음), 환자 화면 문장은 프론트 i18n. 목록에 없는 코드 → 422 `validation`, 거절이 아닌 행동에 `reason` → 422
 
 ## 3. 토큰 (JWT)
 
@@ -143,6 +144,7 @@
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
 | 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
+| 2026-11-17 | 2 | 병원 직원 거절에 사유 코드(`fully_booked`/`not_offered`/`needs_consult`/`other`, 선택) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-contract-reject-reason` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
 | 2026-11-12 | 4 | 가입 동의 `terms`·`privacy`는 현재 문서 버전(프론트 `features/legal` `updated`, 지금 `2026-11-03`)만 받음 → 아니면 422 `validation` + `detail.invalid[{kind, version, current}]` | A | `backend-review-fix` → `backend` |

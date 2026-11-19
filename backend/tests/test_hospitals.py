@@ -1,6 +1,8 @@
-"""병원 정보: 모든 병원을 보여 주되, 상담·예약 요청은 등록 유치의료기관만 (compliance 2-1, 해외진출법 제24조①3).
+"""병원 정보: **공개는 등록 유치의료기관만** (결정 21, 복지부·진흥원 회신 2026-11-17), 상담·예약 요청은 그중 영업 중인 곳만
+(compliance 2-1, 해외진출법 제24조①3). DB에는 전체를 두고 공개 지점(목록·상세·챗봇)에서 거른다.
 
 적재(`load_hospitals`)는 공공데이터 CSV 경로를 받아 DB에 넣고, 결과는 API로만 확인한다.
+`files()`에 `registered`를 주지 않으면 모든 병원을 등록 병원으로 적재 (정렬·필터 테스트용).
 """
 
 import csv
@@ -45,6 +47,8 @@ def files(tmp_path):
 
     def make(hospitals, registered=None, status=None, hours=None):
         out = {"hospitals_csv": write_csv(tmp_path / "h.csv", HOSP_COLS, hospitals)}
+        if registered is None:  # 기본: 모두 등록 병원 (공개는 등록 병원만이라)
+            registered = [{"registration_no": f"M-{h['ykiho']}", "ykiho": h["ykiho"]} for h in hospitals]
         if registered is not None:
             out["registered_csv"] = write_csv(
                 tmp_path / "r.csv", ["registration_no", "name_en", "address_en", "ykiho"], registered
@@ -72,7 +76,7 @@ def list_hospitals(client, **params):
     return r.json()
 
 
-def test_목록은_모든_병원을_보여주고_요청은_등록_병원만(client, db_engine, files):
+def test_목록은_등록_병원만_DB에는_전체를_둔다(client, db_engine, files):
     load(
         db_engine,
         **files(
@@ -83,12 +87,32 @@ def test_목록은_모든_병원을_보여주고_요청은_등록_병원만(clie
 
     items = {h["ykiho"]: h for h in list_hospitals(client)}
 
-    assert set(items) == {"Y1", "Y2"}
+    assert set(items) == {"Y1"}
     assert items["Y1"]["is_registered_facility"] is True
     assert items["Y1"]["can_request"] is True
     assert items["Y1"]["name_en"] == "Registered Clinic"
-    assert items["Y2"]["is_registered_facility"] is False
-    assert items["Y2"]["can_request"] is False
+    # 미등록 병원은 ids·registered=false로 불러도 안 보임
+    assert list_hospitals(client, ids="1,2") == [items["Y1"]]
+    assert list_hospitals(client, registered="false") == []
+    # DB에는 그대로 (등록 명단이 바뀌면 적재로 표시만 갱신)
+    with Session(db_engine) as db:
+        from modules.hospital.models import Hospital
+
+        assert db.query(Hospital).count() == 2
+
+
+def test_등록_명단에서_빠지면_공개에서도_빠지고_다시_등록되면_같은_id로(client, db_engine, files):
+    both = [hosp("Y1", "가"), hosp("Y2", "나")]
+    load(db_engine, **files(both))
+    first = {h["ykiho"]: h["id"] for h in list_hospitals(client)}
+    assert set(first) == {"Y1", "Y2"}
+
+    load(db_engine, **files(both, registered=[{"registration_no": "M-1", "ykiho": "Y1"}]))
+    assert [h["ykiho"] for h in list_hospitals(client)] == ["Y1"]
+    assert client.get(f"/api/v1/hospitals/{first['Y2']}").status_code == 404
+
+    load(db_engine, **files(both))
+    assert {h["ykiho"]: h["id"] for h in list_hospitals(client)} == first
 
 
 def test_폐업_병원은_목록에서_빠지고_재적재로_사라진_병원은_폐업_처리(client, db_engine, files):
@@ -115,7 +139,6 @@ def test_필터_지역_진료과_등록여부(client, db_engine, files):
         **files(
             [hosp("Y1", "중구피부과", sgguCdNm="대구중구"), hosp("Y2", "수성피부과", sgguCdNm="대구수성구"),
              hosp("Y3", "수성성형외과", sgguCdNm="대구수성구")],
-            registered=[{"registration_no": "M-2", "ykiho": "Y2"}],
             hours=[{"ykiho": "Y1", "has_dermatology": "Y"}, {"ykiho": "Y2", "has_dermatology": "Y"},
                    {"ykiho": "Y3", "has_plastic_surgery": "Y"}],
         ),
@@ -126,7 +149,7 @@ def test_필터_지역_진료과_등록여부(client, db_engine, files):
 
     assert ykihos(sggu="대구수성구") == ["Y3", "Y2"]  # 이름순
     assert ykihos(dept="dermatology") == ["Y2", "Y1"]
-    assert ykihos(registered="true") == ["Y2"]
+    assert ykihos(registered="true") == ykihos()  # 공개는 어차피 등록 병원만
     assert ykihos(sggu="대구수성구", dept="dermatology") == ["Y2"]
 
 
@@ -157,11 +180,11 @@ def test_ids로_여러_병원_기본정보(client, db_engine, files):
     assert sorted(h["ykiho"] for h in got) == ["Y1", "Y3"]
 
 
-def test_상세는_진료시간_출처_포함_미등록도_정보는_준다(client, db_engine, files):
+def test_상세는_진료시간_출처_포함(client, db_engine, files):
     load(
         db_engine,
         **files(
-            [hosp("Y1", "미등록의원", hospUrl="http://example.test")],
+            [hosp("Y1", "등록의원", hospUrl="http://example.test")],
             hours=[{"ykiho": "Y1", "trmtMonStart": "0900", "trmtMonEnd": "1800",
                     "trmtWedStart": "0000", "trmtWedEnd": "0000",
                     "lunchWeek": "12시30분~13시30분", "noTrmtSun": "전부 휴무"}],
@@ -172,7 +195,7 @@ def test_상세는_진료시간_출처_포함_미등록도_정보는_준다(clie
     r = client.get(f"/api/v1/hospitals/{hid}")
     assert r.status_code == 200
     d = r.json()
-    assert d["can_request"] is False
+    assert d["can_request"] is True
     assert d["homepage"] == "http://example.test"
     assert d["source"] and d["fetched_at"]
     days = {h["day"]: h for h in d["hours"]}
@@ -182,6 +205,14 @@ def test_상세는_진료시간_출처_포함_미등록도_정보는_준다(clie
     assert days["tue"]["state"] == "unknown"  # 값이 없으면 휴진으로 단정하지 않음
     assert days["wed"]["state"] == "unknown"  # 원본 "0000~0000"은 진료로 보지 않음
     assert days["sun"]["state"] == "closed"
+
+
+def test_미등록_병원_상세는_404(client, db_engine, files):
+    load(db_engine, **files([hosp("Y1", "등록의원"), hosp("Y2", "미등록의원")],
+                            registered=[{"registration_no": "M-1", "ykiho": "Y1"}]))
+    r = client.get("/api/v1/hospitals/2")
+    assert r.status_code == 404 and r.json()["code"] == "not_found"  # 없는 병원과 같은 응답
+    assert client.get("/api/v1/hospitals/1").status_code == 200
 
 
 def test_폐업한_등록_병원은_상세는_보이지만_요청은_불가(client, db_engine, files):
