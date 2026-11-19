@@ -2,7 +2,7 @@
 
 - `tenants`: 입점 병원 1곳 = 1행. **등록 외국인환자 유치의료기관만** 상담 요청을 받음 (`requests_enabled`)
 - `staff_users`: 병원 직원. 직원 API는 토큰의 `tenant_id`로만 조회 (core/security.py `current_staff`)
-- `hospitals` 테이블(A)이 아직 없어서 `hospital_id`는 FK 없이 둠 → hospitals가 생기면 FK 추가 (리비전은 A)
+- `hospital_id` → `hospitals.id` FK (A, 리비전 `0007`). 병원 행은 지우지 않으므로(폐업은 `status_verdict`) 삭제 동작 없음
 """
 
 import uuid
@@ -20,7 +20,7 @@ class Tenant(Base):
     __tablename__ = "tenants"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    hospital_id: Mapped[int] = mapped_column(BigInteger)  # hospitals.id (FK는 hospitals 생긴 뒤)
+    hospital_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("hospitals.id"))
     display_name: Mapped[str] = mapped_column(String(100))  # hospitals가 생기기 전까지 대시보드 표시용
     registration_no: Mapped[str | None] = mapped_column(String(40))  # 외국인환자 유치의료기관 등록번호
     requests_enabled: Mapped[bool] = mapped_column(Boolean, default=False)  # 등록 기관만 True
