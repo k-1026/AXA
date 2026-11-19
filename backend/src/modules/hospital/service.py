@@ -1,7 +1,9 @@
 """병원 정보 규칙.
 
-- 정보(목록·지도·상세)는 모든 병원에 대해 준다 (팀 결정 2026-11-16: 전체 병원 + 등록 표시)
+- **공개(목록·상세·챗봇)는 등록 유치의료기관만** (결정 21, 결정 20 변경: 복지부·진흥원 회신 2026-11-17 — 외국어 병원 정보 웹도
+  유치행위로 평가될 수 있음). 미등록 병원은 목록에 없고 상세는 없는 병원과 같은 404. DB에는 전체를 두고 여기서 거른다
 - 상담·예약 요청은 `can_request`인 병원만: 등록 유치의료기관 + 영업 중 (시연용 가상 병원은 시드 만들 때 추가)
+- 내부 호출(`get_basic`·`require_requestable`)은 거르지 않음 (대시보드·요청서 확인용)
   (해외진출법 제24조①3: 유치사업자가 미등록 의료기관에 소개·알선하면 등록 취소 사유)
 - 정렬은 거리·이름만. 등록·요청 가능·요금제 여부로 순서를 바꾸지 않음 (AGENTS.md 6절)
 """
@@ -15,6 +17,14 @@ from sqlalchemy.orm import Session, selectinload
 from core.errors import AppError
 from modules.hospital.models import Hospital, HospitalDepartment, HospitalHours
 from modules.hospital.schemas import HospitalBasic, HospitalDetail, HospitalListItem, HoursOut
+
+
+# 공개 범위 스위치 (결정 21). 팀이 "전체 + 등록 표시"로 되돌리면 False 한 줄
+PUBLIC_REGISTERED_ONLY = True
+
+
+def _public(h: Hospital) -> bool:
+    return h.is_registered_facility or not PUBLIC_REGISTERED_ONLY
 
 
 def can_request(h: Hospital) -> bool:
@@ -67,11 +77,13 @@ def list_hospitals(
     lat: float | None = None,
     lng: float | None = None,
 ) -> list[HospitalListItem]:
-    """영업 중(normal)·미확인(unknown) 병원. 폐업(closed)은 빼고, `ids`로 부를 때만 포함."""
+    """공개 대상(등록 병원) 중 영업 중(normal)·미확인(unknown). 폐업(closed)은 빼고, `ids`로 부를 때만 포함."""
     if sort == "distance" and (lat is None or lng is None):
         raise AppError(422, "validation", "거리순 정렬에는 lat·lng가 필요합니다", {"fields": ["lat", "lng"]})
 
     q = select(Hospital).options(selectinload(Hospital.departments))
+    if PUBLIC_REGISTERED_ONLY:  # ids(조회 기록)로 불러도 미등록 병원은 주지 않음
+        q = q.where(Hospital.is_registered_facility.is_(True))
     if ids is not None:
         q = q.where(Hospital.id.in_(ids))  # 조회 기록 화면: 폐업했어도 기본 정보는 보여 줌
     else:
@@ -106,8 +118,11 @@ def _get(db: Session, hospital_id: int) -> Hospital:
 
 
 def get_detail(db: Session, hospital_id: int) -> HospitalDetail:
-    """폐업 병원도 상세는 보여 줌 (찜·조회 기록에서 들어올 수 있음). 요청 가능 여부는 can_request로."""
+    """공개 대상만. 미등록 병원은 없는 병원과 같은 404 (결정 21).
+    등록 병원은 폐업해도 상세는 보여 줌 (찜·조회 기록에서 들어올 수 있음). 요청 가능 여부는 can_request로."""
     h = _get(db, hospital_id)
+    if not _public(h):
+        raise AppError(404, "not_found", "병원을 찾을 수 없습니다")
     return HospitalDetail(
         **_list_item(h).model_dump(),
         addr_en=h.addr_en,
