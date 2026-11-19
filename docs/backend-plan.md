@@ -215,7 +215,7 @@ backend/
 | ORM·마이그레이션 | SQLAlchemy 2 + Alembic / SQLModel | SQLAlchemy 2 + Alembic [T5][T6] |
 | 토큰 방식 | JWT / 세션 쿠키 | JWT (환자·직원 공통, `role`로 구분) |
 | 메일 발송 | 콘솔 출력 / 무료 메일 API | 11/9까지 콘솔, 시연 전 결정 |
-| 시연 위치 | 로컬 노트북 / 무료 호스팅 | 12/9 시연 환경 먼저 정하기 |
+| 시연 위치 | 로컬 노트북 / 무료 호스팅 | 12/4 시연 환경 먼저 정하기 |
 | `proposed` 거절 후 상태 | `rejected` / `pending` 재요청 | 5절 |
 | 요청서 보관 기간 | — | 질의 회신 후 |
 

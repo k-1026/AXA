@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메디대구 피치덱 11.18</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* 색·글꼴은 design/theme.css(웹사이트와 같은 값) · 틀은 발표자료-11.18과 같음 */
+:root {
+  --bg: #f6f8fb; --surface: #ffffff; --surface-muted: #eef1f5; --border: #d7dce3;
+  --text: #1f2933; --ink: #172b4d; --text-muted: #5b6673;
+  --accent: #1f6feb; --accent-soft: #e3edfd; --accent-line: rgb(31 111 235 / 0.25);
+  --pain: #d6336c; --pain-soft: #fdeef3;
+  --assume: #b26a00; --assume-soft: #fff6e5;
+  --good: #2b8a3e; --good-soft: #ebf7ee;
+  --neutral: #8a94a3;
+  --radius: 16px; --radius-sm: 10px;
+  --font: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: #2b3440; font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; overflow: hidden; word-break: keep-all; overflow-wrap: break-word; }
+
+#stage { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; transform-origin: center center; }
+.slide { position: absolute; inset: 0; background: var(--bg); padding: 40px 56px 0; display: none; flex-direction: column; }
+.slide.on { display: flex; }
+
+.eyebrow { color: var(--accent); font-size: 15px; font-weight: 700; letter-spacing: .02em; }
+h1 { margin: 6px 0 4px; font-size: 34px; line-height: 1.25; color: var(--ink); letter-spacing: -.01em; }
+h1 em { font-style: normal; color: var(--accent); }
+.lead { margin: 0 0 18px; font-size: 17px; color: var(--text-muted); }
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; }
+.foot { height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); }
+.foot .src { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.foot .no { font-weight: 700; color: var(--ink); }
+
+.grid { display: grid; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+.card h3 { margin: 0 0 8px; font-size: 17px; color: var(--ink); }
+.card p, .card li { font-size: 14.5px; line-height: 1.55; margin: 0; }
+.card ul { margin: 0; padding-left: 18px; }
+.card li + li { margin-top: 4px; }
+.muted { color: var(--text-muted); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; vertical-align: 2px; }
+.t-pain { background: var(--pain-soft); color: var(--pain); }
+.t-good { background: var(--good-soft); color: var(--good); }
+.t-assume { background: var(--assume-soft); color: var(--assume); }
+.t-acc { background: var(--accent-soft); color: var(--accent); }
+.t-neu { background: var(--surface-muted); color: var(--text-muted); }
+.big { font-size: 40px; font-weight: 800; color: var(--ink); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.big small { font-size: 17px; font-weight: 600; color: var(--text-muted); }
+.big.pain { color: var(--pain); }
+.as { color: var(--assume); font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { color: var(--text-muted); font-weight: 600; font-size: 12.5px; background: var(--surface-muted); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* 표지 */
+.cover { justify-content: center; }
+.cover h1 { font-size: 50px; margin-top: 10px; }
+.cover .lead { font-size: 20px; margin-top: 8px; }
+.cover .meta { margin-top: 34px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* 1 문제 */
+.quote { border-left: 5px solid var(--pain); background: var(--surface); }
+.quote .zh { font-size: 21px; line-height: 1.5; color: var(--ink); font-weight: 700; }
+.quote .ko { font-size: 16px; color: var(--text-muted); margin-top: 8px; }
+.quote .who { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; }
+
+/* 2 해결 */
+.ab { display: grid; grid-template-columns: 112px 1fr 26px 1fr; grid-template-rows: auto 1fr 1fr 1fr; gap: 12px 10px; align-items: stretch; height: 100%; }
+.ab .h { font-size: 12.5px; font-weight: 700; color: var(--text-muted); padding: 0 4px; }
+.ab .rl { font-weight: 800; color: var(--ink); font-size: 16px; display: flex; align-items: center; }
+.ab .c { border-radius: var(--radius-sm); padding: 12px 14px; font-size: 16px; line-height: 1.5; display: flex; align-items: center; }
+.ab .as-is { background: var(--pain-soft); border: 1px solid #f3c2d3; }
+.ab .to-be { background: #fbfdff; border: 1px solid var(--accent); }
+.ab .arr { display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 800; font-size: 18px; }
+.video { border: 2px dashed var(--neutral); border-radius: var(--radius); background: var(--surface-muted); aspect-ratio: 16 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; padding: 12px; }
+.video .play { width: 52px; height: 52px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 20px; }
+.video p { margin: 0; font-size: 13.5px; color: var(--text-muted); }
+
+/* 3 시장 · 포지셔닝 맵 */
+.pm svg { display: block; width: 100%; height: auto; }
+.pm .gap { fill: var(--good-soft); stroke: var(--good); stroke-dasharray: 5 4; }
+.pm .gapt { font: 800 12px var(--font); fill: var(--good); }
+.pm .mid { stroke: var(--border); stroke-dasharray: 4 4; }
+.pm .ax { stroke: var(--text-muted); stroke-width: 1.4; }
+.pm .axl { font: 600 11px var(--font); fill: var(--text-muted); }
+.pm .axt { font: 800 12px var(--font); fill: var(--ink); }
+.pm .pt { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.pm .pt.us { fill: var(--accent); stroke: var(--accent); }
+.pm .pl { font: 800 13px var(--font); fill: var(--ink); }
+.pm .pl.us { fill: var(--accent); font-size: 15px; }
+.pm .ps { font: 500 10.5px var(--font); fill: var(--text-muted); }
+.funnel .row { display: grid; grid-template-columns: 54px 1fr; gap: 10px; align-items: center; }
+.funnel .row + .row { margin-top: 16px; }
+.funnel { display: flex; flex-direction: column; justify-content: center; }
+.funnel .k { font-weight: 800; font-size: 13px; color: var(--accent); }
+.funnel .v { border-radius: var(--radius-sm); padding: 12px 14px; background: var(--accent-soft); font-size: 14.5px; line-height: 1.4; }
+.funnel .v b { font-size: 20px; color: var(--ink); }
+.funnel .row.som .v { background: var(--accent); color: #fff; }
+.funnel .row.som .v b { color: #fff; }
+
+/* 4 BM 막대 */
+.bars .bar { display: grid; grid-template-columns: 150px 1fr 118px; gap: 10px; align-items: center; }
+.bars .bar + .bar { margin-top: 22px; }
+.bars .lab { font-size: 15.5px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.bars .lab small { display: block; font-weight: 500; font-size: 11.5px; color: var(--text-muted); }
+.bars .track { height: 34px; background: var(--surface-muted); border-radius: 6px; position: relative; }
+.bars .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--neutral); }
+.bars .bar.us .fill { background: var(--accent); }
+.bars .bar.zero .fill { width: 3px !important; background: var(--ink); }
+.bars .val { font-size: 17px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+.bars .bar.us .val, .bars .bar.us .lab { color: var(--accent); }
+.be { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.be .card { padding: 10px 12px; border-radius: var(--radius-sm); }
+.be .card.base { border-color: var(--accent); background: #fbfdff; }
+.be .n { font-size: 26px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.be .n small { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+.be p { font-size: 12.5px !important; line-height: 1.4 !important; }
+
+/* 5 MVP */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; flex: 1; }
+.steps .card { display: flex; flex-direction: column; justify-content: center; }
+.steps .card { position: relative; padding: 20px 18px; }
+.steps .card + .card::before { content: "→"; position: absolute; left: -15px; top: 50%; transform: translate(-50%, -50%); color: var(--accent); font-size: 18px; font-weight: 800; }
+.steps .n { font-size: 12px; font-weight: 800; color: var(--accent); }
+.steps h3 { font-size: 20px; margin: 6px 0 8px; }
+.steps p { font-size: 15px !important; line-height: 1.5 !important; }
+.score { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex: 1; }
+.score .card { display: flex; flex-direction: column; justify-content: center; }
+.score .card { padding: 18px 18px; }
+.score .card.todo { border-style: dashed; background: var(--assume-soft); border-color: #e8c98f; }
+.score .n { font-size: 40px; font-weight: 800; color: var(--good); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.score .todo .n { color: var(--assume); font-size: 28px; }
+.score p { font-size: 14.5px !important; margin-top: 4px !important; }
+.url { font-family: var(--font); font-weight: 700; font-size: 14px; background: var(--surface-muted); padding: 2px 8px; border-radius: 6px; }
+
+/* 6 팀 */
+table.team td { font-size: 15.5px; padding: 16px 10px; }
+table.team td:first-child { font-weight: 800; color: var(--ink); white-space: nowrap; }
+.trace { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.trace .card { padding: 16px 16px; }
+.trace .n { font-size: 34px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.trace p { font-size: 14px !important; line-height: 1.45 !important; margin-top: 4px !important; }
+
+/* 7 요청 */
+.ask { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--ink); color: #fff; border-radius: var(--radius); padding: 40px 40px; }
+.ask .k { font-size: 14px; font-weight: 700; color: #9cc0ff; letter-spacing: .04em; }
+.ask .s { font-size: 34px; line-height: 1.4; font-weight: 800; margin-top: 10px; }
+.ask .s em { font-style: normal; color: #ffd27a; }
+.ask .u { margin-top: 18px; font-size: 16px; color: #c9d4e5; }
+.ask .u .url { background: rgb(255 255 255 / .12); color: #fff; }
+
+#nav { position: fixed; right: 14px; top: 8px; color: #c9d1db; font: 12px var(--font); opacity: .7; }
+
+@media print {
+  body { background: #fff; overflow: visible; }
+  #stage { position: static; transform: none !important; width: 1280px; height: auto; }
+  .slide { display: flex !important; position: relative; width: 1280px; height: 720px; page-break-after: always; }
+  #nav { display: none; }
+  @page { size: 1280px 720px; margin: 0; }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 0 표지 -->
+<section class="slide cover">
+  <div style="flex:1"></div>
+  <div class="eyebrow">AXA · 데이터 2팀 · 피치 (11/18)</div>
+  <h1>메디대구 — 대구 병원을 <em>근거를 보고</em> 고르고,<br>상담 예약까지</h1>
+  <p class="lead">대구 등록 병원과 외국인 환자를 잇는 AI 의료관광 플랫폼</p>
+  <div class="meta">
+    <span class="tag t-acc">문제</span><span class="tag t-acc">해결</span><span class="tag t-acc">시장</span><span class="tag t-acc">BM</span><span class="tag t-acc">MVP</span><span class="tag t-acc">팀</span><span class="tag t-acc">요청</span>
+    <span class="tag t-assume">"등록 외국인환자 유치사업자" 가정으로 설계 · 등록 전 시연</span>
+  </div>
+  <div style="flex:1"></div>
+  <div class="foot"><span class="src">표시: <b class="as">[가정]</b> = 근거 자료 없이 둔 값 · [U] = 미확인 · 숫자마다 아래 줄에 출처</span><span class="no">0 / 7</span></div>
+</section>
+
+<!-- 1 문제 -->
+<section class="slide">
+  <div class="eyebrow">1 문제 — 정말 있는 문제인가?</div>
+  <h1>대구에서 시술받고 싶은 대만 환자는 <em>고를 근거가 없다</em></h1>
+  <p class="lead">주인공 린(29세 타이베이 직장인, 가정 페르소나) — 3박 4일 대구 여행 중 피부 시술 1회를 원함. 막히는 곳은 "어느 병원으로 할지" 고르는 단계</p>
+  <div class="body">
+    <div class="grid" style="grid-template-columns: 1.05fr 1fr; flex:1; min-height:0;">
+      <div class="card quote" style="display:flex; flex-direction:column; justify-content:center;">
+        <div class="zh">"大邱是小地方，比起釜山首爾資訊超級少"</div>
+        <div class="ko">대구는 서울·부산보다 정보가 아주 적다 — 구글 리뷰도 없다</div>
+        <div class="who">대만 커뮤니티 Dcard "大邱 醫美" 글 · 2026-11-17 수집 · 작성자 정보 저장 안 함</div>
+        <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
+          <p style="font-size:14.5px;"><b>VOC 803건</b> (유튜브·인스타·Dcard 공개 댓글, 사람 검수 8차 20/20 통과) — 원인 1위 <b>가격 299건</b><br>
+          대만·대구만 보면 <b>병원 정보 35건이 1위</b> (89건 중) — "어느 병원인지 모르겠다"</p>
+        </div>
+      </div>
+      <div class="grid" style="grid-template-rows: repeat(3, 1fr); gap:10px;">
+        <div class="card" style="display:flex; align-items:center; gap:18px;"><div class="big pain">7<small> / 161곳</small></div><p>대구 <b>등록</b> 유치의료기관 중 메디컬코리아에 <b>상세 정보</b>가 있는 곳</p></div>
+        <div class="card" style="display:flex; align-items:center; gap:18px;"><div class="big pain">26.1<small>%</small></div><p>대구 병원 중 공공데이터에 <b>진료시간</b>이 채워진 비율</p></div>
+        <div class="card" style="display:flex; align-items:center; gap:18px;"><div class="big pain">0<small>곳</small></div><p><b>미용 시술 공공 가격</b>이 있는 의원 (비급여 공개 대상 밖)</p></div>
+      </div>
+    </div>
+    <div class="card" style="padding:10px 16px; background:var(--accent-soft); border-color:var(--accent-line);"><p>왜 지금 대만인가 — 대구 대만 환자 <b>2025년 1,495명, 전년보다 +500.4%</b> · 병원·시간·가격 세 근거가 모두 비어 있어 결국 "실패가 무서워 안 했다"로 끝남</p></div>
+  </div>
+  <div class="foot"><span class="src">출처: painpoint/evidence.csv E01(심평원 API, 2026-10-28)·E02(심평원 비급여)·E03(메디컬코리아 사이트, 2026-11-18) · voc_classified.csv · voc_대만대구.md · voc_review.md 8차 · 대만 환자: 한국보건산업진흥원 2025 외국인환자 유치실적 통계</span><span class="no">1 / 7</span></div>
+</section>
+
+<!-- 2 해결 -->
+<section class="slide">
+  <div class="eyebrow">2 해결 — 왜 이 방법인가?</div>
+  <h1>빈칸을 <em>출처 붙은 공공데이터</em>로 채우고, 예약까지 한 흐름으로</h1>
+  <p class="lead">AI는 찾고·요약하고·초안을 쓰고, 정하는 건 사람 — 발송은 코디 승인, 확정은 병원, 진단은 의료진</p>
+  <div class="body">
+    <div class="grid" style="grid-template-columns: 1fr 380px; flex:1; min-height:0;">
+      <div class="card" style="padding:14px 16px;">
+        <div class="ab">
+          <div></div><div class="h">As-Is — 지금</div><div></div><div class="h">To-Be — 메디대구</div>
+          <div class="rl">병원 찾기</div>
+          <div class="c as-is"><span>등록 병원 161곳 중 상세 7곳 · 진료시간은 4곳 중 1곳만</span></div>
+          <div class="arr">→</div>
+          <div class="c to-be"><span>대구 <b>등록 유치기관 161곳</b>을 5개 언어 지도·상세로 · <b>159곳 진료시간 채움</b> · 칸마다 출처·확인일</span></div>
+          <div class="rl">가격</div>
+          <div class="c as-is"><span>미용 시술 공공 가격 없음 · 이벤트가 광고만 보임</span></div>
+          <div class="arr">→</div>
+          <div class="c to-be"><span>공공 자료 있는 항목만 <b>지역 가격 범위</b> + "병원에 견적 요청" (숫자 지어내지 않음)</span></div>
+          <div class="rl">묻기 · 예약</div>
+          <div class="c as-is"><span>외국어 문의를 코디가 직접 번역·작성 → 답 기다림</span></div>
+          <div class="arr">→</div>
+          <div class="c to-be"><span>챗봇 → 상담 예약 요청서 → 병원 대시보드에 <b>AI 요약·답장 초안</b> → 코디 승인 후 발송</span></div>
+        </div>
+      </div>
+      <div class="grid" style="grid-template-rows: auto 1fr; gap:10px;">
+        <div class="card" style="padding:14px 16px;">
+          <h3 style="font-size:16px;">AI가 하는 것 · 사람이 정하는 것</h3>
+          <table style="font-size:14.5px;">
+            <tr><td style="padding:6px 4px;">병원 찾기 · 가격 범위 안내</td><td style="padding:6px 4px;"><b>AI</b> (공공데이터만, 출처 표시)</td></tr>
+            <tr><td style="padding:6px 4px;">문의 요약 · 번역 · 답장 초안</td><td style="padding:6px 4px;"><b>AI</b> → 발송은 <b>코디 승인</b></td></tr>
+            <tr><td style="padding:6px 4px;">예약 확정 · 시간 제안</td><td style="padding:6px 4px;"><b>병원</b></td></tr>
+            <tr><td style="padding:6px 4px; border:0;">진단 · 효과 · 부작용</td><td style="padding:6px 4px; border:0;"><b>의료진</b> (AI는 거절)</td></tr>
+          </table>
+        </div>
+        <div class="card" style="padding:12px 14px;">
+          <h3 style="font-size:16px;">숫자로 말하면</h3>
+          <p style="font-size:15px;">코디 1건 처리 25분 → 10분 <span class="as">[가정]</span> — 아직 재지 않음, 데모에서 잴 것</p>
+          <p style="font-size:15px; margin-top:10px;"><span class="tag t-pain">규제</span> 복지부·진흥원 회신(11/17): 외국어 병원 정보 제공도 유치행위로 볼 수 있음 → <b>등록 전엔 시연만</b>, 가상 데이터</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: valuechain/step4_네층맵.md 4-0 (병목 → 해소) · spec/processflow.md · docs/agent-spec.md · 25→10분: bm/revenue_platform.md 4절 [가정] · 회신: docs/compliance.md v2.3 (2026-11-17) · 병원 수: 심평원 API · 진료시간 159/161: data/processed/daegu_hours_manual.csv (2026-11-18)</span><span class="no">2 / 7</span></div>
+</section>
+
+<!-- 3 시장 -->
+<section class="slide">
+  <div class="eyebrow">3 시장 — 충분히 큰가?</div>
+  <h1>대안 5개 중 <em>"공공 근거 + 예약 연결"</em> 칸이 비어 있다</h1>
+  <p class="lead">"메디대구가 없다면 린은 무엇으로 해결하나" → 직접 2 · 간접 2 · 대체재 1 · 첫 시장은 작게, 대구 대만 미용 환자부터</p>
+  <div class="body">
+    <div class="grid" style="grid-template-columns: 640px 1fr; flex:1; min-height:0;">
+      <div class="card pm" style="padding:6px 8px;"><svg viewBox="0 0 640 420" role="img" aria-label="포지셔닝 맵: 가로 정보 근거, 세로 연결 깊이">
+  <defs><marker id="pmm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6673"/></marker></defs>
+  <rect x="330" y="72" width="250" height="134" rx="12" class="gap"/>
+  <text x="572" y="92" class="gapt" text-anchor="end">빈자리 — 공공 근거 + 예약 연결</text>
+  <line x1="60" y1="210" x2="580" y2="210" class="mid"/><line x1="320" y1="40" x2="320" y2="380" class="mid"/>
+  <line x1="60" y1="380" x2="586" y2="380" class="ax" marker-end="url(#pmm)"/><line x1="60" y1="380" x2="60" y2="30" class="ax" marker-end="url(#pmm)"/>
+  <text x="62" y="398" class="axl">병원·제휴처가 올린 정보 (광고·상품가)</text>
+  <text x="580" y="398" class="axl" text-anchor="end">공공데이터·공식 목록</text>
+  <text x="320" y="416" class="axt" text-anchor="middle">정보 근거 →</text>
+  <text x="52" y="376" class="axl" text-anchor="end">정보만</text>
+  <text x="52" y="44" class="axl" text-anchor="end">예약</text><text x="52" y="58" class="axl" text-anchor="end">까지</text>
+  <text x="20" y="210" class="axt" text-anchor="middle" transform="rotate(-90 20 210)">연결 깊이 →</text>
+  <circle cx="122" cy="88" r="9" class="pt"/><text x="136" y="86" class="pl">② 강남언니 UNNI</text><text x="136" y="101" class="ps">직접 · 광고 · 이벤트가</text>
+  <circle cx="164" cy="142" r="9" class="pt"/><text x="178" y="140" class="pl">③ 크리에이트립</text><text x="178" y="155" class="ps">간접 · 여행 예약 상품</text>
+  <circle cx="221" cy="60" r="9" class="pt"/><text x="235" y="58" class="pl">① 트립닥</text><text x="235" y="73" class="ps">직접 · 여정 전체 · 병원 무료</text>
+  <circle cx="195" cy="292" r="9" class="pt"/><text x="209" y="290" class="pl">⑤ 현상 유지</text><text x="209" y="305" class="ps">대체재 · 지인·검색 → 직접 연락</text>
+  <circle cx="518" cy="305" r="9" class="pt"/><text x="504" y="303" class="pl" text-anchor="end">④ 메디컬코리아</text><text x="504" y="318" class="ps" text-anchor="end">간접 · 공식 목록 · 예약 없음</text>
+  <circle cx="497" cy="156" r="13" class="pt us"/><text x="477" y="154" class="pl us" text-anchor="end">메디대구</text><text x="477" y="169" class="ps" text-anchor="end">공공 출처 + 상담 예약 연결</text>
+</svg></div>
+      <div class="grid" style="grid-template-rows: 1fr auto; gap:10px;">
+        <div class="card funnel" style="padding:12px 14px;">
+          <h3 style="font-size:15px;">시장 크기 — 넓게 → 우리가 얻을 몫</h3>
+          <div class="row"><div class="k">전체</div><div class="v"><b>약 201만 명</b> 전국 외국인 환자</div></div>
+          <div class="row"><div class="k">대구</div><div class="v"><b>19,243명</b> 대구 외국인 환자</div></div>
+          <div class="row"><div class="k">첫 시장</div><div class="v"><b>연 약 1,200명</b> 대구 대만 1,495명 × 미용·외래 80.3%</div></div>
+          <div class="row som"><div class="k">우리 몫</div><div class="v"><b>월 약 10건</b> × 경유율 10% <span style="opacity:.85">[가정]</span></div></div>
+        </div>
+        <div class="card" style="padding:10px 14px;">
+          <p style="font-size:13.5px;"><span class="tag t-pain">인정</span> 트립닥은 병원 무료로 같은 병원에 들어가 있음 · 유치 플랫폼(K-Dia·서울기지배 등)은 수수료 15~25%로 영업 중 → 차별점은 "등록"이 아니라 <b>공공 근거 + 대구 특화</b></p>
+          <p class="muted" style="font-size:12.5px; margin-top:4px;">강남언니 2025 영업수익 752억 원 중 성과형 광고 78.8% (DART) — 광고 모델이 주류</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: market/competitors.md · positioning_map.html (점 위치는 팀 해석) · research/company/강남언니-UNNI.md (DART) · 유치 플랫폼 요율: research/company/ (K-Dia·서울기지배 공식 안내, 2026-11-18) · 환자 수: 진흥원 2025 통계 표 2.1 · 80.3%는 전국 대만 환자 피부과 비중으로 대신 · bm/revenue_platform.md 1절</span><span class="no">3 / 7</span></div>
+</section>
+
+<!-- 4 BM -->
+<section class="slide">
+  <div class="eyebrow">4 BM — 지속 가능한가?</div>
+  <h1>병원은 <em>결제된 진료에만</em> — 업계보다 싼 13% · 8%</h1>
+  <p class="lead">기본 회원 무료 + 수수료 13% · 프리미엄 회원 월 ₩150,000 + 수수료 8% (AI 답장 초안·사후관리 포함) · 병원 광고·노출 순위는 팔지 않음</p>
+  <div class="body">
+    <div class="grid" style="grid-template-columns: 1.1fr 1fr; flex:1; min-height:0;">
+      <div class="card bars" style="display:flex; flex-direction:column; justify-content:center;">
+        <h3 style="margin-bottom:20px;">외국인 환자 1명 데려오는 비용 <span class="muted" style="font-weight:500; font-size:13px;">(1건 진료비 100만 원 기준 <span class="as">[추정]</span>)</span></h3>
+        <div class="bar"><div class="lab">유치업체<small>법정 상한 30% (의원)</small></div><div class="track"><div class="fill" style="width:100%"></div></div><div class="val">₩300,000</div></div>
+        <div class="bar"><div class="lab">유치 플랫폼<small>공개 요율 15~25%</small></div><div class="track"><div class="fill" style="width:66.7%"></div></div><div class="val">₩150~250K</div></div>
+        <div class="bar"><div class="lab">광고형 플랫폼<small>안 와도 광고비 · 업체 자료</small></div><div class="track"><div class="fill" style="width:66.7%"></div></div><div class="val">~₩200,000</div></div>
+        <div class="bar us"><div class="lab">메디대구<small>기본 13% · 프리미엄 8%</small></div><div class="track"><div class="fill" style="width:43.3%"></div></div><div class="val">₩130,000</div></div>
+        <div class="bar zero"><div class="lab">트립닥<small>병원 무료</small></div><div class="track"><div class="fill"></div></div><div class="val">₩0</div></div>
+        <p class="muted" style="font-size:14px; margin-top:24px;">트립닥이 무료인데도 내는 이유 — 광고는 환자가 안 와도 돈, 우리는 <b>결제된 진료만</b> + 코디 답장 초안으로 시간 절감 <span class="as">[가정]</span></p>
+      </div>
+      <div class="grid" style="grid-template-rows: auto auto; gap:10px; align-content:start;">
+        <div class="card" style="padding:12px 14px;">
+          <h3 style="font-size:15px;">손익분기 — 월 방문 완료 건수 (예상 월 10건)</h3>
+          <div class="be">
+            <div class="card base"><div class="n">22<small>건</small></div><p>기본 회원만: 1건 100만 원 × 13%</p></div>
+            <div class="card"><div class="n">6<small>곳</small></div><p>프리미엄 병원(월 5건)만</p></div>
+            <div class="card"><div class="n" style="color:var(--pain)">46<small>건</small></div><p>1건 진료비 50만 원일 때</p></div>
+          </div>
+          <p style="font-size:13.5px; margin-top:8px;"><b>팀 4명 최저임금을 넣으면</b> (월 고정비 약 884만 원) → 기본 회원만 <b style="color:var(--pain)">월 71건</b> · 프리미엄만 <b>17곳</b></p>
+          <p class="muted" style="font-size:12.5px; margin-top:4px;">월 고정비 271만 원 = 운영 1명 250만 <span class="as">[가정]</span> + 호스팅 6만 (Vercel·Supabase 요금표) + 보증보험료 10만 <span class="as">[가정]</span> + 수작업 5만 <span class="as">[가정]</span> · 1건 변동비 5,000원 <span class="as">[가정]</span> · 마케팅비 미반영</p>
+        </div>
+        <div class="card" style="padding:12px 14px;">
+          <h3 style="font-size:15px;">프리미엄 병원 1곳 한 달 (대시보드 시안: 방문 24명 · 결제 확인 21건)</h3>
+          <table style="font-size:13.5px;">
+            <tr><td style="padding:5px 4px;">수수료 ₩21,000,000 × 8%</td><td class="num" style="padding:5px 4px;">₩1,680,000</td></tr>
+            <tr><td style="padding:5px 4px;">프리미엄 회원비</td><td class="num" style="padding:5px 4px;">₩150,000</td></tr>
+            <tr><td style="padding:5px 4px;"><b>합계 = 진료비의 8.7%</b> (상한 30% 안)</td><td class="num" style="padding:5px 4px;"><b>₩1,830,000</b></td></tr>
+            <tr><td style="padding:5px 4px; border:0;" class="muted">같은 24명을 광고로 받았다면</td><td class="num muted" style="padding:5px 4px; border:0;">약 ₩4,800,000</td></tr>
+          </table>
+        </div>
+        <div class="card" style="padding:12px 14px; background:var(--assume-soft); border-color:#e8c98f;">
+          <h3 style="font-size:15px; color:var(--assume);">가장 크게 흔드는 가정 = 1건 진료비</h3>
+          <p style="font-size:13.5px;">진흥원 카드 데이터 153만 원은 <b>1인 1년 합계</b> → 건당 100만 원으로 보정 (피부과 105만) · 회원비가 수수료 상한에 합산되는지 [U] → 출시 전 복지부 질의 · 확보 병원·LOI <b>0곳</b></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: bm/revenue_platform.md 2절 (v4) · bm/요금안-or-검토.md (유치 플랫폼 요율: research/company/ 공식 안내 6곳) · bm/bm_canvas.md v4 · 상한: 외국인환자 유치 수수료율 통합 고시 제2·3조 · 1건 100만 원: 진흥원 「2024 신용카드 데이터로 본 외국인환자 소비패턴 분석」 1인 153만·피부과 105만 원을 건당 보정 (research/의료관광/카드데이터-153만원-근거.md) · 광고 20만 원: 마케팅 업체 글 · 병원 1곳 예시: dashboard/대시보드.html 요금·정산 (docs-dashboard-integration 브랜치)</span><span class="no">4 / 7</span></div>
+</section>
+
+<!-- 5 MVP -->
+<section class="slide">
+  <div class="eyebrow">5 MVP — 보여 줄 수 있나?</div>
+  <h1>린의 질문이 <em>예약 요청 초안</em>이 되기까지 — 라이브 데모</h1>
+  <p class="lead">데모 과업 1개 고정 · 가상 병원·가상 환자 데이터 · 요청은 실제로 보내지 않음</p>
+  <div class="body">
+    <div class="steps">
+      <div class="card"><div class="n">1</div><h3>로그인</h3><p>거주국 선택 · 동의 → 해외 거주자만 예약 가능</p></div>
+      <div class="card"><div class="n">2</div><h3>챗봇에 질문</h3><p>"I have acne scars and want treatment in Suseong-gu"</p></div>
+      <div class="card"><div class="n">3</div><h3>병원 카드</h3><p>출처 붙은 병원 목록 · 의료 판단은 안 함</p></div>
+      <div class="card" style="border-color:var(--accent);"><div class="n">4</div><h3>예약 요청 초안</h3><p>희망 날짜·언어·요청 내용이 채워진 카드</p></div>
+    </div>
+    <div class="score">
+      <div class="card"><div class="n">27/27</div><p>의도 분류 — 챗봇이 맞는 도구를 고름</p></div>
+      <div class="card"><div class="n">81/81</div><p>안전 — 진단·추천 요청을 거절</p></div>
+      <div class="card"><div class="n">12/12</div><p>시나리오 — 질문 → 예약 초안까지 (Gemini·Nemotron 둘 다)</p></div>
+      <div class="card todo"><div class="n">사람 테스트 전</div><p>팀 밖 3~5명 완료율 · 걸린 시간 → 12/4 전</p></div>
+    </div>
+    <div class="card" style="padding:16px 18px;">
+      <p style="font-size:15.5px;"><b>가설 판정</b> — "린은 혼자서 예약 요청 초안까지 간다": AI 평가 통과, <b>사람 미검증</b> · "코디 1건 25분 → 10분": <b>미측정</b></p>
+      <p style="font-size:15.5px; margin-top:8px;"><b>데모가 막히면</b> — Gemini 하루 한도 → Nemotron 자동 전환 · 그래도 안 되면 녹화 영상 &nbsp;|&nbsp; MVP <span class="url">배포 전 — 로컬 시연</span></p>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: apps/web-platform/ · ai/agent/eval/results/ (2026-11-10 intent 27/27 · safety 81/81, 2026-11-11 scenario 7a-verify 12/12) · docs/7b-수동검증.md · docs/review-수동테스트-2026-11-12.md</span><span class="no">5 / 7</span></div>
+</section>
+
+<!-- 6 팀 -->
+<section class="slide">
+  <div class="eyebrow">6 팀 — 이 팀이 할 수 있나?</div>
+  <h1>4명이 <em>데이터 → 프론트 2 · 백엔드 2</em>로, 모든 숫자에 출처를 달았다</h1>
+  <p class="lead">사람이 정하고 AI가 반복 작업을 맡음 — 작업 흔적은 전부 저장소에 남김</p>
+  <div class="body">
+    <div class="card" style="padding:6px 10px;">
+      <table class="team">
+        <tr><th>역할</th><th>맡은 것</th><th>AI를 쓴 곳</th><th>흔적</th></tr>
+        <tr><td>팀원 1 · 프론트 A</td><td>병원·진료시간·지도 데이터 → <b>환자 웹</b> (챗봇·병원 찾기·예약, 5개 언어)</td><td>데이터 검증 — 진료시간 출처 교차 대조 · 화면 문구 번역 초안</td><td><code>data/etl/</code> · 진료시간 159/161 · <code>apps/web-platform/</code></td></tr>
+        <tr><td>팀원 2 · 프론트 B</td><td>가격 데이터·규제 검토(복지부·진흥원 질의) → <b>병원 대시보드</b></td><td>기획·검증 — 법령 조사 요약 · AI 레드팀으로 BM 반론 점검</td><td><code>docs/compliance.md</code> · <code>apps/web-hospital/</code></td></tr>
+        <tr><td>팀원 3 · 백엔드 A</td><td>다국어·챗봇·VOC 수집 → <b>환자 쪽 API</b> (인증·동의·병원 검색·챗봇)</td><td>Claude Code VOC 1차 분류 · Gemini → Nemotron 챗봇</td><td><code>painpoint/voc_*</code> · <code>backend/</code></td></tr>
+        <tr><td>팀원 4 · 백엔드 B</td><td><b>병원 쪽 API</b> (예약 상태 흐름·병원 계정·AI 답장 승인) — 개발 단계부터 합류</td><td>설계·검증 — API 설계 검토 · 테스트 코드 초안 · 코드 리뷰</td><td><code>backend/</code> booking·tenant</td></tr>
+      </table>
+    </div>
+    <div class="trace">
+      <div class="card"><div class="n">803</div><p>VOC 분류 · 사람 검수 8차 끝에 20/20</p></div>
+      <div class="card"><div class="n">21</div><p>AI 레드팀 3명(투자자·고객·경쟁사)의 지적 → 16개 반영</p></div>
+      <div class="card"><div class="n">120</div><p>챗봇 자동 평가 문항 (의도 27 · 안전 81 · 시나리오 12)</p></div>
+      <div class="card"><div class="n">25</div><p>main에 합친 PR · 리뷰 후 머지</p></div>
+      <div class="card"><div class="n">2</div><p>공식 기관 질의 회신 (복지부·진흥원)</p></div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">출처: subject/framework.md 8절 역할 (제안 v0, 팀 확인 중) · CLAUDE.md · docs/backend-roles.md · painpoint/voc_review.md · bm/redteam_log.md · .claude/agents/redteam-*.md · ai/agent/eval/results/ · git log origin/main (2026-11-18) · 공개 저장소라 실명 대신 역할로 표기</span><span class="no">6 / 7</span></div>
+</section>
+
+<!-- 7 요청 -->
+<section class="slide">
+  <div class="eyebrow">7 요청사항 — 그래서 무엇을 해 주면 되나?</div>
+  <h1 style="margin-bottom:18px;">한 가지만 부탁드립니다</h1>
+  <div class="body">
+    <div class="ask">
+      <div class="k">요청</div>
+      <div class="s">한국에 있는 <em>외국인 유학생·관광객</em>, 그리고 <em>이 자리에 계신 분들</em>께<br>사용자 테스트 참여를 부탁드립니다 — 혼자 예약 요청까지 가는지 12/4 전에 판정하겠습니다.</div>
+      <div class="u">MVP <span class="url">배포 후 기입</span> · 피치덱 <span class="url">발표/피치덱-11.18/</span></div>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card"><h3>① 사람 테스트</h3><p>지금은 AI 평가만 통과 (12/12) · 완료율·걸린 시간으로 "혼자 예약 요청까지" 판정 — <b>이 요청으로 확인</b></p></div>
+      <div class="card"><h3>② 1건 진료비</h3><p>100만 원 <span class="as">[추정]</span> → 50만 원이면 손익분기 22 → 46건 · 카드 보고서 대만·대구 값으로 확인</p></div>
+      <div class="card"><h3>③ 지불 의향</h3><p>기본 13% / 프리미엄 월 15만 + 8%를 낼지 · LOI 0곳 → 업계 공개 요율 15~25%로 대신 비교</p></div>
+    </div>
+    <div class="card" style="padding:14px 18px; background:var(--accent-soft); border-color:var(--accent-line);"><p><b>12/4까지 우리가 할 것</b> — MVP 배포 URL (가상 데이터, 실제 제출 막음) · 팀 밖 3~5명 사람 테스트 → 가설 판정 · 대만·대구 1건 진료비 확인</p></div>
+  </div>
+  <div class="foot"><span class="src">출처: ai/agent/eval/results/ (시나리오 12/12) · bm/revenue_platform.md 2절 v4 (민감도) · bm/요금안-or-검토.md 2-4절 (업계 요율) · bm/bm_canvas.md (LOI 0곳) · docs/pitch/outline.md 4절 가정 목록</span><span class="no">7 / 7</span></div>
+</section>
+
+</div>
+<div id="nav">← / → 로 넘김</div>
+<script>
+const slides = [...document.querySelectorAll('.slide')];
+let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+function show(n) {
+  i = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, k) => s.classList.toggle('on', k === i));
+  history.replaceState(null, '', '#' + (i + 1));
+}
+function fit() {
+  const s = Math.min(innerWidth / 1280, innerHeight / 720);
+  document.getElementById('stage').style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+addEventListener('keydown', (e) => {
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) show(i + 1);
+  if (['ArrowLeft', 'PageUp'].includes(e.key)) show(i - 1);
+  if (e.key === 'Home') show(0);
+  if (e.key === 'End') show(slides.length - 1);
+});
+addEventListener('click', (e) => { if (e.clientX > innerWidth / 2) show(i + 1); else show(i - 1); });
+addEventListener('resize', fit);
+fit();
+show(i);
+</script>
+</body>
+</html>

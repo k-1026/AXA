@@ -1,0 +1,264 @@
+<title>틱톡 VOC 9차 검수</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 위쪽 고정 진행 바 + 한 줄짜리 판정 카드 목록, 제출 뒤 결과 표 */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --ink:#1b2230; --muted:#5d6676; --line:#dde1e8;
+  --accent:#2f5bd3; --accent-soft:#e7edfc; --ok:#1f7a4d; --ok-soft:#e3f3ea; --bad:#b4372f; --bad-soft:#fbe9e7;
+  --f-head:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --f-body:"Noto Sans KR",system-ui,-apple-system,"Hiragino Sans","Microsoft YaHei",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151b; --surface:#1a1e26; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2c323d;
+  --accent:#7d9cf0; --accent-soft:#232c44; --ok:#5fc58f; --ok-soft:#173226; --bad:#f08a80; --bad-soft:#3a1f1d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b; --surface:#1a1e26; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2c323d;
+  --accent:#7d9cf0; --accent-soft:#232c44; --ok:#5fc58f; --ok-soft:#173226; --bad:#f08a80; --bad-soft:#3a1f1d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{padding-top:24px;display:flex;flex-direction:column;gap:6px}
+h1{font-family:var(--f-head);font-size:1.5rem;margin:0;text-wrap:balance}
+h2{font-family:var(--f-head);font-size:1.1rem;margin:0}
+.sub{color:var(--muted);margin:0;max-width:65ch}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.prog{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.track{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.fill{height:100%;background:var(--accent);width:0;transition:width .2s}
+.prog small{color:var(--muted);font-variant-numeric:tabular-nums}
+.status{font-size:.85rem;color:var(--muted)}
+button{font:inherit;cursor:pointer}
+.primary{background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 16px;font-weight:700}
+.primary:disabled{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+details.rules{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+details.rules summary{font-weight:700;cursor:pointer}
+.rules ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.rules b{font-weight:700}
+.note{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:.9rem}
+.list{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.card.done{border-color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;font-size:.8rem;color:var(--muted)}
+.meta .id{font-family:var(--f-mono);color:var(--ink)}
+.orig{font-size:1rem;margin:0;overflow-wrap:anywhere}
+.tr{margin:0;color:var(--muted);overflow-wrap:anywhere}
+.ctx{font-size:.8rem;color:var(--muted);margin:0}
+.row{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:start}
+.row > span{font-size:.8rem;color:var(--muted);padding-top:6px;letter-spacing:.02em}
+.seg{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.seg button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:.85rem}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.seg button:disabled{cursor:default}
+.fields[hidden]{display:none}
+.result{display:flex;flex-direction:column;gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile b{display:block;font-family:var(--f-head);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.tile small{color:var(--muted)}
+.pass{color:var(--ok)} .fail{color:var(--bad)}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.85rem;min-width:620px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500}
+td.m{font-variant-numeric:tabular-nums}
+.ok{background:var(--ok-soft)} .no{background:var(--bad-soft)}
+.empty{color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>틱톡 VOC 9차 검수</h1>
+    <p class="sub">틱톡 3차 VOC에서 무작위로 뽑은 20건을 판정해 주세요. 고를 때마다 자동으로 저장되고, 20건을 모두 판정한 뒤 <b>제출</b>하면 Claude 판정과 일치율이 열려요. 제출 뒤에는 고칠 수 없어요.</p>
+  </header>
+
+  <div class="bar">
+    <div class="prog"><div class="track"><div class="fill" id="fill"></div></div><small id="count">0 / 20 판정</small></div>
+    <span class="status" id="status">불러오는 중…</span>
+    <button class="primary" id="submit" disabled>제출하고 결과 보기</button>
+  </div>
+
+  <details class="rules" id="rules">
+    <summary>판정 순서 (규칙 v6) 펼쳐 보기</summary>
+    <ol>
+      <li><b>판정</b> — 시술·병원·의료진·가격·예약·회복·한국에서 시술받는 일에 대한 말인가? 아니면 <b>해당 없음</b> (외모·크리에이터 칭찬, 잡담, "Same" 같은 동조, 병원 홍보, 시술 재료 감상만 있는 말)</li>
+      <li><b>원인</b> — 5개 중 하나. 가격이 들어 있으면 <b>가격</b> 먼저. 병원 정보 = 어느 병원·위치·통역·예약 방법·여행 일정·현지 이용 / 시술 정보·효과·회복 = 무슨 시술·효과·유지·회복 / 안전·통증·불신 = 위생·아픔·무서움·부작용·광고 불신 / 한국 시술 기대·신뢰 = 받고 싶다·결과가 좋다</li>
+      <li><b>단계</b> — 예약했거나 다녀왔다고 말할 때만 ③·④·⑤. 영상 속(특정) 병원 이름·연락처·예약 방법·여행 일정을 묻는 말은 <b>②</b>. 나머지(가격·시술·효과 질문, 영상 장면 반응, 가고 싶다, 특정 병원 없이 추천해 달라)는 <b>①</b></li>
+      <li><b>유형</b> — 부탁하는 말("알려 주세요", "please") = <b>요청</b> · 그냥 묻는 말 = <b>질문</b> · 긍정 표현 = <b>칭찬</b> · 문제·걱정만 = <b>불만</b></li>
+      <li><b>강도</b> — 3 실제 손해·포기 · 2 결정에 영향을 준다고 밝힘("망설여진다", "막막하다", "그래서 못 정한다") · 나머지 1</li>
+    </ol>
+  </details>
+
+  <p class="note" id="who">판정자: 확인 중</p>
+
+  <section class="result" id="result" hidden></section>
+  <section class="list" id="list" aria-label="검수할 댓글 20건"></section>
+
+  <section class="result" id="others" hidden>
+    <h2>다른 판정자</h2>
+    <div class="tablebox"><table><thead><tr><th>판정자</th><th>상태</th><th>판정</th><th>완전 일치</th></tr></thead><tbody id="othersBody"></tbody></table></div>
+  </section>
+</div>
+
+<script>
+const STAGES=["① 알아보기","② 비교·결정","③ 상담 예약","④ 방문·진료","⑤ 귀국 후 관리"];
+const TYPES=["불만","요청","질문","칭찬"];
+const SEV=["1","2","3"];
+const CAUSES=["가격","병원 정보","시술 정보·효과·회복","안전·통증·불신","한국 시술 기대·신뢰"];
+const NA="해당 없음", CL="분류";
+// 원문·번역·영상 맥락. c = Claude 판정 [판정, 단계, 유형, 강도, 원인] (제출 전에는 화면에 나오지 않음)
+const ITEMS=[
+ {id:"T17-001",lang:"일본어",ctx:"서울 명동 클리닉 후기 (LINE 일본어 예약)",o:"なんの施術したんですか？",t:"무슨 시술 했어요?",c:[CL,0,2,1,2]},
+ {id:"T50-121",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그",o:"なっちゃんその肌治療の名前教えて欲しい😭",t:"(크리에이터에게) 그 피부 치료 이름 알려 줬으면 해요😭",c:[CL,0,1,1,2]},
+ {id:"T10-042",lang:"영어",ctx:"미국인 크리에이터 '한국 미용 예약 어디서·어떻게' · 결제 수단 묻는 댓글에 단 답글",o:"Of course no problem! 🫶 It's located everywhere in Seoul, but I know it's also in the airport and in hongdae station! Ppl also like the Climate card but idk much ab it! Have fun in South Korea 😸",t:"물론이죠! 서울 곳곳에 있고 공항·홍대역에도 있어요! 기후동행카드도 많이 쓰는데 잘은 몰라요. 한국 여행 즐겁게 해요",c:[NA]},
+ {id:"T10-061",lang:"영어",ctx:"같은 영상 · 다른 댓글에 단 답글",o:"Just be safe and have a fantastic holiday",t:"안전하게, 즐거운 휴가 보내요",c:[NA]},
+ {id:"T10-085",lang:"영어",ctx:"같은 영상 (예약 방법 소개)",o:"Where did you end up booking the skin clinic?",t:"결국 피부과는 어디로 예약했어요?",c:[CL,1,2,1,1]},
+ {id:"T15-014",lang:"영어",ctx:"한국 클리닉 예약 앱 홍보 영상",o:"Hi am african and am very much interested like I need help with my skin it's very bad plz help me change",t:"아프리카 사람인데 정말 관심 있어요. 피부가 너무 안 좋아서 도움이 필요해요, 바꿀 수 있게 도와주세요",c:[CL,0,1,1,4]},
+ {id:"T10-005",lang:"영어",ctx:"예약 방법 영상 · 다녀온 사람의 후기 댓글에 단 답글",o:"I really found fine to be factory style",t:"거기는 정말 공장식이었어요",c:[CL,3,0,1,1]},
+ {id:"T50-148",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그 (마지막 장면은 화장한 얼굴)",o:"化粧したら綺麗になったかわかんないよぉー😭",t:"화장하면 깨끗해졌는지 모르잖아요😭",c:[CL,0,0,1,2]},
+ {id:"T14-006",lang:"베트남어",ctx:"한국 피부관리 영상 (이쑤시개 모양 도구로 압출)",o:"ủa bộ nặn bằng tăm là da đẹp hơn hả bây ☺️",t:"어, 이쑤시개로 짜면 피부가 더 좋아지는 거야?",c:[CL,0,2,1,2]},
+ {id:"T18-003",lang:"일본어",ctx:"한국 클리닉 일본어 예약 대행 서비스 홍보",o:"脂肪溶解注射しようかなぁと、考えてました．お腹には効きますか？",t:"지방분해주사를 할까 생각 중이었어요. 배에도 효과 있나요?",c:[CL,0,2,1,2]},
+ {id:"T50-138",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그 (2주 뒤 모습)",o:"二週間でやっと綺麗になるんですか？",t:"2주나 지나야 겨우 깨끗해지는 거예요?",c:[CL,0,2,1,2]},
+ {id:"T50-195",lang:"일본어",ctx:"같은 영상 (직후 붓기 장면)",o:"あんなにパンパンに腫れるんやね😳でも2週間後の肌ツルんツルん✨️綺麗🥰",t:"저렇게 퉁퉁 붓는구나😳 그래도 2주 뒤 피부는 매끈매끈✨ 예뻐🥰",c:[CL,0,3,1,2]},
+ {id:"T50-078",lang:"일본어",ctx:"같은 영상 · 다른 댓글에 단 답글",o:"ありがとうございます😊🥰",t:"감사합니다😊🥰",c:[NA]},
+ {id:"T14-001",lang:"베트남어",ctx:"한국 피부관리 영상 (압출 장면)",o:"Khó chịu vô cùng cực😀",t:"엄청나게 괴롭네😀",c:[CL,0,0,1,3]},
+ {id:"T50-109",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그 (주사 장면)",o:"いっぱい注射😱がんばったね💯✨",t:"주사 엄청 맞았네😱 잘 버텼어💯✨",c:[CL,0,3,1,3]},
+ {id:"T50-169",lang:"일본어",ctx:"같은 영상",o:"肌治療したきれいなお肌に目が行くけど大好きなお目め🥺にも目がいっちゃう😻💕",t:"피부 치료한 예쁜 피부에 눈이 가는데 좋아하는 눈에도 눈이 가😻",c:[NA]},
+ {id:"T50-081",lang:"일본어",ctx:"같은 영상 (마지막 장면은 화장한 얼굴)",o:"最後化粧してるからわかんない、",t:"마지막에 화장해서 모르겠어",c:[CL,0,0,1,2]},
+ {id:"T14-018",lang:"베트남어",ctx:"한국 피부관리 영상 (압출 장면)",o:"Đau hơn nữa",t:"더 아프겠다",c:[CL,0,0,1,3]},
+ {id:"T10-016",lang:"영어",ctx:"예약 방법 영상 · 미용실 가격 답을 받고 단 답글",o:"Thank you! x",t:"고마워요!",c:[NA]},
+ {id:"T50-085",lang:"일본어",ctx:"일본인 크리에이터 서울 피부 치료 브이로그",o:"お値段知りたいです",t:"가격 알고 싶어요",c:[CL,0,2,1,0]},
+];
+const claudeOf=it=>it.c[0]===NA?{v:NA}:{v:CL,stage:STAGES[it.c[1]],type:TYPES[it.c[2]],sev:String(it.c[3]),cause:CAUSES[it.c[4]]};
+
+let answers={}, submitted=false, canWrite=true, myId=null, db=null, user=null, saving=false, dirty=false, saveTimer=null;
+const $=s=>document.querySelector(s);
+
+function complete(a){ if(!a||!a.v) return false; if(a.v===NA) return true; return !!(a.stage&&a.type&&a.sev&&a.cause); }
+function doneCount(){ return ITEMS.filter(it=>complete(answers[it.id])).length; }
+
+function seg(name,opts,cur,id,locked){
+  const box=document.createElement("div"); box.className="seg"; box.setAttribute("role","group"); box.setAttribute("aria-label",name);
+  opts.forEach(o=>{const b=document.createElement("button"); b.type="button"; b.textContent=o; b.setAttribute("aria-pressed",String(cur===o)); b.disabled=locked;
+    b.addEventListener("click",()=>choose(id,name,o)); box.appendChild(b);});
+  return box;
+}
+function row(label,el){const r=document.createElement("div"); r.className="row"; const s=document.createElement("span"); s.textContent=label; r.append(s,el); return r;}
+
+function renderList(){
+  const list=$("#list"); list.textContent="";
+  const locked=submitted||!canWrite;
+  ITEMS.forEach((it,i)=>{
+    const a=answers[it.id]||{};
+    const card=document.createElement("article"); card.className="card"+(complete(a)?" done":"");
+    const meta=document.createElement("div"); meta.className="meta";
+    const n=document.createElement("span"); n.textContent=(i+1)+" / 20"; const idEl=document.createElement("span"); idEl.className="id"; idEl.textContent=it.id; const lg=document.createElement("span"); lg.textContent=it.lang;
+    meta.append(n,idEl,lg);
+    const o=document.createElement("p"); o.className="orig"; o.lang={"일본어":"ja","영어":"en","베트남어":"vi"}[it.lang]||""; o.textContent=it.o;
+    const t=document.createElement("p"); t.className="tr"; t.textContent="번역: "+it.t;
+    const c=document.createElement("p"); c.className="ctx"; c.textContent="영상: "+it.ctx;
+    card.append(meta,o,t,c,row("판정",seg("판정",[CL,NA],a.v,it.id,locked)));
+    const f=document.createElement("div"); f.className="fields"; f.hidden=a.v!==CL; f.style.display=a.v===CL?"flex":""; f.style.flexDirection="column"; f.style.gap="8px";
+    f.append(row("원인",seg("cause",CAUSES,a.cause,it.id,locked)),row("단계",seg("stage",STAGES,a.stage,it.id,locked)),row("유형",seg("type",TYPES,a.type,it.id,locked)),row("강도",seg("sev",SEV,a.sev,it.id,locked)));
+    card.append(f); list.appendChild(card);
+  });
+  const d=doneCount(); $("#fill").style.width=(d/20*100)+"%"; $("#count").textContent=d+" / 20 판정";
+  $("#submit").disabled=submitted||!canWrite||d<20||!db;
+  $("#submit").textContent=submitted?"제출 완료":"제출하고 결과 보기";
+}
+
+function choose(id,name,val){
+  if(submitted||!canWrite) return;
+  const a={...(answers[id]||{})};
+  if(name==="판정"){ a.v=val; if(val===NA){delete a.stage;delete a.type;delete a.sev;delete a.cause;} }
+  else a[name]=val;
+  answers={...answers,[id]:a}; renderList(); queueSave();
+}
+
+function queueSave(){ dirty=true; clearTimeout(saveTimer); saveTimer=setTimeout(flush,700); setStatus("저장 대기…"); }
+async function flush(extra){
+  if(!db||!myId) return;
+  if(saving){ dirty=true; return; }
+  saving=true; dirty=false;
+  const body={round:9,answers,submitted,updatedAt:new Date().toISOString(),...(extra||{})};
+  try{ await db.doc("reviews/"+myId).set(body); setStatus("저장됨 "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})); }
+  catch(e){ if(e&&e.code==="invalid_argument"){ canWrite=false; setStatus("이 계정은 저장 권한이 없어요 (보기 전용)"); renderList(); } else setStatus("저장 실패 — 잠시 뒤 다시 골라 주세요"); }
+  saving=false; if(dirty) flush();
+}
+function setStatus(s){ $("#status").textContent=s; }
+
+function score(ans){
+  let full=0, f={cause:0,stage:0,type:0,sev:0}, both=0, rows=[];
+  ITEMS.forEach(it=>{const h=ans[it.id]||{}, c=claudeOf(it); let ok;
+    if(c.v===NA||h.v===NA){ ok=c.v===h.v; }
+    else { both++; ["cause","stage","type","sev"].forEach(k=>{ if(h[k]===c[k]) f[k]++; }); ok=["cause","stage","type","sev"].every(k=>h[k]===c[k]); }
+    if(ok) full++; rows.push({it,h,c,ok});});
+  return {full,f,both,rows};
+}
+const fmt=a=>!a||!a.v?"—":a.v===NA?NA:[a.stage,a.type,a.sev,a.cause].join(" · ");
+
+function renderResult(){
+  const box=$("#result"); box.hidden=!submitted; if(!submitted) return;
+  const s=score(answers); const pass=(20-s.full)<=5;
+  box.textContent="";
+  const h=document.createElement("h2"); h.textContent="내 결과 — Claude 판정과 비교"; box.appendChild(h);
+  const tiles=document.createElement("div"); tiles.className="tiles";
+  const tile=(big,small,cls)=>{const d=document.createElement("div"); d.className="tile"; const b=document.createElement("b"); b.textContent=big; if(cls) b.className=cls; const sm=document.createElement("small"); sm.textContent=small; d.append(b,sm); return d;};
+  tiles.append(tile(s.full+" / 20","완전 일치",pass?"pass":"fail"), tile(pass?"통과":"미통과","기준: 불일치 5건 이하",pass?"pass":"fail"),
+    tile(s.f.cause+" / "+s.both,"원인 일치 (둘 다 분류한 것)"), tile(s.f.stage+" / "+s.both,"단계 일치"), tile(s.f.type+" / "+s.both,"유형 일치"), tile(s.f.sev+" / "+s.both,"강도 일치"));
+  box.appendChild(tiles);
+  const tb=document.createElement("div"); tb.className="tablebox"; const tbl=document.createElement("table");
+  tbl.innerHTML="<thead><tr><th>#</th><th>voc_id</th><th>번역</th><th>내 판정</th><th>Claude 판정</th><th>일치</th></tr></thead>";
+  const body=document.createElement("tbody");
+  s.rows.forEach((r,i)=>{const tr=document.createElement("tr"); tr.className=r.ok?"ok":"no";
+    [String(i+1),r.it.id,r.it.t,fmt(r.h),fmt(r.c),r.ok?"O":"X"].forEach((v,j)=>{const td=document.createElement("td"); td.textContent=v; if(j===0) td.className="m"; tr.appendChild(td);});
+    body.appendChild(tr);});
+  tbl.appendChild(body); tb.appendChild(tbl); box.appendChild(tb);
+  $("#list").hidden=true;
+}
+
+async function renderOthers(docs){
+  const others=docs.filter(d=>d.id!==myId&&d.exists);
+  const sec=$("#others"); sec.hidden=others.length===0; if(!others.length) return;
+  const ps=user? await user.profiles(others.map(d=>d.id)) : {};
+  const body=$("#othersBody"); body.textContent="";
+  others.forEach(d=>{const x=d.data()||{}; const ans=x.answers||{}; const n=ITEMS.filter(it=>complete(ans[it.id])).length;
+    const tr=document.createElement("tr");
+    const cells=[(ps[d.id]&&ps[d.id].name)||"팀원", x.submitted?"제출함":"판정 중", n+" / 20", (x.submitted&&submitted)? score(ans).full+" / 20" : "제출 후 공개"];
+    cells.forEach(v=>{const td=document.createElement("td"); td.textContent=v; tr.appendChild(td);}); body.appendChild(tr);});
+}
+
+$("#submit").addEventListener("click",async()=>{
+  if(doneCount()<20||submitted) return;
+  submitted=true; clearTimeout(saveTimer); renderList();
+  await flush({submittedAt:new Date().toISOString()});
+  renderResult(); window.scrollTo({top:0});
+});
+
+renderList();
+(async()=>{
+  const c=window.claude;
+  if(!c||!c.use){ setStatus("claude.ai에서 열어야 저장돼요"); $("#who").textContent="판정자: 로그인 정보 없음 (저장 안 됨)"; return; }
+  [db,user]=await Promise.all([c.use("db"),c.use("user")]);
+  if(!db){ setStatus("저장소에 연결되지 않았어요 — 로그인한 뒤 다시 열어 주세요"); $("#who").textContent="판정자: 연결 안 됨 (저장 안 됨)"; renderList(); return; }
+  myId=user? await user.id():null;
+  if(!myId){ setStatus("로그인한 사람만 저장할 수 있어요"); canWrite=false; renderList(); return; }
+  const me=await user.me(); $("#who").textContent="판정자: "+(me.name||"나")+" — 판정은 내 이름으로 따로 저장돼요. 다른 팀원도 같은 페이지에서 각자 검수할 수 있어요.";
+  const w=await user.can("data.write"); if(w===false){ canWrite=false; setStatus("보기 전용 — 판정을 저장할 수 없어요"); }
+  let first=true; const timer=setTimeout(()=>{ if(first) setStatus("저장소 응답이 늦어요 — 판정은 계속할 수 있어요"); },10000);
+  db.collection("reviews").onSnapshot(snap=>{
+    const mine=snap.docs.find(d=>d.id===myId);
+    if(first){ first=false; clearTimeout(timer);
+      if(mine&&mine.exists){ const x=mine.data()||{}; answers={...(x.answers||{})}; submitted=!!x.submitted; setStatus(submitted?"제출 완료":"이어서 판정하세요 (저장됨)"); }
+      else if(canWrite) setStatus("판정을 고르면 자동 저장돼요");
+      renderList(); renderResult(); }
+    renderOthers(snap.docs);
+  },e=>{ clearTimeout(timer); setStatus("저장소 연결이 끊겼어요 — 새로고침해 주세요"); });
+})();
+</script>
