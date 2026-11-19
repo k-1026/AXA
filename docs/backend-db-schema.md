@@ -231,6 +231,7 @@ erDiagram
 | `chatbot_chunks` | `id`, `doc_id`, `source_url`, `fetched_at`, `lang`, `body`, `embedding vector(n)` | 공공 문서만 |
 
 - 구현 (2026-11-16·17, 리비전 `0006`, `backend-A-hospital`): `hospitals`에 `type_name_ko`(종별 이름) 추가, `hospital_hours`에 `day_order`(0=월…6=일) 추가. `day` = `mon..sun`, `state` = `open/closed/unknown` — 원본에 시간이 없거나 "0000~0000"이면 `unknown`(휴진으로 단정 X). 적재 `backend/scripts/load_hospitals.py`(등록 병원·내과/안과 파일은 경로로 받음, 없으면 건너뜀). `is_registered_facility` + `status_verdict = normal` = 상담 요청 가능(`can_request`, 결정 20)
+- 직접 채운 진료시간 (2026-11-18, `backend-A-manual-hours`): `manual_hours_csv`(`data/processed/daegu_hours_manual.csv`)로 API가 `unknown`인 요일만 채움. 그 요일의 `source` = 출처 URL, `checked_at` = 확인일. `휴진` → `closed`
 
 ## 3. 환자 계정
 
