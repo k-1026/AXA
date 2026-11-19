@@ -78,6 +78,26 @@
 - 테스트: 백엔드+AI 367개 통과 (거절 사유 3개 추가)
 - B에게 요청: ① 거절 사유 코드·계약 2절 확인 ② 대시보드 다이얼로그 PR 리뷰 ③ 환자 화면에 거절 사유를 언어별 문장으로 보일지 결정
 
+### 2026-11-18 (2) · backend-A-manual-hours · Claude
+- 한 일: 직접 채운 진료시간에 `override=Y` 지원 — 카카오맵 영업정보로 전체 검증해 보니 심평원 API 값이 실제와 다른 곳(9곳)이 있어서, 그 행은 API 값이 있는 요일도 바꿈. `휴진`으로 바뀌면 시간 칸 비움
+- 데이터 쪽 결과: [진료시간-채움-등록기관-2026-11-18.md](진료시간-채움-등록기관-2026-11-18.md) 0-2 (카카오 138곳: 일치 46 · 변경 48 · 채움 24 · 확인 불가 20), 로더용 파일은 research-data 브랜치
+- 바뀐 계약: 없음 · 마이그레이션: 없음
+- 테스트: 169개 통과 (새 1개: override=Y면 API 값 대체, 빈 요일은 API 유지). 실제 데이터 + `daegu_hours_manual.csv` 101행 메모리 SQLite 적재 → `manual_hours: 101`, 등록 126곳 중 평일 5일 확인 121곳
+- 다음 할 일: 공용 DB 정한 뒤 Supabase 재적재 · 네이버/홈페이지 교차확인은 데이터 담당
+- B에게 요청: 없음
+
+### 2026-11-18 · backend-A-manual-hours · Claude
+- 한 일: 병원 적재가 **직접 채운 진료시간**도 읽게 함 (결정 21로 공개 = 등록 유치기관만 → 그 기관 진료시간 빈칸을 직접 채우기로, [진료시간-채움-등록기관-2026-11-18.md](진료시간-채움-등록기관-2026-11-18.md))
+  - 그전에는 `loader.py`가 심평원 API CSV만 읽어서 10/28에 직접 채운 값도 DB·화면에 안 나갔음
+  - `load_hospitals(manual_hours_csv=…)`, 스크립트 기본 경로 `data/processed/daegu_hours_manual.csv` (없으면 건너뜀). 칸: `ykiho`, `mon`~`sun`(`HH:MM-HH:MM` / `휴진` / 빈칸), `lunch_week`·`lunch_sat`, `source_url`, `checked_at` — 작업표 `registered_hours_fill.csv` 형식 그대로 읽힘
+  - 규칙: **API 값이 없는(state=unknown) 요일만** 채움 · `휴진` → closed · 빈칸·형식 틀림·시작≥끝 → unknown 유지 · 출처(`source_url`)·확인일 없는 행은 적재 X · `hospital_hours.source`·`checked_at`은 요일마다 실제 출처 · 적재 결과에 `manual_hours` 건수
+  - 상세 API `hours[]`에 `source`·`checked_at` 추가 (요일마다 출처가 다를 수 있어서, 칸 추가만)
+- 바뀐 계약: 없음 (상세 응답 `hours[]`에 칸 2개 추가 — 프론트에 알림) · 마이그레이션: 없음 (기존 칸 사용)
+- 테스트: 168개 통과 (새 4개: API 우선·빈 요일만 채움·휴진/빈칸, API 행 없는 병원, 형식 틀림 무시, 출처 없는 행 적재 X). 실제 데이터 4,242곳 + 작업표(1행 시험 값)로 메모리 SQLite 적재 확인 → `manual_hours: 1`, 그 병원 월=open·토=closed·출처 URL
+- 다음 할 일: 데이터 담당이 채운 뒤 `data/processed/daegu_hours_manual.csv`로 → Supabase 재적재 (공용 DB 정한 뒤) · 프론트 `build-hospitals.mjs`도 같은 파일 읽게
+- B에게 요청: 없음
+- 막힌 것·질문: 없음
+
 ### 2026-11-17 (2) · backend-A-hospital · Claude (로컬 확인)
 - 한 일: 프론트(5173)·백엔드(8000) 로컬 실행 확인. 백엔드를 **로컬 SQLite**(0001~0006 + 실제 데이터)로 켜면 `/hospitals`·상세·정렬 422·프론트에서 호출(CORS) 모두 정상. **Supabase 설정으로 켜면 서버는 뜨지만 DB를 쓰는 요청은 500**(`ImportError`, psycopg)
 - 원인: 이 PC의 윈도우 **스마트 앱 컨트롤이 차단 모드**(`VerifiedAndReputablePolicyState = 1`), CodeIntegrity 로그에 psycopg DLL 차단(11/17 14:59·15:34). 11/4~5에는 이 PC에서 Supabase 연결이 됐음(아래 기록) → 그 뒤 차단 모드로 바뀐 것으로 보임. B PC도 11/12 같은 증상
