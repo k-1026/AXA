@@ -69,6 +69,15 @@
 - B에게 요청: 결정 21·contracts 4절 확인. 대시보드는 `get_basic()`을 쓰므로 영향 없음
 - AI 담당에게: `ai/agent/tools/chat_tools.py` `registered_only` 인자는 백엔드에선 효과 없음(항상 등록만) → 도구 설명·가상 병원 데이터도 맞출지 확인
 
+### 2026-11-17 (8) · backend-A-contract-reject-reason → backend-A-reject-reason · Claude
+- 한 일: **병원 직원 거절 사유 코드** (사용자 요청) — `fully_booked`·`not_offered`·`needs_consult`·`other`, 선택. `booking_events.reason`(20자, 이미 있음)에 저장 → 마이그레이션 없음. 거절이 아닌 행동에 사유·목록 밖 코드는 422
+  - **B 모듈(booking) 변경**: `models.REJECT_REASONS`, `service.staff_act(reason=)`, `schemas.StaffAction.reason`, `router_tenant` 전달 — B 리뷰 필요
+  - 같이: 대시보드 시안(`dashboard-dialogs` 브랜치, B의 `docs-dashboard-integration` 위)에 모든 버튼 확인 다이얼로그 + 요청 목록 DB 연결
+- 확인: Supabase `AXA`(0007) + 가상 병원 9001로 대시보드에서 확정·시간 제안(직접 입력)·거절(사유 저장 `fully_booked` 확인)·방문 완료·사후관리 해결됨(태그)·답장 저장
+- 바뀐 계약: 있음 2절 (거절 사유)
+- 테스트: 백엔드+AI 367개 통과 (거절 사유 3개 추가)
+- B에게 요청: ① 거절 사유 코드·계약 2절 확인 ② 대시보드 다이얼로그 PR 리뷰 ③ 환자 화면에 거절 사유를 언어별 문장으로 보일지 결정
+
 ### 2026-11-18 (2) · backend-A-manual-hours · Claude
 - 한 일: 직접 채운 진료시간에 `override=Y` 지원 — 카카오맵 영업정보로 전체 검증해 보니 심평원 API 값이 실제와 다른 곳(9곳)이 있어서, 그 행은 API 값이 있는 요일도 바꿈. `휴진`으로 바뀌면 시간 칸 비움
 - 데이터 쪽 결과: [진료시간-채움-등록기관-2026-11-18.md](진료시간-채움-등록기관-2026-11-18.md) 0-2 (카카오 138곳: 일치 46 · 변경 48 · 채움 24 · 확인 불가 20), 로더용 파일은 research-data 브랜치
