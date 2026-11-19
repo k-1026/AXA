@@ -69,6 +69,10 @@
   .cal .d b { display:block; margin-bottom:4px; } .cal .d.today { border-color:var(--brand); background:var(--brand-soft); }
   .ev { display:block; border-radius:5px; padding:2px 5px; margin:2px 0; font-size:11px; background:var(--info-soft); color:var(--info); }
   .ev.c { background:var(--brand-soft); color:var(--brand); } .ev.p { background:var(--warn-soft); color:var(--warn); }
+  .ev.w { background:var(--muted-bg); color:var(--muted); } .ev.v { background:#fff; color:var(--brand); border:1px solid var(--brand-2); } .ev.n { background:var(--bad-soft); color:var(--bad); }
+  button.ev { width:100%; text-align:left; border:0; font:inherit; font-size:11px; cursor:pointer; } button.ev.v { border:1px solid var(--brand-2); }
+  button.ev:hover { filter:brightness(.95); } .cal .d.past { background:#fafbfc; } .cal .d small.none { color:var(--muted); }
+  .calhead { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:10px; } .calhead h3 { margin:0; }
   .plan { border:2px solid var(--line); border-radius:12px; padding:14px; cursor:pointer; } .plan.on { border-color:var(--brand); background:var(--brand-soft); }
   .plan b { display:block; font-size:15px; } .plan .p { font-size:20px; font-weight:800; margin:6px 0; }
   .sum td:last-child { text-align:right; } .sum tr.total td { font-weight:800; border-top:2px solid var(--fg); }
@@ -130,6 +134,26 @@
   .cdraft:empty { display:none; } .cdraft .acts { display:flex; gap:6px; margin-top:8px; }
   .cinput { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); } .cinput input { flex:1; min-width:0; }
   @media (max-width:860px) { .chat { grid-template-columns:1fr; height:auto; } .clist { display:flex; overflow-x:auto; border-right:0; border-bottom:1px solid var(--line); } .citem { min-width:180px; border-bottom:0; border-right:1px solid var(--line); } .cmsgs { max-height:420px; } }
+  /* 다이얼로그 (확인·입력 창) */
+  .dlg-wrap { position:fixed; inset:0; z-index:60; background:rgba(15,23,42,.45); display:flex; align-items:center; justify-content:center; padding:16px; }
+  .dlg { background:var(--card); border-radius:var(--radius); width:min(480px,100%); max-height:calc(100vh - 32px); overflow:auto; padding:20px; box-shadow:0 20px 50px rgba(15,23,42,.25); }
+  .dlg h3 { margin:0 0 12px; font-size:17px; }
+  .dlg-body { display:flex; flex-direction:column; gap:10px; font-size:14px; }
+  .dlg-body p { margin:0; } .dlg-body .note { margin:0; }
+  .dlg-body label.f { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); flex:1; }
+  .dlg-body .opts { display:flex; flex-direction:column; gap:6px; }
+  .dlg-body .opt { display:flex; gap:10px; align-items:center; padding:9px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer; }
+  .dlg-body .opt:has(input:checked) { border-color:var(--brand); background:var(--brand-soft); }
+  .dlg-body .opt small { color:var(--muted); }
+  .dlg-body .pick { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .dlg-body .pick small { color:var(--muted); font-size:12px; }
+  .dlg-sum { background:var(--muted-bg); border-radius:10px; padding:10px 12px; } .dlg-sum small { display:block; color:var(--muted); } .dlg-sum p { margin:6px 0 0; }
+  .dlg-err { color:var(--bad); font-size:13px; margin:12px 0 0; }
+  .dlg-acts { display:flex; gap:8px; margin-top:16px; align-items:center; flex-wrap:wrap; } .dlg-acts .btn { padding:8px 14px; font-size:13px; }
+  .btn.danger { background:var(--bad); border-color:var(--bad); color:#fff; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .btn:focus-visible, .dlg input:focus-visible, .dlg select:focus-visible, .dlg textarea:focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
+  input[type=date], input[type=url] { font:inherit; font-size:0.9rem; border:1px solid var(--line); border-radius:10px; padding:0 12px; height:40px; background:#fff; color:var(--fg); }
+  textarea { height:auto; padding:8px 12px; resize:vertical; }
 </style>
 </head>
 <body>
@@ -144,7 +168,7 @@
       <span class="badge gray">이벤트가·광고 없음</span>
     </div>
     <select id="period" aria-label="기간"><option>이번 달 (11/1~11/16)</option><option>지난달 (10월)</option><option>최근 3개월</option></select>
-    <button class="hbtn">로그아웃</button>
+    <button class="hbtn" id="logoutBtn">로그아웃</button>
   </div>
 </header>
 <div class="app-body">
@@ -174,7 +198,7 @@
     <h3 class="sec">오늘 할 일</h3>
     <div class="tiles">
       <a class="tile" href="#booking"><span class="tl">새 상담 요청</span><span class="tv" id="tNew">5</span><span class="tg">답변하러 가기 →</span></a>
-      <a class="tile hot" href="#aftercare"><span class="tl">미답변 사후관리</span><span class="tv">4</span><span class="tg">7시간 지난 문의 있음 →</span></a>
+      <a class="tile hot" href="#aftercare"><span class="tl">미답변 사후관리</span><span class="tv" id="tAc">4</span><span class="tg">7시간 지난 문의 있음 →</span></a>
       <a class="tile" href="#booking"><span class="tl">오늘 방문 예정</span><span class="tv" id="tVisit">2</span><span class="tg" id="tVisitG">11:00 · 15:30 →</span></a>
       <a class="tile" href="#receipt"><span class="tl">결제 금액 입력</span><span class="tv">1</span><span class="tg">방문 완료 R-1036 →</span></a>
     </div>
@@ -227,33 +251,23 @@
   <section id="booking" class="hidden">
     <h2>상담·예약</h2><p class="sub">메디대구 직접 유치로 들어온 요청. 확정은 병원이 합니다</p>
     <div class="grid g4">
-      <div class="card kpi"><div class="l">대기</div><div class="v">5</div></div>
-      <div class="card kpi"><div class="l">시간 제안함</div><div class="v">3</div></div>
-      <div class="card kpi"><div class="l">이번 주 확정</div><div class="v">9</div></div>
+      <div class="card kpi"><div class="l">대기</div><div class="v" id="kPend">5</div></div>
+      <div class="card kpi"><div class="l">시간 제안함</div><div class="v" id="kProp">3</div></div>
+      <div class="card kpi"><div class="l">이번 주 확정</div><div class="v" id="kWeek">9</div></div>
       <div class="card kpi"><div class="l">반복 변경 (2회 이상)</div><div class="v">2</div></div>
     </div>
-    <div class="card mt"><h3>이번 주 예약 캘린더 <span class="badge info">확정</span><span class="badge warn">시간 제안</span><span class="badge gray">대기</span></h3>
-      <div class="cal">
-        <div class="d"><b>월 17</b><span class="ev c">10:00 R-1040 보톡스</span><span class="ev">대기 R-1045</span></div>
-        <div class="d today"><b>화 18 · 오늘</b><span class="ev c">11:00 R-1038 토닝</span><span class="ev c">15:30 R-1039 상담</span></div>
-        <div class="d"><b>수 19</b><span class="ev p">제안 14:00 R-1042</span></div>
-        <div class="d"><b>목 20</b><span class="ev c">10:30 R-1041 흉터</span></div>
-        <div class="d"><b>금 21</b><span class="ev">대기 R-1043</span><span class="ev">대기 R-1044</span></div>
-        <div class="d"><b>토 22</b><span class="ev c">11:00 R-1037 필러</span><span class="ev p">제안 13:00 R-1046</span></div>
-        <div class="d" style="background:#fafbfc"><b>일 23</b><small style="color:var(--muted)">휴진</small></div>
-      </div>
+    <div class="card mt">
+      <div class="calhead"><h3>예약 캘린더</h3><small id="calRange" class="note" style="margin:0"></small>
+        <span class="badge info">확정</span><span class="badge warn">시간 제안</span><span class="badge gray">대기 (첫 희망 시간)</span><span class="badge" style="background:#fff;border:1px solid var(--brand-2)">방문 완료</span><span class="badge bad">미방문</span>
+        <span style="flex:1"></span><button class="btn" id="calPrev">‹ 지난주</button><button class="btn" id="calToday">이번 주</button><button class="btn" id="calNext">다음 주 ›</button></div>
+      <div class="cal" id="cal"></div>
+      <p class="note" id="calNote">일정을 누르면 요청 내용과 처리 버튼이 나와요. 시간은 한국 시간이에요.</p>
     </div>
     <div class="grid mt">
-      <div class="card"><h3>요청 목록 <span class="badge info">가입 때 체류 형태 확인</span></h3>
+      <div class="card"><h3>요청 목록 <span class="badge ex" id="reqSrc">예시</span></h3>
         <div class="scroll"><table>
-          <thead><tr><th>요청</th><th>국적·언어</th><th>체류</th><th>진료 항목</th><th>희망일</th><th>비자</th><th>상태</th><th></th></tr></thead>
-          <tbody>
-            <tr><td>R-1043</td><td>대만 · 번체</td><td><span class="badge">단기 방문</span></td><td>레이저 토닝</td><td>11/21</td><td>불필요</td><td><span class="badge gray">대기</span></td><td><button class="btn primary">확정</button> <button class="btn">시간 제안</button></td></tr>
-            <tr><td>R-1044</td><td>몽골 · 영어</td><td><span class="badge">단기 방문</span></td><td>여드름 흉터</td><td>11/21</td><td><span class="badge warn">예약확인서 필요</span></td><td><span class="badge gray">대기</span></td><td><button class="btn primary">확정</button></td></tr>
-            <tr><td>R-1042</td><td>일본 · 일본어</td><td><span class="badge">단기 방문</span></td><td>기미 치료</td><td>11/19</td><td>불필요</td><td><span class="badge warn">시간 제안함</span></td><td><button class="btn">답장 보기</button></td></tr>
-            <tr><td>R-1040</td><td>중국 · 간체</td><td><span class="badge">단기 방문</span></td><td>보톡스</td><td>11/17</td><td>—</td><td><span class="badge">확정</span></td><td><button class="btn">방문 완료</button> <button class="btn">미방문</button></td></tr>
-            <tr class="dim"><td>—</td><td>베트남 · 베트남어</td><td><span class="badge gray">국내 거주</span></td><td>—</td><td>—</td><td>—</td><td>요청 불가</td><td><small>정보 열람만</small></td></tr>
-          </tbody>
+          <thead><tr><th>요청</th><th>국적·언어</th><th>진료 항목</th><th>희망·확정 시간</th><th>비자</th><th>상태</th><th></th></tr></thead>
+          <tbody id="reqRows"></tbody>
         </table></div>
         <p class="note">국내 거주 외국인(외국인등록·국내거소)은 가입 때 구분되어 상담 요청 버튼이 보이지 않아요. 병원 정보·진료시간·전화번호만 볼 수 있어요.</p>
       </div>
@@ -310,7 +324,7 @@
     <div id="acBody">
       <div class="grid g4">
         <div class="card kpi"><div class="l">새 문의</div><div class="v">6</div></div>
-        <div class="card kpi"><div class="l">미답변</div><div class="v" style="color:var(--bad)">4</div></div>
+        <div class="card kpi"><div class="l">미답변</div><div class="v" style="color:var(--bad)" id="kAcUn">4</div></div>
         <div class="card kpi"><div class="l">처리 중</div><div class="v">3</div></div>
         <div class="card kpi"><div class="l">이번 달 완료</div><div class="v">12</div></div>
         <div class="card kpi"><div class="l">평균 첫 답변</div><div class="v">5h 40m</div></div>
@@ -493,7 +507,7 @@
           <tr><td>R-1033</td><td>11/13</td><td>보톡스 (이마)</td><td class="r">₩1,200,000</td><td>카드</td><td>영수증.pdf</td><td>✔ 11/14</td><td><span class="badge">확인 완료</span></td><td class="r">₩120,000</td></tr>
           <tr><td>R-1034</td><td>11/14</td><td>기미 치료 3회</td><td class="r">₩1,860,000</td><td>카드</td><td>영수증.pdf</td><td>대기</td><td><span class="badge warn">확인 중</span></td><td class="r">₩186,000</td></tr>
           <tr><td>R-1035</td><td>11/15</td><td>필러</td><td class="r">₩1,200,000</td><td>현금</td><td>영수증.jpg</td><td>대기</td><td><span class="badge warn">확인 중</span></td><td class="r">₩120,000</td></tr>
-          <tr><td>R-1036</td><td>11/14</td><td>피부 상담</td><td class="r"><input type="text" placeholder="금액 입력" style="width:110px"></td><td>—</td><td><button class="btn">영수증 올리기</button></td><td>—</td><td><span class="badge bad">입력 대기</span></td><td class="r">—</td></tr>
+          <tr><td>R-1036</td><td>11/14</td><td>피부 상담</td><td class="r"><input type="text" placeholder="금액 입력" style="width:110px"></td><td>—</td><td><button class="btn" data-dlg="receipt">영수증 올리기</button></td><td>—</td><td><span class="badge bad">입력 대기</span></td><td class="r">—</td></tr>
         </tbody>
       </table></div>
     </div>
@@ -611,15 +625,15 @@
       <div class="progress"><i style="width:71%"></i></div>
       <div class="grid g2" style="gap:0 24px">
         <div>
-          <div class="check"><span class="o done"></span><div>진료시간<small>심평원 데이터에서 불러옴 · 수정 가능</small></div><button class="btn">수정</button></div>
-          <div class="check"><span class="o done"></span><div>홈페이지·SNS<small>공공 데이터에서 불러옴</small></div><button class="btn">수정</button></div>
+          <div class="check"><span class="o done"></span><div>진료시간<small>심평원 데이터에서 불러옴 · 수정 가능</small></div><button class="btn" data-dlg="hours">수정</button></div>
+          <div class="check"><span class="o done"></span><div>홈페이지·SNS<small>공공 데이터에서 불러옴</small></div><button class="btn" data-dlg="links">수정</button></div>
           <div class="check"><span class="o done"></span><div>유치의료기관 등록번호<small>환자 화면에 "등록 유치의료기관" 표시</small></div></div>
-          <div class="check"><span class="o"></span><div>통역 가능 언어<small>환자가 언어로 병원을 고를 때 쓰여요</small></div><button class="btn primary">입력</button></div>
+          <div class="check"><span class="o"></span><div>통역 가능 언어<small>환자가 언어로 병원을 고를 때 쓰여요</small></div><button class="btn primary" data-dlg="langs">입력</button></div>
         </div>
         <div>
           <div class="check"><span class="o done"></span><div>상담 가능 시간<small>첫 답변 시간을 이 시간 기준으로 계산</small></div></div>
           <div class="check"><span class="o done"></span><div>예약 가능 요일<small>환자 요청서의 날짜 선택에 반영</small></div></div>
-          <div class="check"><span class="o"></span><div>가격 안내<small>시술별 가격 범위 (이벤트가 X)</small></div><button class="btn primary">입력</button></div>
+          <div class="check"><span class="o"></span><div>가격 안내<small>시술별 가격 범위 (이벤트가 X)</small></div><button class="btn primary" data-dlg="price">입력</button></div>
         </div>
       </div>
     </div>
@@ -642,7 +656,7 @@
         <div class="row"><span>통역이 되나요?</span><span class="badge">5개 언어</span></div>
         <div class="row"><span>어떻게 결제하나요?</span><span class="badge">5개 언어</span></div>
         <div class="row"><span>비행기 탑승은 언제부터 되나요?</span><span class="badge warn">번체만</span></div>
-        <button class="btn mt">질문 추가</button>
+        <button class="btn mt" data-dlg="faq">질문 추가</button>
       </div>
       <div class="card"><h3>가격 안내 <span class="badge gray">이벤트가 입력 불가</span></h3>
         <div class="row"><span>레이저 토닝 1회</span><span>₩—~₩— 입력 전</span></div>
@@ -653,14 +667,14 @@
         <div class="check"><span class="o done"></span><div>세안·화장 시작 시기<small>10/28 추가</small></div></div>
         <div class="check"><span class="o done"></span><div>자외선 차단</div></div>
         <div class="check"><span class="o done"></span><div>비행기 탑승 가능 시기<small>11/5 추가</small></div></div>
-        <div class="check"><span class="o"></span><div>붉은기가 오래갈 때 연락 기준<small>추천 — 최근 문의가 늘었어요</small></div><button class="btn primary">추가</button></div>
+        <div class="check"><span class="o"></span><div>붉은기가 오래갈 때 연락 기준<small>추천 — 최근 문의가 늘었어요</small></div><button class="btn primary" data-dlg="guide">추가</button></div>
       </div>
       <div class="card"><h3>홍보 링크</h3>
         <table><thead><tr><th>채널</th><th>링크</th><th class="r">이번 달 방문</th><th></th></tr></thead><tbody>
-          <tr><td>인스타그램</td><td><code>/h/1043?ch=ig7k</code></td><td class="r">188</td><td><button class="btn">끄기</button></td></tr>
-          <tr><td>샤오홍슈</td><td><code>/h/1043?ch=xh2p</code></td><td class="r">96</td><td><button class="btn">끄기</button></td></tr>
+          <tr><td>인스타그램</td><td><code>/h/1043?ch=ig7k</code></td><td class="r">188</td><td><button class="btn" data-dlg="linkToggle">끄기</button></td></tr>
+          <tr><td>샤오홍슈</td><td><code>/h/1043?ch=xh2p</code></td><td class="r">96</td><td><button class="btn" data-dlg="linkToggle">끄기</button></td></tr>
         </tbody></table>
-        <button class="btn mt">링크 만들기</button>
+        <button class="btn mt" data-dlg="linkAdd">링크 만들기</button>
         <p class="note">이 링크로 들어온 방문·상담이 통계 탭 "유입 경로"에 따로 집계돼요.</p>
       </div>
     </div>
@@ -783,7 +797,7 @@
   }
   // HOOKS[key]가 있으면(백엔드 연결) 버튼·전송·대화 선택을 API로 처리, 없으면 예시 데이터로 화면만 바뀜
   const HOOKS = {};
-  const toast = (msg, bad) => { const el = document.createElement('div'); el.textContent = msg; el.style.cssText = `position:fixed;right:20px;bottom:20px;z-index:50;padding:10px 14px;border-radius:10px;color:#fff;font-size:14px;background:${bad ? 'var(--bad)' : 'var(--brand)'}`; document.body.append(el); setTimeout(() => el.remove(), 2600); };
+  const toast = (msg, bad) => { const el = document.createElement('div'); el.textContent = msg; el.style.cssText = `position:fixed;right:20px;bottom:20px;z-index:70;padding:10px 14px;border-radius:10px;color:#fff;font-size:14px;background:${bad ? 'var(--bad)' : 'var(--brand)'}`; document.body.append(el); setTimeout(() => el.remove(), 2600); };
   function renderChat(root, key, idx) {
     const list = CHATS[key];
     if (!list.length) {
@@ -796,8 +810,7 @@
     root.dataset.idx = idx;
     root.querySelector('.clist').innerHTML = list.map((x, i) =>
       `<button class="citem${i === idx ? ' on' : ''}" data-i="${i}"><b>${esc(x.id)} · ${esc(x.who)}${x.unread ? `<span class="dot">${x.unread}</span>` : ''}</b><small>${esc(x.title)}</small><small>${esc(x.sub)}</small></button>`).join('');
-    const acts = key === 'booking'
-      ? '<button class="btn primary" data-head="confirm">예약 확정</button><button class="btn" data-head="propose">시간 제안</button>'
+    const acts = key === 'booking' ? headActs(chatReq(c))
       : '<button class="btn" data-head="in_progress">처리 중</button><button class="btn primary" data-head="resolved">해결됨</button>';
     root.querySelector('.chead').innerHTML = `<div><b>${esc(c.id)} · ${esc(c.title)}</b><br><small>${esc(c.who)} · ${esc(c.sub)}</small></div><div style="display:flex;gap:6px">${acts}</div>`;
     root.querySelector('.csum').innerHTML = `<b>${hook ? '요약' : 'AI 요약'}</b> ${esc(c.sum)}<div class="chips">${c.tags.map((t) => `<span class="chip">${esc(t)}</span>`).join('')}</div>`;
@@ -805,24 +818,45 @@
     root.querySelector('.cdraft').innerHTML = c.draft
       ? `<b>AI 답장 초안</b> (직원 승인 후 발송)<br>${esc(c.draft.k)}<div class="note" style="margin:4px 0 0">환자에게: ${esc(c.draft.o)}</div><div class="acts"><button class="btn primary" data-act="send">승인·발송</button><button class="btn" data-act="edit">고쳐서 보내기</button></div>` : '';
     root.querySelectorAll('.citem').forEach((b) => b.onclick = async () => {
-      const i = +b.dataset.i; list[i].unread = 0;
+      const i = +b.dataset.i;
       if (hook && hook.select) await hook.select(list[i]);
       renderChat(root, key, i);
     });
     root.querySelectorAll('[data-head]').forEach((b) => b.onclick = async () => {
-      if (hook) { b.disabled = true; await hook.action(c, b.dataset.head, root); return; }
-      c.sub = b.dataset.head === 'confirm' ? '확정됨 (예시)' : b.dataset.head === 'resolved' ? '해결됨 (예시)' : b.dataset.head === 'propose' ? '시간 제안함 (예시)' : '처리 중 (예시)';
-      renderChat(root, key, idx);
+      const act = b.dataset.head;
+      if (key === 'booking') {
+        const r = chatReq(c);
+        const done = act === 'view' ? await viewProposal(r) : await bookingAct(r, act);
+        if (done && !API.ready) renderChat(root, key, idx);
+        return;
+      }
+      await aftercareAct(c, act, root, idx);
     });
-    const send = async (k, o) => {
+    // 환자에게 보내는 글은 모두 확인 창을 거친다 (AI 초안은 직원 승인 후 발송, compliance)
+    const deliver = async (k, o) => {
       if (hook) { await hook.send(c, k, root); return; }
-      c.msgs.push({ f: 's', k, o, t: '방금' }); c.draft = null; c.unread = 0; renderChat(root, key, idx);
+      c.msgs.push({ f: 's', k, o, t: '방금' }); c.draft = null; c.unread = 0; renderChat(root, key, idx); updateNav();
+      toast('보냈어요 (예시 — 저장 안 됨)');
     };
-    const d = root.querySelector('[data-act=send]'); if (d) d.onclick = () => send(c.draft.k, c.draft.o);
-    const e = root.querySelector('[data-act=edit]'); if (e) e.onclick = () => { root.querySelector('.cinput input').value = c.draft.k; root.querySelector('.cinput input').focus(); };
-    root.querySelector('.cinput').onsubmit = (ev) => { ev.preventDefault(); const inp = root.querySelector('.cinput input'), v = inp.value.trim(); if (v) { inp.value = ''; send(v, '(AI 번역되어 전송됨)'); } };
+    const note = key === 'booking' ? '상담 답장 저장 API는 아직 없어서 화면에만 보여요.' : '환자 언어 번역은 연결 전이라 한국어 원문으로 저장돼요.';
+    const send = async (k, o, title) => {
+      const ok = await dialog({ title: title || '환자에게 보낼까요?', ok: '보내기',
+        body: `<div class="dlg-sum"><b>보낼 내용</b><p>${esc(k)}</p>${o && !o.startsWith('(') ? `<small>환자에게 보이는 글: ${esc(o)}</small>` : ''}</div><p class="note">${note}</p>` });
+      if (!ok) return false;
+      await deliver(k, o); return true;
+    };
+    const d = root.querySelector('[data-act=send]'); if (d) d.onclick = () => send(c.draft.k, c.draft.o, 'AI 초안을 승인하고 보낼까요?');
+    const e = root.querySelector('[data-act=edit]'); if (e) e.onclick = async () => {
+      const k = await dialog({ title: '고쳐서 보내기', ok: '보내기', body: field('보낼 내용 (한국어)', `<textarea name="k" rows="4">${esc(c.draft.k)}</textarea>`) + `<p class="note">${note}</p>`,
+        onOk: (f) => f.k.value.trim() || fail('내용을 입력해 주세요') });
+      if (k) await deliver(k, '(AI 번역되어 전송됨)');
+    };
+    root.querySelector('.cinput').onsubmit = async (ev) => {
+      ev.preventDefault();
+      const inp = root.querySelector('.cinput input'), v = inp.value.trim();
+      if (v && await send(v, '(AI 번역되어 전송됨)')) inp.value = '';
+    };
   }
-  document.querySelectorAll('.chat').forEach((root) => renderChat(root, root.dataset.chat, 0));
 
   // ---------- 백엔드 연결 (GET /api/v1/tenant/analytics/summary) ----------
   // 주소 뒤 ?token=<직원 토큰> (&api=<API 주소>) 이 있으면 DB 값으로 홈 숫자를 바꿈. 없으면 예시 데이터 그대로
@@ -885,7 +919,7 @@
   async function loadBooking(keepId) {
     const [p, q] = await Promise.all([call('/tenant/booking-requests?status=pending'), call('/tenant/booking-requests?status=proposed')]);
     CHATS.booking = [...p, ...q].map((r) => ({
-      rid: r.id, id: 'R-' + short(r.id), who: `${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`,
+      req: toR(r), rid: r.id, id: 'R-' + short(r.id), who: `${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`,
       unread: r.status === 'pending' ? 1 : 0, title: TRT[r.treatment] || r.treatment || '상담',
       sub: (r.status === 'proposed' ? '시간 제안함 ' + kdate(r.confirmed_slot) : '희망 ' + kdate(r.preferred_slots[0])) + (r.visa_needed ? ' · 예약확인서 필요' : ''),
       slots: r.preferred_slots, sum: r.message_translated || '(번역 전)',
@@ -894,7 +928,6 @@
     }));
     const i = Math.max(0, CHATS.booking.findIndex((c) => c.rid === keepId));
     renderChat(chatRoot('booking'), 'booking', i);
-    document.querySelector('#tabs button[data-t=booking] .cnt').textContent = p.length;
   }
 
   async function openThread(c) {
@@ -909,13 +942,13 @@
     const list = await call('/tenant/aftercare');
     CHATS.aftercare = list.map((th) => ({
       tid: th.id, id: 'A-' + short(th.id), who: `${NAT[th.nationality] || th.nationality} · ${LANG[th.lang] || th.lang}`,
-      unread: th.unanswered, title: (th.tags[0] || TRT[th.treatment] || '사후관리'), sub: AC_STATUS[th.status] + ' · 방문 ' + kdate(th.visited_slot),
+      status: th.status, unread: th.status === 'resolved' ? 0 : th.unanswered, title: (th.tags[0] || TRT[th.treatment] || '사후관리'), sub: AC_STATUS[th.status] + ' · 방문 ' + kdate(th.visited_slot),
       sum: th.last_message || '', tags: th.tags.length ? th.tags : [TRT[th.treatment] || '태그 없음'], msgs: [],
     }));
     let i = Math.max(0, CHATS.aftercare.findIndex((c) => c.tid === keepId));
     if (CHATS.aftercare[i]) await openThread(CHATS.aftercare[i]);
     renderChat(chatRoot('aftercare'), 'aftercare', i);
-    document.querySelector('#tabs button[data-t=aftercare] .cnt').textContent = list.filter((x) => x.unanswered).length;
+    updateNav();
   }
 
   async function setupApi() {
@@ -923,27 +956,9 @@
       const me = await call('/tenant/me');
       document.querySelector('.hosp b').textContent = me.display_name;
       state.ac = me.aftercare_enabled;
-      document.querySelectorAll('#acSwitch button').forEach((b) => {
-        b.classList.toggle('on', (b.dataset.v === 'on') === state.ac);
-        b.onclick = async () => {
-          try {
-            const out = await call('/tenant/me', { method: 'PATCH', body: JSON.stringify({ aftercare_enabled: b.dataset.v === 'on' }) });
-            state.ac = out.aftercare_enabled;
-            document.querySelectorAll('#acSwitch button').forEach((x) => x.classList.toggle('on', (x.dataset.v === 'on') === state.ac));
-            render(); toast(state.ac ? '사후관리 지원을 켰어요 (DB 저장)' : '사후관리 지원을 껐어요 (DB 저장)');
-          } catch (e) { toast('저장 실패: ' + e.message, true); }
-        };
-      });
+      document.querySelectorAll('#acSwitch button').forEach((b) => b.classList.toggle('on', (b.dataset.v === 'on') === state.ac));
       render();
       HOOKS.booking = {
-        async action(c, act) {
-          try {
-            const slot = act === 'propose' ? (c.slots[1] || c.slots[0]) : c.slots[0];
-            const out = await call(`/tenant/booking-requests/${c.rid}/${act}`, { method: 'POST', body: JSON.stringify({ slot }) });
-            toast(act === 'confirm' ? `예약 확정: ${kdate(out.confirmed_slot)} (DB 저장)` : `시간 제안: ${kdate(out.confirmed_slot)} (DB 저장)`);
-            await loadBooking(c.rid); await connectApi();
-          } catch (e) { toast('실패: ' + e.message, true); await loadBooking(c.rid); }
-        },
         async send(c, text) {
           c.msgs.push({ f: 's', k: text, o: '(상담 답장 API는 다음 단계 — 화면에만 표시)', t: '방금' });
           renderChat(chatRoot('booking'), 'booking', CHATS.booking.indexOf(c));
@@ -951,24 +966,364 @@
       };
       HOOKS.aftercare = {
         select: openThread,
-        async action(c, act) {
-          try { await call('/tenant/aftercare/' + c.tid, { method: 'PATCH', body: JSON.stringify({ status: act }) }); toast(AC_STATUS[act] + '(으)로 바꿨어요 (DB 저장)'); }
-          catch (e) { toast('실패: ' + e.message, true); }
-          await loadAftercare(c.tid);
-        },
         async send(c, text) {
           try { await call(`/tenant/aftercare/${c.tid}/messages`, { method: 'POST', body: JSON.stringify({ text }) }); toast('답장을 보냈어요 (DB 저장)'); }
           catch (e) { toast('전송 실패: ' + e.message, true); }
           await loadAftercare(c.tid);
         },
       };
-      await Promise.all([loadBooking(), loadAftercare()]);
+      await Promise.all([loadBooking(), loadAftercare(), loadRequests()]);
     } catch (e) {
       toast('API 연결 실패: ' + e.message, true);
     }
   }
 
-  render(); fromHash(); connectApi();
+
+  // ---------- 다이얼로그 (모든 버튼 공통) ----------
+  // 저장·상태 변경 버튼은 모두 확인 창을 거친다. 서버 API가 아직 없는 기능은 창까지 만들고 "화면에만 반영"으로 안내
+  const SCREEN_ONLY = '화면에만 반영됐어요 (서버 연결 전 기능이라 저장되지 않아요)';
+  const ERR = {
+    'booking.invalid_transition': '이미 다른 상태로 바뀐 요청이에요. 목록을 새로 불러왔어요',
+    validation: '입력값을 확인해 주세요', not_found: '요청을 찾을 수 없어요 (다른 곳에서 바뀌었을 수 있어요)',
+    'auth.required': '로그인이 만료됐어요. 토큰을 새로 받아 주세요', 'auth.forbidden': '이 계정으로는 할 수 없어요',
+  };
+  const why = (e) => ERR[e.message] || ('저장하지 못했어요: ' + e.message);
+  function dialog({ title, body = '', ok = '확인', cancel = '취소', danger = false, onOk, extra, extras }) {
+    return new Promise((resolve) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'dlg-wrap';
+      wrap.innerHTML = `<form class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" novalidate>
+        <h3 id="dlgTitle">${esc(title)}</h3><div class="dlg-body">${body}</div><p class="dlg-err" role="alert" hidden></p>
+        <div class="dlg-acts">${(extras || (extra ? [extra] : [])).map((x, i) => `<button type="button" class="btn${x.danger ? ' danger' : x.primary ? ' primary' : ''}" data-x="extra" data-i="${i}">${esc(x.label)}</button>`).join('')}<span style="flex:1"></span>
+        ${cancel ? `<button type="button" class="btn" data-x="cancel">${esc(cancel)}</button>` : ''}
+        <button type="submit" class="btn ${danger ? 'danger' : 'primary'}">${esc(ok)}</button></div></form>`;
+      const form = wrap.querySelector('form'), err = wrap.querySelector('.dlg-err'), back = document.activeElement;
+      const close = (v) => { wrap.remove(); document.removeEventListener('keydown', onKey); if (back && back.focus) back.focus(); resolve(v); };
+      const onKey = (e) => { if (e.key === 'Escape') close(null); };
+      document.addEventListener('keydown', onKey);
+      wrap.addEventListener('mousedown', (e) => { if (e.target === wrap) close(null); });
+      wrap.querySelector('[data-x=cancel]')?.addEventListener('click', () => close(null));
+      wrap.querySelectorAll('[data-x=extra]').forEach((b) => b.addEventListener('click', () => { close(null); (extras || [extra])[+b.dataset.i].onClick(); }));
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const sub = form.querySelector('[type=submit]');
+        err.hidden = true; sub.disabled = true;
+        try { const v = onOk ? await onOk(form) : true; close(v === undefined ? true : v); }
+        catch (x) { err.textContent = x.message; err.hidden = false; sub.disabled = false; }
+      };
+      document.body.append(wrap);
+      (form.querySelector('.dlg-body input:not([type=radio]), .dlg-body select, .dlg-body textarea, .dlg-body input:checked') || form.querySelector('[type=submit]')).focus();
+    });
+  }
+  const fail = (msg) => { throw new Error(msg); };
+  const field = (label, html) => `<label class="f">${esc(label)}${html}</label>`;
+  const won2 = (n) => '₩' + Number(n).toLocaleString('ko-KR');
+
+  // ---------- 상담·예약: 확정 · 시간 제안 · 거절 · 방문 완료 · 미방문 ----------
+  const REJECT = { fully_booked: '예약이 마감됐어요', not_offered: '하지 않는 진료예요', needs_consult: '대면 상담이 먼저 필요해요', other: '기타' };
+  const ST = { pending: ['대기', 'gray'], proposed: ['시간 제안함', 'warn'], confirmed: ['확정', ''], visited: ['방문 완료', ''],
+    no_show: ['미방문', 'bad'], rejected: ['거절', 'gray'], cancelled: ['환자 취소', 'gray'], expired: ['기간 지남', 'gray'] };
+  const NEXT = { confirm: 'confirmed', propose: 'proposed', reject: 'rejected', visited: 'visited', no_show: 'no_show' };
+  const DONE = { confirm: '예약을 확정했어요', propose: '다른 시간을 제안했어요', reject: '요청을 거절했어요', visited: '방문 완료로 바꿨어요', no_show: '미방문으로 바꿨어요' };
+  const kst = (d, t) => new Date(`${d}T${t}:00+09:00`).toISOString();
+  const todayKst = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  const plusDays = (n) => new Date(Date.now() + (9 + 24 * n) * 3600e3).toISOString().slice(0, 10);
+  // 예시 데이터 (토큰 없이 열었을 때)
+  let REQS = [
+    { rid: null, id: 'R-1043', who: '대만 · 번체', title: '레이저 토닝', status: 'pending', visa: false, slots: [kst(plusDays(3), '10:00'), kst(plusDays(4), '14:00')], msg_k: '레이저 토닝 몇 회가 필요한가요?' },
+    { rid: null, id: 'R-1044', who: '몽골 · 영어', title: '여드름 흉터', status: 'pending', visa: true, slots: [kst(plusDays(3), '11:00')], msg_k: '의료 비자용 예약확인서가 필요해요' },
+    { rid: null, id: 'R-1042', who: '일본 · 일본어', title: '기미 치료', status: 'proposed', visa: false, slots: [kst(plusDays(1), '10:00')], confirmed_slot: kst(plusDays(1), '14:00'), msg_k: '기미 치료 예약하고 싶어요' },
+    { rid: null, id: 'R-1040', who: '중국 · 간체', title: '보톡스', status: 'confirmed', visa: false, slots: [kst(todayKst(), '10:00')], confirmed_slot: kst(todayKst(), '10:00') },
+    { rid: null, id: 'R-1041', who: '대만 · 번체', title: '여드름 흉터', status: 'confirmed', visa: false, slots: [kst(plusDays(2), '10:30')], confirmed_slot: kst(plusDays(2), '10:30') },
+  ];
+  function toR(r) {
+    return { rid: r.id, id: 'R-' + short(r.id), who: `${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`,
+      title: TRT[r.treatment] || r.treatment || '상담', status: r.status, visa: r.visa_needed, slots: r.preferred_slots,
+      confirmed_slot: r.confirmed_slot, msg_o: r.message_original, msg_k: r.message_translated };
+  }
+  function chatReq(c) {
+    const ex = !c.req && REQS.find((x) => !x.rid && x.id === c.id);
+    if (ex) { ex.demoChat = c; return ex; }
+    return c.req || { rid: null, id: c.id, who: c.who, title: c.title, status: 'pending', visa: /예약확인서/.test(c.sub),
+      slots: [kst(plusDays(3), '10:00'), kst(plusDays(4), '14:00')], msg_k: c.sum, demoChat: c };
+  }
+  function reqSummary(r) {
+    return `<div class="dlg-sum"><b>${esc(r.id)} · ${esc(r.title)}</b><small>${esc(r.who)}${r.visa ? ' · 예약확인서 필요' : ''}</small>${r.msg_k ? `<p>“${esc(r.msg_k)}”</p>` : ''}</div>`;
+  }
+  function slotOptions(opts, custom) {
+    const times = [];
+    for (let h = 9; h < 19; h++) for (const m of ['00', '30']) times.push(`${String(h).padStart(2, '0')}:${m}`);
+    return `<div class="opts">${opts.map((o, i) => `<label class="opt"><input type="radio" name="slot" value="${esc(o.iso)}"${i === 0 ? ' checked' : ''}><span><b>${esc(kdate(o.iso))}</b> <small>${esc(o.label)}</small></span></label>`).join('')}
+      ${custom ? `<label class="opt"><input type="radio" name="slot" value="custom"${opts.length ? '' : ' checked'}><span><b>다른 시간 직접 입력</b></span></label>
+      <div class="pick"><input type="date" name="d" min="${todayKst()}" value="${plusDays(1)}" aria-label="날짜"><select name="t" aria-label="시간">${times.map((t) => `<option${t === '10:00' ? ' selected' : ''}>${t}</option>`).join('')}</select><small>한국 시간 · 30분 단위</small></div>` : ''}</div>`;
+  }
+  function pickedSlot(f) {
+    const v = f.querySelector('input[name=slot]:checked')?.value || fail('시간을 골라 주세요');
+    const iso = v === 'custom' ? kst(f.d.value || fail('날짜를 골라 주세요'), f.t.value) : v;
+    if (new Date(iso) <= new Date()) fail('지난 시간은 고를 수 없어요');
+    return iso;
+  }
+  async function bookingAct(r, act) {
+    const S = reqSummary(r);
+    const cfg = {
+      confirm: () => {
+        const opts = r.status === 'proposed' && r.confirmed_slot ? [{ iso: r.confirmed_slot, label: '병원이 제안한 시간' }]
+          : r.slots.map((iso, i) => ({ iso, label: `환자 희망 ${i + 1}` }));
+        return { title: '예약을 확정할까요?', ok: '예약 확정', body: S + '<b>확정할 시간</b>' + slotOptions(opts, false)
+          + '<p class="note">확정하면 환자 화면에 “확정”으로 보이고 캘린더·오늘 할 일에 들어가요.</p>', slot: true };
+      },
+      propose: () => ({ title: '다른 시간을 제안할까요?', ok: '시간 제안 보내기',
+        body: S + '<b>제안할 시간</b>' + slotOptions(r.slots.map((iso, i) => ({ iso, label: `환자 희망 ${i + 1}` })), true)
+          + '<p class="note">환자가 수락하면 확정돼요. 수락 전에는 다른 시간으로 다시 제안할 수 있어요.</p>', slot: true }),
+      reject: () => ({ title: '이 요청을 거절할까요?', ok: '거절', danger: true,
+        body: S + field('거절 사유', `<select name="reason" required><option value="">사유를 골라 주세요</option>${Object.entries(REJECT).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('')}</select>`)
+          + '<p class="note">거절하면 되돌릴 수 없어요. 사유는 상태 기록에 남아요.</p>', reason: true }),
+      visited: () => ({ title: '방문 완료로 바꿀까요?', ok: '방문 완료',
+        body: S + `<p>확정 시간: <b>${esc(kdate(r.confirmed_slot))}</b></p><p class="note">방문 완료 건은 “진료·결제 확인”에서 결제 금액을 입력해요 (수수료 기준). 사후관리 대화도 이때부터 열려요.</p>` }),
+      no_show: () => ({ title: '미방문으로 바꿀까요?', ok: '미방문', danger: true,
+        body: S + `<p>확정 시간: <b>${esc(kdate(r.confirmed_slot))}</b></p><p class="note">되돌릴 수 없어요. 미방문은 수수료가 생기지 않아요.</p>` }),
+    }[act]();
+    const out = await dialog({ ...cfg, onOk: async (f) => {
+      const body = {};
+      if (cfg.slot) body.slot = pickedSlot(f);
+      if (cfg.reason) body.reason = f.reason.value || fail('거절 사유를 골라 주세요');
+      if (!API.ready) return { demo: true, slot: body.slot };
+      try { return await call(`/tenant/booking-requests/${r.rid}/${act === 'no_show' ? 'no-show' : act}`, { method: 'POST', body: JSON.stringify(body) }); }
+      catch (e) { if (e.message === 'booking.invalid_transition' || e.message === 'not_found') refreshBooking(r.rid); fail(why(e)); }
+    } });
+    if (!out) return false;
+    if (out.demo) {
+      r.status = NEXT[act];
+      if (out.slot) r.confirmed_slot = out.slot;
+      if (r.demoChat) { r.demoChat.sub = `${ST[r.status][0]} (예시)`; r.demoChat.unread = 0; }
+      const broot = chatRoot('booking'); renderChat(broot, 'booking', +broot.dataset.idx || 0);
+      toast(DONE[act] + ' (예시 — 저장 안 됨)'); renderReqs(); updateNav(); return true;
+    }
+    toast(DONE[act] + (out.confirmed_slot && act !== 'reject' ? ': ' + kdate(out.confirmed_slot) : '') + ' (DB 저장)');
+    await refreshBooking(r.rid);
+    return true;
+  }
+  function viewProposal(r) {
+    return dialog({ title: '제안한 시간', ok: '닫기', cancel: '', extra: { label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') },
+      body: reqSummary(r) + `<div class="row"><span>제안한 시간</span><b>${esc(kdate(r.confirmed_slot))}</b></div>
+        <div class="row"><span>환자 희망</span><span>${r.slots.map((s) => esc(kdate(s))).join('<br>')}</span></div>
+        <div class="row"><span>환자 응답</span><span class="badge warn">수락 대기 중</span></div>
+        <p class="note">환자가 수락하면 자동으로 확정돼요. 상담 답장 기록은 답장 API가 생기면 여기에 함께 보여요.</p>` });
+  }
+  function rowActs(r) {
+    return r.status === 'pending' ? '<button class="btn primary" data-a="confirm">확정</button> <button class="btn" data-a="propose">시간 제안</button> <button class="btn" data-a="reject">거절</button>'
+      : r.status === 'proposed' ? '<button class="btn" data-a="view">제안 보기</button> <button class="btn" data-a="reject">거절</button>'
+      : r.status === 'confirmed' ? '<button class="btn primary" data-a="visited">방문 완료</button> <button class="btn" data-a="no_show">미방문</button>' : '';
+  }
+  const headActs = (r) => r.status === 'pending'
+    ? '<button class="btn primary" data-head="confirm">예약 확정</button><button class="btn" data-head="propose">시간 제안</button><button class="btn" data-head="reject">거절</button>'
+    : r.status === 'proposed' ? '<button class="btn" data-head="view">제안 보기</button><button class="btn" data-head="reject">거절</button>' : '';
+  function renderReqs() {
+    const tb = document.getElementById('reqRows');
+    tb.innerHTML = REQS.length ? REQS.map((r, i) => `<tr data-i="${i}"><td>${esc(r.id)}</td><td>${esc(r.who)}</td><td>${esc(r.title)}</td>
+      <td>${r.confirmed_slot && r.status !== 'pending' ? esc(kdate(r.confirmed_slot)) : esc(kdate(r.slots[0]))}${r.status === 'pending' && r.slots.length > 1 ? ` <small>외 ${r.slots.length - 1}개</small>` : ''}</td>
+      <td>${r.visa ? '<span class="badge warn">예약확인서 필요</span>' : '불필요'}</td><td><span class="badge ${ST[r.status][1]}">${ST[r.status][0]}</span></td><td style="white-space:nowrap">${rowActs(r)}</td></tr>`).join('')
+      : '<tr><td colspan="7" class="note">처리할 요청이 없어요</td></tr>';
+    renderCal();
+    tb.querySelectorAll('[data-a]').forEach((b) => b.onclick = () => {
+      const r = REQS[+b.closest('tr').dataset.i];
+      return b.dataset.a === 'view' ? viewProposal(r) : bookingAct(r, b.dataset.a);
+    });
+  }
+  async function loadRequests() {
+    const [p, q, c, v, n] = await Promise.all(['pending', 'proposed', 'confirmed', 'visited', 'no_show'].map((s) => call('/tenant/booking-requests?status=' + s)));
+    REQS = [...p, ...q, ...c.sort((a, b) => String(a.confirmed_slot).localeCompare(String(b.confirmed_slot)))].map(toR);
+    DONE_REQS = [...v, ...n].map(toR);
+    const src = document.getElementById('reqSrc'); src.textContent = 'DB · 대기 ' + p.length + ' · 제안 ' + q.length + ' · 확정 ' + c.length; src.className = 'badge';
+    renderReqs(); updateNav();
+  }
+  async function refreshBooking(keep) {
+    if (!API.ready) return;
+    await Promise.all([loadBooking(keep), loadRequests(), connectApi()]).catch((e) => toast(why(e), true));
+  }
+
+  // ---------- 사후관리: 처리 중 · 해결됨 · 지원 스위치 ----------
+  async function aftercareAct(c, act, root, idx) {
+    const tags = (c.tags || []).filter((t) => t !== '태그 없음').join(', ');
+    const out = await dialog({
+      title: act === 'resolved' ? '해결됨으로 바꿀까요?' : '처리 중으로 바꿀까요?', ok: act === 'resolved' ? '해결됨' : '처리 중',
+      body: `<div class="dlg-sum"><b>${esc(c.id)} · ${esc(c.title)}</b><small>${esc(c.who)} · ${esc(c.sub)}</small></div>`
+        + (act === 'resolved' ? field('태그 (쉼표로 구분, 통계·비슷한 문의 찾기에 쓰여요)', `<input type="text" name="tags" value="${esc(tags)}">`)
+          + '<p class="note">해결된 대화도 환자가 다시 글을 쓰면 새 문의로 열려요.</p>' : '<p class="note">다른 직원에게 “누가 보고 있음”으로 보여요.</p>'),
+      onOk: async (f) => {
+        const body = { status: act };
+        if (f.tags) body.tags = f.tags.value.split(',').map((t) => t.trim()).filter(Boolean);
+        if (!API.ready) return { demo: true, body };
+        try { await call('/tenant/aftercare/' + c.tid, { method: 'PATCH', body: JSON.stringify(body) }); }
+        catch (e) { fail(why(e)); }
+      },
+    });
+    if (!out) return;
+    if (out.demo) { c.sub = AC_STATUS[act] + ' (예시)'; if (out.body.tags) c.tags = out.body.tags; if (act === 'resolved') c.unread = 0; updateNav(); toast(AC_STATUS[act] + '(으)로 바꿨어요 (예시 — 저장 안 됨)'); renderChat(root, 'aftercare', idx); return; }
+    toast(AC_STATUS[act] + '(으)로 바꿨어요 (DB 저장)'); await loadAftercare(c.tid);
+  }
+  async function acToggle(on) {
+    if (on === state.ac) return;
+    const out = await dialog({
+      title: on ? '사후관리 지원을 켤까요?' : '사후관리 지원을 끌까요?', ok: on ? '켜기' : '끄기', danger: !on,
+      body: on ? '<p>환자 사이트 “사후관리 지원” 필터에 이 병원이 나오고, 방문 완료 환자가 사후관리 대화를 열 수 있어요.</p><p class="note">월 구독료가 ₩69,000(사후관리 이용)으로 바뀌어요.</p>'
+        : '<p>“사후관리 지원” 필터에서 빠지고, 환자가 <b>새</b> 사후관리 대화를 열 수 없어요. 이미 열린 대화는 그대로 볼 수 있어요.</p><p class="note">월 구독료가 ₩99,000(사후관리 미이용)으로 바뀌어요.</p>',
+      onOk: async () => {
+        if (!API.ready) return { demo: true };
+        try { return await call('/tenant/me', { method: 'PATCH', body: JSON.stringify({ aftercare_enabled: on }) }); } catch (e) { fail(why(e)); }
+      },
+    });
+    if (!out) return;
+    state.ac = out.demo ? on : out.aftercare_enabled;
+    document.querySelectorAll('#acSwitch button').forEach((x) => x.classList.toggle('on', (x.dataset.v === 'on') === state.ac));
+    render(); toast((state.ac ? '사후관리 지원을 켰어요' : '사후관리 지원을 껐어요') + (out.demo ? ' (예시 — 저장 안 됨)' : ' (DB 저장)'));
+  }
+  document.querySelectorAll('#acSwitch button').forEach((b) => b.onclick = () => acToggle(b.dataset.v === 'on'));
+
+  // ---------- 서버 API가 아직 없는 버튼: 창까지 만들고 화면에만 반영 ----------
+  const markDone = (b) => { const o = b.closest('.check')?.querySelector('.o'); if (o) o.classList.add('done'); };
+  const setRow = (label, html) => document.querySelectorAll('#settings .row').forEach((r) => { if (r.firstElementChild?.textContent === label) r.lastElementChild.innerHTML = html; });
+  const DLG = {
+    async receipt(b) {
+      const tr = b.closest('tr'), id = tr.cells[0].textContent;
+      const out = await dialog({ title: id + ' 결제 금액·영수증', ok: '저장',
+        body: field('결제 금액 (원, 부가세 제외)', '<input type="number" name="amt" min="1" step="1" required inputmode="numeric">')
+          + field('결제 수단', '<select name="pay"><option>카드</option><option>현금</option><option>계좌이체</option></select>')
+          + field('영수증 (사진·PDF)', '<input type="file" name="file" accept="image/*,application/pdf">')
+          + '<p class="note">환자가 금액을 확인하면 “확인 완료”가 되고, 수수료(10%)는 확인된 금액 기준이에요.</p>',
+        onOk: (f) => { const a = +f.amt.value; if (!(a > 0)) fail('결제 금액을 입력해 주세요'); return { a, pay: f.pay.value, file: f.file.files[0]?.name || '—' }; } });
+      if (!out) return;
+      tr.cells[3].textContent = won2(out.a); tr.cells[4].textContent = out.pay; tr.cells[5].innerHTML = `${esc(out.file)} <button class="btn" data-dlg="receipt">바꾸기</button>`; bindDlg();
+      tr.cells[7].innerHTML = '<span class="badge warn">확인 중</span>'; tr.cells[8].textContent = won2(Math.round(out.a * 0.1));
+      updateNav(); toast(SCREEN_ONLY);
+    },
+    async hours(b) {
+      const cur = [...document.querySelectorAll('#settings .row')].find((r) => r.firstElementChild?.textContent === '진료시간')?.lastElementChild.firstChild?.textContent.trim() || '';
+      const out = await dialog({ title: '진료시간 수정', ok: '저장', body: field('진료시간', `<textarea name="h" rows="3">${esc(cur)}</textarea>`) + '<p class="note">심평원 값과 다르면 환자 화면에 “병원이 직접 수정” 표시가 붙어요.</p>',
+        onOk: (f) => f.h.value.trim() || fail('진료시간을 입력해 주세요') });
+      if (!out) return; setRow('진료시간', `${esc(out)} <span class="badge">병원 수정</span>`); toast(SCREEN_ONLY);
+    },
+    async links() {
+      const out = await dialog({ title: '홈페이지·SNS 수정', ok: '저장',
+        body: field('홈페이지', '<input type="url" name="web" placeholder="https://">') + field('인스타그램', '<input type="url" name="ig" placeholder="https://instagram.com/…">') + '<p class="note">블로그·카페 링크는 넣지 않아요.</p>',
+        onOk: (f) => { for (const x of [f.web, f.ig]) if (x.value && !/^https?:\/\//.test(x.value)) fail('주소는 https:// 로 시작해야 해요'); } });
+      if (out) toast(SCREEN_ONLY);
+    },
+    async langs(b) {
+      const L = ['영어', '중국어(번체)', '중국어(간체)', '일본어', '베트남어', '몽골어', '러시아어'];
+      const out = await dialog({ title: '통역 가능 언어', ok: '저장',
+        body: `<div class="opts">${L.map((l) => `<label class="opt"><input type="checkbox" name="l" value="${l}"${/영어|중국어/.test(l) ? ' checked' : ''}><span>${l}</span></label>`).join('')}</div><p class="note">직원이 직접 응대할 수 있는 언어만 골라 주세요. AI 번역 채팅은 따로예요.</p>`,
+        onOk: (f) => { const v = [...f.querySelectorAll('input[name=l]:checked')].map((x) => x.value); return v.length ? v : fail('하나 이상 골라 주세요'); } });
+      if (!out) return; setRow('직원 응대 언어', `<span class="chips">${out.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</span>`); markDone(b); toast(SCREEN_ONLY);
+    },
+    async price(b) {
+      const out = await dialog({ title: '가격 안내 입력', ok: '추가',
+        body: field('시술', '<input type="text" name="item" placeholder="예: 레이저 토닝 1회" required>')
+          + `<div class="pick">${field('최저 (원)', '<input type="number" name="lo" min="0" step="1000">')}${field('최고 (원)', '<input type="number" name="hi" min="0" step="1000">')}</div>`
+          + '<p class="note">할인율·기간 한정 가격(이벤트가)은 입력할 수 없어요 (의료광고 규정).</p>',
+        onOk: (f) => { const item = f.item.value.trim(), lo = +f.lo.value, hi = +f.hi.value;
+          if (!item) fail('시술 이름을 입력해 주세요'); if (/할인|이벤트|%|특가/.test(item)) fail('할인·이벤트 문구는 넣을 수 없어요');
+          if (!(lo > 0 && hi > 0)) fail('가격 범위를 입력해 주세요'); if (lo > hi) fail('최저가가 최고가보다 클 수 없어요'); return { item, lo, hi }; } });
+      if (!out) return;
+      const card = [...document.querySelectorAll('#settings .card h3')].find((h) => h.textContent.startsWith('가격 안내')).parentElement;
+      card.querySelector('.note').insertAdjacentHTML('beforebegin', `<div class="row"><span>${esc(out.item)}</span><span>${won2(out.lo)}~${won2(out.hi)}</span></div>`);
+      markDone(b); toast(SCREEN_ONLY);
+    },
+    async faq(b) {
+      const out = await dialog({ title: '자주 묻는 질문 추가', ok: '추가',
+        body: field('질문 (한국어)', '<input type="text" name="q" required>') + field('답변 (한국어)', '<textarea name="a" rows="3"></textarea>')
+          + '<p class="note">저장하면 5개 언어로 번역해 직원이 확인한 뒤 공개돼요. 효과·횟수 같은 의료 판단은 넣지 않아요.</p>',
+        onOk: (f) => (f.q.value.trim() && f.a.value.trim()) ? f.q.value.trim() : fail('질문과 답변을 입력해 주세요') });
+      if (!out) return; b.insertAdjacentHTML('beforebegin', `<div class="row"><span>${esc(out)}</span><span class="badge gray">번역 대기</span></div>`); toast(SCREEN_ONLY);
+    },
+    async guide(b) {
+      const out = await dialog({ title: '방문 후 안내문 추가', ok: '추가',
+        body: field('제목', '<input type="text" name="t" value="붉은기가 오래갈 때 연락 기준">') + field('내용', '<textarea name="c" rows="4" placeholder="예: 3일 넘게 붉은기가 줄지 않으면 사진과 함께 사후관리 채팅으로 알려 주세요"></textarea>'),
+        onOk: (f) => f.c.value.trim() || fail('내용을 입력해 주세요') });
+      if (!out) return; markDone(b); b.remove(); toast(SCREEN_ONLY);
+    },
+    async linkToggle(b) {
+      const tr = b.closest('tr'), off = b.textContent === '끄기';
+      const out = await dialog({ title: `${tr.cells[0].textContent} 링크를 ${off ? '끌까요' : '다시 켤까요'}?`, ok: off ? '끄기' : '켜기', danger: off,
+        body: `<p><code>${esc(tr.cells[1].textContent)}</code></p><p class="note">${off ? '끄면 이 링크로 들어온 사람은 병원 상세 대신 일반 목록으로 가요. 지난 집계는 남아요.' : '다시 켜면 이 링크로 들어온 방문·상담이 다시 집계돼요.'}</p>` });
+      if (!out) return; b.textContent = off ? '켜기' : '끄기'; tr.style.opacity = off ? .5 : 1; toast(SCREEN_ONLY);
+    },
+    async linkAdd(b) {
+      const out = await dialog({ title: '홍보 링크 만들기', ok: '만들기',
+        body: field('채널 이름', '<input type="text" name="ch" placeholder="예: 틱톡, 네이버 카페" required>') + '<p class="note">링크마다 방문·상담·체결이 통계 탭 “유입 경로”에 따로 집계돼요.</p>',
+        onOk: (f) => f.ch.value.trim() || fail('채널 이름을 입력해 주세요') });
+      if (!out) return;
+      const code = Math.random().toString(36).slice(2, 6);
+      b.previousElementSibling.querySelector('tbody').insertAdjacentHTML('beforeend', `<tr><td>${esc(out)}</td><td><code>/h/1043?ch=${code}</code></td><td class="r">0</td><td><button class="btn" data-dlg="linkToggle">끄기</button></td></tr>`);
+      bindDlg(); toast(SCREEN_ONLY);
+    },
+  };
+
+  // ---------- 예약 캘린더 (요청 목록과 같은 데이터) ----------
+  let DONE_REQS = [], calWeek = 0;  // 방문 완료·미방문 (캘린더 전용), 0 = 이번 주
+  const kday = (iso) => new Date(new Date(iso).getTime() + 9 * 3600e3).toISOString().slice(0, 10);
+  const khm = (iso) => new Date(new Date(iso).getTime() + 9 * 3600e3).toISOString().slice(11, 16);
+  const EV = { confirmed: ['c', ''], proposed: ['p', '제안 '], pending: ['w', '대기 '], visited: ['v', '✓ '], no_show: ['n', '미방문 '] };
+  const calSlot = (r) => r.status === 'pending' ? r.slots[0] : r.confirmed_slot;
+  function weekDays() {
+    const t = new Date(todayKst() + 'T00:00:00Z'), mon = new Date(t.getTime() - ((t.getUTCDay() + 6) % 7) * 864e5 + calWeek * 7 * 864e5);
+    return [...Array(7)].map((_, i) => new Date(mon.getTime() + i * 864e5).toISOString().slice(0, 10));
+  }
+  function renderCal() {
+    const days = weekDays(), today = todayKst(), all = [...REQS, ...DONE_REQS].filter((r) => calSlot(r));
+    const md = (d) => `${+d.slice(5, 7)}/${+d.slice(8)}`;
+    document.getElementById('calRange').textContent = `${md(days[0])} ~ ${md(days[6])}${calWeek === 0 ? ' · 이번 주' : ''}`;
+    document.getElementById('cal').innerHTML = days.map((d, i) => {
+      const evs = all.filter((r) => kday(calSlot(r)) === d).sort((a, b) => calSlot(a).localeCompare(calSlot(b)));
+      return `<div class="d${d === today ? ' today' : d < today ? ' past' : ''}"><b>${'월화수목금토일'[i]} ${+d.slice(8)}${d === today ? ' · 오늘' : ''}</b>${evs.length
+        ? evs.map((r) => `<button type="button" class="ev ${EV[r.status][0]}" data-k="${esc(r.rid || r.id)}" title="${esc(ST[r.status][0])} · ${esc(r.who)}">${EV[r.status][1]}${khm(calSlot(r))} ${esc(r.id)} ${esc(r.title)}</button>`).join('')
+        : '<small class="none">예약 없음</small>'}</div>`;
+    }).join('');
+    document.querySelectorAll('#cal [data-k]').forEach((b) => b.onclick = () => calDetail(all.find((r) => (r.rid || r.id) === b.dataset.k)));
+    // 위 숫자 (반복 변경은 근거 데이터가 없어 예시 그대로)
+    const thisWeek = (() => { const keep = calWeek; calWeek = 0; const w = weekDays(); calWeek = keep; return w; })();
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    set('kPend', REQS.filter((r) => r.status === 'pending').length);
+    set('kProp', REQS.filter((r) => r.status === 'proposed').length);
+    set('kWeek', all.filter((r) => ['confirmed', 'visited', 'no_show'].includes(r.status) && thisWeek.includes(kday(r.confirmed_slot))).length);
+  }
+  function calDetail(r) {
+    const extras = {
+      pending: [{ label: '예약 확정', primary: true, onClick: () => bookingAct(r, 'confirm') }, { label: '시간 제안', onClick: () => bookingAct(r, 'propose') }, { label: '거절', onClick: () => bookingAct(r, 'reject') }],
+      proposed: [{ label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') }, { label: '거절', onClick: () => bookingAct(r, 'reject') }],
+      confirmed: [{ label: '방문 완료', primary: true, onClick: () => bookingAct(r, 'visited') }, { label: '미방문', onClick: () => bookingAct(r, 'no_show') }],
+    }[r.status] || [];
+    const when = r.status === 'pending' ? r.slots.map((x, i) => `${esc(kdate(x))} <small>희망 ${i + 1}</small>`).join('<br>') : esc(kdate(r.confirmed_slot));
+    return dialog({ title: `${r.id} · ${ST[r.status][0]}`, ok: '닫기', cancel: '', extras,
+      body: reqSummary(r) + `<div class="row"><span>${r.status === 'pending' ? '환자 희망 시간' : r.status === 'proposed' ? '제안한 시간' : '예약 시간'}</span><span style="text-align:right">${when}</span></div>`
+        + `<div class="row"><span>상태</span><span class="badge ${ST[r.status][1]}">${ST[r.status][0]}</span></div>` });
+  }
+  document.getElementById('calPrev').onclick = () => { calWeek--; renderCal(); };
+  document.getElementById('calNext').onclick = () => { calWeek++; renderCal(); };
+  document.getElementById('calToday').onclick = () => { calWeek = 0; renderCal(); };
+
+  // 메뉴 숫자 = 처리할 일. 상담·예약: 대기 요청 / 사후관리: 환자 글에 아직 답 안 한 대화(해결됨 제외)
+  // 진료·결제 확인: 결제 금액 API 전이라 DB에 연결되면 숨김 (가짜 숫자 X), 예시 화면에서는 "입력 대기" 줄 수
+  function updateNav() {
+    const set = (t, n, show = true) => { const el = document.querySelector(`#tabs button[data-t=${t}] .cnt`); if (el) { el.textContent = n; el.hidden = !show || !n; } };
+    const ac = CHATS.aftercare.filter((c) => c.unread).length;
+    set('booking', REQS.filter((r) => r.status === 'pending').length);
+    set('aftercare', ac);
+    set('receipt', document.querySelectorAll('#receipt .badge.bad').length, !API.ready);
+    for (const id of ['tAc', 'kAcUn']) { const e = document.getElementById(id); if (e) e.textContent = ac; }
+  }
+  function bindDlg() { document.querySelectorAll('[data-dlg]').forEach((b) => b.onclick = () => DLG[b.dataset.dlg](b)); }
+  bindDlg();
+  document.getElementById('logoutBtn').onclick = async () => {
+    const out = await dialog({ title: '로그아웃할까요?', ok: '로그아웃', body: '<p>이 브라우저에 저장된 직원 토큰을 지우고 예시 화면으로 돌아가요.</p><p class="note">직원 로그인 화면은 직원 로그인 API가 생기면 연결돼요.</p>' });
+    if (!out) return;
+    try { sessionStorage.removeItem('md_token'); } catch (e) {}
+    location.href = location.pathname;
+  };
+
+  // 첫 그리기는 맨 끝에서 (위의 다이얼로그 함수·상수가 모두 정의된 뒤)
+  document.querySelectorAll('.chat').forEach((root) => renderChat(root, root.dataset.chat, 0));
+  render(); renderReqs(); updateNav(); fromHash(); connectApi();
 </script>
 </body>
 </html>
