@@ -27,6 +27,8 @@ class BookingOut(BaseModel):
 
 
 class StaffAction(BaseModel):
-    """confirm·propose는 시간(slot, UTC)을 받음. 확정할 때 이미 제안한 시간이 있으면 생략 가능."""
+    """confirm·propose는 시간(slot, UTC)을 받음. 확정할 때 이미 제안한 시간이 있으면 생략 가능.
+    reject는 사유 코드(reason, 선택): fully_booked · not_offered · needs_consult · other (contracts 2절)"""
 
     slot: datetime | None = None
+    reason: str | None = None

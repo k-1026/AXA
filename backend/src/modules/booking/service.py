@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from core.db import utcnow
 from core.errors import AppError
-from modules.booking.models import CANCEL_REASONS, BookingEvent, BookingRequest
+from modules.booking.models import CANCEL_REASONS, REJECT_REASONS, BookingEvent, BookingRequest
 from modules.tenant.models import Tenant
 
 # (현재 상태, 행동) → 다음 상태. 여기 없는 조합은 409 booking.invalid_transition
@@ -170,8 +170,11 @@ def staff_act(
     request_id: uuid.UUID,
     action: str,
     slot: datetime | None = None,
+    reason: str | None = None,
 ) -> BookingRequest:
     if action not in STAFF_ACTIONS:
         raise AppError(409, "booking.invalid_transition", "지금 상태에서는 할 수 없는 변경입니다", {"action": action})
+    if reason is not None and (action != "reject" or reason not in REJECT_REASONS):  # 거절 사유는 거절에만, 정해진 코드만
+        raise AppError(422, "validation", "거절 사유 코드가 올바르지 않습니다", {"errors": [{"loc": ["reason"], "type": "enum"}]})
     req = staff_get(db, tenant_id, request_id)
-    return _move(db, req, action, "staff", staff_id, slot=slot)
+    return _move(db, req, action, "staff", staff_id, slot=slot, reason=reason)
