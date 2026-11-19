@@ -32,7 +32,7 @@
 - [x] `POST /auth/patient/logout` — 서버 세션 종료, 그 토큰 즉시 401 (결정 14)
 - [ ] 로그인 시도 횟수 제한 (`auth.too_many_attempts`) → 11/17~ 남용 방지 때
 - [ ] 비밀번호 변경·재설정 (재설정은 메일 발송 결정 후)
-- [ ] `POST /auth/staff/login` — 직원 비밀번호 로그인 → 직원 토큰(`tenant_id` 포함). 직원 계정 테이블은 B(`tenant`)
+- [x] (11/18) `POST /auth/staff/signup`·`POST /auth/staff/login` — 직원 비밀번호 로그인 → 직원 토큰(`tenant_id` 포함). 직원 계정 테이블은 B(`tenant`)
 - [x] 가입 시 "만 14세 이상" 확인 칸 (미만 가입 불가, 개인정보보호법 제22조의2)
 
 **patient (계정)**

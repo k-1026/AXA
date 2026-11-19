@@ -112,6 +112,17 @@
 - B에게 요청: `main.py` 1줄·`schemas_patient.py`(booking 폴더 안 A 파일) 확인
 - 막힌 것·질문: 시연하려면 공용 DB에 0007 적용 + 등록 병원 1곳에 tenant 행(입점) 필요
 
+### 2026-11-18 (4) · backend-A-staff-auth · Claude
+- 한 일: **가입할 때 환자/병원 관계자 나눔** — 병원 쪽 가입·로그인 (`modules/auth/staff.py`)
+  - `POST /auth/staff/signup` {email, password, hospital_id, registration_no, consents} → 201 직원 토큰: 등록 유치기관·영업 중만(`require_requestable`, 403/404) → 병원 1곳 = 계정 1개(이미 입점 409 `auth.hospital_taken`) → `tenants`(requests_enabled=True, 등록번호) + `staff_users`(owner) 생성
+  - `POST /auth/staff/login` → 직원 토큰(`tenant_id`). 실패 응답 하나로, 시도 제한(환자와 기록 분리), 비활성 직원 401
+  - 프로토타입: 등록번호는 형식(`M-YYYY-MM-DD-NNNN`)만 확인 → 실서비스는 운영자 확인 후 활성화 (팀 확인)
+- 바뀐 계약: 있음 — 4절 `auth.hospital_taken`, 직원 가입·로그인 경로 → contracts PR 따로 (`backend-A-contract-staff-auth`)
+- 마이그레이션: 없음 (tenants·staff_users는 0007, PR #29)
+- 테스트: 175개 통과 (새 `test_auth_staff.py` 11개)
+- 다음 할 일: 직원 추가 초대(owner가 staff 추가) · `current_staff()`가 직원 행·비활성 확인 (지금은 토큰만 → 비활성돼도 만료 전까지 사용 가능, core 변경이라 B 승인 필요)
+- B에게 요청: `tenants`·`staff_users`에 A가 행을 만드는 것 확인
+
 ### 2026-11-17 (2) · backend-A-hospital · Claude (로컬 확인)
 - 한 일: 프론트(5173)·백엔드(8000) 로컬 실행 확인. 백엔드를 **로컬 SQLite**(0001~0006 + 실제 데이터)로 켜면 `/hospitals`·상세·정렬 422·프론트에서 호출(CORS) 모두 정상. **Supabase 설정으로 켜면 서버는 뜨지만 DB를 쓰는 요청은 500**(`ImportError`, psycopg)
 - 원인: 이 PC의 윈도우 **스마트 앱 컨트롤이 차단 모드**(`VerifiedAndReputablePolicyState = 1`), CodeIntegrity 로그에 psycopg DLL 차단(11/17 14:59·15:34). 11/4~5에는 이 PC에서 Supabase 연결이 됐음(아래 기록) → 그 뒤 차단 모드로 바뀐 것으로 보임. B PC도 11/12 같은 증상
