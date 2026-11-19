@@ -1,6 +1,8 @@
 // data/interim/영업정보/*.csv → public/data/hospitals.json
 // 피부과·성형외과·내과·안과 병원만, 한국어 가나다순으로 저장한다. 원본 데이터는 수정하지 않는다.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+// **등록 외국인환자 유치의료기관만** 내보낸다 (백엔드 결정 21, 복지부·진흥원 회신 2026-11-17:
+// 외국어 병원 정보 웹도 유치행위로 평가될 수 있음 → 미등록 병원 노출 X). 백엔드 GET /hospitals와 같은 기준
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { englishName } from './romanize.mjs';
@@ -45,6 +47,17 @@ const excluded = new Set(
     .filter((r) => r.verdict !== '정상')
     .map((r) => r.ykiho),
 );
+// 등록 유치의료기관 (요양기관 기호로 맞춘 것만). 파일이 없으면 아무 병원도 내보내지 않는다 (미등록 노출 방지)
+const registeredPath = resolve(repo, 'data/processed/daegu_registered_institutions.csv');
+const registered = existsSync(registeredPath)
+  ? new Set(readCsv('daegu_registered_institutions.csv', resolve(repo, 'data/processed')).map((r) => r.ykiho).filter(Boolean))
+  : null;
+if (!registered) {
+  console.warn(
+    '⚠ data/processed/daegu_registered_institutions.csv 없음 → 병원 0곳으로 저장 (미등록 병원 노출 방지).\n' +
+      '  받기: git restore --source origin/research-data -- data/processed/daegu_registered_institutions.csv',
+  );
+}
 // 홈페이지·인스타그램 (팀 수집 파일에서 사이트 병원과 맞는 곳만, 블로그·네이버 제외)
 const links = new Map(readCsv('daegu_hospital_links.csv', resolve(repo, 'data/processed')).map((r) => [r.ykiho, r]));
 // 대표사진 주소 (팀 수집 파일을 요양기관 기호로 맞춘 것). 사진 파일은 저장하지 않고 원래 주소로 표시
@@ -90,7 +103,7 @@ const collator = new Intl.Collator('ko', { ignorePunctuation: true });
 
 const items = hours
   .map((r) => ({ r, depts: departments(r) }))
-  .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos && !excluded.has(r.ykiho))
+  .filter(({ r, depts }) => depts.length > 0 && r.XPos && r.YPos && !excluded.has(r.ykiho) && registered?.has(r.ykiho))
   .map(({ r, depts }) => {
     const b = basics.get(r.ykiho) ?? {};
     const link = links.get(r.ykiho);
