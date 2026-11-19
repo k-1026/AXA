@@ -8,7 +8,7 @@
    (없으면 새로 만듦, 환자 웹 목록도 같은 파일을 읽음)
 2. 입점 계정(tenant): 9001에 없으면 만들고, 요청·사후관리 받기 켬
 3. 시연 직원 계정 `demo-staff@example.com` — 대시보드 로그인용 (`POST /auth/staff/login`)
-4. 시연 환자 계정 `demo-patient@example.com` + 그 환자의 예약 3건 (방문 완료·확정·대기). 다시 돌리면 이 환자 예약만 새로 만듦
+4. 시연 환자 계정 `demo-patient@example.com` + 그 환자의 예약 2건 (방문 완료·확정). 다시 돌리면 이 환자 예약만 새로 만듦
    B가 넣은 9001 대시보드 데이터(환자 없는 요청)는 그대로 둠
 
 비밀번호: 계정을 처음 만들 때만 새로 만들어 `data/dev/demo_accounts.txt`(git 제외)에 저장.
@@ -150,7 +150,9 @@ def seed_patient(db: Session, reset: bool, now: datetime) -> tuple[Patient, str 
 
 
 def seed_patient_bookings(db: Session, p: Patient, t: Tenant, now: datetime) -> int:
-    """시연 환자 예약 3건을 새로 만든다 (이 환자의 기존 예약은 지움)."""
+    """시연 환자 예약 2건(방문 완료·확정)을 새로 만든다 (이 환자의 기존 예약은 지움).
+    대기(pending) 예약은 넣지 않음 — 같은 병원에 대기·제안 요청이 있으면 새 요청이 409 booking.duplicate라
+    시연 때 환자가 직접 요청하는 장면을 못 보여 줌. 시연 중에 만든 요청도 다시 돌리면 지워짐 (리허설 초기화)"""
     old_ids = list(db.scalars(select(BookingRequest.id).where(BookingRequest.patient_id == p.id)))
     if old_ids:  # DB의 ON DELETE에 기대지 않고 직접 지움 (SQLite 로컬 확인에서도 같은 결과)
         db.execute(delete(BookingEvent).where(BookingEvent.request_id.in_(old_ids)))
@@ -162,7 +164,6 @@ def seed_patient_bookings(db: Session, p: Patient, t: Tenant, now: datetime) -> 
         # (상태, 만든 날, 확정 시간, 진료항목, 문의)
         ("visited", today - timedelta(days=12), kst(today - timedelta(days=7), 11), "laser_toning", "想做雷射淨膚，大概需要幾次？"),
         ("confirmed", today - timedelta(days=3), kst(today + timedelta(days=4), 14), "acne_scar", "痘疤治療可以預約嗎？"),
-        ("pending", today, None, "melasma", "我想諮詢肝斑治療，週末有時間嗎？"),
     ]
     for status, created_day, slot, treatment, msg in plans:
         created = kst(created_day, 10)
