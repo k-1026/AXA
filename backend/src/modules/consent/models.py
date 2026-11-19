@@ -18,8 +18,10 @@ class Consent(Base):
     patient_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("patients.id", ondelete="SET NULL")
     )
-    # 요청서별 동의. booking_requests(B)가 생기면 FK 추가
-    booking_request_id: Mapped[uuid.UUID | None]
+    # 요청서별 동의 (리비전 0007). 요청서가 지워져도 동의 증명은 남김 → SET NULL
+    booking_request_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("booking_requests.id", ondelete="SET NULL")
+    )
     kind: Mapped[str] = mapped_column(String(24))
     version: Mapped[str] = mapped_column(String(16))
     lang: Mapped[str] = mapped_column(String(8))

@@ -17,6 +17,46 @@
 
 ## 기록
 
+### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
+- 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**
+- 확인: alembic `0007` · hospitals 4,242(등록 126) 그대로 · 새 표 7개 모두 0행 · public 표 RLS 꺼진 것 0 · FK `tenants·booking_requests.hospital_id → hospitals`, `consents.booking_request_id → booking_requests` 있음
+- 서버(0007 브랜치, Supabase)로 확인: health 200, 직원 토큰(가짜 tenant)으로 `/tenant/booking-requests`·`/tenant/aftercare` 200 `[]`, `/tenant/analytics/summary` 200 → 표가 있어 500 안 남. `/tenant/me`는 직원 행이 없어 401
+- ⚠️ #29 리뷰에서 0007이 바뀌면 `downgrade 0006` 후 다시 `upgrade head` (지금 새 표는 비어 있음). 시연 데이터를 넣을 땐 실제 병원에 가짜 병원 계정을 붙이지 말고 가상 병원(`is_demo`) 행부터
+- 바뀐 계약·코드: 없음
+
+### 2026-11-17 (6) · backend-A-migration-0007 · Claude (Supabase 연결 해결)
+- 한 일: 이 PC(스마트 앱 컨트롤 차단 모드)에서 **Supabase 연결 됨** — psycopg 바이너리(DLL)는 계속 막히지만, 설치된 **PostgreSQL 18 공식 `libpq.dll`**(서명됨)은 통과 → psycopg 순수 파이썬 구현으로 접속
+  - 실행 전 (PowerShell, 그 창에서만): `$env:PATH = "C:\Program Files\PostgreSQL\18\bin;$env:PATH"; $env:PSYCOPG_IMPL = "python"`
+  - 그다음 평소처럼 `uv run python -m alembic -c backend/alembic.ini upgrade head` / `uv run python -m uvicorn main:app --app-dir backend/src`
+- 확인 (읽기 전용): `.env` = `AXA`(`afypgiqkrohgoybqhtsi`) · alembic `0006` · hospitals 4,242 · 등록 126 · public 테이블 11개
+- 바뀐 계약·코드: 없음 (환경만)
+- 다음 할 일: #29 머지 후 이 PC에서 0007 적용 가능 (`medi`·`AXA` 둘 다면 둘 다). B PC도 같은 방법 시도 가능 (PostgreSQL 설치 → bin을 PATH)
+
+### 2026-11-17 (4) · backend-A-migration-0007 · Claude (리뷰 반영)
+- 한 일: 점검([review-0007-2026-11-17.md](review-0007-2026-11-17.md)) 반영
+  - `consents.booking_request_id` → `booking_requests.id` FK(SET NULL, 동의 증명은 남김)를 모델과 **0007**에 추가 (Supabase 미적용이라 0008 대신 0007에 포함. SQLite는 `batch_alter_table`)
+  - 테스트 DB에서 **SQLite FK 검사 켬**(`conftest.py` `PRAGMA foreign_keys = ON`) → Postgres처럼 없는 id를 막음. 켜자 21개 실패: 없는 병원 9001로 병원 계정(B 테스트 20), 없는 요청서 id로 동의(A 1) → 새 `tests/db_rows.py`(`demo_hospital`·`demo_staff`, 가상 행)로 FK 대상 행을 먼저 만들게 고침
+  - 사후관리 답장 테스트는 아무 uuid의 직원 토큰을 썼음 → `aftercare_messages.staff_id` FK 때문에 **Postgres였다면 500**. 실제 직원 행으로 토큰을 만들게 고침
+  - 동의 테스트 2개 추가: 요청서 삭제 → 동의 남고 `booking_request_id`만 비움, 없는 요청서 id → 저장 실패
+- 확인: 실제 데이터 로컬 SQLite 복사본에서 `upgrade head` → `downgrade 0006` → `upgrade head`, 병원 4,242 유지, `foreign_key_check` 0건. ⚠️ 예전 0007을 로컬에 올렸다면 `downgrade 0006` 후 다시 `upgrade head`
+- 알게 된 것: 0001~0007 모든 CHECK 이름이 `ck_<표>_ck_<표>_<이름>`(이름 규칙이 두 번 붙음, Supabase에도 이 이름). 모델 이름(`ck_<표>_<이름>`)과 다름 → 이번엔 그대로 두고 정리 리비전은 따로
+- 바뀐 계약: 없음 · 마이그레이션: `0007` 수정 (Supabase 미적용)
+- 테스트: 백엔드+AI 368개 통과
+- 다음 할 일: 요청서 제출 API, 직원 로그인
+- B에게 요청:
+  1. B 테스트 2개(`test_booking_tenant.py`·`test_aftercare_tenant.py`)의 `_tenant`에 `demo_hospital()` 한 줄, 사후관리 흐름 테스트에 `demo_staff()` — FK 때문에 필요, 리뷰에서 확인
+  2. `seed_demo.py`가 `hospital_id=9001`(없는 병원)로 tenant를 만듦 → 로컬 SQLite는 FK 검사가 꺼져 있어 지금은 되지만 Supabase에서는 실패. 시드에 가상 병원 행(`is_demo=True`)을 먼저 넣거나 실제 `hospitals.id` 사용
+  3. 직원 토큰의 `staff_id`가 `staff_users`에 없으면 답장·사후관리 저장이 500 → `current_staff()`에서 직원 행 확인(11/12 요청 ③)은 A가 직원 로그인 만들 때 같이
+
+### 2026-11-17 (3) · backend-A-migration-0007 · Claude
+- 한 일: **마이그레이션 `0007`** — B 모델(#28)의 `tenants`·`staff_users`·`booking_requests`·`booking_events`·`replies`·`aftercare_threads`·`aftercare_messages` + RLS. B 모델 주석대로 `tenants.hospital_id`·`booking_requests.hospital_id` → `hospitals.id` FK를 모델과 리비전에 추가 (병원 행은 지우지 않으므로 삭제 동작 없음)
+- 새 테스트 `test_migrations.py`: 빈 SQLite에 `upgrade head` → 모델과 **테이블·칸·FK**가 같은지(`compare_metadata`), `downgrade 0006` → 다시 `upgrade`. FK 하나를 일부러 빼면 실패하는 것 확인. alembic.ini를 읽지 않게 해서 다른 테스트의 로그 캡처를 끄지 않음
+- 확인: 실제 데이터가 든 로컬 SQLite(0006)에 `upgrade head` → `downgrade 0006` → `upgrade head` 정상, 병원 4,242곳 유지
+- 바뀐 계약: 없음 · 마이그레이션: 있음 `0007` (**Supabase 미적용** → 다른 PC에서 `uv run python -m alembic -c backend/alembic.ini upgrade head`, 공용 DB가 `medi`·`AXA` 둘이면 둘 다)
+- 테스트: 백엔드+AI 366개 통과
+- 다음 할 일: 요청서 제출 API (`POST /hospitals/{id}/booking-requests`: `require_requestable` + 동의 4개 + 거주 재확인 → B `booking.service.create_request`)
+- B에게 요청: 모델을 더 바꾸면 A에게 알려 주기(리비전 추가). #28 리뷰의 사후관리 비의료 제한·`health` 동의 확인
+
 ### 2026-11-18 (2) · backend-A-manual-hours · Claude
 - 한 일: 직접 채운 진료시간에 `override=Y` 지원 — 카카오맵 영업정보로 전체 검증해 보니 심평원 API 값이 실제와 다른 곳(9곳)이 있어서, 그 행은 API 값이 있는 요일도 바꿈. `휴진`으로 바뀌면 시간 칸 비움
 - 데이터 쪽 결과: [진료시간-채움-등록기관-2026-11-18.md](진료시간-채움-등록기관-2026-11-18.md) 0-2 (카카오 138곳: 일치 46 · 변경 48 · 채움 24 · 확인 불가 20), 로더용 파일은 research-data 브랜치
