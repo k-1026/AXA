@@ -32,6 +32,8 @@ class ToolContext:
     timezone: str = "UTC"  # 환자 프로필의 IANA 시간대 (프론트가 넣음). 요청서 patient_timezone으로 쓰임
     today: date | None = None  # 오늘 날짜(서버 시계). 있으면 초안 단계에서 지난 희망 일시를 거른다
     store: Any = None  # BookingStore (ai/agent/tools/booking_store.py). 없으면 도구가 처음 쓸 때 기본 저장소를 만든다
+    # 실제 병원 DB 게이트웨이 (backend modules/chatbot/hospitals.py). 있으면 병원 찾기·상세가 이것을 쓰고, 없으면 가상 병원(fake_data)
+    hospitals: Any = None
 
 
 Handler = Callable[[JSON, ToolContext], JSON]
