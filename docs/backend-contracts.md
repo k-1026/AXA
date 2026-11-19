@@ -64,8 +64,7 @@
 | `consent.required` | 422 | 필수 동의 없음 |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
-| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`. 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
-| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`/`not_joined`(등록 기관이지만 메디대구 입점 안 함 = tenant 없음·`requests_enabled=false`, 예약 요청 때만). 병원 정보 조회(목록·상세)는 막지 않음 |
+| `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`/`not_joined`(등록 기관이지만 메디대구 입점 안 함 = tenant 없음·`requests_enabled=false`, 예약 요청 때만). 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
