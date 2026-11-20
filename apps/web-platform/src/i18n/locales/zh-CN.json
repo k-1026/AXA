@@ -1,4 +1,22 @@
 {
+  "notify": {
+    "title": "通知",
+    "open": "{{count}}条通知",
+    "empty": "没有新通知。",
+    "markAll": "全部已读",
+    "hospital": "医院",
+    "newCount": "{{count}}条新通知",
+    "status": {
+      "confirmed": "{{hospital}}已确认您的预约。",
+      "rejected": "{{hospital}}表示无法接受此次预约。",
+      "proposed": "{{hospital}}提议了其他时间。",
+      "visited": "您在{{hospital}}的就诊已记录为完成，现在可以使用术后管理对话。",
+      "no_show": "您在{{hospital}}的预约被记录为未到诊。",
+      "expired": "您向{{hospital}}申请的希望日期均已过去。"
+    },
+    "reply": "{{hospital}}发来{{count}}条咨询回复。",
+    "aftercare": "{{hospital}}医护人员发来{{count}}条术后管理消息。"
+  },
   "header": {
     "language": "语言",
     "currency": "货币",

@@ -1,4 +1,22 @@
 {
+  "notify": {
+    "title": "Thông báo",
+    "open": "{{count}} thông báo",
+    "empty": "Không có thông báo mới.",
+    "markAll": "Đánh dấu đã đọc tất cả",
+    "hospital": "Bệnh viện",
+    "newCount": "{{count}} mới",
+    "status": {
+      "confirmed": "{{hospital}} đã xác nhận lịch hẹn của bạn.",
+      "rejected": "{{hospital}} cho biết không thể nhận yêu cầu đặt lịch.",
+      "proposed": "{{hospital}} đã đề xuất thời gian khác.",
+      "visited": "Lần khám tại {{hospital}} đã được ghi nhận hoàn tất. Bạn có thể trò chuyện sau điều trị.",
+      "no_show": "Lịch hẹn tại {{hospital}} được ghi nhận là không đến.",
+      "expired": "Các ngày mong muốn trong yêu cầu gửi {{hospital}} đều đã qua."
+    },
+    "reply": "{{hospital}} đã gửi {{count}} phản hồi tư vấn.",
+    "aftercare": "Nhân viên y tế {{hospital}} đã gửi {{count}} tin nhắn sau điều trị."
+  },
   "header": {
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",

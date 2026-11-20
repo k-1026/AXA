@@ -11,6 +11,7 @@ import { useConsultThreads } from '../features/consult/useConsultThreads';
 import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { displayStatus, type BookingRequest, type DisplayStatus } from '../features/consult/types';
 import { LegalLinks } from '../features/legal/LegalLinks';
+import { useMarkSeenOn } from '../features/notifications/NotificationsProvider';
 
 type Filter = 'all' | 'pending' | 'confirmed' | 'visited' | 'cancelled';
 type Sort = 'visit' | 'recent';
@@ -31,6 +32,7 @@ const group = (b: { booking: BookingRequest }) => GROUP[displayStatus(b.booking)
 
 // 상담에서 신청한 예약 모아 보기. 변경·취소는 환자가 하고, 확정·방문 완료 표시는 병원이 한다
 export function BookingsPage() {
+  useMarkSeenOn('/mypage/bookings'); // 이 화면을 열면 이 화면의 알림은 읽은 것으로
   const { t, i18n } = useTranslation();
   const text = useLocalized();
   const navigate = useNavigate();

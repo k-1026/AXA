@@ -12,12 +12,14 @@ import { AftercareMessages } from '../features/aftercare/AftercareMessages';
 import { useAftercare } from '../features/aftercare/useAftercare';
 import type { Attachment } from '../features/aftercare/types';
 import type { AftercareHandoff } from '../features/chatbot/ChatCards';
+import { useMarkSeenOn } from '../features/notifications/NotificationsProvider';
 
 const MAX_FILES = 4;
 const MAX_BYTES = 50 * 1024 * 1024; // 파일 1개당 50MB
 
 // 사후 관리: 방문을 마친 예약(진료·시술)마다 그 병원 의료진과 대화. 상태 사진·영상 첨부 가능
 export function AftercarePage() {
+  useMarkSeenOn('/aftercare'); // 이 화면을 열면 이 화면의 알림은 읽은 것으로
   const { t, i18n } = useTranslation();
   const text = useLocalized();
   const care = useAftercare();
