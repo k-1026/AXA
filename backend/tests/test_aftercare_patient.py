@@ -194,3 +194,61 @@ def test_저장소_설정이_없으면_503(client, db):
     (p, me), t = _me(client, db), _tenant(db)
     r = client.post(_url(_req(db, p, t)) + "/uploads", json={"content_type": "image/png", "size": 10}, headers=me)
     assert (r.status_code, r.json()["code"]) == (503, "storage.unavailable")
+
+
+# ---------- 지우기 (결정 23) ----------
+
+
+def _send_photo(client, me, r):
+    path = client.post(_url(r) + "/uploads", json={"name": "a.png", "content_type": "image/png", "size": 10}, headers=me).json()["path"]
+    out = client.post(_url(r) + "/messages", json={"text": "사진", "attachments": [{"path": path, "kind": "image"}]}, headers=me)
+    assert out.status_code == 201, out.json()
+    return path
+
+
+def test_탈퇴하면_내_사진은_Storage에서_지우고_메시지는_사진_있음만_남는다(client, db, storage, monkeypatch):
+    from modules.aftercare.models import AftercareMessage
+    from modules.media import service as media
+
+    removed = []
+    monkeypatch.setattr(media, "remove", lambda paths: removed.extend(paths) or len(paths))
+    (p, me), t = _me(client, db), _tenant(db)
+    other, other_h = _me(client, db, "keep@example.com")
+    mine = _send_photo(client, me, _req(db, p, t))
+    theirs = _send_photo(client, other_h, _req(db, other, _tenant(db, 9002)))
+
+    r = client.request("DELETE", "/api/v1/me", headers=me, json={"password": SIGNUP["password"]})
+    assert r.status_code == 204
+    assert removed == [mine]  # 남의 파일은 그대로
+    db.expire_all()
+    rows = db.query(AftercareMessage).all()
+    gone = [m for m in rows if m.attachments == []]
+    kept = [m for m in rows if m.attachments]
+    assert len(gone) == 1 and gone[0].has_photo is True and gone[0].text_original == "사진"
+    assert [a["path"] for a in kept[0].attachments] == [theirs]
+
+
+def test_정기_정리는_DB에_없는_하루_지난_파일만_지운다(client, db, storage, monkeypatch):
+    from datetime import timedelta
+
+    from core.db import utcnow
+    from modules.maintenance import service as maintenance
+    from modules.media import service as media
+
+    (p, me), t = _me(client, db), _tenant(db)
+    used = _send_photo(client, me, _req(db, p, t))
+    old, new = utcnow() - timedelta(days=2), utcnow() - timedelta(hours=1)
+    monkeypatch.setattr(media, "list_objects", lambda: [(used, old), ("x/y/orphan-old.png", old), ("x/y/orphan-new.png", new)])
+    removed = []
+    monkeypatch.setattr(media, "remove", lambda paths: removed.extend(paths) or len(paths))
+    assert maintenance.purge_media(db) == 1
+    assert removed == ["x/y/orphan-old.png"]  # 쓰는 파일·방금 올린 파일은 남김
+
+
+def test_정기_정리는_Storage_오류에도_멈추지_않는다(db, monkeypatch):
+    from modules.maintenance import service as maintenance
+    from modules.media import service as media
+
+    monkeypatch.setattr(media, "enabled", lambda: True)
+    monkeypatch.setattr(media, "list_objects", lambda: (_ for _ in ()).throw(RuntimeError("down")))
+    assert maintenance.purge_media(db) == 0

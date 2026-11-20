@@ -17,6 +17,13 @@
 
 ## 기록
 
+### 2026-11-20 (3) · backend-A-aftercare-patient · Claude (사진·영상 지우기)
+- 한 일: 결정 23. 탈퇴(`auth.service.withdraw`)에서 `aftercare.detach_patient_media()` → commit 뒤 `media.remove()`. 정기 정리 `maintenance.purge_media()` — Storage 목록(`media.list_objects`) 중 DB가 가리키지 않는 하루 지난 파일 삭제, Storage 오류여도 다른 정리는 끝남. 테스트 `conftest.py`에서 `SUPABASE_*`를 비움 (.env에 키가 있어도 실제 Storage를 부르지 않게)
+- B 모듈 변경 (**B 확인 필요**): `aftercare/service.py`에 `detach_patient_media`·`referenced_media_paths`
+- 바뀐 계약: contracts 6-3·7-1 (`media_files`)
+- 테스트: 전체 224개 통과
+- 다음 할 일: Vercel Cron에 `/internal/purge` 등록 (배포 때)
+
 ### 2026-11-20 (2) · backend-A-aftercare-patient · Claude (사후관리 사진·영상 = Supabase Storage)
 - 한 일: 결정 22. 새 모듈 `modules/media/`(A) — 서명된 업로드·보기 주소 (httpx, 서비스 키는 서버만). `POST /me/booking-requests/{id}/aftercare/uploads`, 보내기에 `attachments`, 환자·병원 메시지 응답에 `attachments[{kind, name, url}]`. 마이그레이션 **0008** (`aftercare_messages.attachments`). 버킷 만들기 `backend/scripts/setup_storage.py`
 - 공통 파일 변경: `core/config.py`에 `supabase_url`·`supabase_service_role_key` (**B 승인 필요**), `.env.example`

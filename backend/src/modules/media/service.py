@@ -3,7 +3,10 @@
 - 파일은 서버를 거치지 않음: 서버가 서명된 업로드 주소를 주고, 브라우저가 Supabase로 바로 PUT (Vercel 요청 크기 제한 피함)
 - 볼 때도 서명된 주소(1시간)만 줌 → 버킷은 공개하지 않음. 누구에게 줄지는 부르는 쪽(aftercare)이 권한 확인 뒤 결정
 - 서비스 키는 서버 전용 (core/config.py). 설정이 없으면 `enabled() = False` → 업로드 API는 503 `storage.unavailable`
+- 지우기: 탈퇴 때 그 환자 파일 바로(`remove`), 그 밖에 DB에 없는 파일은 정기 정리가 하루 뒤(`list_objects` → `remove`)
 """
+
+from datetime import datetime
 
 import re
 import uuid
@@ -90,3 +93,39 @@ def attachments_out(messages) -> dict[int, list[dict]]:
         m.id: [{"kind": a.get("kind"), "name": a.get("name"), "url": urls.get(a.get("path"))} for a in (m.attachments or [])]
         for m in messages
     }
+
+
+def remove(paths: list[str]) -> int:
+    """파일 지우기 → 지운 수. 실패하면 0 (DB에서 빠진 파일은 정기 정리가 다시 지움)."""
+    paths = [p for p in dict.fromkeys(paths) if p]
+    if not paths or not enabled():
+        return 0
+    try:
+        r = httpx.request("DELETE", f"{_base()}/object/{BUCKET}", headers=_headers(), json={"prefixes": paths}, timeout=TIMEOUT)
+        r.raise_for_status()
+        return len(r.json())
+    except (httpx.HTTPError, ValueError, TypeError):
+        return 0
+
+
+def list_objects(prefix: str = "", _depth: int = 0) -> list[tuple[str, datetime | None]]:
+    """버킷의 모든 파일 (경로, 만든 시각). 경로가 `{tenant}/{request}/{file}`이라 폴더를 따라 내려감."""
+    if not enabled() or _depth > 3:
+        return []
+    out: list[tuple[str, datetime | None]] = []
+    offset = 0
+    while True:
+        r = httpx.post(f"{_base()}/object/list/{BUCKET}", headers=_headers(), timeout=TIMEOUT,
+                       json={"prefix": prefix, "limit": 1000, "offset": offset, "sortBy": {"column": "name", "order": "asc"}})
+        r.raise_for_status()
+        items = r.json()
+        for it in items:
+            path = f"{prefix}/{it['name']}" if prefix else it["name"]
+            if it.get("id") is None:  # 폴더
+                out += list_objects(path, _depth + 1)
+            else:
+                ts = it.get("created_at")
+                out.append((path, datetime.fromisoformat(ts.replace("Z", "+00:00")) if ts else None))
+        if len(items) < 1000:
+            return out
+        offset += 1000

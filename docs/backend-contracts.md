@@ -139,6 +139,7 @@
 | `POST /me/booking-requests/{id}/aftercare/uploads` | `{name, content_type, size}` → 201 `{path, kind, upload_url}`. 브라우저가 `upload_url`로 파일을 `PUT`(Content-Type 그대로) 한 뒤 `path`를 `attachments`에 넣어 보냄 | 422(사진·영상 아님, 50MB 초과), 404, 409(위와 같음), 503 `storage.unavailable` |
 
 - 사진·영상(결정 22): Supabase Storage 비공개 버킷 `aftercare-media`, 경로 `{tenant_id}/{request_id}/{무작위}.{확장자}`. 메시지 응답의 `attachments[{kind, name, url}]` — `url`은 1시간짜리 서명된 주소(못 만들면 `null`), 경로는 응답에 넣지 않음. 병원용 `GET /tenant/aftercare/{id}`도 같은 `attachments`
+- 지우기(결정 23): 탈퇴(`DELETE /me`)하면 그 환자가 보낸 파일을 바로 삭제하고 메시지 `attachments`를 비움(글·`has_photo`는 남음). 나머지 고아 파일은 7-1 정기 정리가 하루 뒤
 - 저장소 설정(`SUPABASE_URL`·`SUPABASE_SERVICE_ROLE_KEY`)이 없으면 업로드는 503 → 화면은 `photo: true`("사진 있음")만 보냄. 번역(`text_translated`)은 `ai/llm` 연결 전이라 비움
 
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
@@ -163,7 +164,7 @@
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
-| `GET`·`POST /internal/purge` | 30일 지난 챗봇 대화 + 만료·로그아웃한 로그인 세션 삭제 → `{chat_sessions, auth_sessions}` (지운 수) | 404 `not_found`(`CRON_SECRET` 없음 = 꺼짐), 401 `auth.required`(비밀 값 틀림) |
+| `GET`·`POST /internal/purge` | 30일 지난 챗봇 대화 + 만료·로그아웃한 로그인 세션 + DB에 없는 하루 지난 사진·영상 파일(결정 23) 삭제 → `{chat_sessions, auth_sessions, media_files}` (지운 수, 저장소 설정 없으면 `media_files` 0) | 404 `not_found`(`CRON_SECRET` 없음 = 꺼짐), 401 `auth.required`(비밀 값 틀림) |
 
 - 인증: `Authorization: Bearer <CRON_SECRET>` (환경변수 `CRON_SECRET`, 16자 이상). Swagger에 숨김
 - **예약 작업이 하루 1번 불러야 함** (Vercel Cron 등). 부르지 않으면 30일 보관 정리가 되지 않음. Vercel Cron은 GET + 이 헤더를 자동으로 보냄 (`vercel.json` 설정은 배포 담당이)
@@ -177,6 +178,7 @@
 | 2026-11-18 | 4·6 | 환자 예약 API 6-1절 신설, `hospital.not_requestable` 사유 `not_joined` 추가, `residency` 필수(`short_term`만), 동의 조건(`overseas_transfer` = 글 번역 때) 확정, `preferred_slots` 미래만 | A (**B 확인 필요**) | `backend-A-contract-booking-request` → `backend` |
 | 2026-11-20 | 6-3 | 환자 사후관리 API 신설 (`/me/aftercare`, `/me/booking-requests/{id}/aftercare[/messages]`), `aftercare.service`에 `patient_list`·`patient_messages` 추가 | A (**B 확인 필요** — aftercare는 B 모듈) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-20 | 4·6-3 | 사후관리 사진·영상 업로드(`…/aftercare/uploads`)·`attachments`, 에러 `storage.unavailable`(503) 추가, 병원용 메시지에도 `attachments` (결정 22, 마이그레이션 0008) | A (**B 확인 필요**) | `backend-A-aftercare-patient` → `backend` |
+| 2026-11-20 | 6-3·7-1 | 탈퇴 때 사진·영상 삭제, 정기 정리 응답에 `media_files` (결정 23) | A (**B 확인 필요**) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-18 | 3·4 | 병원 관계자 가입·로그인 경로(`/auth/staff/signup`·`login`), 에러 `auth.hospital_taken`(409) | A (**B 확인 필요**) | `backend-A-contract-staff-auth` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |

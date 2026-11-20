@@ -120,6 +120,34 @@ def patient_messages(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) 
     return thread, msgs
 
 
+# ---------- 파일 정리 (A가 추가 · B 확인, 결정 23) ----------
+
+
+def detach_patient_media(db: Session, patient_id: uuid.UUID) -> list[str]:
+    """탈퇴: 그 환자가 보낸 사진·영상의 경로를 메시지에서 빼고 돌려줌 (파일은 부르는 쪽이 commit 뒤 Storage에서 지움).
+    메시지 글과 "사진 있음"(has_photo)은 병원 쪽 기록이라 남김 (결정 15와 같음). commit은 부르는 쪽."""
+    rows = db.scalars(
+        select(AftercareMessage)
+        .join(AftercareThread, AftercareThread.id == AftercareMessage.thread_id)
+        .join(BookingRequest, BookingRequest.id == AftercareThread.request_id)
+        .where(BookingRequest.patient_id == patient_id, AftercareMessage.sender == "patient")
+    )
+    paths: list[str] = []
+    for m in rows:
+        if m.attachments:
+            paths += [a.get("path") for a in m.attachments if a.get("path")]
+            m.attachments = []
+    return paths
+
+
+def referenced_media_paths(db: Session) -> set[str]:
+    """DB 메시지가 가리키는 파일 전부 (정기 정리에서 이것 밖의 파일만 지움)."""
+    out: set[str] = set()
+    for atts in db.scalars(select(AftercareMessage.attachments).where(AftercareMessage.has_photo.is_(True))):
+        out.update(a.get("path") for a in atts or [] if a.get("path"))
+    return out
+
+
 # ---------- 병원 쪽 (B) ----------
 
 
