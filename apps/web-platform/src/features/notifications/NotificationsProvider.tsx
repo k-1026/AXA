@@ -1,185 +1,184 @@
-// 사이트 안 알림: 병원이 예약 상태를 바꾸거나(확정·거절·시간 제안·방문 완료·미방문·기간 지남) 답장을 보냈을 때
-// 서버에 알림 표는 없음 → 내 예약·사후관리를 주기적으로 불러, 이 브라우저에 저장한 "마지막으로 본 상태"와 다른 것만 알림
-// - 처음(저장 값 없음)에는 지금 상태를 본 것으로 저장 → 예전 일이 한꺼번에 알림으로 뜨지 않음
-// - 실제 회원만 (데모·비로그인은 서버 기록이 없음). 저장은 계정별 localStorage `notifySeen@<계정>`
+// 사이트 안 알림 (결정 27): 서버 알림 표(GET /me/notifications) + Supabase Realtime으로 새 알림을 바로 받음
+// - 병원이 예약 상태를 바꾸거나 답장하면 서버가 같은 처리 안에서 알림 한 줄을 씀 → 읽음 여부도 서버에 (기기마다 같음)
+// - Realtime: 백엔드가 준 짧은 토큰으로 notifications 표의 새 줄만 구독 (RLS = 자기 알림만, 표에는 글·건강정보 없음)
+// - Realtime을 쓸 수 없으면(설정 없음·연결 끊김) 60초마다·탭으로 돌아올 때 다시 불러옴
+// - 실제 회원만 (데모·비로그인은 서버 기록이 없음)
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js';
+import { api } from '../../components/api';
 import { useAuth } from '../../components/auth';
-import { readSetting, writeSetting } from '../../components/storage';
 import type { KoEn } from '../../lib/common';
-import { listMine, ykihoOf } from '../consult/bookingApi';
-import { listAftercare } from '../aftercare/aftercareApi';
+import { ykihoOf } from '../consult/bookingApi';
 import { useHospitals } from '../hospital/useHospitals';
 import { hospitalNames } from '../hospital/name';
 
-const POLL_MS = 30_000;
-// 환자에게 알릴 상태 (환자가 직접 한 취소·처음 대기는 제외)
-const NOTIFY_STATUS = ['confirmed', 'rejected', 'proposed', 'visited', 'no_show', 'expired'] as const;
-export type NotifyStatus = (typeof NOTIFY_STATUS)[number];
+const FALLBACK_MS = 60_000;
+const PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-export type Notice =
-  | { key: string; kind: 'status'; status: NotifyStatus; requestId: string; hospital?: KoEn; at: string; to: '/mypage/bookings' }
-  | { key: string; kind: 'reply'; count: number; requestId: string; hospital?: KoEn; at: string; to: '/booking' }
-  | { key: string; kind: 'aftercare'; count: number; requestId: string; hospital?: KoEn; at: string; to: '/aftercare' };
+export type NotifyStatus = 'confirmed' | 'rejected' | 'proposed' | 'visited' | 'no_show' | 'expired';
+type Target = '/mypage/bookings' | '/booking' | '/aftercare';
 
-interface Seen {
-  status: Record<string, string>; // 요청 id → 마지막으로 본 상태
-  replies: Record<string, number>; // 요청 id → 본 답장 수
-  aftercare: Record<string, string>; // 요청 id → 본 마지막 메시지 시각
+interface ServerNotice {
+  id: number;
+  kind: 'status' | 'reply' | 'aftercare';
+  request_id: string;
+  hospital_id: number | null;
+  status: NotifyStatus | null;
+  created_at: string;
+  read: boolean;
 }
 
-interface Snapshot {
-  bookings: { id: string; status: string; replies: number; lastReplyAt?: string; hospitalId: number; updatedAt: string }[];
-  aftercare: { requestId: string; lastAt: string; unread: number }[];
-}
+export type Notice = {
+  key: string;
+  ids: number[]; // 같은 예약의 같은 종류는 한 줄로 묶음 (예: 답장 3개)
+  kind: ServerNotice['kind'];
+  status?: NotifyStatus;
+  count: number;
+  requestId: string;
+  hospital?: KoEn;
+  at: string;
+  to: Target;
+};
 
 interface Ctx {
   notices: Notice[];
   markRead: (n: Notice) => void;
   markAll: () => void;
-  countFor: (to: Notice['to']) => number;
+  countFor: (to: Target) => number;
+  live: boolean; // Realtime 연결됨
 }
 
-const NotificationsContext = createContext<Ctx>({ notices: [], markRead: () => {}, markAll: () => {}, countFor: () => 0 });
+const NotificationsContext = createContext<Ctx>({ notices: [], markRead: () => {}, markAll: () => {}, countFor: () => 0, live: false });
 export const useNotifications = () => useContext(NotificationsContext);
 
-const seenKey = (account: string) => `notifySeen@${account}`;
-function readSeen(account: string): Seen | null {
-  try {
-    const v = JSON.parse(readSetting(seenKey(account)) ?? 'null');
-    return v && typeof v === 'object' ? { status: v.status ?? {}, replies: v.replies ?? {}, aftercare: v.aftercare ?? {} } : null;
-  } catch {
-    return null;
-  }
-}
-const writeSeen = (account: string, seen: Seen) => writeSetting(seenKey(account), JSON.stringify(seen));
-
-function seenFrom(s: Snapshot): Seen {
-  return {
-    status: Object.fromEntries(s.bookings.map((b) => [b.id, b.status])),
-    replies: Object.fromEntries(s.bookings.map((b) => [b.id, b.replies])),
-    aftercare: Object.fromEntries(s.aftercare.map((a) => [a.requestId, a.lastAt])),
-  };
-}
+const TARGET: Record<ServerNotice['kind'], Target> = { status: '/mypage/bookings', reply: '/booking', aftercare: '/aftercare' };
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user, account, token } = useAuth();
   const member = !!user && !user.demo && !!token;
   const hospitals = useHospitals();
-  const [snap, setSnap] = useState<Snapshot | null>(null);
-  const [seen, setSeen] = useState<Seen | null>(null);
-  const [names, setNames] = useState<Record<number, string>>({}); // 백엔드 병원 id → ykiho
+  const [rows, setRows] = useState<ServerNotice[]>([]);
+  const [ykiho, setYkiho] = useState<Record<number, string>>({});
+  const [live, setLive] = useState(false);
+  const [epoch, setEpoch] = useState(0); // 바꾸면 Realtime 다시 연결 (토큰 만료 전·연결 끊김)
   const accountRef = useRef(account);
   accountRef.current = account;
 
-  // 계정이 바뀌면 처음부터
-  useEffect(() => {
-    setSnap(null);
-    setSeen(member ? readSeen(account) : null);
-  }, [account, member]);
+  useEffect(() => setRows([]), [account]);
 
   const load = useCallback(async () => {
     if (!member || !token) return;
-    const key = account;
-    const [mine, care] = await Promise.all([listMine(token), listAftercare(token).catch(() => [])]);
+    const key = accountRef.current;
+    const list = await api<ServerNotice[]>('/me/notifications', { token });
     if (accountRef.current !== key) return;
-    const next: Snapshot = {
-      bookings: mine.map((b) => {
-        const replies = (b as { replies?: { sent_at: string }[] }).replies ?? []; // 답장 API가 있는 서버에서만
-        return { id: b.id, status: b.status, replies: replies.length, lastReplyAt: replies[replies.length - 1]?.sent_at, hospitalId: b.hospital_id, updatedAt: b.created_at };
-      }),
-      // 병원이 보낸 새 메시지(내가 마지막으로 보낸 뒤)가 있는 대화만
-      aftercare: care.map((t) => ({ requestId: t.request_id, lastAt: t.last_message_at, unread: t.unread })),
-    };
-    setSnap(next);
-    setSeen((prev) => {
-      if (prev) return prev;
-      const first = seenFrom(next); // 처음: 지금 상태를 본 것으로
-      writeSeen(key, first);
-      return first;
-    });
-    const ids = [...new Set(next.bookings.map((b) => b.hospitalId))];
+    setRows(list);
+    const ids = [...new Set(list.map((n) => n.hospital_id).filter((x): x is number => x !== null))];
     const pairs = await Promise.all(ids.map(async (id) => [id, await ykihoOf(id).catch(() => undefined)] as const));
-    if (accountRef.current === key) setNames(Object.fromEntries(pairs.filter(([, y]) => y)) as Record<number, string>);
-  }, [member, token, account]);
+    if (accountRef.current === key) setYkiho(Object.fromEntries(pairs.filter(([, y]) => y)) as Record<number, string>);
+  }, [member, token]);
 
-  // 30초마다 + 탭으로 돌아올 때
+  // 처음 + 탭으로 돌아올 때 + (Realtime이 없을 때만) 60초마다
   useEffect(() => {
     if (!member) return;
     load().catch(() => {});
-    const timer = window.setInterval(() => document.visibilityState === 'visible' && load().catch(() => {}), POLL_MS);
     const onFocus = () => load().catch(() => {});
     window.addEventListener('focus', onFocus);
+    const timer = live ? 0 : window.setInterval(() => document.visibilityState === 'visible' && load().catch(() => {}), FALLBACK_MS);
     return () => {
-      window.clearInterval(timer);
       window.removeEventListener('focus', onFocus);
+      if (timer) window.clearInterval(timer);
     };
-  }, [member, load]);
+  }, [member, load, live]);
+
+  // Realtime 구독: 새 알림 줄이 생기면 목록을 다시 불러옴 (병원 이름·묶음을 서버 기준으로 맞춤)
+  useEffect(() => {
+    if (!member || !token || !PUBLISHABLE_KEY) return;
+    let client: SupabaseClient | null = null;
+    let channel: RealtimeChannel | null = null;
+    let refresh = 0;
+    let stopped = false;
+    (async () => {
+      const rt = await api<{ url: string; token: string; expires_at: string }>('/me/notifications/realtime-token', { method: 'POST', token });
+      if (stopped) return;
+      client = createClient(rt.url, PUBLISHABLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+        accessToken: async () => rt.token,
+      });
+      client.realtime.setAuth(rt.token);
+      const me = JSON.parse(atob(rt.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).sub as string;
+      channel = client
+        .channel(`notifications:${me}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `patient_id=eq.${me}` }, () => {
+          load().catch(() => {});
+        })
+        .subscribe((status) => {
+          if (stopped) return;
+          setLive(status === 'SUBSCRIBED');
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            window.clearTimeout(refresh);
+            refresh = window.setTimeout(() => setEpoch((e) => e + 1), 30_000); // 30초 뒤 다시 (그동안은 60초 확인)
+          }
+        });
+      // 토큰(1시간)이 끝나기 5분 전에 새 토큰으로 다시 연결
+      const ms = Math.max(60_000, Date.parse(rt.expires_at) - Date.now() - 5 * 60_000);
+      refresh = window.setTimeout(() => setEpoch((e) => e + 1), ms);
+    })().catch(() => {
+      if (stopped) return;
+      setLive(false);
+      refresh = window.setTimeout(() => setEpoch((e) => e + 1), 60_000);
+    });
+    return () => {
+      stopped = true;
+      window.clearTimeout(refresh);
+      if (channel && client) client.removeChannel(channel);
+      setLive(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load는 token과 같이 바뀜 (넣으면 매번 다시 연결)
+  }, [member, token, epoch]);
 
   const notices = useMemo<Notice[]>(() => {
-    if (!snap || !seen) return [];
     const byYkiho = hospitals.status === 'ready' ? new Map(hospitals.data.items.map((h) => [h.id, h])) : new Map();
-    const nameOf = (hospitalId: number) => {
-      const h = byYkiho.get(names[hospitalId]);
+    const nameOf = (hid: number | null) => {
+      const h = hid === null ? undefined : byYkiho.get(ykiho[hid]);
       return h ? hospitalNames(h) : undefined;
     };
-    const hospitalOfRequest = new Map(snap.bookings.map((b) => [b.id, b.hospitalId]));
-    const out: Notice[] = [];
-    for (const b of snap.bookings) {
-      const before = seen.status[b.id];
-      if (b.status !== before && (NOTIFY_STATUS as readonly string[]).includes(b.status)) {
-        out.push({ key: `status:${b.id}:${b.status}`, kind: 'status', status: b.status as NotifyStatus, requestId: b.id, hospital: nameOf(b.hospitalId), at: b.updatedAt, to: '/mypage/bookings' });
-      }
-      const newReplies = b.replies - (seen.replies[b.id] ?? 0);
-      if (newReplies > 0) {
-        out.push({ key: `reply:${b.id}:${b.replies}`, kind: 'reply', count: newReplies, requestId: b.id, hospital: nameOf(b.hospitalId), at: b.lastReplyAt ?? b.updatedAt, to: '/booking' });
-      }
-    }
-    for (const a of snap.aftercare) {
-      if (a.unread > 0 && a.lastAt !== seen.aftercare[a.requestId]) {
-        const hid = hospitalOfRequest.get(a.requestId);
-        out.push({ key: `aftercare:${a.requestId}:${a.lastAt}`, kind: 'aftercare', count: a.unread, requestId: a.requestId, hospital: hid ? nameOf(hid) : undefined, at: a.lastAt, to: '/aftercare' });
+    const groups = new Map<string, Notice>();
+    for (const n of rows) {
+      if (n.read) continue;
+      const key = n.kind === 'status' ? `status:${n.request_id}:${n.id}` : `${n.kind}:${n.request_id}`;
+      const g = groups.get(key);
+      if (g) {
+        g.ids.push(n.id);
+        g.count += 1;
+      } else {
+        groups.set(key, {
+          key, ids: [n.id], kind: n.kind, status: n.status ?? undefined, count: 1, requestId: n.request_id,
+          hospital: nameOf(n.hospital_id), at: n.created_at, to: TARGET[n.kind],
+        });
       }
     }
-    return out.sort((x, y) => y.at.localeCompare(x.at));
-  }, [snap, seen, names, hospitals]);
+    return [...groups.values()].sort((a, b) => b.at.localeCompare(a.at));
+  }, [rows, ykiho, hospitals]);
 
-  const save = useCallback(
-    (fn: (s: Seen) => Seen) =>
-      setSeen((prev) => {
-        if (!prev) return prev;
-        const next = fn(prev);
-        writeSeen(accountRef.current, next);
-        return next;
-      }),
-    [],
-  );
-
-  const markRead = useCallback(
-    (n: Notice) => {
-      const b = snap?.bookings.find((x) => x.id === n.requestId);
-      const a = snap?.aftercare.find((x) => x.requestId === n.requestId);
-      save((s) =>
-        n.kind === 'status' && b ? { ...s, status: { ...s.status, [b.id]: b.status } }
-        : n.kind === 'reply' && b ? { ...s, replies: { ...s.replies, [b.id]: b.replies } }
-        : n.kind === 'aftercare' && a ? { ...s, aftercare: { ...s.aftercare, [a.requestId]: a.lastAt } }
-        : s,
-      );
+  const read = useCallback(
+    (ids: number[] | null) => {
+      if (!token) return;
+      setRows((prev) => prev.map((n) => (ids === null || ids.includes(n.id) ? { ...n, read: true } : n))); // 바로 반영
+      api('/me/notifications/read', { method: 'POST', token, body: { ids } }).catch(() => load().catch(() => {}));
     },
-    [snap, save],
+    [token, load],
   );
 
-  const markAll = useCallback(() => {
-    if (snap) save(() => seenFrom(snap));
-  }, [snap, save]);
+  const markRead = useCallback((n: Notice) => read(n.ids), [read]);
+  const markAll = useCallback(() => read(null), [read]);
+  const countFor = useCallback((to: Target) => notices.filter((n) => n.to === to).length, [notices]);
 
-  const countFor = useCallback((to: Notice['to']) => notices.filter((n) => n.to === to).length, [notices]);
-
-  const value = useMemo(() => ({ notices, markRead, markAll, countFor }), [notices, markRead, markAll, countFor]);
+  const value = useMemo(() => ({ notices, markRead, markAll, countFor, live }), [notices, markRead, markAll, countFor, live]);
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
 }
 
 /** 그 화면을 열면 그 화면의 알림은 읽은 것으로 (예: 예약 관리를 열면 상태 알림) */
-export function useMarkSeenOn(to: Notice['to']) {
+export function useMarkSeenOn(to: Target) {
   const { notices, markRead } = useNotifications();
   useEffect(() => {
     notices.filter((n) => n.to === to).forEach(markRead);
