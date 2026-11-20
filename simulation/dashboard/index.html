@@ -60,7 +60,7 @@ details .in{padding:0 18px 18px}
 <body>
 <div class="wrap">
   <h1>메디대구 수익 시뮬레이션</h1>
-  <div class="lead">운영 시작 후 2년(3개월씩 8분기) · 요금안 v4: 기본 수수료 13%, 프리미엄 월 15만 원 + 8% · 숫자는 추정이며 실적이 아닙니다 · <span id="upd"></span></div>
+  <div class="lead">운영 시작 후 3년(1년 단위) · 팀 인건비 4명×주 4일×하루 4시간 · 광고 배너 월 15만 원 포함 · 요금안 v4: 기본 수수료 13%, 프리미엄 월 15만 원 + 8% · 숫자는 추정이며 실적이 아닙니다 · <span id="upd"></span></div>
   <div id="app"><div class="card empty">결과 계산 전입니다.</div></div>
 </div>
 
@@ -84,60 +84,62 @@ function render(){
   const app = document.getElementById('app');
   const runs = R.scenarios.map(s=>run(s,L)), base = run('기준',L), Ld = R.L_levels[L];
   const scColor = ['--s0','--s1','--s2'].map(css), scBg = ['--s0bg','--s1bg','--s2bg'].map(css);
-  const bs = base.summary;
-  const headline = bs.first_profit_q
-    ? `기준 시나리오라면 <b>${bs.first_profit_q}</b>에 처음 분기 흑자가 나고, 그때까지 <b>약 ${man(bs.need_capital)}원</b>의 자금이 필요합니다.`
-    : `기준 시나리오라면 <b>2년 안에 흑자가 나지 않습니다</b>. 2년 동안 <b>${man(-bs.op_24)}원</b> 적자이고, 필요한 자금은 약 ${man(bs.need_capital)}원입니다.`;
+  const bs = base.summary, by = base.years;
+  const yearsTxt = by.map(y=>`${y.y} <b class="${cls(y.op)}">${manS(y.op)}원</b>`).join(' → ');
+  const headline = (bs.first_profit_year
+    ? `기준 시나리오라면 <b>${bs.first_profit_year}</b>에 처음 연간 흑자가 나고, 그때까지 <b>약 ${man(bs.need_capital)}원</b>의 자금이 필요합니다.`
+    : `기준 시나리오라면 <b>3년 안에 연간 흑자가 나지 않습니다</b>${bs.first_profit_q?` (분기로는 ${bs.first_profit_q}부터 흑자)`:''}. 3년 동안 <b>${man(-bs.op_total)}원</b> 적자이고, 필요한 자금은 약 <b>${man(bs.need_capital)}원</b>입니다.`)
+    + `<div class="note" style="font-size:14px;margin-top:6px">연간 손익: ${yearsTxt}</div>`;
   const leverRows = (list, kind) => list.map(x=>{ const y=x.by_L[L];
-    return `<tr class="${kind}"><td>${x.name}</td><td class="how">${x.change}<br>${x.how}</td><td class="${cls(y.delta)}">${manS(y.delta)}</td><td>${y.first||'없음'}</td><td class="${cls(y.op_24)}">${manS(y.op_24)}</td><td>${man(y.need)}</td></tr>`}).join('');
+    return `<tr class="${kind}"><td>${x.name}</td><td class="how">${x.change}<br>${x.how}</td><td class="${cls(y.delta)}">${manS(y.delta)}</td><td>${y.first_year||'없음'}</td><td class="${cls(y.y3_op)}">${manS(y.y3_op)}</td><td class="${cls(y.op_total)}">${manS(y.op_total)}</td><td>${man(y.need)}</td></tr>`}).join('');
 
   app.innerHTML = `
   <div class="sticky"><div class="ctrl"><b>팀 인건비 (팀 전체 월 총액)</b>
-    ${R.L_levels.map((l,i)=>`<button data-l="${i}" class="${i===L?'on':''}">${l.label}</button>`).join('')}
+    ${R.L_levels.map((l,i)=>`<button data-l="${i}" class="${i===L?'on':''}">${l.label}${i===R.L_selected?' · 적용':''}</button>`).join('')}
     <span class="hint">${Ld.desc}. 버튼을 바꾸면 아래 숫자가 모두 바뀝니다.</span></div></div>
 
   <div class="banner">${headline}</div>
 
-  <h2>① 시나리오 3개 한눈에</h2>
-  <div class="lead">같은 병원 확보 경로(1년차 말 25곳, 2년차 말 46곳)에서 거래가 적을 때·예상대로일 때·많을 때를 비교합니다.</div>
+  <h2>① 시나리오 3개 한눈에 (1년 단위)</h2>
+  <div class="lead">같은 병원 확보 경로(1년차 말 25곳 → 2년차 말 46곳 → 3년차 말 67곳)에서 거래가 적을 때·예상대로일 때·많을 때를 비교합니다. 광고 배너 수익 월 15만 원 포함.</div>
   <div class="grid g3">
     ${runs.map((r,i)=>{const s=r.summary; return `<div class="card sc" style="border-top-color:${scColor[i]};background:linear-gradient(${scBg[i]},var(--card) 90px)">
       <div class="name" style="color:${scColor[i]}">${r.scenario}</div><div class="desc">${SC_DESC[r.scenario]}</div>
-      <div class="metric"><span>첫 분기 흑자</span><strong class="${s.first_profit_q?'pos':'neg'}">${s.first_profit_q||'2년 안에 없음'}</strong></div>
-      <div class="metric"><span>2년 매출 (수수료+구독)</span><strong>${man(s.revenue_24)}원</strong></div>
-      <div class="metric"><span>2년 손익 합계</span><strong class="${cls(s.op_24)}">${manS(s.op_24)}원</strong></div>
+      <div class="metric"><span>첫 흑자 연도</span><strong class="${s.first_profit_year?'pos':'neg'}">${s.first_profit_year||'3년 안에 없음'}</strong></div>
+      ${r.years.map(y=>`<div class="metric"><span>${y.y} 손익</span><strong class="${cls(y.op)}">${manS(y.op)}원</strong></div>`).join('')}
+      <div class="metric"><span>3년 매출 합계</span><strong>${man(s.revenue_total)}원</strong></div>
+      <div class="metric"><span>3년 손익 합계</span><strong class="${cls(s.op_total)}">${manS(s.op_total)}원</strong></div>
       <div class="metric"><span>필요 초기자금</span><strong>${man(s.need_capital)}원</strong></div>
-      <div class="metric"><span>마지막 분기(Q8) 손익</span><strong class="${cls(r.quarters[7].op)}">${manS(r.quarters[7].op)}원</strong></div>
     </div>`}).join('')}
   </div>
   <div class="grid g2" style="margin-top:14px">
-    <div class="card"><h3>분기별 손익 — 0선 위로 올라가면 흑자</h3><canvas id="c1"></canvas></div>
-    <div class="card"><h3>통장 잔고 변화 — 가장 낮은 점이 필요한 자금</h3><canvas id="c2"></canvas></div>
+    <div class="card"><h3>연간 손익 — 0선 위면 흑자</h3><canvas id="c1"></canvas></div>
+    <div class="card"><h3>연말 통장 잔고 — 초기자금 0원에서 시작</h3><canvas id="c2"></canvas></div>
   </div>
-  <div class="glossary"><span><b>손익</b> = 번 돈(수수료·구독료) − 쓴 돈(인건비·마케팅·운영비)</span><span><b>필요 초기자금</b> = 통장이 가장 많이 비는 금액 + 3개월 예비비</span><span><b>매출</b>은 병원 진료비가 아니라 우리가 받는 수수료·구독료</span></div>
+  <div class="glossary"><span><b>손익</b> = 번 돈(수수료·구독료·광고) − 쓴 돈(인건비·마케팅·운영비)</span><span><b>필요 초기자금</b> = 통장이 가장 많이 비는 금액 + 3개월 예비비</span><span><b>매출</b>은 병원 진료비가 아니라 우리가 받는 수수료·구독료·광고비</span></div>
 
   <h2>② 흑자로 바꾸려면 — 우리가 바꿀 수 있는 것</h2>
-  <div class="lead">기준 시나리오에서 한 가지씩 바꿨을 때 2년 손익이 얼마나 좋아지는지 보여 줍니다 (팀 인건비 ${Ld.label}).</div>
+  <div class="lead">기준 시나리오에서 한 가지씩 바꿨을 때 3년 손익이 얼마나 좋아지는지 보여 줍니다 (팀 인건비 ${Ld.label}).</div>
   <div class="grid g2">
-    <div class="card"><h3>2년 손익 개선 폭</h3><canvas id="c3" style="max-height:340px"></canvas></div>
+    <div class="card"><h3>3년 손익 개선 폭</h3><canvas id="c3" style="max-height:340px"></canvas></div>
     <div class="card"><h3>핵심 정리</h3><ul class="c">${R.lever_summary.map(t=>`<li>${t}</li>`).join('')}</ul></div>
   </div>
   <div class="card" style="margin-top:14px"><div class="scroll"><table>
-    <thead><tr><th>방법</th><th style="text-align:left">무엇을 · 어떻게</th><th>2년 손익 개선</th><th>첫 흑자</th><th>2년 손익 합계</th><th>필요 초기자금</th></tr></thead>
+    <thead><tr><th>방법</th><th style="text-align:left">무엇을 · 어떻게</th><th>3년 손익 개선</th><th>첫 흑자 연도</th><th>3년차 손익</th><th>3년 손익 합계</th><th>필요 초기자금</th></tr></thead>
     <tbody>
-      <tr class="ref"><td>지금 (기준)</td><td class="how">아무것도 바꾸지 않음</td><td>-</td><td>${bs.first_profit_q||'없음'}</td><td class="${cls(bs.op_24)}">${manS(bs.op_24)}</td><td>${man(bs.need_capital)}</td></tr>
+      <tr class="ref"><td>지금 (기준)</td><td class="how">아무것도 바꾸지 않음</td><td>-</td><td>${bs.first_profit_year||'없음'}</td><td class="${cls(bs.y3_op)}">${manS(bs.y3_op)}</td><td class="${cls(bs.op_total)}">${manS(bs.op_total)}</td><td>${man(bs.need_capital)}</td></tr>
       ${leverRows(R.combos,'combo')}${leverRows(R.levers,'')}${leverRows(R.ref_levers,'ref')}
     </tbody></table></div>
     <div class="note">엑셀에서 같은 결과를 보려면 가정 시트에서 해당 칸을 바꾸면 됩니다 (엑셀 '개선방안' 시트에 바꿀 칸 표시). 요금(참고) 두 줄은 팀 확정 요금안을 바꿔야 해서 참고로만 둡니다.</div></div>
 
   <h2>③ 자세히 보기</h2>
-  <details><summary>분기별 손익표 (시나리오별)</summary><div class="in">
+  <details><summary>연간 손익표 (시나리오별)</summary><div class="in">
     <div class="ctrl" style="margin-bottom:10px">${R.scenarios.map(s=>`<button data-tsc="${s}" class="${s==='기준'?'on':''}">${s}</button>`).join('')}</div>
     <div class="scroll" id="tbl"></div></div></details>
-  <details><summary>무엇이 결과를 가장 크게 흔드나 (민감도)</summary><div class="in"><canvas id="c4"></canvas><div class="note">${R.sensitivity_note}</div></div></details>
+  <details><summary>무엇이 결과를 가장 크게 흔드나 (민감도 · 3년차)</summary><div class="in"><canvas id="c4"></canvas><div class="note">${R.sensitivity_note}</div></div></details>
   <details><summary>거래 1건·병원 1곳·환자 1명 기준 (단위경제)</summary><div class="in"><table><tbody>${R.unit.map(u=>`<tr><td>${u[0]}</td><td>${u[1]}</td></tr>`).join('')}</tbody></table></div></details>
-  <details><summary>손익분기에 필요한 거래 수</summary><div class="in"><table><thead><tr><th>팀 인건비</th><th>필요 월 진료 완료</th><th>2년차 말 예상</th><th>배수</th></tr></thead><tbody>
-    ${R.breakeven.map(b=>`<tr><td>${b.label}</td><td>${b.need.toFixed(1)}건</td><td>${b.have.toFixed(1)}건</td><td>${(b.need/b.have).toFixed(2)}배</td></tr>`).join('')}</tbody></table><div class="note">${R.breakeven_note}</div></div></details>
+  <details><summary>손익분기에 필요한 거래 수</summary><div class="in"><table><thead><tr><th>팀 인건비</th><th>필요 월 진료 완료</th><th>3년차 말 예상</th><th>배수</th><th>필요 평균 병원 수</th></tr></thead><tbody>
+    ${R.breakeven.map(b=>`<tr><td>${b.label}</td><td>${b.need.toFixed(1)}건</td><td>${b.have.toFixed(1)}건</td><td>${(b.need/b.have).toFixed(2)}배</td><td>${b.hospitals.toFixed(0)}곳</td></tr>`).join('')}</tbody></table><div class="note">${R.breakeven_note}</div></div></details>
   <details><summary>결론 · 주의할 점</summary><div class="in"><h3>결론</h3><ul class="c">${R.conclusions.map(c=>`<li>${c}</li>`).join('')}</ul><h3 style="margin-top:14px">주의할 점</h3><ul class="c">${R.cautions.map(c=>`<li>${c}</li>`).join('')}</ul></div></details>
   <details><summary>작업 진행 기록</summary><div class="in" id="prog"></div></details>`;
 
@@ -147,27 +149,28 @@ function render(){
   if(URLQ.get('open')==='1') app.querySelectorAll('details').forEach(d=>d.open=true);
 
   Chart.defaults.color = css('--sub'); Chart.defaults.borderColor = css('--line'); Chart.defaults.font.size = 12; Chart.defaults.animation = false;
-  const labels = base.quarters.map(q=>q.q);
   const yMan = {ticks:{callback:v=>man(v)}};
-  chart('c1',{type:'line',data:{labels,datasets:runs.map((r,i)=>({label:r.scenario,data:r.quarters.map(q=>q.op),borderColor:scColor[i],backgroundColor:scColor[i],borderWidth:i===1?3:2,tension:.25}))},
-    options:{plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+won(c.raw)}}},scales:{y:{...yMan,grid:{color:c=>c.tick.value===0?css('--ink'):css('--line')}}}}});
-  chart('c2',{type:'line',data:{labels,datasets:runs.map((r,i)=>({label:r.scenario,data:r.quarters.map(q=>q.cash_cum),borderColor:scColor[i],backgroundColor:scColor[i],borderWidth:i===1?3:2,tension:.25}))},
-    options:{plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+won(c.raw)}}},scales:{y:{...yMan,grid:{color:c=>c.tick.value===0?css('--ink'):css('--line')}}}}});
+  const zero = {grid:{color:c=>c.tick.value===0?css('--ink'):css('--line')}};
+  chart('c1',{type:'bar',data:{labels:R.years,datasets:runs.map((r,i)=>({label:r.scenario,data:r.years.map(y=>y.op),backgroundColor:scColor[i]}))},
+    options:{plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+won(c.raw)}}},scales:{y:{...yMan,...zero}}}});
+  chart('c2',{type:'line',data:{labels:['시작',...R.years.map(y=>y+' 말')],datasets:runs.map((r,i)=>({label:r.scenario,data:[0,...r.years.map(y=>y.cash_end)],borderColor:scColor[i],backgroundColor:scColor[i],borderWidth:i===1?3:2,tension:.2}))},
+    options:{plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+won(c.raw)}}},scales:{y:{...yMan,...zero}}}});
   const lv = [...R.combos, ...R.levers, ...R.ref_levers].map(x=>({n:x.name,d:x.by_L[L].delta,k:x.group}));
   chart('c3',{type:'bar',data:{labels:lv.map(x=>x.n),datasets:[{data:lv.map(x=>x.d),backgroundColor:lv.map(x=>x.k==='묶음'?css('--accent'):x.k.startsWith('요금')?css('--line'):css('--pos'))}]},
-    options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'2년 손익 '+manS(c.raw)+'원'}}},scales:{x:yMan,y:{ticks:{autoSkip:false}}}}});
+    options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'3년 손익 '+manS(c.raw)+'원'}}},scales:{x:yMan,y:{ticks:{autoSkip:false}}}}});
   const S = R.sensitivity;
   chart('c4',{type:'bar',data:{labels:S.map(s=>s.name),datasets:[
     {label:'20% 낮을 때',data:S.map(s=>s.minus-R.sens_base),backgroundColor:css('--neg')},
     {label:'20% 높을 때',data:S.map(s=>s.plus-R.sens_base),backgroundColor:css('--pos')}]},
-    options:{indexAxis:'y',plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': 분기 손익 '+manS(c.raw)+'원'}}},scales:{x:yMan,y:{ticks:{autoSkip:false}}}}});
+    options:{indexAxis:'y',plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': 3년차 손익 '+manS(c.raw)+'원'}}},scales:{x:yMan,y:{ticks:{autoSkip:false}}}}});
 }
 
 function table(sc){
-  const Q = run(sc,L).quarters;
-  const rows = [['deals','진료 완료 (건)',1],['revenue','매출 (수수료+구독)'],['contrib','공헌이익 (매출 − 건별 비용)'],['labor','팀 인건비'],['mkt','마케팅비'],['fixed','기타 고정비'],['onboard','병원 온보딩비'],['op','분기 손익'],['cash_cum','통장 잔고 (누적)']];
-  document.getElementById('tbl').innerHTML = `<table><thead><tr><th>항목</th>${Q.map(q=>`<th>${q.q}</th>`).join('')}</tr></thead><tbody>
-    ${rows.map(([k,n,cnt])=>`<tr><td>${n}</td>${Q.map(q=>`<td class="${['op','cash_cum'].includes(k)?cls(q[k]):''}">${cnt?q[k].toFixed(1):man(q[k])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  const Y = run(sc,L).years;
+  const rows = [['hospitals_end','연말 입점 병원 (곳)',1],['deals','진료 완료 (건)',1],['fee_basic','기본 수수료 (13%)'],['fee_prem','프리미엄 수수료 (8%)'],['sub','구독료'],['ad','광고 배너'],['revenue','매출 합계'],['contrib','공헌이익 (매출 − 건별 비용)'],['labor','팀 인건비'],['mkt','마케팅비'],['fixed','기타 고정비'],['onboard','병원 온보딩비'],['op','연간 손익'],['cash_end','연말 통장 잔고']];
+  document.getElementById('tbl').innerHTML = `<table><thead><tr><th>항목</th>${Y.map(y=>`<th>${y.y}</th>`).join('')}<th>3년 합계</th></tr></thead><tbody>
+    ${rows.map(([k,n,cnt])=>{const tot=['hospitals_end','cash_end'].includes(k)?'':(cnt?Y.reduce((a,y)=>a+y[k],0).toFixed(0):man(Y.reduce((a,y)=>a+y[k],0)));
+      return `<tr><td>${n}</td>${Y.map(y=>`<td class="${['op','cash_end'].includes(k)?cls(y[k]):''}">${cnt?y[k].toFixed(cnt&&k==='deals'?1:0):man(y[k])}</td>`).join('')}<td>${tot}</td></tr>`}).join('')}</tbody></table>`;
 }
 
 function renderProgress(){
