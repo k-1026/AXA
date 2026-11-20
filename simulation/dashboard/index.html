@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메디대구 수익 시뮬레이션</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--sub:#5f6878;--line:#e3e6eb;--accent:#2f6fde;--pos:#1f8a5b;--neg:#c8463d;--soft:#eef3fd;
+  --s0:#d0703a;--s1:#2f6fde;--s2:#1f9a62;--s0bg:#fdf3ec;--s1bg:#eef3fd;--s2bg:#ecf8f1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e8ebf0;--sub:#9aa3b2;--line:#2c323c;--accent:#6c9cf0;--pos:#4cc38a;--neg:#ef7a70;--soft:#232b3a;
+  --s0:#ef9a62;--s1:#6c9cf0;--s2:#4cc38a;--s0bg:#2c231d;--s1bg:#1f2735;--s2bg:#1c2a23}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:24px;margin:0}
+h2{font-size:19px;margin:34px 0 4px}
+h3{font-size:15px;margin:0 0 10px}
+.lead{color:var(--sub);font-size:14px;margin:2px 0 14px}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin:0 -16px;padding-left:16px;padding-right:16px}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ctrl b{font-size:14px;margin-right:4px}
+.ctrl button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;font:inherit;font-size:14px}
+.ctrl button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.ctrl .hint{color:var(--sub);font-size:12.5px;flex-basis:100%}
+.banner{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:12px;padding:16px 18px;font-size:16.5px;margin-top:16px}
+.sc{border-top:5px solid}
+.sc .name{font-weight:700;font-size:17px}
+.sc .desc{color:var(--sub);font-size:12.5px;margin:2px 0 12px;min-height:38px}
+.metric{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line)}
+.metric:last-child{border:0}
+.metric span{color:var(--sub);font-size:13.5px}
+.metric strong{font-size:18px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+canvas{max-height:280px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+th:first-child,td:first-child{text-align:left}
+thead th{color:var(--sub);font-weight:600;font-size:12.5px}
+.scroll{overflow-x:auto}
+td.how{color:var(--sub);font-size:12.5px;text-align:left;max-width:320px}
+tr.combo td{background:var(--soft);font-weight:600}
+tr.ref td{color:var(--sub)}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--accent);margin-left:6px;font-weight:600}
+ul.c{margin:0;padding-left:18px}ul.c li{margin:6px 0}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:12px}
+details summary{cursor:pointer;padding:14px 18px;font-weight:600}
+details .in{padding:0 18px 18px}
+.glossary{font-size:12.5px;color:var(--sub);display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
+.glossary b{color:var(--ink)}
+.steps{list-style:none;margin:0;padding:0;font-size:13.5px}
+.steps li{padding:4px 0}
+.note{color:var(--sub);font-size:12.5px;margin-top:8px}
+.empty{color:var(--sub);padding:40px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>메디대구 수익 시뮬레이션</h1>
+  <div class="lead">운영 시작 후 2년(3개월씩 8분기) · 요금안 v4: 기본 수수료 13%, 프리미엄 월 15만 원 + 8% · 숫자는 추정이며 실적이 아닙니다 · <span id="upd"></span></div>
+  <div id="app"><div class="card empty">결과 계산 전입니다.</div></div>
+</div>
+
+<script>
+const man = v => v==null ? '-' : Math.round(v/1e4).toLocaleString('ko-KR') + '만';
+const manS = v => (v>0?'+':'') + man(v);
+const won = v => Math.round(v).toLocaleString('ko-KR') + '원';
+const cls = v => v>=0 ? 'pos' : 'neg';
+const SC_DESC = {
+  '보수':'거래 빈도·진료비 −20%, 전환율 낮고 직접비·온보딩비 높음',
+  '기준':'시장규모 문서의 팀 가정 그대로 (병원당 월 기본 0.5건 · 프리미엄 4건, 진료비 73만 원)',
+  '낙관':'거래 빈도·진료비 +20%, 전환율 높고 직접비 낮음'};
+const URLQ = new URLSearchParams(location.search);  // ?L=0|1|2 인건비 단계, ?open=1 세부 펼침 (이미지 저장용)
+let R=null, P=null, L=URLQ.has('L')?+URLQ.get('L'):1, charts={}, lastR='';
+
+function css(k){return getComputedStyle(document.documentElement).getPropertyValue(k).trim()}
+function chart(id,cfg){ if(charts[id]) charts[id].destroy(); charts[id]=new Chart(document.getElementById(id),cfg) }
+const run = (sc,li) => R.runs.find(r=>r.scenario===sc && r.L_index===li);
+
+function render(){
+  const app = document.getElementById('app');
+  const runs = R.scenarios.map(s=>run(s,L)), base = run('기준',L), Ld = R.L_levels[L];
+  const scColor = ['--s0','--s1','--s2'].map(css), scBg = ['--s0bg','--s1bg','--s2bg'].map(css);
+  const bs = base.summary;
+  const headline = bs.first_profit_q
+    ? `기준 시나리오라면 <b>${bs.first_profit_q}</b>에 처음 분기 흑자가 나고, 그때까지 <b>약 ${man(bs.need_capital)}원</b>의 자금이 필요합니다.`
+    : `기준 시나리오라면 <b>2년 안에 흑자가 나지 않습니다</b>. 2년 동안 <b>${man(-bs.op_24)}원</b> 적자이고, 필요한 자금은 약 ${man(bs.need_capital)}원입니다.`;
+  const leverRows = (list, kind) => list.map(x=>{ const y=x.by_L[L];
+    return `<tr class="${kind}"><td>${x.name}</td><td class="how">${x.change}<br>${x.how}</td><td class="${cls(y.delta)}">${manS(y.delta)}</td><td>${y.first||'없음'}</td><td class="${cls(y.op_24)}">${manS(y.op_24)}</td><td>${man(y.need)}</td></tr>`}).join('');
+
+  app.innerHTML = `
+  <div class="sticky"><div class="ctrl"><b>팀 인건비 (팀 전체 월 총액)</b>
+    ${R.L_levels.map((l,i)=>`<button data-l="${i}" class="${i===L?'on':''}">${l.label}</button>`).join('')}
+    <span class="hint">${Ld.desc}. 버튼을 바꾸면 아래 숫자가 모두 바뀝니다.</span></div></div>
+
+  <div class="banner">${headline}</div>
+
+  <h2>① 시나리오 3개 한눈에</h2>
+  <div class="lead">같은 병원 확보 경로(1년차 말 25곳, 2년차 말 46곳)에서 거래가 적을 때·예상대로일 때·많을 때를 비교합니다.</div>
+  <div class="grid g3">
+    ${runs.map((r,i)=>{const s=r.summary; return `<div class="card sc" style="border-top-color:${scColor[i]};background:linear-gradient(${scBg[i]},var(--card) 90px)">
+      <div class="name" style="color:${scColor[i]}">${r.scenario}</div><div class="desc">${SC_DESC[r.scenario]}</div>
+      <div class="metric"><span>첫 분기 흑자</span><strong class="${s.first_profit_q?'pos':'neg'}">${s.first_profit_q||'2년 안에 없음'}</strong></div>
+      <div class="metric"><span>2년 매출 (수수료+구독)</span><strong>${man(s.revenue_24)}원</strong></div>
+      <div class="metric"><span>2년 손익 합계</span><strong class="${cls(s.op_24)}">${manS(s.op_24)}원</strong></div>
+      <div class="metric"><span>필요 초기자금</span><strong>${man(s.need_capital)}원</strong></div>
+      <div class="metric"><span>마지막 분기(Q8) 손익</span><strong class="${cls(r.quarters[7].op)}">${manS(r.quarters[7].op)}원</strong></div>
+    </div>`}).join('')}
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>분기별 손익 — 0선 위로 올라가면 흑자</h3><canvas id="c1"></canvas></div>
+    <div class="card"><h3>통장 잔고 변화 — 가장 낮은 점이 필요한 자금</h3><canvas id="c2"></canvas></div>
+  </div>
+  <div class="glossary"><span><b>손익</b> = 번 돈(수수료·구독료) − 쓴 돈(인건비·마케팅·운영비)</span><span><b>필요 초기자금</b> = 통장이 가장 많이 비는 금액 + 3개월 예비비</span><span><b>매출</b>은 병원 진료비가 아니라 우리가 받는 수수료·구독료</span></div>
+
+  <h2>② 흑자로 바꾸려면 — 우리가 바꿀 수 있는 것</h2>
+  <div class="lead">기준 시나리오에서 한 가지씩 바꿨을 때 2년 손익이 얼마나 좋아지는지 보여 줍니다 (팀 인건비 ${Ld.label}).</div>
+  <div class="grid g2">
+    <div class="card"><h3>2년 손익 개선 폭</h3><canvas id="c3" style="max-height:340px"></canvas></div>
+    <div class="card"><h3>핵심 정리</h3><ul class="c">${R.lever_summary.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="scroll"><table>
+    <thead><tr><th>방법</th><th style="text-align:left">무엇을 · 어떻게</th><th>2년 손익 개선</th><th>첫 흑자</th><th>2년 손익 합계</th><th>필요 초기자금</th></tr></thead>
+    <tbody>
+      <tr class="ref"><td>지금 (기준)</td><td class="how">아무것도 바꾸지 않음</td><td>-</td><td>${bs.first_profit_q||'없음'}</td><td class="${cls(bs.op_24)}">${manS(bs.op_24)}</td><td>${man(bs.need_capital)}</td></tr>
+      ${leverRows(R.combos,'combo')}${leverRows(R.levers,'')}${leverRows(R.ref_levers,'ref')}
+    </tbody></table></div>
+    <div class="note">엑셀에서 같은 결과를 보려면 가정 시트에서 해당 칸을 바꾸면 됩니다 (엑셀 '개선방안' 시트에 바꿀 칸 표시). 요금(참고) 두 줄은 팀 확정 요금안을 바꿔야 해서 참고로만 둡니다.</div></div>
+
+  <h2>③ 자세히 보기</h2>
+  <details><summary>분기별 손익표 (시나리오별)</summary><div class="in">
+    <div class="ctrl" style="margin-bottom:10px">${R.scenarios.map(s=>`<button data-tsc="${s}" class="${s==='기준'?'on':''}">${s}</button>`).join('')}</div>
+    <div class="scroll" id="tbl"></div></div></details>
+  <details><summary>무엇이 결과를 가장 크게 흔드나 (민감도)</summary><div class="in"><canvas id="c4"></canvas><div class="note">${R.sensitivity_note}</div></div></details>
+  <details><summary>거래 1건·병원 1곳·환자 1명 기준 (단위경제)</summary><div class="in"><table><tbody>${R.unit.map(u=>`<tr><td>${u[0]}</td><td>${u[1]}</td></tr>`).join('')}</tbody></table></div></details>
+  <details><summary>손익분기에 필요한 거래 수</summary><div class="in"><table><thead><tr><th>팀 인건비</th><th>필요 월 진료 완료</th><th>2년차 말 예상</th><th>배수</th></tr></thead><tbody>
+    ${R.breakeven.map(b=>`<tr><td>${b.label}</td><td>${b.need.toFixed(1)}건</td><td>${b.have.toFixed(1)}건</td><td>${(b.need/b.have).toFixed(2)}배</td></tr>`).join('')}</tbody></table><div class="note">${R.breakeven_note}</div></div></details>
+  <details><summary>결론 · 주의할 점</summary><div class="in"><h3>결론</h3><ul class="c">${R.conclusions.map(c=>`<li>${c}</li>`).join('')}</ul><h3 style="margin-top:14px">주의할 점</h3><ul class="c">${R.cautions.map(c=>`<li>${c}</li>`).join('')}</ul></div></details>
+  <details><summary>작업 진행 기록</summary><div class="in" id="prog"></div></details>`;
+
+  app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{L=+b.dataset.l;render()});
+  app.querySelectorAll('[data-tsc]').forEach(b=>b.onclick=()=>{app.querySelectorAll('[data-tsc]').forEach(x=>x.classList.toggle('on',x===b));table(b.dataset.tsc)});
+  table('기준'); renderProgress();
+  if(URLQ.get('open')==='1') app.querySelectorAll('details').forEach(d=>d.open=true);
+
+  Chart.defaults.color = css('--sub'); Chart.defaults.borderColor = css('--line'); Chart.defaults.font.size = 12; Chart.defaults.animation = false;
+  const labels = base.quarters.map(q=>q.q);
+  const yMan = {ticks:{callback:v=>man(v)}};
+  chart('c1',{type:'line',data:{labels,datasets:runs.map((r,i)=>({label:r.scenario,data:r.quarters.map(q=>q.op),borderColor:scColor[i],backgroundColor:scColor[i],borderWidth:i===1?3:2,tension:.25}))},
+    options:{plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+won(c.raw)}}},scales:{y:{...yMan,grid:{color:c=>c.tick.value===0?css('--ink'):css('--line')}}}}});
+  chart('c2',{type:'line',data:{labels,datasets:runs.map((r,i)=>({label:r.scenario,data:r.quarters.map(q=>q.cash_cum),borderColor:scColor[i],backgroundColor:scColor[i],borderWidth:i===1?3:2,tension:.25}))},
+    options:{plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+won(c.raw)}}},scales:{y:{...yMan,grid:{color:c=>c.tick.value===0?css('--ink'):css('--line')}}}}});
+  const lv = [...R.combos, ...R.levers, ...R.ref_levers].map(x=>({n:x.name,d:x.by_L[L].delta,k:x.group}));
+  chart('c3',{type:'bar',data:{labels:lv.map(x=>x.n),datasets:[{data:lv.map(x=>x.d),backgroundColor:lv.map(x=>x.k==='묶음'?css('--accent'):x.k.startsWith('요금')?css('--line'):css('--pos'))}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'2년 손익 '+manS(c.raw)+'원'}}},scales:{x:yMan,y:{ticks:{autoSkip:false}}}}});
+  const S = R.sensitivity;
+  chart('c4',{type:'bar',data:{labels:S.map(s=>s.name),datasets:[
+    {label:'20% 낮을 때',data:S.map(s=>s.minus-R.sens_base),backgroundColor:css('--neg')},
+    {label:'20% 높을 때',data:S.map(s=>s.plus-R.sens_base),backgroundColor:css('--pos')}]},
+    options:{indexAxis:'y',plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': 분기 손익 '+manS(c.raw)+'원'}}},scales:{x:yMan,y:{ticks:{autoSkip:false}}}}});
+}
+
+function table(sc){
+  const Q = run(sc,L).quarters;
+  const rows = [['deals','진료 완료 (건)',1],['revenue','매출 (수수료+구독)'],['contrib','공헌이익 (매출 − 건별 비용)'],['labor','팀 인건비'],['mkt','마케팅비'],['fixed','기타 고정비'],['onboard','병원 온보딩비'],['op','분기 손익'],['cash_cum','통장 잔고 (누적)']];
+  document.getElementById('tbl').innerHTML = `<table><thead><tr><th>항목</th>${Q.map(q=>`<th>${q.q}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map(([k,n,cnt])=>`<tr><td>${n}</td>${Q.map(q=>`<td class="${['op','cash_cum'].includes(k)?cls(q[k]):''}">${cnt?q[k].toFixed(1):man(q[k])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+function renderProgress(){
+  const el = document.getElementById('prog'); if(!el || !P) return;
+  document.getElementById('upd').textContent = '갱신 ' + (P.updated||'');
+  el.innerHTML = `<ul class="steps">${P.steps.map((s,i)=>`<li>${s.status==='done'?'✅':s.status==='doing'?'⏳':'⬜'} ${i+1}. ${s.name}${s.note?` <span class="note">— ${s.note}</span>`:''}</li>`).join('')}</ul>`;
+}
+
+async function getJSON(p){ try{ const r=await fetch(p+'?t='+Date.now()); return r.ok?r.json():null }catch(e){ return null } }
+async function tick(){
+  if(window.__SNAPSHOT__){ P=window.__SNAPSHOT__.progress; if(!R){ R=window.__SNAPSHOT__.results; render(); } return; }
+  P = await getJSON('../output/progress.json') || P;
+  const r = await getJSON('../output/results.json');
+  if(r){ const s=JSON.stringify(r); if(s!==lastR){ lastR=s; R=r; if(!URLQ.has('L')) L=r.L_selected??1; render(); } else renderProgress(); }
+}
+tick(); setInterval(tick, 3000);
+</script>
+</body>
+</html>

@@ -18,6 +18,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "5175", "--directory", "."],
       "port": 5175
+    },
+    {
+      "name": "simulation",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5176", "--directory", "simulation"],
+      "port": 5176
     }
   ]
 }
