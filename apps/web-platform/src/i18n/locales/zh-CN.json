@@ -137,7 +137,8 @@
     "subtitle": "在一个地方管理收藏的医院、就诊日程和旅行准备。",
     "stats": {
       "saved": "收藏的医院",
-      "visits": "就诊记录"
+      "visits": "就诊记录",
+      "bookings": "预约管理"
     },
     "schedule": {
       "title": "我的大邱日程",
@@ -148,6 +149,16 @@
         "userAdded": "自行登记",
         "experience": "体验",
         "tour": "观光"
+      },
+      "remove": "删除",
+      "form": {
+        "date": "日期",
+        "time": "时间（选填）",
+        "text": "要做的事",
+        "placeholder": "例：去西门市场夜市",
+        "save": "添加",
+        "cancel": "取消",
+        "noTime": "不指定"
       }
     },
     "checklist": {

@@ -137,7 +137,8 @@
     "subtitle": "관심 병원과 방문 일정, 여행 준비를 한곳에서 관리하세요.",
     "stats": {
       "saved": "저장한 병원",
-      "visits": "방문 기록"
+      "visits": "방문 기록",
+      "bookings": "예약 관리"
     },
     "schedule": {
       "title": "나의 대구 일정",
@@ -148,6 +149,16 @@
         "userAdded": "직접 등록",
         "experience": "체험",
         "tour": "관광"
+      },
+      "remove": "삭제",
+      "form": {
+        "date": "날짜",
+        "time": "시간 (선택)",
+        "text": "할 일",
+        "placeholder": "예: 서문시장 야시장 가기",
+        "save": "추가",
+        "cancel": "취소",
+        "noTime": "선택 안 함"
       }
     },
     "checklist": {
