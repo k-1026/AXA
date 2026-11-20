@@ -15,9 +15,10 @@ from sqlalchemy.orm import Session
 from core.db import get_db
 from core.errors import AppError
 from core.security import PatientPrincipal, current_patient, patient_uuid
+from modules.agent import translate
 from modules.booking import service
-from modules.booking.models import Reply
-from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut
+from modules.booking.models import BookingEvent, Reply
+from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut, ReplyOut
 from modules.consent import service as consent_service
 from modules.hospital import service as hospital_service
 from modules.tenant.models import Tenant
@@ -43,7 +44,12 @@ def _out(db: Session, req) -> PatientBookingOut:
     replies = db.scalars(
         select(Reply).where(Reply.request_id == req.id, Reply.sent_at.is_not(None)).order_by(Reply.sent_at)
     )
-    out.replies = [{"text_ko": r.text_ko, "text_translated": r.text_translated, "sent_at": r.sent_at} for r in replies]
+    out.replies = [ReplyOut(text_ko=r.text_ko, text_translated=r.text_translated, sent_at=r.sent_at) for r in replies]
+    if req.status == "rejected":  # 거절 사유 (contracts 2절, booking_events.reason)
+        out.reject_reason = db.scalar(
+            select(BookingEvent.reason).where(BookingEvent.request_id == req.id, BookingEvent.to_status == "rejected")
+            .order_by(BookingEvent.created_at.desc()).limit(1)
+        )
     return out
 
 
@@ -82,6 +88,11 @@ def create(hospital_id: int, body: BookingCreate, db: Db, me: Me):
     for c in body.consents:  # 이 요청서에 대한 동의로 기록 (consents.booking_request_id)
         consent_service.record(db, patient_id, c.kind, c.version, body.lang, request_id=req.id)
     db.commit()
+    if body.message:  # 병원 직원용 한국어 번역 (동의를 기록한 뒤, 실패하면 원문만 — 결정 25)
+        ko = translate.for_request(db, req.id, body.message, "ko", tenant.id)
+        if ko:
+            req.message_translated = ko
+            db.commit()
     return _out(db, req)
 
 

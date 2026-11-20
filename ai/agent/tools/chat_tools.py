@@ -318,10 +318,17 @@ def open_aftercare_thread(args: JSON, ctx: ToolContext) -> JSON:
         raise ToolError("내 예약에서 해당 booking_id를 찾을 수 없습니다") from e
     if not bk.get("visited"):
         return {"status": "not_available", "reason": "Follow-up chat opens after the visit."}
+    # 실제 저장소(backend BookingGateway)는 병원이 사후관리를 하는지·이미 있는 대화를 알려 줌. 가짜 저장소는 가상 대화
+    info = ctx.store.aftercare_for(ctx.patient_id, bk["id"]) if hasattr(ctx.store, "aftercare_for") else         {"available": True, "thread_id": f"demo-thread-{bk['id']}"}
+    if not info.get("available"):
+        return {"status": "not_available", "reason": "This hospital does not take follow-up messages here. "
+                "Tell the user to contact the hospital directly."}
+    # 메시지는 여기서 보내지 않음: 카드의 버튼으로 사후관리 화면을 열고 사용자가 직접 보냄 (AI가 대신 보내지 않게)
     return {
-        "status": "opened", "thread_id": f"demo-thread-{bk['id']}", "hospital_id": bk["hospital_id"],
-        "topic": args["topic"], "first_message": args["message"],
+        "status": "opened", "thread_id": info.get("thread_id") or "", "booking_id": bk["id"],
+        "hospital_id": bk["hospital_id"], "topic": args["topic"], "first_message": args["message"],
         "notice": "For schedule, cost, documents or accommodation questions only. This is not medical consultation.",
+        "note": "Not sent yet. Tell the user to press the button on the card to open the follow-up chat and send it.",
     }
 
 

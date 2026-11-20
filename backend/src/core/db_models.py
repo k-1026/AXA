@@ -4,6 +4,7 @@
 """
 
 from modules.aftercare import models as aftercare_models  # noqa: F401
+from modules.audit import models as audit_models  # noqa: F401
 from modules.auth import models as auth_models  # noqa: F401
 from modules.booking import models as booking_models  # noqa: F401
 from modules.chatbot import models as chatbot_models  # noqa: F401
