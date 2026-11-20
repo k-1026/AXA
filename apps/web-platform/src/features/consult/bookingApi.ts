@@ -1,7 +1,7 @@
 // 예약 요청 API (docs/backend-contracts.md 6·6-1절). 흐름: 환자 예약 요청(대기) → 병원 확정 → 내 예약에 "확정"
 // 화면의 병원 id는 심평원 요양기관 기호(ykiho), 백엔드 경로는 숫자 병원 id → 등록 병원 목록으로 바꿔서 부른다
 import { api } from '../../components/api';
-import type { BookingRequest, BookingStatus } from './types';
+import type { BookingRequest, BookingStatus, RejectReason } from './types';
 
 export const KST_OFFSET = '+09:00';
 // 동의 문구 버전. privacy = 개인정보 처리방침 개정일, overseas_transfer = 번역(해외 AI) 안내 문구 날짜
@@ -17,6 +17,7 @@ interface ServerBooking {
   message_original: string | null;
   confirmed_slot: string | null;
   created_at: string;
+  reject_reason?: RejectReason | null; // 거절 사유 코드 (contracts 6-1)
 }
 
 interface HospitalRef {
@@ -55,6 +56,7 @@ export function toLocal(s: ServerBooking): BookingRequest {
     note: s.message_original ?? undefined,
     status: s.status, // 방문 완료·미방문도 서버 상태 그대로 (결정 19)
     serverId: s.id,
+    rejectReason: s.reject_reason ?? undefined,
     bookingNo: s.status === 'confirmed' || s.status === 'visited' ? s.id.slice(0, 8).toUpperCase() : undefined,
   };
 }

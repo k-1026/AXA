@@ -355,6 +355,9 @@
       "listNote": "按名称排序，并非推荐或排名。",
       "suggestBasis": "仅根据各医院与您所说条件（接待语言、就诊日、可预约时间）的符合程度提出，并非对医疗水平、技术或结果的评价。均为已登记的外国患者招揽医疗机构。MediDaegu 为登记的患者招揽机构，可能向医院收取中介费，但中介费不影响排序。",
       "priceNote": "以韩国患者为准公开的非医保价格（演示数值）。实际费用可能不同，请向医院确认。",
+      "aftercare": "要发给医院的术后咨询",
+      "aftercareOpen": "打开术后管理对话发送",
+      "aftercareNote": "尚未发送。请在术后管理页面确认内容后自行发送。症状或治疗问题请直接联系医院。",
       "reasons": {
         "staffLang": "有会说{{lang}}的员工",
         "aiTranslation": "可使用 AI 翻译聊天",
@@ -467,6 +470,12 @@
     "number": "预约编号 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
     "rejectedNote": "医院告知该时间无法预约。",
+    "rejectReason": {
+      "fully_booked": "医院表示该时段已约满，请改选其他日期再申请。",
+      "not_offered": "医院表示不提供您申请的诊疗项目，请寻找其他医院。",
+      "needs_consult": "医院表示需要先进行面诊，请在咨询页面查看医院的说明。",
+      "other": "医院表示无法接受此次申请，请在咨询页面查看医院的说明。"
+    },
     "change": "更改预约",
     "cancel": "取消预约",
     "chat": "咨询",
@@ -499,6 +508,8 @@
     "errType": "只能发送照片或视频。",
     "errSize": "每个文件最大50MB。",
     "errCount": "一次最多发送{{max}}个。",
+    "errClosed": "这家医院不在MediDaegu接收术后管理消息。请直接联系医院。",
+    "errSend": "发送失败，请稍后再试。",
     "aftercareButton": "术后管理"
   },
   "notFoundPage": {

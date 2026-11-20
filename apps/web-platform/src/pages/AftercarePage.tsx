@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CloseIcon, MenuIcon, SendIcon } from '../features/chatbot/icons';
 import { useLocalized } from '../lib/common';
@@ -11,6 +11,7 @@ import { AftercareSidebar } from '../features/aftercare/AftercareSidebar';
 import { AftercareMessages } from '../features/aftercare/AftercareMessages';
 import { useAftercare } from '../features/aftercare/useAftercare';
 import type { Attachment } from '../features/aftercare/types';
+import type { AftercareHandoff } from '../features/chatbot/ChatCards';
 
 const MAX_FILES = 4;
 const MAX_BYTES = 50 * 1024 * 1024; // 파일 1개당 50MB
@@ -33,6 +34,20 @@ export function AftercarePage() {
   useEffect(() => () => filesRef.current.forEach((f) => URL.revokeObjectURL(f.url)), []);
 
   const active = care.active;
+
+  // 챗봇 사후관리 카드에서 넘어오면 그 예약의 대화를 열고 글을 입력창에 채움 (보내기는 환자가, 결정 26)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const handoff = location.state as AftercareHandoff | null;
+  useEffect(() => {
+    if (!handoff?.booking) return;
+    const visit = care.visits.find((v) => v.booking.serverId === handoff.booking);
+    if (!visit) return; // 예약 목록을 아직 불러오는 중이면 다음 렌더에서
+    care.select(visit.id);
+    if (handoff.draft) setDraft(handoff.draft);
+    navigate('.', { replace: true, state: null }); // 새로 고침·뒤로 가기 때 다시 채우지 않게
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 넘어온 값과 방문 목록이 바뀔 때만
+  }, [handoff, care.visits]);
 
   // 열려 있는 대화의 의료진 답변은 읽은 것으로 처리
   useEffect(() => {
@@ -65,10 +80,10 @@ export function AftercarePage() {
     setFiles(files.filter((f) => f.url !== url));
   };
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!draft.trim() && !files.length) return;
-    care.send(draft, files);
+    if (!(await care.send(draft, files))) return; // 못 보냈으면 글·첨부를 그대로 둠
     setDraft('');
     setFiles([]);
     setError('');
@@ -143,9 +158,9 @@ export function AftercarePage() {
                   ))}
                 </ul>
               )}
-              {error && (
+              {(error || care.error) && (
                 <p className="consult-form-error" role="alert">
-                  {error}
+                  {error || t(care.error === 'closed' ? 'aftercare.errClosed' : 'aftercare.errSend')}
                 </p>
               )}
               <form className="chat-input" onSubmit={submit}>
