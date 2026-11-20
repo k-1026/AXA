@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-20 · backend-A-aftercare-patient · Claude
+- 한 일: 환자 사후관리 API 3개 (`GET /me/aftercare`, `GET·POST /me/booking-requests/{id}/aftercare[/messages]`). 새 파일 `aftercare/router_patient.py`(A), `aftercare/service.py`에 조회 함수 `patient_list`·`patient_messages` 추가 (B 모듈 — 확인 요청), `main.py`에 라우터 등록
+- 바뀐 계약: contracts 6-3 신설
+- 테스트: 전체 210개 통과 (새 `test_aftercare_patient.py` 5개: 열기·답장 안 읽은 수, 409, 남의 것 404, 빈 글 422, 401·403)
+- 다음 할 일: 환자 웹 사후관리 화면을 이 API로 (회원 모드)
+- B에게 요청: `aftercare/service.py` 추가 함수 2개와 6-3절 확인. 사진 저장 방식(스토리지) 정하기
+- 막힌 것·질문: 없음
+
 ### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
 - 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**
 - 확인: alembic `0007` · hospitals 4,242(등록 126) 그대로 · 새 표 7개 모두 0행 · public 표 RLS 꺼진 것 0 · FK `tenants·booking_requests.hospital_id → hospitals`, `consents.booking_request_id → booking_requests` 있음

@@ -1,6 +1,6 @@
 """사후관리 규칙 (B).
 
-- 환자 쪽(`patient_open`, `patient_post`)은 A의 환자 라우터가 부른다 (contracts 5절에 추가 제안)
+- 환자 쪽(`patient_open`, `patient_list`, `patient_messages`)은 A의 `aftercare/router_patient.py`가 부른다 (contracts 6-3, 조회 함수 2개는 A가 추가 · B 확인 필요)
 - 병원 쪽(`tenant_*`)은 `aftercare/router_tenant.py`(B)가 부른다. tenant_id로만 조회 → 남의 병원 대화는 404
 - 사후관리를 지원하는 병원(`tenants.aftercare_enabled`)의 방문 완료(`visited`) 요청서만 대화를 열 수 있음
 """
@@ -56,6 +56,48 @@ def patient_open(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, text
     db.commit()
     db.refresh(thread)
     return thread
+
+
+def _unanswered_by(db: Session, thread_id: uuid.UUID, sender: str, other: str) -> int:
+    """`other`가 마지막으로 보낸 뒤 `sender`가 보낸 메시지 수 (환자 화면 = 안 읽은 병원 답장 수)."""
+    return db.scalar(
+        select(func.count()).select_from(AftercareMessage).where(
+            AftercareMessage.thread_id == thread_id,
+            AftercareMessage.sender == sender,
+            AftercareMessage.id > (
+                select(func.coalesce(func.max(AftercareMessage.id), 0))
+                .where(AftercareMessage.thread_id == thread_id, AftercareMessage.sender == other)
+                .scalar_subquery()
+            ),
+        )
+    ) or 0
+
+
+def patient_list(db: Session, patient_id: uuid.UUID) -> list[dict]:
+    """내 사후관리 대화 (최근 메시지 순). 남의 요청서 대화는 나오지 않음."""
+    rows = db.execute(
+        select(AftercareThread, BookingRequest)
+        .join(BookingRequest, BookingRequest.id == AftercareThread.request_id)
+        .where(BookingRequest.patient_id == patient_id)
+        .order_by(AftercareThread.last_message_at.desc())
+    ).all()
+    out = []
+    for thread, req in rows:
+        last = db.scalar(
+            select(AftercareMessage).where(AftercareMessage.thread_id == thread.id).order_by(AftercareMessage.id.desc()).limit(1)
+        )
+        out.append({"thread": thread, "request": req, "last": last, "unread": _unanswered_by(db, thread.id, "staff", "patient")})
+    return out
+
+
+def patient_messages(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -> tuple[AftercareThread, list]:
+    """요청서 1건의 대화와 메시지. 대화가 아직 없거나 남의 요청서면 404."""
+    req = db.get(BookingRequest, request_id)
+    thread = db.scalar(select(AftercareThread).where(AftercareThread.request_id == request_id)) if req else None
+    if req is None or req.patient_id != patient_id or thread is None:
+        raise _not_found()
+    msgs = list(db.scalars(select(AftercareMessage).where(AftercareMessage.thread_id == thread.id).order_by(AftercareMessage.id)))
+    return thread, msgs
 
 
 # ---------- 병원 쪽 (B) ----------

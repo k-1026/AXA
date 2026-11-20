@@ -126,6 +126,18 @@
 | `POST /me/booking-requests/{id}/accept` | 병원이 제안한 시간 수락 `proposed → confirmed` | 409 `booking.invalid_transition` |
 | `POST /me/booking-requests/{id}/cancel` | `{reason?}` (`CANCEL_REASONS`) → `cancelled`, `pending`·`proposed`에서만 | 409, 422 |
 
+### 6-3. 환자 사후관리 API (A, `modules/aftercare/router_patient.py`, aftercare 주인 B — **B 확인 필요**)
+
+모두 **환자 로그인 필요**, 내 요청서만 (남의 것은 404). 규칙은 `aftercare.service`: `patient_open()`(B가 만든 것) + 조회용 `patient_list()`·`patient_messages()`(A가 추가)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `GET /me/aftercare` | 내 대화 목록 (최근 메시지 순) `PatientThreadOut{id, request_id, status, last_message_at, last_message, unread}` — `unread` = 내가 마지막으로 보낸 뒤 병원이 보낸 수 | — |
+| `GET /me/booking-requests/{id}/aftercare` | 요청서 1건의 대화 + `messages[{id, sender(patient/staff), text_original, text_translated, has_photo, created_at}]` | 404 `not_found`(대화 없음·남의 것) |
+| `POST /me/booking-requests/{id}/aftercare/messages` | `{text(1~4,000자), photo?}` → 201, 첫 메시지면 대화를 엶. 해결된 대화에 보내면 다시 `new` | 409 `booking.invalid_transition`(방문 완료 전·사후관리 미지원 병원), 404, 422 `validation`(빈 글) |
+
+- 사진·영상 파일은 아직 저장하지 않음 (`photo`는 "사진 있음" 표시만). 번역(`text_translated`)은 `ai/llm` 연결 전이라 비움
+
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
 
 모두 **환자 로그인 필요**. 경로 앞 `/api/v1`. 응답 모델은 `ai/agent/schemas.py`(카드 형식의 기준) → OpenAPI
@@ -160,6 +172,7 @@
 | 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
 | 2026-11-17 | 2 | 병원 직원 거절에 사유 코드(`fully_booked`/`not_offered`/`needs_consult`/`other`, 선택) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-contract-reject-reason` → `backend` |
 | 2026-11-18 | 4·6 | 환자 예약 API 6-1절 신설, `hospital.not_requestable` 사유 `not_joined` 추가, `residency` 필수(`short_term`만), 동의 조건(`overseas_transfer` = 글 번역 때) 확정, `preferred_slots` 미래만 | A (**B 확인 필요**) | `backend-A-contract-booking-request` → `backend` |
+| 2026-11-20 | 6-3 | 환자 사후관리 API 신설 (`/me/aftercare`, `/me/booking-requests/{id}/aftercare[/messages]`), `aftercare.service`에 `patient_list`·`patient_messages` 추가 | A (**B 확인 필요** — aftercare는 B 모듈) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-18 | 3·4 | 병원 관계자 가입·로그인 경로(`/auth/staff/signup`·`login`), 에러 `auth.hospital_taken`(409) | A (**B 확인 필요**) | `backend-A-contract-staff-auth` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
