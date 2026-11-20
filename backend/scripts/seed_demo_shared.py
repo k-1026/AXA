@@ -35,6 +35,8 @@ from modules.auth.service import password_hash  # noqa: E402
 from modules.booking.models import BookingEvent, BookingRequest  # noqa: E402
 from modules.consent.models import Consent  # noqa: E402
 from modules.consent.service import CURRENT_VERSIONS  # noqa: E402
+
+OVERSEAS_VERSION = "2026-11-18"  # 번역 안내 문구 날짜 (환자 웹 bookingApi.ts OVERSEAS_VERSION과 같게)
 from modules.hospital.models import Hospital, HospitalDepartment, HospitalHours  # noqa: E402
 from modules.patient.models import Patient  # noqa: E402
 from modules.tenant.models import StaffUser, Tenant  # noqa: E402
@@ -161,21 +163,26 @@ def seed_patient_bookings(db: Session, p: Patient, t: Tenant, now: datetime) -> 
     db.flush()
     today = now.astimezone(KST).date()
     plans = [
-        # (상태, 만든 날, 확정 시간, 진료항목, 문의)
-        ("visited", today - timedelta(days=12), kst(today - timedelta(days=7), 11), "laser_toning", "想做雷射淨膚，大概需要幾次？"),
-        ("confirmed", today - timedelta(days=3), kst(today + timedelta(days=4), 14), "acne_scar", "痘疤治療可以預約嗎？"),
+        # (상태, 만든 날, 확정 시간, 진료항목, 문의, 문의 한국어 — 시드는 LLM을 부르지 않고 미리 쓴 번역)
+        ("visited", today - timedelta(days=12), kst(today - timedelta(days=7), 11), "laser_toning", "想做雷射淨膚，大概需要幾次？",
+         "레이저 토닝을 하고 싶은데, 대략 몇 번 받아야 하나요?"),
+        ("confirmed", today - timedelta(days=3), kst(today + timedelta(days=4), 14), "acne_scar", "痘疤治療可以預約嗎？",
+         "여드름 흉터 치료 예약할 수 있나요?"),
     ]
-    for status, created_day, slot, treatment, msg in plans:
+    for status, created_day, slot, treatment, msg, msg_ko in plans:
         created = kst(created_day, 10)
         req = BookingRequest(
             patient_id=p.id, tenant_id=t.id, hospital_id=t.hospital_id, status=status, lang="zh-TW", nationality="TW",
             contact_method="email", department_code="dermatology", treatment=treatment, visa_needed=False,
             preferred_slots=[(slot or kst(today + timedelta(days=6), 11)).isoformat()],
-            message_original=msg, patient_timezone="Asia/Taipei", confirmed_slot=slot, created_at=created, updated_at=created,
+            message_original=msg, message_translated=msg_ko, patient_timezone="Asia/Taipei", confirmed_slot=slot, created_at=created, updated_at=created,
         )
         db.add(req)
         db.flush()
         db.add(Consent(patient_id=p.id, booking_request_id=req.id, kind="privacy", version=CURRENT_VERSIONS["privacy"],
+                       lang="zh-TW", agreed_at=created))
+        # 문의 글이 있으면 실제 요청서처럼 번역(해외 LLM) 동의도 → 시연에서 사후관리·답장 번역이 보임 (결정 25)
+        db.add(Consent(patient_id=p.id, booking_request_id=req.id, kind="overseas_transfer", version=OVERSEAS_VERSION,
                        lang="zh-TW", agreed_at=created))
         db.add(BookingEvent(request_id=req.id, from_status=None, to_status="pending", actor_type="patient", created_at=created))
         prev = "pending"
