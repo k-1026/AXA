@@ -859,7 +859,7 @@
       c.msgs.push({ f: 's', k, o, t: '방금' }); c.draft = null; c.unread = 0; renderChat(root, key, idx); updateNav();
       toast('보냈어요 (예시 — 저장 안 됨)');
     };
-    const note = key === 'booking' ? '상담 답장 저장 API는 아직 없어서 화면에만 보여요.' : '환자 언어 번역은 연결 전이라 한국어 원문으로 저장돼요.';
+    const note = '환자 언어 번역은 연결 전이라 한국어 원문으로 저장돼요.';
     const send = async (k, o, title) => {
       const ok = await dialog({ title: title || '환자에게 보낼까요?', ok: '보내기',
         body: `<div class="dlg-sum"><b>보낼 내용</b><p>${esc(k)}</p>${o && !o.startsWith('(') ? `<small>환자에게 보이는 글: ${esc(o)}</small>` : ''}</div><p class="note">${note}</p>` });
@@ -941,11 +941,15 @@
     const [p, q] = await Promise.all([call('/tenant/booking-requests?status=pending'), call('/tenant/booking-requests?status=proposed')]);
     CHATS.booking = [...p, ...q].map((r) => ({
       req: toR(r), rid: r.id, id: 'R-' + short(r.id), who: `${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`,
-      unread: r.status === 'pending' ? 1 : 0, title: TRT[r.treatment] || r.treatment || '상담',
+      // 빨간 숫자: 대기 중인데 병원 답장이 아직 없으면 1 (답장은 서버에 저장 → 새로고침해도 유지)
+      unread: r.status === 'pending' && !(r.replies || []).length ? 1 : 0, title: TRT[r.treatment] || r.treatment || '상담',
       sub: (r.status === 'proposed' ? '시간 제안함 ' + kdate(r.confirmed_slot) : '희망 ' + kdate(r.preferred_slots[0])) + (r.visa_needed ? ' · 예약확인서 필요' : ''),
       slots: r.preferred_slots, sum: r.message_translated || '(번역 전)',
       tags: [TRT[r.treatment] || r.treatment, '희망일 ' + r.preferred_slots.length + '개', r.visa_needed ? '비자 서류' : '비자 불필요'].filter(Boolean),
-      msgs: r.message_original ? [{ f: 'p', o: r.message_original, k: r.message_translated || '(번역 전)', t: kdate(r.created_at) }] : [],
+      msgs: [
+        ...(r.message_original ? [{ f: 'p', o: r.message_original, k: r.message_translated || '(번역 전)', t: kdate(r.created_at) }] : []),
+        ...(r.replies || []).map((x) => ({ f: 's', k: x.text_ko, o: x.text_translated || '(번역 연결 전 — 환자에게 한국어 원문)', t: kdate(x.sent_at) })),
+      ],
     }));
     const i = Math.max(0, CHATS.booking.findIndex((c) => c.rid === keepId));
     renderChat(chatRoot('booking'), 'booking', i);
@@ -981,9 +985,9 @@
       render();
       HOOKS.booking = {
         async send(c, text) {
-          c.msgs.push({ f: 's', k: text, o: '(상담 답장 API는 다음 단계 — 화면에만 표시)', t: '방금' });
-          c.unread = 0; // 답장했으면 목록의 빨간 숫자 지우기 (답장 저장 API 전이라 새로고침하면 대기 요청은 다시 1)
-          renderChat(chatRoot('booking'), 'booking', CHATS.booking.indexOf(c)); updateNav();
+          try { await call(`/tenant/booking-requests/${c.rid}/replies`, { method: 'POST', body: JSON.stringify({ text }) }); toast('답장을 보냈어요 (DB 저장)'); }
+          catch (e) { toast('전송 실패: ' + e.message, true); return; }
+          await loadBooking(c.rid); updateNav(); // 서버에서 다시 불러와 답장·빨간 숫자 반영
         },
       };
       HOOKS.aftercare = {
