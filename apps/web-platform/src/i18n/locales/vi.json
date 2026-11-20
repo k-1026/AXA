@@ -187,9 +187,6 @@
       "priceTitle": "Giá theo dịch vụ",
       "detail": "Xem chi tiết",
       "priceNote": "Vui lòng xác nhận chi phí thực tế với bệnh viện.",
-      "aftercare": "Tin nhắn hỏi sau điều trị gửi bệnh viện",
-      "aftercareOpen": "Mở trò chuyện sau điều trị để gửi",
-      "aftercareNote": "Chưa gửi. Hãy kiểm tra nội dung trong trò chuyện sau điều trị và tự gửi. Câu hỏi về triệu chứng hay điều trị, vui lòng liên hệ trực tiếp bệnh viện.",
       "empty": "Không có bệnh viện đã lưu thuộc chuyên khoa này.",
       "none": "Chưa có bệnh viện đã lưu."
     },
@@ -358,6 +355,9 @@
       "listNote": "Sắp xếp theo tên. Đây không phải là gợi ý hay xếp hạng.",
       "suggestBasis": "Chỉ được gợi ý dựa trên mức độ phù hợp với điều kiện bạn đưa ra (ngôn ngữ hỗ trợ, ngày khám, giờ trống). Đây không phải là đánh giá về chất lượng y tế, tay nghề hay kết quả. Tất cả đều là cơ sở y tế đã đăng ký thu hút bệnh nhân nước ngoài. MediDaegu là đơn vị thu hút bệnh nhân đã đăng ký và có thể nhận phí môi giới từ bệnh viện; phí này không ảnh hưởng đến thứ tự.",
       "priceNote": "Giá ngoài bảo hiểm công bố cho bệnh nhân Hàn Quốc (giá trị minh họa). Chi phí thực tế có thể khác, vui lòng hỏi bệnh viện.",
+      "aftercare": "Tin nhắn hỏi sau điều trị gửi bệnh viện",
+      "aftercareOpen": "Mở trò chuyện sau điều trị để gửi",
+      "aftercareNote": "Chưa gửi. Hãy kiểm tra nội dung trong trò chuyện sau điều trị và tự gửi. Câu hỏi về triệu chứng hay điều trị, vui lòng liên hệ trực tiếp bệnh viện.",
       "reasons": {
         "staffLang": "Nhân viên nói {{lang}}",
         "aiTranslation": "Có trò chuyện dịch AI",
