@@ -686,6 +686,14 @@
         <button class="btn mt" data-dlg="linkAdd">링크 만들기</button>
         <p class="note">이 링크로 들어온 방문·상담이 통계 탭 "유입 경로"에 따로 집계돼요.</p>
       </div>
+      <div class="card" style="grid-column:1/-1"><h3>열람 기록 (건강정보) <span class="badge ex" id="auditSrc">예시</span> <button class="btn" id="auditReload" style="float:right">새로 불러오기</button></h3>
+        <div class="scroll"><table><thead><tr><th>시각</th><th>직원</th><th>한 일</th><th>대상</th></tr></thead><tbody id="auditRows">
+          <tr><td>11. 16. 14:02</td><td>직원 1</td><td>사후관리 대화 열람</td><td>A-0068</td></tr>
+          <tr><td>11. 16. 13:55</td><td>직원 1</td><td>상담 답장</td><td>R-1043</td></tr>
+          <tr><td>11. 16. 13:54</td><td>직원 2</td><td>요청 목록 열람</td><td>—</td></tr>
+        </tbody></table></div>
+        <p class="note">요청서·사후관리 대화를 열거나 답장하면 남아요. 글·사진 내용은 기록하지 않아요. 같은 직원이 1분 안에 다시 열면 한 줄만 남아요.</p>
+      </div>
     </div>
   </section>
 </main>
@@ -1042,8 +1050,27 @@
     updateNav();
   }
 
+  // ---------- 열람 기록 (GET /tenant/audit-logs) ----------
+  const AUDIT = { 'booking.list': '요청 목록 열람', 'booking.view': '요청서 열람', 'booking.reply': '상담 답장',
+    'aftercare.view': '사후관리 대화 열람', 'aftercare.reply': '사후관리 답장' };
+  async function loadAudit() {
+    const rows = await call('/tenant/audit-logs?limit=50');
+    const staffNo = {};
+    const who = (a) => (staffNo[a] ??= '직원 ' + (Object.keys(staffNo).length + 1)); // 직원 id는 화면에 그대로 안 보임
+    const ref = (r) => { const [k, id] = r.split(':'); return k === 'booking_requests' ? id + '건' : k === 'aftercare_thread' ? 'A-' + short(id) : 'R-' + short(id); };
+    document.getElementById('auditRows').innerHTML = rows.length
+      ? rows.map((x) => `<tr><td>${esc(kdate(x.created_at))}</td><td>${esc(who(x.actor))}</td><td>${esc(AUDIT[x.action] || x.action)}</td><td>${esc(ref(x.ref))}</td></tr>`).join('')
+      : '<tr><td colspan="4" class="note">아직 기록이 없어요</td></tr>';
+    const src = document.getElementById('auditSrc'); src.textContent = 'DB · 최근 ' + rows.length + '줄'; src.className = 'badge';
+  }
+  document.getElementById('auditReload').onclick = async () => {
+    if (!API.ready) return toast('직원 로그인 뒤에 실제 기록을 볼 수 있어요');
+    try { await loadAudit(); toast('열람 기록을 새로 불러왔어요'); } catch (e) { toast(why(e), true); }
+  };
+
   async function setupApi() {
     try {
+      loadAudit().catch(() => {});
       const me = await call('/tenant/me');
       document.querySelector('.hosp b').textContent = me.display_name;
       state.ac = me.aftercare_enabled;
