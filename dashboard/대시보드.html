@@ -129,6 +129,9 @@
   .msg .tr { display:block; margin-top:6px; padding-top:6px; border-top:1px dashed var(--line); font-size:12px; color:var(--muted); }
   .msg.s .tr { border-top-color:rgb(255 255 255 / .4); color:rgb(255 255 255 / .85); }
   .msg .t { display:block; font-size:11px; color:var(--muted); margin-top:4px; } .msg.s .t { color:rgb(255 255 255 / .75); text-align:right; }
+  .msg .media { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .msg .media a, .msg .media video { display:block; width:140px; height:140px; border-radius:8px; overflow:hidden; background:var(--muted-bg); }
+  .msg .media img, .msg .media video { width:100%; height:100%; object-fit:cover; }
   .msg .img { display:block; margin-top:6px; background:var(--muted-bg); border-radius:8px; padding:18px; text-align:center; color:var(--muted); font-size:12px; }
   .cdraft { padding:10px 16px; border-top:1px solid var(--line); background:var(--ex-soft); font-size:13px; }
   .cdraft:empty { display:none; } .cdraft .acts { display:flex; gap:6px; margin-top:8px; }
@@ -799,7 +802,14 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function msgHtml(m) {
     const main = m.f === 'p' ? m.o : m.k, tr = m.f === 'p' ? '번역: ' + m.k : '환자에게 보이는 글: ' + m.o;
-    return `<div class="msg ${m.f}">${esc(main)}${m.img ? '<span class="img">📷 사진 1장 (직원만 열람)</span>' : ''}<span class="tr">${esc(tr)}</span><span class="t">${esc(m.t)}</span></div>`;
+    // 사진·영상: 서버가 준 1시간짜리 서명된 주소 (Supabase Storage 비공개 버킷). 주소가 없으면 "사진 있음"만
+    const files = (m.files || []).filter((a) => /^https:\/\//.test(a.url || ''));
+    const media = files.length
+      ? `<span class="media">${files.map((a) => a.kind === 'video'
+        ? `<video src="${esc(a.url)}" controls preload="metadata" aria-label="${esc(a.name || '영상')}"></video>`
+        : `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(a.url)}" alt="${esc(a.name || '사진')}"></a>`).join('')}</span>`
+      : m.img ? '<span class="img">📷 사진 있음 (직원만 열람)</span>' : '';
+    return `<div class="msg ${m.f}">${m.o === '📷' && files.length ? '' : esc(main)}${media}<span class="tr">${esc(tr)}</span><span class="t">${esc(m.t)}</span></div>`;
   }
   // HOOKS[key]가 있으면(백엔드 연결) 버튼·전송·대화 선택을 API로 처리, 없으면 예시 데이터로 화면만 바뀜
   const HOOKS = {};
@@ -1014,7 +1024,7 @@
   async function openThread(c) {
     const th = await call('/tenant/aftercare/' + c.tid);
     c.msgs = th.messages.map((m) => m.sender === 'patient'
-      ? { f: 'p', o: m.text_original, k: m.text_translated || '(번역 전)', t: kdate(m.created_at), img: m.has_photo }
+      ? { f: 'p', o: m.text_original, k: m.text_translated || '(번역 전)', t: kdate(m.created_at), img: m.has_photo, files: m.attachments || [] }
       : { f: 's', k: m.text_original, o: m.text_translated || '(번역 연결 전)', t: kdate(m.created_at) });
     c.sub = AC_STATUS[th.status] + ' · 방문 ' + kdate(th.visited_slot);
     c.loaded = true;
