@@ -982,7 +982,8 @@
       HOOKS.booking = {
         async send(c, text) {
           c.msgs.push({ f: 's', k: text, o: '(상담 답장 API는 다음 단계 — 화면에만 표시)', t: '방금' });
-          renderChat(chatRoot('booking'), 'booking', CHATS.booking.indexOf(c));
+          c.unread = 0; // 답장했으면 목록의 빨간 숫자 지우기 (답장 저장 API 전이라 새로고침하면 대기 요청은 다시 1)
+          renderChat(chatRoot('booking'), 'booking', CHATS.booking.indexOf(c)); updateNav();
         },
       };
       HOOKS.aftercare = {
