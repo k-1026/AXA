@@ -17,6 +17,16 @@
 
 ## 기록
 
+### 2026-11-20 (4) · backend-A-audit-translate · Claude (열람 기록 · 번역 · 챗봇 사후관리 카드)
+- 브랜치: `backend-A-aftercare-patient` + `backend-A-booking-replies` + `backend-A-chatbot-bookings`를 합친 위 → **그 셋이 먼저 머지돼야 함**
+- 한 일
+  - 결정 24 열람 기록: 새 모듈 `modules/audit/`(B 모듈) 모델·`log_action`·`GET /tenant/audit-logs`, 마이그레이션 **0009**. 병원 요청서 목록·1건·답장, 사후관리 열람·답장에서 기록
+  - 결정 25 번역: `modules/agent/translate.py`(B 모듈) — `ai/llm` 클라이언트, `mask_pii`, 동의 확인(`consent.given_for_request` 추가). 사후관리 환자·직원 글, 상담 답장, 요청서 글(저장 뒤)
+  - 결정 26 챗봇: `open_aftercare_thread`가 `BookingGateway.aftercare_for()`로 실제 가능 여부·대화 id 확인, 카드에 `booking_id`, 보내지 않음. 프롬프트 한 줄 (`ai/agent` — AI 담당 확인)
+- 테스트: 전체 443개 통과 (`conftest`에서 번역 LLM 끔 — 실제 LLM 안 부름)
+- B에게 요청: `audit/`·`agent/translate.py`·`booking/service.staff_reply`·`aftercare/service` 번역 줄·`router_tenant` 기록 줄 확인
+- 다음: Supabase에 0009 적용, 환자 웹 챗봇 카드·자기 글 원문 표시
+
 ### 2026-11-20 (3) · backend-A-aftercare-patient · Claude (사진·영상 지우기)
 - 한 일: 결정 23. 탈퇴(`auth.service.withdraw`)에서 `aftercare.detach_patient_media()` → commit 뒤 `media.remove()`. 정기 정리 `maintenance.purge_media()` — Storage 목록(`media.list_objects`) 중 DB가 가리키지 않는 하루 지난 파일 삭제, Storage 오류여도 다른 정리는 끝남. 테스트 `conftest.py`에서 `SUPABASE_*`를 비움 (.env에 키가 있어도 실제 Storage를 부르지 않게)
 - B 모듈 변경 (**B 확인 필요**): `aftercare/service.py`에 `detach_patient_media`·`referenced_media_paths`

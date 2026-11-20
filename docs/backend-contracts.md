@@ -117,7 +117,7 @@
 
 ### 6-1. 환자 예약 API (A, `modules/booking/router_patient.py`)
 
-모두 **환자 로그인 필요**. 응답 `PatientBookingOut` = `BookingOut` + `replies[{text_ko, text_translated, sent_at}]`(직원이 보낸 답장만)
+모두 **환자 로그인 필요**. 응답 `PatientBookingOut` = `BookingOut` + `replies[{text_ko, text_translated, sent_at}]`(직원이 보낸 답장만). 요청서 `message`는 저장 뒤 한국어로 번역해 `message_translated`(결정 25, 실패하면 비움)
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
@@ -140,7 +140,8 @@
 
 - 사진·영상(결정 22): Supabase Storage 비공개 버킷 `aftercare-media`, 경로 `{tenant_id}/{request_id}/{무작위}.{확장자}`. 메시지 응답의 `attachments[{kind, name, url}]` — `url`은 1시간짜리 서명된 주소(못 만들면 `null`), 경로는 응답에 넣지 않음. 병원용 `GET /tenant/aftercare/{id}`도 같은 `attachments`
 - 지우기(결정 23): 탈퇴(`DELETE /me`)하면 그 환자가 보낸 파일을 바로 삭제하고 메시지 `attachments`를 비움(글·`has_photo`는 남음). 나머지 고아 파일은 7-1 정기 정리가 하루 뒤
-- 저장소 설정(`SUPABASE_URL`·`SUPABASE_SERVICE_ROLE_KEY`)이 없으면 업로드는 503 → 화면은 `photo: true`("사진 있음")만 보냄. 번역(`text_translated`)은 `ai/llm` 연결 전이라 비움
+- 저장소 설정(`SUPABASE_URL`·`SUPABASE_SERVICE_ROLE_KEY`)이 없으면 업로드는 503 → 화면은 `photo: true`("사진 있음")만 보냄
+- 번역(`text_translated`, 결정 25): 환자 글 → 한국어, 직원 글 → 환자 언어. 요청서 번역 동의가 있을 때만, 실패하면 `null`
 
 ### 6-2. 병원 상담 답장 API (`modules/booking/router_tenant.py`, booking 주인 B — A가 작성, **B 확인 필요**)
 
@@ -151,9 +152,19 @@
 | `POST /tenant/booking-requests/{id}/replies` | `{text}`(1~2,000자, 한국어) → 201 `ReplyOut{id, text_ko, text_translated, sent_at}`. 대시보드 확인 창의 "보내기" = 직원 승인 → 바로 보낸 상태(`sent_at`), `approved_by` = 보낸 직원(직원 행이 없으면 비움). 상태는 바꾸지 않음 | 404 `not_found`, 422 `validation`(빈 글·공백만·2,000자 초과), 401 |
 | `GET /tenant/booking-requests`, `GET /tenant/booking-requests/{id}` | 응답이 `TenantBookingOut` = `BookingOut` + `replies[ReplyOut]`(보낸 순)으로 바뀜 (칸 추가만, 기존 칸 그대로) | — |
 
-- 번역(`text_translated`)은 `ai/llm` 연결 전이라 비움 → 환자 화면은 원문. AI 초안(`ai_draft`)은 승인 전에는 저장하지 않음 (compliance: 직원 승인 없이 발송 X)
+- 번역(`text_translated`, 결정 25): 보낼 때 환자 언어로 (`ai/llm`, 요청서 번역 동의가 있을 때만, 실패하면 비움 → 환자 화면은 원문). AI 초안(`ai_draft`)은 승인 전에는 저장하지 않음 (compliance: 직원 승인 없이 발송 X)
 - 환자는 6-1절 `replies`로 봄 (보낸 것만)
 
+
+### 6-4. 열람 기록 (`modules/audit/`, B — A 작성 · **B 확인 필요**, 결정 24)
+
+| 메서드·경로 | 하는 일 |
+|---|---|
+| `GET /tenant/audit-logs?limit=` | 자기 병원 기록 최근 순 `[{actor, action, ref, created_at}]` (limit 1~500, 기본 100) |
+
+- 남는 행동: `booking.list`(ref `booking_requests:<건수>`) · `booking.view` · `booking.reply`(ref `booking_request:<id>`) · `aftercare.view` · `aftercare.reply`(ref `aftercare_thread:<id>`)
+- 내용(글·사진)은 저장하지 않음. 다른 병원 데이터를 열려다 404가 나면 기록 없음
+- 함수: `audit.service.log_action(db, tenant_id, actor, action, ref)`(5절, commit은 부르는 쪽), 조회 API용 `log_and_commit`
 
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
 
@@ -168,6 +179,7 @@
 
 - **언어**: `ko`, `en`, `zh-TW`, `zh-CN`, `vi`. 별칭 `zh`·`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`. 그 밖은 422
 - **카드** `{type, data}` 9종: `hospital_list`, `hospital_suggestions`, `hospital_detail`, `price_list`, `sources`, `time_slots`, `booking_draft`, `booking_list`, `aftercare_thread`. 숫자·병원 정보는 도구 결과에서 코드가 넣음
+- `aftercare_thread` 카드(결정 26): `{status: "opened", thread_id(없으면 ""), booking_id, hospital_id, topic, first_message, notice}` — 메시지는 **보내지 않음**. 화면은 버튼으로 사후관리 화면을 열고 `first_message`를 입력창에 채움, 환자가 보냄
 - **요청서 카드**(`booking_draft`)의 `data.request`는 6절 `BookingCreate` 모양(희망 일시 UTC). 프론트 [제출] = `POST /hospitals/{hospital_id}/booking-requests`에 `request` + 환자가 체크한 `consents`(`data.consents_required` 목록)를 그대로. **챗봇 전용 제출 경로 없음**
 - **진료과**: 챗봇은 한국어 이름을 받아 `department_code`로 바꿈. 코드 표에 없는 진료과는 병원 찾기까지만, 요청서 불가
 - **저장**: 개인정보를 가린 대화 글 + 상태(체류 형태, 초안 일부, 보여 준 병원)만. 도구 결과·카드·초안의 `health_info`·`message`는 저장 X → 지난 대화를 열면 글만 보임. 30일 후 삭제, 탈퇴 즉시 삭제
@@ -193,6 +205,7 @@
 | 2026-11-20 | 6-3 | 환자 사후관리 API 신설 (`/me/aftercare`, `/me/booking-requests/{id}/aftercare[/messages]`), `aftercare.service`에 `patient_list`·`patient_messages` 추가 | A (**B 확인 필요** — aftercare는 B 모듈) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-20 | 4·6-3 | 사후관리 사진·영상 업로드(`…/aftercare/uploads`)·`attachments`, 에러 `storage.unavailable`(503) 추가, 병원용 메시지에도 `attachments` (결정 22, 마이그레이션 0008) | A (**B 확인 필요**) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-20 | 6-3·7-1 | 탈퇴 때 사진·영상 삭제, 정기 정리 응답에 `media_files` (결정 23) | A (**B 확인 필요**) | `backend-A-aftercare-patient` → `backend` |
+| 2026-11-20 | 6-1·6-2·6-3·6-4·7 | 열람 기록 API(6-4, 마이그레이션 0009), 메시지 번역(결정 25), 챗봇 `aftercare_thread` 카드에 `booking_id`·보내지 않음(결정 26) | A (**B 확인 필요**) | `backend-A-audit-translate` → `backend` |
 | 2026-11-18 | 3·4 | 병원 관계자 가입·로그인 경로(`/auth/staff/signup`·`login`), 에러 `auth.hospital_taken`(409) | A (**B 확인 필요**) | `backend-A-contract-staff-auth` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |

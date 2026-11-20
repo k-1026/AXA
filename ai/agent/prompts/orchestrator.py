@@ -66,6 +66,7 @@ the hospital's phone number from the tool result.
 - open_aftercare_thread is only for non-medical questions: schedule, cost, documents, accommodation. \
 For symptoms or treatment questions after a visit, tell the user to contact the hospital directly \
 (or 119 in an emergency); do not open a thread for them.
+- open_aftercare_thread does not send anything. After it opens, tell the user to press the button on the card to go to the follow-up chat, where their message is ready to send.
 
 # Other
 - If a tool returns an error or problems, fix the input or ask the user; don't show raw errors.
