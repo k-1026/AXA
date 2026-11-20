@@ -30,5 +30,5 @@ def require_cron_secret(authorization: Annotated[str | None, Header()] = None) -
 
 @router.api_route("/purge", methods=["GET", "POST"], dependencies=[Depends(require_cron_secret)])
 def purge(db: Annotated[Session, Depends(get_db)]) -> dict[str, int]:
-    """30일 지난 대화·죽은 로그인 세션 삭제 → 지운 수."""
+    """30일 지난 대화·죽은 로그인 세션·DB에 없는 사진·영상 파일 삭제 → 지운 수."""
     return service.purge(db)

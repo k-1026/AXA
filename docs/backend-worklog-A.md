@@ -17,6 +17,30 @@
 
 ## 기록
 
+### 2026-11-20 (3) · backend-A-aftercare-patient · Claude (사진·영상 지우기)
+- 한 일: 결정 23. 탈퇴(`auth.service.withdraw`)에서 `aftercare.detach_patient_media()` → commit 뒤 `media.remove()`. 정기 정리 `maintenance.purge_media()` — Storage 목록(`media.list_objects`) 중 DB가 가리키지 않는 하루 지난 파일 삭제, Storage 오류여도 다른 정리는 끝남. 테스트 `conftest.py`에서 `SUPABASE_*`를 비움 (.env에 키가 있어도 실제 Storage를 부르지 않게)
+- B 모듈 변경 (**B 확인 필요**): `aftercare/service.py`에 `detach_patient_media`·`referenced_media_paths`
+- 바뀐 계약: contracts 6-3·7-1 (`media_files`)
+- 테스트: 전체 224개 통과
+- 다음 할 일: Vercel Cron에 `/internal/purge` 등록 (배포 때)
+
+### 2026-11-20 (2) · backend-A-aftercare-patient · Claude (사후관리 사진·영상 = Supabase Storage)
+- 한 일: 결정 22. 새 모듈 `modules/media/`(A) — 서명된 업로드·보기 주소 (httpx, 서비스 키는 서버만). `POST /me/booking-requests/{id}/aftercare/uploads`, 보내기에 `attachments`, 환자·병원 메시지 응답에 `attachments[{kind, name, url}]`. 마이그레이션 **0008** (`aftercare_messages.attachments`). 버킷 만들기 `backend/scripts/setup_storage.py`
+- 공통 파일 변경: `core/config.py`에 `supabase_url`·`supabase_service_role_key` (**B 승인 필요**), `.env.example`
+- B 모듈 변경 (**B 확인 필요**): `aftercare/models.py` 칸 1개, `service.py` `_openable`·`media_prefix`·`patient_upload_prefix` + `_add(attachments)`, `router_tenant.py` 메시지에 `attachments`
+- 바뀐 계약: contracts 4절(`storage.unavailable`)·6-3
+- 테스트: 전체 218개 통과 (업로드·보기 주소, 다른 요청서 파일 422, 파일 종류·크기·권한, 설정 없음 503, Supabase 응답 처리)
+- 다음 할 일: `.env`에 키 → `setup_storage.py` → Supabase에 0008 적용 → 환자 웹·대시보드 연결 확인
+- 막힌 것·질문: 탈퇴·대화 삭제 때 Storage 파일도 지우기는 아직 (DB 행만 지워짐) → 정리 API(`maintenance`)에 추가 필요
+
+### 2026-11-20 · backend-A-aftercare-patient · Claude
+- 한 일: 환자 사후관리 API 3개 (`GET /me/aftercare`, `GET·POST /me/booking-requests/{id}/aftercare[/messages]`). 새 파일 `aftercare/router_patient.py`(A), `aftercare/service.py`에 조회 함수 `patient_list`·`patient_messages` 추가 (B 모듈 — 확인 요청), `main.py`에 라우터 등록
+- 바뀐 계약: contracts 6-3 신설
+- 테스트: 전체 210개 통과 (새 `test_aftercare_patient.py` 5개: 열기·답장 안 읽은 수, 409, 남의 것 404, 빈 글 422, 401·403)
+- 다음 할 일: 환자 웹 사후관리 화면을 이 API로 (회원 모드)
+- B에게 요청: `aftercare/service.py` 추가 함수 2개와 6-3절 확인. 사진 저장 방식(스토리지) 정하기
+- 막힌 것·질문: 없음
+
 ### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
 - 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**
 - 확인: alembic `0007` · hospitals 4,242(등록 126) 그대로 · 새 표 7개 모두 0행 · public 표 RLS 꺼진 것 0 · FK `tenants·booking_requests.hospital_id → hospitals`, `consents.booking_request_id → booking_requests` 있음
