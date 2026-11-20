@@ -121,3 +121,76 @@ def test_로그인_없으면_401_직원_토큰이면_403(client, db):
     assert client.get("/api/v1/me/aftercare").status_code == 401
     tok = create_access_token(str(uuid.uuid4()), "staff", tenant_id=str(uuid.uuid4()))
     assert client.get("/api/v1/me/aftercare", headers={"Authorization": f"Bearer {tok}"}).status_code == 403
+
+
+# ---------- 사진·영상 (Supabase Storage, 실제 호출은 가짜로 바꿈) ----------
+
+
+@pytest.fixture
+def storage(monkeypatch):
+    from modules.media import service as media
+
+    calls = {"upload": [], "view": []}
+    monkeypatch.setattr(media, "enabled", lambda: True)
+
+    def sign_upload(path):
+        calls["upload"].append(path)
+        return f"https://storage.example.test/upload/{path}?token=t"
+
+    def sign_views(paths):
+        calls["view"].append(list(paths))
+        return {p: f"https://storage.example.test/view/{p}?token=v" for p in paths}
+
+    monkeypatch.setattr(media, "sign_upload", sign_upload)
+    monkeypatch.setattr(media, "sign_views", sign_views)
+    return calls
+
+
+def test_사진을_올리고_보내면_환자와_병원_모두_서명된_주소로_본다(client, db, storage):
+    (p, me), t = _me(client, db), _tenant(db)
+    r = _req(db, p, t)
+    up = client.post(_url(r) + "/uploads", json={"name": "내 얼굴.JPG", "content_type": "image/jpeg", "size": 1234}, headers=me)
+    assert up.status_code == 201, up.json()
+    u = up.json()
+    assert u["kind"] == "image" and u["path"].startswith(f"{t.id}/{r.id}/") and u["path"].endswith(".jpg")
+    assert "얼굴" not in u["path"]  # 원래 파일 이름은 경로에 넣지 않음
+    assert u["upload_url"].startswith("https://storage.example.test/upload/")
+
+    out = client.post(_url(r) + "/messages", json={"text": "📷", "attachments": [{"path": u["path"], "kind": "image", "name": "내 얼굴.JPG"}]}, headers=me)
+    assert out.status_code == 201, out.json()
+    m = out.json()["messages"][0]
+    assert m["has_photo"] is True
+    assert m["attachments"] == [{"kind": "image", "name": "내 얼굴.JPG", "url": f"https://storage.example.test/view/{u['path']}?token=v"}]
+    assert "path" not in m["attachments"][0]
+
+    staff = demo_staff(db, t.id)
+    tok = create_access_token(str(staff.id), "staff", tenant_id=str(t.id))
+    th = client.get(f"/api/v1/tenant/aftercare/{out.json()['id']}", headers={"Authorization": f"Bearer {tok}"}).json()
+    assert th["messages"][0]["attachments"][0]["url"].startswith("https://storage.example.test/view/")
+    assert "path" not in th["messages"][0]["attachments"][0]
+
+
+def test_다른_요청서_경로의_파일은_붙일_수_없다(client, db, storage):
+    (p, me), t = _me(client, db), _tenant(db)
+    r1, r2 = _req(db, p, t), _req(db, p, _tenant(db, 9002))
+    other = client.post(_url(r2) + "/uploads", json={"content_type": "image/png", "size": 10}, headers=me).json()["path"]
+    out = client.post(_url(r1) + "/messages", json={"text": "x", "attachments": [{"path": other, "kind": "image"}]}, headers=me)
+    assert (out.status_code, out.json()["code"]) == (422, "validation")
+
+
+def test_업로드_규칙_파일종류_크기_권한(client, db, storage):
+    (p, me), t = _me(client, db), _tenant(db)
+    _, other_h = _me(client, db, "other2@example.com")
+    r = _req(db, p, t)
+    assert client.post(_url(r) + "/uploads", json={"content_type": "application/pdf", "size": 10}, headers=me).status_code == 422
+    assert client.post(_url(r) + "/uploads", json={"content_type": "video/mp4", "size": 50 * 1024 * 1024 + 1}, headers=me).status_code == 422
+    assert client.post(_url(r) + "/uploads", json={"content_type": "video/mp4", "size": 10}, headers=other_h).status_code == 404
+    before = _req(db, p, _tenant(db, 9003), visited=False)
+    assert client.post(_url(before) + "/uploads", json={"content_type": "image/png", "size": 10}, headers=me).status_code == 409
+    assert storage["upload"] == []  # 거절된 요청에는 업로드 주소를 만들지 않음
+
+
+def test_저장소_설정이_없으면_503(client, db):
+    (p, me), t = _me(client, db), _tenant(db)
+    r = client.post(_url(_req(db, p, t)) + "/uploads", json={"content_type": "image/png", "size": 10}, headers=me)
+    assert (r.status_code, r.json()["code"]) == (503, "storage.unavailable")

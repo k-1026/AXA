@@ -17,6 +17,15 @@
 
 ## 기록
 
+### 2026-11-20 (2) · backend-A-aftercare-patient · Claude (사후관리 사진·영상 = Supabase Storage)
+- 한 일: 결정 22. 새 모듈 `modules/media/`(A) — 서명된 업로드·보기 주소 (httpx, 서비스 키는 서버만). `POST /me/booking-requests/{id}/aftercare/uploads`, 보내기에 `attachments`, 환자·병원 메시지 응답에 `attachments[{kind, name, url}]`. 마이그레이션 **0008** (`aftercare_messages.attachments`). 버킷 만들기 `backend/scripts/setup_storage.py`
+- 공통 파일 변경: `core/config.py`에 `supabase_url`·`supabase_service_role_key` (**B 승인 필요**), `.env.example`
+- B 모듈 변경 (**B 확인 필요**): `aftercare/models.py` 칸 1개, `service.py` `_openable`·`media_prefix`·`patient_upload_prefix` + `_add(attachments)`, `router_tenant.py` 메시지에 `attachments`
+- 바뀐 계약: contracts 4절(`storage.unavailable`)·6-3
+- 테스트: 전체 218개 통과 (업로드·보기 주소, 다른 요청서 파일 422, 파일 종류·크기·권한, 설정 없음 503, Supabase 응답 처리)
+- 다음 할 일: `.env`에 키 → `setup_storage.py` → Supabase에 0008 적용 → 환자 웹·대시보드 연결 확인
+- 막힌 것·질문: 탈퇴·대화 삭제 때 Storage 파일도 지우기는 아직 (DB 행만 지워짐) → 정리 API(`maintenance`)에 추가 필요
+
 ### 2026-11-20 · backend-A-aftercare-patient · Claude
 - 한 일: 환자 사후관리 API 3개 (`GET /me/aftercare`, `GET·POST /me/booking-requests/{id}/aftercare[/messages]`). 새 파일 `aftercare/router_patient.py`(A), `aftercare/service.py`에 조회 함수 `patient_list`·`patient_messages` 추가 (B 모듈 — 확인 요청), `main.py`에 라우터 등록
 - 바뀐 계약: contracts 6-3 신설

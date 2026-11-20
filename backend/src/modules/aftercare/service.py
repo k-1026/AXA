@@ -21,13 +21,14 @@ def _not_found() -> AppError:
     return AppError(404, "not_found", "사후관리 대화를 찾을 수 없습니다")
 
 
-def _add(db: Session, thread: AftercareThread, sender: str, text: str, *, staff_id=None, translated=None, photo=False):
+def _add(db: Session, thread: AftercareThread, sender: str, text: str, *, staff_id=None, translated=None, photo=False,
+         attachments: list[dict] | None = None):
     text = (text or "").strip()
     if not text:
         raise AppError(422, "validation", "내용을 입력하세요", {"errors": [{"loc": ["text"], "type": "missing"}]})
     msg = AftercareMessage(
         thread_id=thread.id, sender=sender, staff_id=staff_id, text_original=text[:4000],
-        text_translated=translated, has_photo=photo,
+        text_translated=translated, has_photo=photo or bool(attachments), attachments=attachments or [],
     )
     db.add(msg)
     thread.last_message_at = utcnow()
@@ -37,7 +38,7 @@ def _add(db: Session, thread: AftercareThread, sender: str, text: str, *, staff_
 # ---------- 환자 쪽 (A가 호출) ----------
 
 
-def patient_open(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, text: str, photo: bool = False) -> AftercareThread:
+def _openable(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -> BookingRequest:
     req = db.get(BookingRequest, request_id)
     if req is None or req.patient_id != patient_id:
         raise _not_found()
@@ -45,6 +46,25 @@ def patient_open(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, text
     if req.status != "visited" or tenant is None or not tenant.aftercare_enabled:
         # 방문 전이거나 사후관리 미지원 병원 → 환자 화면에서는 "병원에 직접 연락" 안내
         raise AppError(409, "booking.invalid_transition", "사후관리 대화를 열 수 없습니다", {"status": req.status})
+    return req
+
+
+def media_prefix(req: BookingRequest) -> str:
+    """첨부 파일 경로 앞부분 `{tenant_id}/{request_id}` — 다른 대화의 파일을 붙이지 못하게 이 앞부분만 허용."""
+    return f"{req.tenant_id}/{req.id}"
+
+
+def patient_upload_prefix(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -> str:
+    """사진·영상을 올려도 되는지 (대화를 열 수 있는 요청서인지) 확인하고 경로 앞부분을 줌. A가 추가 (B 확인)."""
+    return media_prefix(_openable(db, patient_id, request_id))
+
+
+def patient_open(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, text: str, photo: bool = False,
+                 attachments: list[dict] | None = None) -> AftercareThread:
+    req = _openable(db, patient_id, request_id)
+    prefix = media_prefix(req) + "/"
+    if any(not str(a.get("path", "")).startswith(prefix) for a in attachments or []):
+        raise AppError(422, "validation", "첨부 파일이 올바르지 않습니다", {"errors": [{"loc": ["attachments"], "type": "path"}]})
     thread = db.scalar(select(AftercareThread).where(AftercareThread.request_id == request_id))
     if thread is None:
         thread = AftercareThread(request_id=request_id, tenant_id=req.tenant_id)
@@ -52,7 +72,7 @@ def patient_open(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, text
         db.flush()
     else:
         thread.status = "new" if thread.status == "resolved" else thread.status
-    _add(db, thread, "patient", text, photo=photo)
+    _add(db, thread, "patient", text, photo=photo, attachments=attachments)
     db.commit()
     db.refresh(thread)
     return thread
