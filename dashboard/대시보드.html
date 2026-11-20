@@ -173,7 +173,8 @@
       <span class="badge gray">이벤트가·광고 없음</span>
     </div>
     <select id="period" aria-label="기간"><option>이번 달 (11/1~11/16)</option><option>지난달 (10월)</option><option>최근 3개월</option></select>
-    <button class="hbtn" id="logoutBtn">로그아웃</button>
+    <button class="hbtn" id="loginBtn">직원 로그인</button>
+    <button class="hbtn" id="logoutBtn" hidden>로그아웃</button>
   </div>
 </header>
 <div class="app-body">
@@ -879,17 +880,71 @@
     };
   }
 
-  // ---------- 백엔드 연결 (GET /api/v1/tenant/analytics/summary) ----------
-  // 주소 뒤 ?token=<직원 토큰> (&api=<API 주소>) 이 있으면 DB 값으로 홈 숫자를 바꿈. 없으면 예시 데이터 그대로
-  async function connectApi() {
+  // ---------- 직원 로그인 · 백엔드 연결 (GET /api/v1/tenant/analytics/summary) ----------
+  // 토큰은 이 탭의 sessionStorage에만 (탭을 닫으면 사라짐). 받는 길 2가지:
+  // 1) 이 화면의 "직원 로그인" (POST /auth/staff/login)
+  // 2) 환자 사이트 "병원 관계자 로그인" 뒤 넘어올 때 주소의 ?token=&api= → 읽자마자 주소에서 지움 (방문 기록·공유 주소에 남지 않게)
+  // 토큰이 없으면 예시 데이터, 만료(401)되면 지우고 다시 로그인 안내
+  const DEFAULT_API = 'http://localhost:8000/api/v1';
+  const store = {
+    get: (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} },
+    del: (k) => { try { sessionStorage.removeItem(k); } catch (e) {} },
+  };
+  function takeHandoff() {
     const q = new URLSearchParams(location.search);
-    let token = q.get('token'), api = q.get('api');
-    try { if (token) sessionStorage.setItem('md_token', token); else token = sessionStorage.getItem('md_token'); } catch (e) {}
-    api = api || 'http://localhost:8010/api/v1';
+    if (!q.has('token') && !q.has('api')) return;
+    if (q.get('token')) store.set('md_token', q.get('token'));
+    if (q.get('api')) store.set('md_api', q.get('api'));
+    q.delete('token'); q.delete('api');
+    history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash);
+  }
+  const apiBase = () => store.get('md_api') || DEFAULT_API;
+  function setLoggedIn(on) {
+    document.getElementById('loginBtn').hidden = on;
+    document.getElementById('logoutBtn').hidden = !on;
+  }
+  function expired() {
+    store.del('md_token');
+    setLoggedIn(false);
+    toast('로그인이 만료됐어요. 다시 로그인해 주세요', true);
+    setTimeout(() => location.replace(location.pathname + location.hash), 1500); // 예시 화면으로 (DB 값이 남지 않게)
+  }
+  document.getElementById('loginBtn').onclick = async () => {
+    const token = await dialog({
+      title: '직원 로그인', ok: '로그인',
+      body: field('이메일', '<input name="email" type="email" autocomplete="username" required>')
+        + field('비밀번호', '<input name="pw" type="password" autocomplete="current-password" required>')
+        + '<p class="note">입점 병원 직원 계정. 가입은 환자 사이트의 "병원 관계자"에서 해요.</p>',
+      onOk: async (f) => {
+        const email = f.email.value.trim(), password = f.pw.value;
+        if (!email || !password) fail('이메일과 비밀번호를 입력해 주세요');
+        let res;
+        try {
+          res = await fetch(apiBase() + '/auth/staff/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+        } catch (e) { fail('서버에 연결하지 못했어요 (' + apiBase() + ')'); }
+        const body = await res.json().catch(() => ({}));
+        if (res.status === 401 || body.code === 'auth.invalid_credentials') fail('이메일 또는 비밀번호가 맞지 않아요');
+        if (body.code === 'auth.too_many_attempts') fail('여러 번 틀려서 잠시 막혔어요. 조금 뒤 다시 해 주세요');
+        if (!res.ok) fail('로그인하지 못했어요: ' + (body.code || res.status));
+        return body.access_token;
+      },
+    });
+    if (!token) return;
+    store.set('md_token', token);
+    toast('로그인했어요');
+    connectApi();
+  };
+
+  async function connectApi() {
+    takeHandoff();
+    const token = store.get('md_token'), api = apiBase();
     const src = document.getElementById('dataSrc');
     if (!token) { src.textContent = '예시 데이터'; return; }
     try {
+      setLoggedIn(true);
       const res = await fetch(api + '/tenant/analytics/summary', { headers: { Authorization: 'Bearer ' + token } });
+      if (res.status === 401) return expired();
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).code || res.status);
       const s = await res.json();
       const fmt = (n) => (n == null ? '집계 전' : n.toLocaleString('ko-KR'));
@@ -926,6 +981,7 @@
       headers: { Authorization: 'Bearer ' + API.token, ...(opts.body ? { 'Content-Type': 'application/json' } : {}) },
     });
     const body = await res.json().catch(() => ({}));
+    if (res.status === 401) { expired(); throw new Error('auth.required'); }
     if (!res.ok) throw new Error(body.code || res.status);
     return body;
   }
@@ -1011,7 +1067,7 @@
   const ERR = {
     'booking.invalid_transition': '이미 다른 상태로 바뀐 요청이에요. 목록을 새로 불러왔어요',
     validation: '입력값을 확인해 주세요', not_found: '요청을 찾을 수 없어요 (다른 곳에서 바뀌었을 수 있어요)',
-    'auth.required': '로그인이 만료됐어요. 토큰을 새로 받아 주세요', 'auth.forbidden': '이 계정으로는 할 수 없어요',
+    'auth.required': '로그인이 만료됐어요. 다시 로그인해 주세요', 'auth.forbidden': '이 계정으로는 할 수 없어요',
   };
   const why = (e) => ERR[e.message] || ('저장하지 못했어요: ' + e.message);
   function dialog({ title, body = '', ok = '확인', cancel = '취소', danger = false, onOk, extra, extras }) {
@@ -1359,9 +1415,9 @@
   function bindDlg() { document.querySelectorAll('[data-dlg]').forEach((b) => b.onclick = () => DLG[b.dataset.dlg](b)); }
   bindDlg();
   document.getElementById('logoutBtn').onclick = async () => {
-    const out = await dialog({ title: '로그아웃할까요?', ok: '로그아웃', body: '<p>이 브라우저에 저장된 직원 토큰을 지우고 예시 화면으로 돌아가요.</p><p class="note">직원 로그인 화면은 직원 로그인 API가 생기면 연결돼요.</p>' });
+    const out = await dialog({ title: '로그아웃할까요?', ok: '로그아웃', body: '<p>이 탭에 저장된 직원 로그인을 지우고 예시 화면으로 돌아가요.</p>' });
     if (!out) return;
-    try { sessionStorage.removeItem('md_token'); } catch (e) {}
+    store.del('md_token');
     location.href = location.pathname;
   };
 
