@@ -29,9 +29,13 @@ def _base() -> str:
     return get_settings().supabase_url.rstrip("/") + "/storage/v1"
 
 
+def headers(key: str) -> dict:
+    """새 형식 비밀 키(`sb_secret_…`)는 JWT가 아니라 `apikey`로만, 예전 service_role 키(JWT)는 Bearer도 같이."""
+    return {"apikey": key} if key.startswith("sb_") else {"Authorization": f"Bearer {key}", "apikey": key}
+
+
 def _headers() -> dict:
-    key = get_settings().supabase_service_role_key
-    return {"Authorization": f"Bearer {key}", "apikey": key}
+    return headers(get_settings().supabase_service_role_key)
 
 
 def _unavailable() -> AppError:

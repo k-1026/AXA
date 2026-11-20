@@ -15,7 +15,7 @@ import httpx
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from core.config import get_settings  # noqa: E402
-from modules.media.service import BUCKET, MAX_BYTES  # noqa: E402
+from modules.media.service import BUCKET, MAX_BYTES, headers  # noqa: E402
 
 CONFIG = {"public": False, "file_size_limit": MAX_BYTES, "allowed_mime_types": ["image/*", "video/*"]}
 
@@ -25,8 +25,11 @@ def main() -> int:
     if not (s.supabase_url and s.supabase_service_role_key):
         print("SUPABASE_URL·SUPABASE_SERVICE_ROLE_KEY가 .env에 없어요")
         return 1
+    if s.supabase_service_role_key.startswith("sb_publishable_"):
+        print("SUPABASE_SERVICE_ROLE_KEY에 공개 키(sb_publishable_)가 들어 있어요 → 비밀 키(sb_secret_ 또는 service_role)로 바꿔 주세요")
+        return 1
     base = s.supabase_url.rstrip("/") + "/storage/v1"
-    h = {"Authorization": f"Bearer {s.supabase_service_role_key}", "apikey": s.supabase_service_role_key}
+    h = headers(s.supabase_service_role_key)
     r = httpx.get(f"{base}/bucket/{BUCKET}", headers=h, timeout=15)
     if r.status_code == 200:
         r = httpx.put(f"{base}/bucket/{BUCKET}", headers=h, json=CONFIG, timeout=15)

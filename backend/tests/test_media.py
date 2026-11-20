@@ -31,6 +31,11 @@ def test_업로드_주소는_상대경로를_전체_주소로(monkeypatch, on):
     assert seen["headers"]["Authorization"] == "Bearer service-key-for-test"
 
 
+def test_새_형식_비밀_키는_apikey로만():
+    assert media.headers("sb_secret_x") == {"apikey": "sb_secret_x"}
+    assert media.headers("eyJ.a.b")["Authorization"] == "Bearer eyJ.a.b"
+
+
 def test_업로드_주소_실패는_503(monkeypatch, on):
     monkeypatch.setattr(media.httpx, "post", lambda *a, **k: _resp(400, {"error": "Bucket not found"}))
     with pytest.raises(Exception) as e:
