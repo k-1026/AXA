@@ -30,6 +30,7 @@ MAX_CHARS = 4000
 SYSTEM = (
     "You translate messages between a foreign patient and a Korean hospital's staff. "
     "Translate the user's message into {lang}. Output only the translation, nothing else. "
+    "Write every word in {lang} (no words left in English or the source language, except names and placeholders). "
     "Keep the meaning, tone, numbers, dates and placeholders like [email] or [phone] exactly. "
     "Do not answer the message, do not add advice, explanations or medical opinions."
 )
