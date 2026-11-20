@@ -6,7 +6,7 @@ import { uid } from '../../lib/common';
 import { useConsultThreads } from '../consult/useConsultThreads';
 import { SAMPLE_AFTERCARE } from './sampleAftercare';
 import { displayStatus } from '../consult/types';
-import { getAftercare, listAftercare, sendAftercare, toLocalMessage, type ServerThread } from './aftercareApi';
+import { getAftercare, listAftercare, PHOTO_ONLY, sendAftercare, toLocalMessage, uploadAftercare, type ServerThread } from './aftercareApi';
 import type { AftercareMessage, Attachment } from './types';
 
 // 사후 관리 대상 = 방문 완료로 보이는 예약만 (확정 + 방문 일시 지남, 예약 내역 기반)
@@ -30,12 +30,12 @@ const load = (key: AccountKey, mode: Mode): Store => {
 };
 
 
-// 서버 메시지 + 이 탭에서 보낸 사진·영상(서버에는 "사진 있음"만)
+// 서버 메시지 (사진·영상은 서버의 서명된 주소). 저장소가 꺼진 서버라 주소가 없으면 이 탭에서 보낸 미리보기로
 const withFiles = (t: ServerThread, files: Map<string, Attachment[]>): AftercareMessage[] =>
   (t.messages ?? []).map((m) => {
     const local = toLocalMessage(m);
     const att = files.get(local.id);
-    return att ? { ...local, attachments: att } : local;
+    return !local.attachments && att ? { ...local, text: local.text === PHOTO_ONLY ? undefined : local.text, attachments: att } : local;
   });
 const sentFiles = new Map<string, Attachment[]>(); // 서버 메시지 id → 첨부 (계정 초기화 때 위에서 같이 풀림)
 onAccountReset(() => sentFiles.clear());
@@ -121,9 +121,13 @@ export function useAftercare() {
     if (mode === 'member' && token && serverId) {
       const key = accountRef.current;
       try {
-        const t = await sendAftercare(token, serverId, text.trim(), attachments.length > 0);
+        const uploaded = await Promise.all(attachments.map((a) => uploadAftercare(token, serverId, a)));
+        const stored = uploaded.filter((u) => u !== null);
+        const t = await sendAftercare(token, serverId, text.trim(), attachments.length > 0, stored);
         const mine = (t.messages ?? []).filter((m) => m.sender === 'patient');
-        if (attachments.length && mine.length) sentFiles.set(`srv-${mine[mine.length - 1].id}`, attachments);
+        // 저장소에 못 올린 것(꺼진 서버)만 이 탭 미리보기로 남김
+        if (attachments.length && !stored.length && mine.length) sentFiles.set(`srv-${mine[mine.length - 1].id}`, attachments);
+        if (stored.length) attachments.forEach((a) => a.url.startsWith('blob:') && URL.revokeObjectURL(a.url)); // 서버 주소로 보여 주므로 미리보기는 풀어 줌
         if (accountRef.current !== key) return false;
         update((prev) => ({ ...prev, [active.id]: { messages: withFiles(t, sentFiles), unread: 0 } }));
         return true;
