@@ -65,10 +65,10 @@ export function AftercarePage() {
     setFiles(files.filter((f) => f.url !== url));
   };
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!draft.trim() && !files.length) return;
-    care.send(draft, files);
+    if (!(await care.send(draft, files))) return; // 못 보냈으면 글·첨부를 그대로 둠
     setDraft('');
     setFiles([]);
     setError('');
@@ -143,9 +143,9 @@ export function AftercarePage() {
                   ))}
                 </ul>
               )}
-              {error && (
+              {(error || care.error) && (
                 <p className="consult-form-error" role="alert">
-                  {error}
+                  {error || t(care.error === 'closed' ? 'aftercare.errClosed' : 'aftercare.errSend')}
                 </p>
               )}
               <form className="chat-input" onSubmit={submit}>

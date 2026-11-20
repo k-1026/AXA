@@ -499,6 +499,8 @@
     "errType": "Chỉ có thể gửi ảnh hoặc video.",
     "errSize": "Mỗi tệp tối đa 50MB.",
     "errCount": "Mỗi lần gửi tối đa {{max}} tệp.",
+    "errClosed": "Bệnh viện này không nhận tin nhắn chăm sóc sau điều trị trên MediDaegu. Vui lòng liên hệ trực tiếp với bệnh viện.",
+    "errSend": "Không gửi được. Vui lòng thử lại sau ít phút.",
     "aftercareButton": "Chăm sóc sau khám"
   },
   "notFoundPage": {

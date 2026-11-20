@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { onAccountReset, type AccountKey } from '../../components/account';
+import { ApiError } from '../../components/api';
 import { useAuth } from '../../components/auth';
 import { uid } from '../../lib/common';
 import { useConsultThreads } from '../consult/useConsultThreads';
 import { SAMPLE_AFTERCARE } from './sampleAftercare';
 import { displayStatus } from '../consult/types';
+import { getAftercare, listAftercare, sendAftercare, toLocalMessage, type ServerThread } from './aftercareApi';
 import type { AftercareMessage, Attachment } from './types';
 
 // 사후 관리 대상 = 방문 완료로 보이는 예약만 (확정 + 방문 일시 지남, 예약 내역 기반)
-// 저장 방식은 상담과 같음: demo는 예시로 시작해 메모리에만, member는 백엔드 연결 전까지 메모리
+// 저장: demo는 예시로 시작해 메모리에만, member는 서버(/me/aftercare, contracts 6-3). 사진·영상 미리보기는 이 탭 메모리에만
 type Mode = 'demo' | 'member';
 type Store = Record<string, { messages: AftercareMessage[]; unread: number }>;
 // 메모리는 계정별로 나누고, 로그아웃·탈퇴하면 모두 지운다
@@ -28,12 +30,25 @@ const load = (key: AccountKey, mode: Mode): Store => {
 };
 
 
+// 서버 메시지 + 이 탭에서 보낸 사진·영상(서버에는 "사진 있음"만)
+const withFiles = (t: ServerThread, files: Map<string, Attachment[]>): AftercareMessage[] =>
+  (t.messages ?? []).map((m) => {
+    const local = toLocalMessage(m);
+    const att = files.get(local.id);
+    return att ? { ...local, attachments: att } : local;
+  });
+const sentFiles = new Map<string, Attachment[]>(); // 서버 메시지 id → 첨부 (계정 초기화 때 위에서 같이 풀림)
+onAccountReset(() => sentFiles.clear());
+
+export type AftercareError = 'closed' | 'failed' | null;
+
 export function useAftercare() {
-  const { user, account } = useAuth();
+  const { user, account, token } = useAuth();
   const mode: Mode = user?.demo ? 'demo' : 'member';
   const consult = useConsultThreads();
   const [store, setStore] = useState<Store>(() => load(account, mode));
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [error, setError] = useState<AftercareError>(null);
   const accountRef = useRef(account);
   accountRef.current = account;
 
@@ -47,10 +62,39 @@ export function useAftercare() {
     setStore((prev) => {
       const next = fn(prev);
       memory.set(key, next);
-      // TODO(member): 백엔드가 생기면 여기서 서버 저장 (사진·영상은 서버에 올린 주소로 교체)
       return next;
     });
   }, []);
+
+  // 실제 회원: 방문 완료 예약의 서버 대화를 불러옴 (요청서 id = booking.serverId)
+  const visitedIds = consult.bookings
+    .filter((b) => displayStatus(b.booking) === 'visited' && b.booking.serverId)
+    .map((b) => `${b.message.id}:${b.booking.serverId}`)
+    .join(',');
+  useEffect(() => {
+    if (mode !== 'member' || !token || !visitedIds) return;
+    const key = account;
+    let alive = true;
+    (async () => {
+      const byServer = new Map(visitedIds.split(',').map((p) => p.split(':') as [string, string]).map(([local, server]) => [server, local]));
+      const list = (await listAftercare(token)).filter((t) => byServer.has(t.request_id));
+      const full = await Promise.all(list.map(async (t) => ({ ...(await getAftercare(token, t.request_id)), unread: t.unread })));
+      if (!alive || accountRef.current !== key) return;
+      update((prev) => {
+        const next = { ...prev };
+        for (const t of full) {
+          const id = byServer.get(t.request_id)!;
+          next[id] = { messages: withFiles(t, sentFiles), unread: t.unread };
+        }
+        return next;
+      });
+    })().catch(() => {
+      /* 서버 연결 실패: 이 탭의 기록만 보여 줌 */
+    });
+    return () => {
+      alive = false;
+    };
+  }, [mode, token, account, visitedIds, update]);
 
   // 방문일이 최근인 순
   const visits = useMemo(
@@ -65,17 +109,36 @@ export function useAftercare() {
 
   const select = (id: string) => {
     setActiveId(id);
+    setError(null);
     update((prev) => (prev[id]?.unread ? { ...prev, [id]: { ...prev[id], unread: 0 } } : prev));
   };
 
-  const send = (text: string, attachments: Attachment[]) => {
-    if (!active || (!text.trim() && !attachments.length)) return;
+  const send = async (text: string, attachments: Attachment[]) => {
+    if (!active || (!text.trim() && !attachments.length)) return false;
+    setError(null);
     const msg: AftercareMessage = { id: uid(), from: 'user', at: new Date().toISOString(), text: text.trim() || undefined, attachments: attachments.length ? attachments : undefined };
+    const serverId = active.booking.serverId;
+    if (mode === 'member' && token && serverId) {
+      const key = accountRef.current;
+      try {
+        const t = await sendAftercare(token, serverId, text.trim(), attachments.length > 0);
+        const mine = (t.messages ?? []).filter((m) => m.sender === 'patient');
+        if (attachments.length && mine.length) sentFiles.set(`srv-${mine[mine.length - 1].id}`, attachments);
+        if (accountRef.current !== key) return false;
+        update((prev) => ({ ...prev, [active.id]: { messages: withFiles(t, sentFiles), unread: 0 } }));
+        return true;
+      } catch (e) {
+        // 실패하면 쓴 글·첨부는 입력창에 그대로 둠. 409 = 방문 완료 전이거나 사후관리를 지원하지 않는 병원 → 병원에 직접 연락 안내
+        setError(e instanceof ApiError && e.status === 409 ? 'closed' : 'failed');
+        return false;
+      }
+    }
     update((prev) => {
       const cur = prev[active.id] ?? { messages: [], unread: 0 };
       return { ...prev, [active.id]: { ...cur, messages: [...cur.messages, msg] } };
     });
+    return true;
   };
 
-  return { mode, visits, active, select, send };
+  return { mode, visits, active, select, send, error };
 }

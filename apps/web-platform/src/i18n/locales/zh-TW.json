@@ -499,6 +499,8 @@
     "errType": "只能傳送照片或影片。",
     "errSize": "每個檔案最大50MB。",
     "errCount": "一次最多傳送{{max}}個。",
+    "errClosed": "這家醫院不在MediDaegu接收術後管理訊息。請直接聯絡醫院。",
+    "errSend": "傳送失敗，請稍後再試。",
     "aftercareButton": "術後管理"
   },
   "notFoundPage": {

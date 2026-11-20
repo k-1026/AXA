@@ -499,6 +499,8 @@
     "errType": "只能发送照片或视频。",
     "errSize": "每个文件最大50MB。",
     "errCount": "一次最多发送{{max}}个。",
+    "errClosed": "这家医院不在MediDaegu接收术后管理消息。请直接联系医院。",
+    "errSend": "发送失败，请稍后再试。",
     "aftercareButton": "术后管理"
   },
   "notFoundPage": {

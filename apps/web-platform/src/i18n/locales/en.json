@@ -499,6 +499,8 @@
     "errType": "You can only send photos or videos.",
     "errSize": "Each file can be up to 50MB.",
     "errCount": "You can send up to {{max}} files at once.",
+    "errClosed": "This hospital doesn't take aftercare messages on MediDaegu. Please contact the hospital directly.",
+    "errSend": "Couldn't send. Please try again in a moment.",
     "aftercareButton": "Aftercare"
   },
   "notFoundPage": {
