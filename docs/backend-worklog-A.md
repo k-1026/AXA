@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-20 (5) · backend-A-notifications · Claude (사이트 안 알림)
+- 브랜치: `backend-A-audit-translate` 위 → 그것이 먼저 머지돼야 함
+- 한 일: 결정 27. 새 모듈 `modules/notification/`(A) — 모델·`notify`·목록·읽음·Realtime 토큰(PyJWT HS256, `SUPABASE_JWT_SECRET`), 마이그레이션 **0010** (표 + Supabase에서만 RLS 정책·authenticated SELECT·Realtime 발행). `booking/service._move`·`staff_reply`, `aftercare/service.tenant_reply`에 `notify` 한 줄 (B 모듈). `core/config.py`에 `supabase_jwt_secret` (공통 파일). `.env.example` 정리 (CORS·Supabase 묶음)
+- 바뀐 계약: contracts 4·5·6-5
+- 테스트: 전체 452개 통과 (`conftest`에서 `SUPABASE_JWT_SECRET` 비움)
+- Supabase `AXA`: 0010 적용, 정책 `notifications_own`·Realtime 발행 확인
+- B에게 요청: booking·aftercare에 넣은 `notify` 줄, `core/config.py` 확인
+
 ### 2026-11-20 (4) · backend-A-audit-translate · Claude (열람 기록 · 번역 · 챗봇 사후관리 카드)
 - 브랜치: `backend-A-aftercare-patient` + `backend-A-booking-replies` + `backend-A-chatbot-bookings`를 합친 위 → **그 셋이 먼저 머지돼야 함**
 - 한 일

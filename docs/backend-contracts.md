@@ -70,6 +70,7 @@
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `storage.unavailable` | 503 | 사진·영상 저장소(Supabase Storage)를 쓸 수 없음 — 설정 없음·Supabase 오류 (결정 22) |
+| `realtime.unavailable` | 503 | 실시간 알림 토큰을 만들 수 없음 (`SUPABASE_URL`·`SUPABASE_JWT_SECRET` 없음) → 화면은 주기 확인 (결정 27) |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
 | `internal` | 500 | 처리하지 못한 서버 오류 (`detail` = `{}`, 로그에는 예외 종류만) |
 
@@ -88,7 +89,7 @@
 | `booking.service.patient_cancel(db, patient_id, request_id)` | B | A | → `BookingOut` |
 | `consent.service.require(db, patient_id, kinds: list[str], request_id=None)` | A | A·B | 없으면 `consent.required` |
 | `consent.service.record(db, patient_id, kind, version, lang, request_id=None)` | A | A | → `ConsentOut` |
-| `notification.service.notify(patient_id, event, payload)` | A | B (상태 변경 후) | 데모는 콘솔 출력 |
+| `notification.service.notify(db, patient_id, kind, request_id, status=None)` | A | B (상태 변경·답장, **commit 전**) | `kind` = status·reply·aftercare. commit하지 않음 → 부르는 쪽 commit에 같이 (결정 27) |
 | `audit.service.log_action(db, tenant_id, actor, action, ref)` | B | A·B | 기록만 |
 | `hospital.service.get_basic(db, hospital_id)` | A | B (대시보드 병원 정보) | → `HospitalBasic`(`id`, `ykiho`, `name_ko`, `name_en`, `type_code`, `sggu`, `addr_ko`, `tel`, `is_registered_facility`, `is_demo`, `can_request`) / 없으면 `not_found` |
 | `hospital.service.require_requestable(db, hospital_id)` | A | A (요청서 제출 전) | → `HospitalBasic` / 미등록·영업 중 아님이면 403 `hospital.not_requestable` (`detail.reason` = `unregistered`/`not_operating`), 없으면 `not_found` |
@@ -167,6 +168,20 @@
 - 열람(`*.list`·`*.view`)은 같은 직원·같은 대상이면 1분에 1줄 (목록은 건수가 달라도 같은 열람), 답장은 매번
 - 함수: `audit.service.log_action(db, tenant_id, actor, action, ref)`(5절, commit은 부르는 쪽), 조회 API용 `log_and_commit`
 
+### 6-5. 환자 알림 API (A, `modules/notification/`, 결정 27)
+
+모두 **환자 로그인 필요**, 자기 알림만
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `GET /me/notifications` | 최근 50개 `[{id, kind(status/reply/aftercare), request_id, hospital_id, status, created_at, read}]` | — |
+| `POST /me/notifications/read` | `{ids?}` (비우면 모두) → `{updated}`. 남의 id는 무시 | 422 |
+| `POST /me/notifications/realtime-token` | `{url, token, expires_at}` — Supabase Realtime 접속용 1시간 토큰 (`sub` = 환자 id, `role` = authenticated) | 503 `realtime.unavailable` |
+
+- 기록 시점: `booking._move`(환자가 한 변경 제외) · `booking.staff_reply` · `aftercare.tenant_reply` — 모두 같은 commit
+- Supabase: `notifications` RLS 정책 `notifications_own`(authenticated, `patient_id = auth.jwt()->>'sub'`), Realtime 발행 `supabase_realtime`에 추가 (마이그레이션 0010)
+- 탈퇴하면 같이 삭제 (FK CASCADE)
+
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
 
 모두 **환자 로그인 필요**. 경로 앞 `/api/v1`. 응답 모델은 `ai/agent/schemas.py`(카드 형식의 기준) → OpenAPI
@@ -208,6 +223,7 @@
 | 2026-11-20 | 6-3·7-1 | 탈퇴 때 사진·영상 삭제, 정기 정리 응답에 `media_files` (결정 23) | A (**B 확인 필요**) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-20 | 6-1·6-2·6-3·6-4·7 | 열람 기록 API(6-4, 마이그레이션 0009), 메시지 번역(결정 25), 챗봇 `aftercare_thread` 카드에 `booking_id`·보내지 않음(결정 26) | A (**B 확인 필요**) | `backend-A-audit-translate` → `backend` |
 | 2026-11-20 | 6-1·6-4 | 환자 예약 응답에 `reject_reason`, 열람 기록은 같은 직원·대상 1분에 1줄 | A (**B 확인 필요**) | `backend-A-audit-translate` → `backend` |
+| 2026-11-20 | 4·5·6-5 | 알림 API 6-5 신설, `notify()` 모양 확정(commit 전 호출), 에러 `realtime.unavailable` (결정 27, 마이그레이션 0010) | A (**B 확인 필요**) | `backend-A-notifications` → `backend` |
 | 2026-11-18 | 3·4 | 병원 관계자 가입·로그인 경로(`/auth/staff/signup`·`login`), 에러 `auth.hospital_taken`(409) | A (**B 확인 필요**) | `backend-A-contract-staff-auth` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
