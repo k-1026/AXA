@@ -11,6 +11,7 @@ from core.config import get_settings
 from core.errors import register_error_handlers
 from modules.aftercare.router_patient import router as aftercare_patient_router
 from modules.aftercare.router_tenant import router as aftercare_tenant_router
+from modules.audit.router import router as audit_router
 from modules.auth.router import router as auth_router
 from modules.booking.router_patient import router as booking_patient_router
 from modules.booking.router_tenant import router as booking_tenant_router
@@ -50,6 +51,7 @@ api.include_router(booking_tenant_router)
 api.include_router(tenant_router)
 api.include_router(aftercare_tenant_router)
 api.include_router(aftercare_patient_router)
+api.include_router(audit_router)
 
 app.include_router(api)
 
