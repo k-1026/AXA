@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from core.db import get_db
 from core.errors import AppError
 from core.security import PatientPrincipal, current_patient, patient_uuid
+from modules.agent import translate
 from modules.booking import service
 from modules.booking.models import Reply
 from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut, ReplyOut
@@ -82,6 +83,11 @@ def create(hospital_id: int, body: BookingCreate, db: Db, me: Me):
     for c in body.consents:  # 이 요청서에 대한 동의로 기록 (consents.booking_request_id)
         consent_service.record(db, patient_id, c.kind, c.version, body.lang, request_id=req.id)
     db.commit()
+    if body.message:  # 병원 직원용 한국어 번역 (동의를 기록한 뒤, 실패하면 원문만 — 결정 25)
+        ko = translate.for_request(db, req.id, body.message, "ko", tenant.id)
+        if ko:
+            req.message_translated = ko
+            db.commit()
     return _out(db, req)
 
 

@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from core.db import utcnow
 from core.errors import AppError
+from modules.agent import translate
 from modules.booking.models import CANCEL_REASONS, REJECT_REASONS, BookingEvent, BookingRequest, Reply
 from modules.tenant.models import StaffUser, Tenant
 
@@ -197,7 +198,7 @@ def staff_reply(db: Session, tenant_id: uuid.UUID, staff_id: str, request_id: uu
         request_id=req.id,
         kind="free",
         text_ko=text.strip(),
-        text_translated=None,
+        text_translated=translate.for_request(db, req.id, text, req.lang, tenant_id),  # 환자 언어로, 동의 없거나 실패면 None (결정 25)
         ai_draft=False,
         approved_by=approver.id if approver and approver.tenant_id == tenant_id else None,
         sent_at=utcnow(),

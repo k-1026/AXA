@@ -15,6 +15,10 @@ def test_settings(monkeypatch):
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "")
     get_settings.cache_clear()
     get_engine.cache_clear()
+    # 번역은 실제 LLM을 부르지 않음 (번역을 보는 테스트만 가짜 LLM으로 바꿈)
+    from modules.agent import translate
+
+    monkeypatch.setattr(translate, "_llm", lambda: None)
     from modules.auth import attempts
 
     attempts.reset_all()  # 로그인 시도 기록은 모듈 전역 → 테스트마다 비움
