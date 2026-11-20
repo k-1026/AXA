@@ -6,8 +6,9 @@ action 목록 (dashboard-integration 5-3, 결정 24)
 - `aftercare.view` 사후관리 대화 열람 (사진 주소 발급 포함) · `aftercare.reply` 사후관리 답장
 """
 
+import threading
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -19,6 +20,9 @@ ACTIONS = ("booking.list", "booking.view", "booking.reply", "aftercare.view", "a
 # 목록·열람은 화면이 여러 번 불러도 같은 직원·같은 대상이면 이 시간 안에 1줄만 (대시보드가 한 번 열 때 목록을 7번 부름)
 # 답장(*.reply)은 한 번 보낼 때마다 기록
 REPEAT_WINDOW = timedelta(minutes=1)
+# 화면이 같은 목록을 동시에 여러 번 부르면 DB 확인만으로는 서로 못 봄 → 이 서버 안에서 먼저 막음 (서버가 여러 대면 DB 확인이 뒤를 받침)
+_seen: dict[tuple, datetime] = {}
+_lock = threading.Lock()
 
 
 def log_action(db: Session, tenant_id: uuid.UUID, actor: str, action: str, ref: str) -> None:
@@ -29,8 +33,19 @@ def log_action(db: Session, tenant_id: uuid.UUID, actor: str, action: str, ref: 
 
 def log_and_commit(db: Session, tenant_id: uuid.UUID, actor: str, action: str, ref: str) -> None:
     """조회(GET)처럼 따로 commit이 없는 곳에서. 열람은 1분 안에 같은 기록이 있으면 건너뜀."""
-    if not action.endswith(".reply") and _recent_same(db, tenant_id, actor, action, ref):
-        return
+    if not action.endswith(".reply"):
+        key = (str(tenant_id), str(actor), action, "list" if action == "booking.list" else ref)
+        now = utcnow()
+        with _lock:
+            last = _seen.get(key)
+            if last and now - last < REPEAT_WINDOW:
+                return
+            _seen[key] = now
+            if len(_seen) > 5000:  # 오래된 것 정리
+                for k in [k for k, v in _seen.items() if now - v >= REPEAT_WINDOW]:
+                    del _seen[k]
+        if _recent_same(db, tenant_id, actor, action, ref):
+            return
     log_action(db, tenant_id, actor, action, ref)
     db.commit()
 

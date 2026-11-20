@@ -84,5 +84,24 @@ def test_같은_직원이_1분_안에_다시_열면_한_줄만_답장은_매번(
     for row in db.query(AuditLog):
         row.created_at = row.created_at - timedelta(minutes=2)
     db.commit()
+    audit._seen.clear()  # 서버 메모리 기록도 1분 지난 것으로
     client.get("/api/v1/tenant/booking-requests", headers=_h(t, sid))
     assert db.query(AuditLog).filter_by(action="booking.list").count() == 3
+
+
+def test_동시에_여러_번_불러도_한_줄(db):
+    """대시보드가 목록을 한꺼번에 부를 때 (DB 확인 전에 서로 못 보는 경우) — 서버 메모리에서 막음."""
+    from concurrent.futures import ThreadPoolExecutor
+    from sqlalchemy.orm import sessionmaker
+
+    t = _tenant(db)
+    audit._seen.clear()
+    make = sessionmaker(bind=db.get_bind())
+
+    def call(i):
+        with make() as s:
+            audit.log_and_commit(s, t.id, "staff-x", "booking.list", f"booking_requests:{i}")
+
+    with ThreadPoolExecutor(7) as ex:
+        list(ex.map(call, range(7)))
+    assert db.query(AuditLog).filter_by(action="booking.list").count() == 1
