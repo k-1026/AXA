@@ -187,6 +187,9 @@
       "priceTitle": "Giá theo dịch vụ",
       "detail": "Xem chi tiết",
       "priceNote": "Vui lòng xác nhận chi phí thực tế với bệnh viện.",
+      "aftercare": "Tin nhắn hỏi sau điều trị gửi bệnh viện",
+      "aftercareOpen": "Mở trò chuyện sau điều trị để gửi",
+      "aftercareNote": "Chưa gửi. Hãy kiểm tra nội dung trong trò chuyện sau điều trị và tự gửi. Câu hỏi về triệu chứng hay điều trị, vui lòng liên hệ trực tiếp bệnh viện.",
       "empty": "Không có bệnh viện đã lưu thuộc chuyên khoa này.",
       "none": "Chưa có bệnh viện đã lưu."
     },

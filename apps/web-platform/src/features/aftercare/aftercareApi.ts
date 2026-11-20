@@ -34,7 +34,8 @@ export const toLocalMessage = (m: ServerMessage): AftercareMessage => {
     from: m.sender === 'staff' ? 'doctor' : 'user',
     at: m.created_at,
     // 사진만 보낸 메시지는 사진을 보여 주고 글은 숨김 (사진 주소가 없으면 📷 표시)
-    text: photoOnly && files.length ? undefined : m.text_translated || m.text_original,
+    // 내 글은 내가 쓴 원문, 병원 글은 내 언어 번역(없으면 한국어 원문) — 결정 25
+    text: photoOnly && files.length ? undefined : m.sender === 'patient' ? m.text_original : m.text_translated || m.text_original,
     attachments: files.length ? files : undefined,
   };
 };

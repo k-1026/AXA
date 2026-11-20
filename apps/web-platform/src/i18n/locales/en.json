@@ -187,6 +187,9 @@
       "priceTitle": "Treatment prices",
       "detail": "Details",
       "priceNote": "Please confirm actual costs with the hospital.",
+      "aftercare": "Follow-up message for the hospital",
+      "aftercareOpen": "Open follow-up chat to send",
+      "aftercareNote": "Not sent yet. Check the message in the follow-up chat and send it yourself. For symptoms or treatment questions, contact the hospital directly.",
       "empty": "No saved hospitals in this department.",
       "none": "No saved hospitals yet."
     },
