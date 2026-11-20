@@ -39,6 +39,59 @@ export function useExchangeRates(enabled: boolean): State {
   return state;
 }
 
+// 백엔드 /exchange-rates에 아직 없는 통화(지금은 JPY)만 임시로 채우는 참고 환율
+// 유럽중앙은행(ECB) 기준 환율을 Frankfurter 공개 API로 받음 (키 없음, 사용자 정보 안 보냄)
+// 백엔드가 그 통화를 주기 시작하면 이 값은 쓰이지 않음
+export interface FallbackRate {
+  rate: number; // 1원 = rate
+  date: string; // ECB 기준일 (YYYY-MM-DD)
+  provider: { name: string; url: string };
+}
+
+type FallbackState = { status: 'idle' | 'loading' | 'error' } | { status: 'ready'; data: FallbackRate };
+
+const fallbackCache = new Map<Currency, Promise<FallbackRate>>();
+
+export function useFallbackRate(currency: Currency, needed: boolean): FallbackState {
+  const [state, setState] = useState<FallbackState>({ status: 'idle' });
+
+  useEffect(() => {
+    if (!needed || currency === 'KRW') {
+      setState({ status: 'idle' });
+      return;
+    }
+    let alive = true;
+    setState({ status: 'loading' });
+    let p = fallbackCache.get(currency);
+    if (!p) {
+      p = fetch(`https://api.frankfurter.dev/v1/latest?from=KRW&to=${currency}`)
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+        .then((j: { date: string; rates: Record<string, number> }) => {
+          const rate = j.rates?.[currency];
+          if (!rate) throw new Error('no rate');
+          return {
+            rate,
+            date: j.date,
+            provider: { name: 'European Central Bank (Frankfurter)', url: 'https://frankfurter.dev' },
+          };
+        })
+        .catch((e) => {
+          fallbackCache.delete(currency); // 실패하면 다음에 다시 시도
+          throw e;
+        });
+      fallbackCache.set(currency, p);
+    }
+    p.then((data) => alive && setState({ status: 'ready', data })).catch(
+      () => alive && setState({ status: 'error' }),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [currency, needed]);
+
+  return state;
+}
+
 // 원화 금액 → 고른 통화 (소수점 없이 반올림). 통화 기호·자리 구분은 화면 언어 형식으로
 export function formatConverted(krw: number, currency: Currency, rate: number, lang: string): string {
   return new Intl.NumberFormat(lang, {
