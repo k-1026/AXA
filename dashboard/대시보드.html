@@ -693,7 +693,6 @@
     document.querySelectorAll('main > section').forEach(s => s.classList.toggle('hidden', s.id !== t));
     document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
     window.scrollTo(0, 0);
-    try { updateNav(); } catch (e) {} // 이 탭의 숫자 지우기 (데이터가 준비되기 전이면 건너뜀)
   }
   document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { location.hash = b.dataset.t; });
   const fromHash = () => { const t = (location.hash || '#home').slice(1); show(document.getElementById(t) ? t : 'home'); };
@@ -840,6 +839,7 @@
       ? `<b>AI 답장 초안</b> (직원 승인 후 발송)<br>${esc(c.draft.k)}<div class="note" style="margin:4px 0 0">환자에게: ${esc(c.draft.o)}</div><div class="acts"><button class="btn primary" data-act="send">승인·발송</button><button class="btn" data-act="edit">고쳐서 보내기</button></div>` : '';
     root.querySelectorAll('.citem').forEach((b) => b.onclick = async () => {
       const i = +b.dataset.i;
+      markSeen(key, list[i]); // 이 항목을 열어 봄 → 메뉴 숫자에서 빠짐
       if (hook && hook.select) await hook.select(list[i]);
       renderChat(root, key, i);
     });
@@ -1325,20 +1325,26 @@
 
   // 메뉴 숫자 = 처리할 일. 상담·예약: 대기 요청 / 사후관리: 환자 글에 아직 답 안 한 대화(해결됨 제외)
   // 진료·결제 확인: 결제 금액 API 전이라 DB에 연결되면 숨김 (가짜 숫자 X), 예시 화면에서는 "입력 대기" 줄 수
-  // 메뉴 숫자 = 아직 안 본 것. 그 탭을 열면 그때 있던 항목을 "봤음"으로 기록 → 숫자가 사라지고, 새 요청·새 메시지가 오면 다시 뜸
+  // 메뉴 숫자 = 아직 안 열어 본 것. 대화 목록에서 그 항목을 눌러 열면 하나씩 줄어듦 (탭만 옮겨서는 안 줄어듦). 새 요청·새 메시지가 오면 다시 뜸
   // (홈의 "오늘 할 일"·사후관리 KPI는 실제 처리할 건수 그대로)
   const SEEN_KEY = 'md_seen_tabs';
   let SEEN = {};
   try { SEEN = JSON.parse(localStorage.getItem(SEEN_KEY) || '{}'); } catch (e) {}
+  const navKey = { booking: (c) => c.id, aftercare: (c) => `${c.tid || c.id}:${c.unread}` };
+  function markSeen(tab, item) {
+    if (!navKey[tab]) return;
+    const k = navKey[tab](item), list = SEEN[tab] || (SEEN[tab] = []);
+    if (!list.includes(k)) list.push(k);
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(SEEN)); } catch (e) {}
+    updateNav();
+  }
   const NAV_ITEMS = {
-    booking: () => REQS.filter((r) => r.status === 'pending').map((r) => r.rid || r.id),
-    aftercare: () => CHATS.aftercare.filter((c) => c.unread).map((c) => `${c.tid || c.id}:${c.unread}`), // 같은 대화라도 안 읽은 수가 늘면 새것
+    booking: () => REQS.filter((r) => r.status === 'pending').map((r) => r.id), // 상담 채팅 목록의 R-… 와 같은 id
+    aftercare: () => CHATS.aftercare.filter((c) => c.unread).map(navKey.aftercare), // 같은 대화라도 안 읽은 수가 늘면 새것
   };
   function updateNav() {
     const set = (t, n, show = true) => { const el = document.querySelector(`#tabs button[data-t=${t}] .cnt`); if (el) { el.textContent = n; el.hidden = !show || !n; } };
     const ac = CHATS.aftercare.filter((c) => c.unread).length;
-    const cur = (location.hash || '#home').slice(1);
-    if (NAV_ITEMS[cur]) { SEEN[cur] = NAV_ITEMS[cur](); try { localStorage.setItem(SEEN_KEY, JSON.stringify(SEEN)); } catch (e) {} }
     const unseen = (t) => NAV_ITEMS[t]().filter((k) => !(SEEN[t] || []).includes(k)).length;
     set('booking', unseen('booking'));
     set('aftercare', unseen('aftercare'));
