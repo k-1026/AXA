@@ -142,6 +142,19 @@
 - 지우기(결정 23): 탈퇴(`DELETE /me`)하면 그 환자가 보낸 파일을 바로 삭제하고 메시지 `attachments`를 비움(글·`has_photo`는 남음). 나머지 고아 파일은 7-1 정기 정리가 하루 뒤
 - 저장소 설정(`SUPABASE_URL`·`SUPABASE_SERVICE_ROLE_KEY`)이 없으면 업로드는 503 → 화면은 `photo: true`("사진 있음")만 보냄. 번역(`text_translated`)은 `ai/llm` 연결 전이라 비움
 
+### 6-2. 병원 상담 답장 API (`modules/booking/router_tenant.py`, booking 주인 B — A가 작성, **B 확인 필요**)
+
+모두 **직원 로그인 필요**, 직원 토큰의 `tenant_id` 요청만 (다른 병원 요청은 404). 답장 저장은 `booking.service.staff_reply()`
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `POST /tenant/booking-requests/{id}/replies` | `{text}`(1~2,000자, 한국어) → 201 `ReplyOut{id, text_ko, text_translated, sent_at}`. 대시보드 확인 창의 "보내기" = 직원 승인 → 바로 보낸 상태(`sent_at`), `approved_by` = 보낸 직원(직원 행이 없으면 비움). 상태는 바꾸지 않음 | 404 `not_found`, 422 `validation`(빈 글·공백만·2,000자 초과), 401 |
+| `GET /tenant/booking-requests`, `GET /tenant/booking-requests/{id}` | 응답이 `TenantBookingOut` = `BookingOut` + `replies[ReplyOut]`(보낸 순)으로 바뀜 (칸 추가만, 기존 칸 그대로) | — |
+
+- 번역(`text_translated`)은 `ai/llm` 연결 전이라 비움 → 환자 화면은 원문. AI 초안(`ai_draft`)은 승인 전에는 저장하지 않음 (compliance: 직원 승인 없이 발송 X)
+- 환자는 6-1절 `replies`로 봄 (보낸 것만)
+
+
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
 
 모두 **환자 로그인 필요**. 경로 앞 `/api/v1`. 응답 모델은 `ai/agent/schemas.py`(카드 형식의 기준) → OpenAPI
@@ -173,6 +186,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-20 | 6-2 | 병원 상담 답장 `POST /tenant/booking-requests/{id}/replies` 신설, 병원 목록·상세 응답에 `replies` 추가 (`TenantBookingOut`) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-booking-replies` → `backend` |
 | 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
 | 2026-11-17 | 2 | 병원 직원 거절에 사유 코드(`fully_booked`/`not_offered`/`needs_consult`/`other`, 선택) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-contract-reject-reason` → `backend` |
 | 2026-11-18 | 4·6 | 환자 예약 API 6-1절 신설, `hospital.not_requestable` 사유 `not_joined` 추가, `residency` 필수(`short_term`만), 동의 조건(`overseas_transfer` = 글 번역 때) 확정, `preferred_slots` 미래만 | A (**B 확인 필요**) | `backend-A-contract-booking-request` → `backend` |

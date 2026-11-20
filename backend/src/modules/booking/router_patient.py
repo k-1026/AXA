@@ -17,7 +17,7 @@ from core.errors import AppError
 from core.security import PatientPrincipal, current_patient, patient_uuid
 from modules.booking import service
 from modules.booking.models import Reply
-from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut
+from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut, ReplyOut
 from modules.consent import service as consent_service
 from modules.hospital import service as hospital_service
 from modules.tenant.models import Tenant
@@ -43,7 +43,7 @@ def _out(db: Session, req) -> PatientBookingOut:
     replies = db.scalars(
         select(Reply).where(Reply.request_id == req.id, Reply.sent_at.is_not(None)).order_by(Reply.sent_at)
     )
-    out.replies = [{"text_ko": r.text_ko, "text_translated": r.text_translated, "sent_at": r.sent_at} for r in replies]
+    out.replies = [ReplyOut(text_ko=r.text_ko, text_translated=r.text_translated, sent_at=r.sent_at) for r in replies]
     return out
 
 
