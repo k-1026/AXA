@@ -17,7 +17,7 @@ from core.errors import AppError
 from core.security import PatientPrincipal, current_patient, patient_uuid
 from modules.agent import translate
 from modules.booking import service
-from modules.booking.models import Reply
+from modules.booking.models import BookingEvent, Reply
 from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut, ReplyOut
 from modules.consent import service as consent_service
 from modules.hospital import service as hospital_service
@@ -45,6 +45,11 @@ def _out(db: Session, req) -> PatientBookingOut:
         select(Reply).where(Reply.request_id == req.id, Reply.sent_at.is_not(None)).order_by(Reply.sent_at)
     )
     out.replies = [ReplyOut(text_ko=r.text_ko, text_translated=r.text_translated, sent_at=r.sent_at) for r in replies]
+    if req.status == "rejected":  # 거절 사유 (contracts 2절, booking_events.reason)
+        out.reject_reason = db.scalar(
+            select(BookingEvent.reason).where(BookingEvent.request_id == req.id, BookingEvent.to_status == "rejected")
+            .order_by(BookingEvent.created_at.desc()).limit(1)
+        )
     return out
 
 

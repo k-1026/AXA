@@ -117,7 +117,7 @@
 
 ### 6-1. 환자 예약 API (A, `modules/booking/router_patient.py`)
 
-모두 **환자 로그인 필요**. 응답 `PatientBookingOut` = `BookingOut` + `replies[{text_ko, text_translated, sent_at}]`(직원이 보낸 답장만). 요청서 `message`는 저장 뒤 한국어로 번역해 `message_translated`(결정 25, 실패하면 비움)
+모두 **환자 로그인 필요**. 응답 `PatientBookingOut` = `BookingOut` + `replies[{text_ko, text_translated, sent_at}]`(직원이 보낸 답장만) + `reject_reason`(거절이면 2절 사유 코드, 아니면·사유 없으면 `null`). 요청서 `message`는 저장 뒤 한국어로 번역해 `message_translated`(결정 25, 실패하면 비움)
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
@@ -164,6 +164,7 @@
 
 - 남는 행동: `booking.list`(ref `booking_requests:<건수>`) · `booking.view` · `booking.reply`(ref `booking_request:<id>`) · `aftercare.view` · `aftercare.reply`(ref `aftercare_thread:<id>`)
 - 내용(글·사진)은 저장하지 않음. 다른 병원 데이터를 열려다 404가 나면 기록 없음
+- 열람(`*.list`·`*.view`)은 같은 직원·같은 대상이면 1분에 1줄 (목록은 건수가 달라도 같은 열람), 답장은 매번
 - 함수: `audit.service.log_action(db, tenant_id, actor, action, ref)`(5절, commit은 부르는 쪽), 조회 API용 `log_and_commit`
 
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
@@ -206,6 +207,7 @@
 | 2026-11-20 | 4·6-3 | 사후관리 사진·영상 업로드(`…/aftercare/uploads`)·`attachments`, 에러 `storage.unavailable`(503) 추가, 병원용 메시지에도 `attachments` (결정 22, 마이그레이션 0008) | A (**B 확인 필요**) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-20 | 6-3·7-1 | 탈퇴 때 사진·영상 삭제, 정기 정리 응답에 `media_files` (결정 23) | A (**B 확인 필요**) | `backend-A-aftercare-patient` → `backend` |
 | 2026-11-20 | 6-1·6-2·6-3·6-4·7 | 열람 기록 API(6-4, 마이그레이션 0009), 메시지 번역(결정 25), 챗봇 `aftercare_thread` 카드에 `booking_id`·보내지 않음(결정 26) | A (**B 확인 필요**) | `backend-A-audit-translate` → `backend` |
+| 2026-11-20 | 6-1·6-4 | 환자 예약 응답에 `reject_reason`, 열람 기록은 같은 직원·대상 1분에 1줄 | A (**B 확인 필요**) | `backend-A-audit-translate` → `backend` |
 | 2026-11-18 | 3·4 | 병원 관계자 가입·로그인 경로(`/auth/staff/signup`·`login`), 에러 `auth.hospital_taken`(409) | A (**B 확인 필요**) | `backend-A-contract-staff-auth` → `backend` |
 | 2026-11-16 | 4·5 | 에러 `hospital.not_requestable`(403) 추가, `HospitalBasic` 칸 확정(`can_request` 포함), 요청서 제출 전 `require_requestable()`로 확인 | A (**B 확인 필요**) | `backend-A-contract-hospital` → `backend` |
 | 2026-11-12 | 1·7-1 | 내부 정리 API `/internal/purge`(`CRON_SECRET`), 새 모듈 `maintenance/`(A) | A (**B 확인 필요**) | `backend-review-fix` → `backend` |
