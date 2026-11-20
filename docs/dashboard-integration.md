@@ -20,6 +20,33 @@ cd apps/web-hospital && npm install && npm run dev   # http://localhost:5175
 - 탭 4개: 홈 `#home` · 유입·관심 `#inflow` · 상담·예약 `#booking` · 사후관리 `#aftercare`
 - 카드 종류: `설정`(병원 입력) · `공공`(공공데이터) · `예시`(→ 이 문서의 API로 교체) · `집계 전`(데이터 부족 시)
 
+### 시연용 대시보드 연결 (`dashboard/대시보드.html`, 2026-11-20)
+
+지금 시연은 `apps/web-hospital`이 아니라 **`dashboard/대시보드.html`**(파일 1개)을 씀. 서버 3개를 띄움
+
+| 서버 | 띄우는 법 (저장소 루트에서) | 주소 |
+|---|---|---|
+| 백엔드 | `uv run python -m uvicorn main:app --app-dir backend/src --port 8000` | http://localhost:8000 |
+| 환자 사이트 | `npm run dev --prefix apps/web-platform` | http://localhost:5173 |
+| 대시보드 | `python -m http.server 5175 --directory dashboard` | http://localhost:5175/대시보드.html |
+
+설정 2곳 (둘 다 git 제외 파일)
+
+| 파일 | 넣을 값 | 없으면 |
+|---|---|---|
+| 루트 `.env` | `CORS_ORIGINS=["http://localhost:5173","http://localhost:5175"]` | 대시보드에서 API 호출이 CORS로 막힘 (기본값에 5175 없음) |
+| `apps/web-platform/.env.local` | `VITE_DASHBOARD_URL=http://localhost:5175/대시보드.html` (`VITE_API_URL`은 기본 `http://localhost:8000`) | 환자 사이트 "병원 관계자 로그인" 뒤 "대시보드 주소가 설정되지 않음" |
+
+로그인 (2가지, 토큰은 그 탭의 `sessionStorage`에만 — 탭을 닫으면 사라짐)
+
+1. 대시보드 오른쪽 위 **직원 로그인** → `POST /api/v1/auth/staff/login`
+2. 환자 사이트 **병원 관계자 로그인** → 대시보드로 이동하며 `?token=&api=`를 넘김 → 대시보드가 읽자마자 주소에서 지움
+- 로그인 안 하면 **예시 데이터**, 토큰이 만료되면(401) 지우고 다시 로그인 안내
+- API 주소 기본값 `http://localhost:8000/api/v1`. 다른 주소면 환자 사이트에서 넘어오거나 `?api=` 로 한 번 열기
+- 시연 계정: `demo-staff@example.com` (비밀번호는 `data/dev/demo_accounts.txt`, git 제외)
+
+배포할 때: `VITE_DASHBOARD_URL` = 배포한 대시보드 주소, 백엔드 `CORS_ORIGINS`에 환자 사이트·대시보드 주소 둘 다
+
 ## 1. 지표 → 데이터 출처
 
 상태: ✅ 기존 계획 테이블로 계산 가능 · 🆕 새 테이블·칸 필요 · 📄 정적 파일
