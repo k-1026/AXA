@@ -41,8 +41,10 @@ class Settings(BaseSettings):
     # 서비스 키는 서버 전용 — 프론트·커밋에 넣지 않음 (Supabase 대시보드 → Project Settings → API)
     supabase_url: str | None = None
     supabase_service_role_key: str | None = None
+    # Realtime 알림 토큰 서명 (Supabase JWT Keys > Legacy JWT Secret, 결정 27). 없으면 알림은 주기 확인만
+    supabase_jwt_secret: str | None = None
 
-    @field_validator("supabase_url", "supabase_service_role_key", mode="before")
+    @field_validator("supabase_url", "supabase_service_role_key", "supabase_jwt_secret", mode="before")
     @classmethod
     def _empty_str_is_none(cls, v: str | None) -> str | None:
         return v or None
