@@ -470,6 +470,12 @@
     "number": "预约编号 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
     "rejectedNote": "医院告知该时间无法预约。",
+    "rejectReason": {
+      "fully_booked": "医院表示该时段已约满，请改选其他日期再申请。",
+      "not_offered": "医院表示不提供您申请的诊疗项目，请寻找其他医院。",
+      "needs_consult": "医院表示需要先进行面诊，请在咨询页面查看医院的说明。",
+      "other": "医院表示无法接受此次申请，请在咨询页面查看医院的说明。"
+    },
     "change": "更改预约",
     "cancel": "取消预约",
     "chat": "咨询",

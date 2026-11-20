@@ -470,6 +470,12 @@
     "number": "Mã đặt lịch {{no}}",
     "cancelledOn": "Ngày hủy {{date}}",
     "rejectedNote": "Bệnh viện cho biết không thể đặt vào thời gian này.",
+    "rejectReason": {
+      "fully_booked": "Bệnh viện cho biết khung giờ đó đã kín lịch. Vui lòng yêu cầu ngày khác.",
+      "not_offered": "Bệnh viện cho biết không thực hiện dịch vụ bạn yêu cầu. Vui lòng tìm bệnh viện khác.",
+      "needs_consult": "Bệnh viện cho biết cần tư vấn trực tiếp trước. Hãy xem thông báo của bệnh viện trong mục tư vấn.",
+      "other": "Bệnh viện cho biết không thể nhận yêu cầu này. Hãy xem thông báo của bệnh viện trong mục tư vấn."
+    },
     "change": "Đổi lịch",
     "cancel": "Hủy lịch",
     "chat": "Tư vấn",

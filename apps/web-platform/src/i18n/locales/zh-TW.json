@@ -470,6 +470,12 @@
     "number": "預約編號 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
     "rejectedNote": "醫院告知此時間無法預約。",
+    "rejectReason": {
+      "fully_booked": "醫院表示該時段已額滿，請改選其他日期再申請。",
+      "not_offered": "醫院表示不提供您申請的診療項目，請尋找其他醫院。",
+      "needs_consult": "醫院表示需要先進行面診，請在諮詢頁面查看醫院的說明。",
+      "other": "醫院表示無法接受此次申請，請在諮詢頁面查看醫院的說明。"
+    },
     "change": "變更預約",
     "cancel": "取消預約",
     "chat": "諮詢",

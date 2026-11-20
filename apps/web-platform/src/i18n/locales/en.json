@@ -470,6 +470,12 @@
     "number": "Booking no. {{no}}",
     "cancelledOn": "Cancelled on {{date}}",
     "rejectedNote": "The hospital said this time is not available.",
+    "rejectReason": {
+      "fully_booked": "The hospital says that time is fully booked. Please request another date.",
+      "not_offered": "The hospital says it does not offer the treatment you asked for. Please look for another hospital.",
+      "needs_consult": "The hospital says an in-person consultation is needed first. Check the hospital's message in the consultation chat.",
+      "other": "The hospital says it can't accept this request. Check the hospital's message in the consultation chat."
+    },
     "change": "Change booking",
     "cancel": "Cancel booking",
     "chat": "Chat",

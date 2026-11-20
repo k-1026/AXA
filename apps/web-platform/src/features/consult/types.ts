@@ -27,7 +27,11 @@ export interface BookingRequest {
   cancelledAt?: string; // ISO 시각
   treatment?: ChatText; // 병원이 기록한 진료·시술 이름 (방문 완료로 보일 때 표시)
   serverId?: string; // 실제 회원: 백엔드 예약 요청 id (POST /hospitals/{id}/booking-requests)
+  rejectReason?: RejectReason; // 거절 사유 코드 (병원이 고름, 없을 수 있음)
 }
+
+// 병원 거절 사유 (docs/backend-contracts.md 2절) → 문장은 bookings.rejectReason.*
+export type RejectReason = 'fully_booked' | 'not_offered' | 'needs_consult' | 'other';
 
 interface ConsultMessage {
   id: string;
