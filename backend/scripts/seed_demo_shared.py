@@ -25,6 +25,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend" / "src"))
+sys.path.insert(0, str(ROOT))  # ai/ 패키지 (백엔드 모듈이 ai.llm 등을 불러올 때)
 
 from sqlalchemy import delete, select  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
