@@ -17,6 +17,18 @@
 
 ## 기록
 
+### 2026-11-20 · backend-A-booking-replies · Claude (병원 상담 답장 API)
+- 한 일: 사용자 요청으로 **B 모듈(booking)에 상담 답장 쓰기 API** — 대시보드 상담 답장이 화면에만 붙고 새로고침하면 사라지던 것
+  - `POST /tenant/booking-requests/{id}/replies` `{text}` → `Reply` 저장 (`sent_at` 지금, `approved_by` = 보낸 직원, `ai_draft` false, 번역 비움). 확인 창 "보내기" = 직원 승인
+  - 병원 목록·상세 응답 `TenantBookingOut` = `BookingOut` + `replies` (한 번에 조회, `service.sent_replies`)
+  - `/replies` 경로를 `/{action}`보다 먼저 등록 (행동 이름으로 잡히지 않게)
+  - 환자 쪽 `_out()`이 답장을 dict로 넣어 Pydantic 경고 → `ReplyOut`으로 (답장이 실제로 생기면서 드러남)
+- 바뀐 계약: 있음 6-2절 신설 + 변경 이력 (**B 확인 필요**)
+- 테스트: `backend/tests/test_booking_replies.py` 5개 (저장·병원/환자 조회, 다른 병원 404, 빈 글·2,001자 422, 로그인·환자 토큰 막기, 경로 충돌 없음), 백엔드+AI 410개 통과
+- 다음 할 일: 대시보드 상담 채팅이 이 API로 보내고 불러오기, 환자 웹 상담 화면에 답장 표시 (프론트 브랜치)
+- B에게 요청: 6-2절·`staff_reply()` 확인. 상태 이력(`booking_events`)에는 답장을 넣지 않음 — 넣어야 하면 알려 주기
+- 막힌 것·질문: 번역은 `ai/llm` 연결 후 (`text_translated`)
+
 ### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
 - 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**
 - 확인: alembic `0007` · hospitals 4,242(등록 126) 그대로 · 새 표 7개 모두 0행 · public 표 RLS 꺼진 것 0 · FK `tenants·booking_requests.hospital_id → hospitals`, `consents.booking_request_id → booking_requests` 있음
