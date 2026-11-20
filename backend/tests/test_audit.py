@@ -61,3 +61,28 @@ def test_모르는_행동은_기록하지_않는다(db):
 def test_환자_토큰으로는_기록을_볼_수_없다(client):
     tok = create_access_token(str(uuid.uuid4()), "patient", session_id="s")
     assert client.get("/api/v1/tenant/audit-logs", headers={"Authorization": f"Bearer {tok}"}).status_code == 403
+
+
+def test_같은_직원이_1분_안에_다시_열면_한_줄만_답장은_매번(client, db):
+    from datetime import timedelta
+
+    p, t = _patient(db), _tenant(db)
+    sid = str(demo_staff(db, t.id).id)
+    r = _req(db, p, t, visited=False)
+    for _ in range(7):  # 대시보드가 한 번 열 때 목록을 여러 번 부름
+        client.get("/api/v1/tenant/booking-requests", headers=_h(t, sid))
+    client.get("/api/v1/tenant/booking-requests?status=pending", headers=_h(t, sid))
+    for _ in range(2):
+        client.post(f"/api/v1/tenant/booking-requests/{r.id}/replies", json={"text": "네"}, headers=_h(t, sid))
+    actions = [x.action for x in db.query(AuditLog).order_by(AuditLog.id)]
+    assert actions == ["booking.list", "booking.reply", "booking.reply"]
+    other = str(demo_staff(db, t.id, email="staff2@example.com").id)  # 다른 직원은 따로 기록
+    client.get("/api/v1/tenant/booking-requests", headers=_h(t, other))
+    assert db.query(AuditLog).filter_by(action="booking.list").count() == 2
+
+    # 1분이 지나면 다시 기록
+    for row in db.query(AuditLog):
+        row.created_at = row.created_at - timedelta(minutes=2)
+    db.commit()
+    client.get("/api/v1/tenant/booking-requests", headers=_h(t, sid))
+    assert db.query(AuditLog).filter_by(action="booking.list").count() == 3
