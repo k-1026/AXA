@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n';
 import { CURRENCIES, useCurrency, type Currency } from '../components/currency';
 import { useAuth } from '../components/auth';
+import { NotificationBell } from '../features/notifications/NotificationBell';
 
 export function Header() {
   const { t, i18n } = useTranslation();
@@ -35,6 +36,7 @@ export function Header() {
             ))}
           </select>
         </label>
+        {user && !user.demo && <NotificationBell />}
         {user ? (
           <button type="button" className="header-button" onClick={logout}>
             {t('auth.logout')}

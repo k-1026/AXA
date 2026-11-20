@@ -1,4 +1,22 @@
 {
+  "notify": {
+    "title": "Notifications",
+    "open": "{{count}} notifications",
+    "empty": "No new notifications.",
+    "markAll": "Mark all as read",
+    "hospital": "The hospital",
+    "newCount": "{{count}} new",
+    "status": {
+      "confirmed": "{{hospital}} confirmed your booking.",
+      "rejected": "{{hospital}} can't accept your booking request.",
+      "proposed": "{{hospital}} proposed another time.",
+      "visited": "Your visit to {{hospital}} is marked complete. You can now use follow-up chat.",
+      "no_show": "Your booking at {{hospital}} was marked as not visited.",
+      "expired": "All preferred dates for your request to {{hospital}} have passed."
+    },
+    "reply": "{{hospital}} sent {{count}} consultation reply(s).",
+    "aftercare": "Staff at {{hospital}} sent {{count}} follow-up message(s)."
+  },
   "header": {
     "language": "Language",
     "currency": "Currency",

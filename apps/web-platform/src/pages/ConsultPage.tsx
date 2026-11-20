@@ -13,6 +13,7 @@ import { HospitalThumb } from '../features/consult/HospitalThumb';
 import { ClipboardIcon } from '../features/consult/icons';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
 import { hospitalNames } from '../features/hospital/name';
+import { useMarkSeenOn } from '../features/notifications/NotificationsProvider';
 
 const QUICK = [
   { key: 'booking', Icon: CalendarIcon },
@@ -23,6 +24,7 @@ const QUICK = [
 // 병원 상담·예약. 병원마다 상담 하나 (1:1). 답변은 병원 담당자가 직접 한다
 // 병원 상세의 "병원에 상담하기"로 들어오면 ?hospital=<id> 로 그 병원 상담을 연다
 export function ConsultPage() {
+  useMarkSeenOn('/booking'); // 이 화면을 열면 이 화면의 알림은 읽은 것으로
   const { t } = useTranslation();
   const text = useLocalized();
   const consult = useConsultThreads();
