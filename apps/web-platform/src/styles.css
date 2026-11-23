@@ -1138,7 +1138,7 @@ a {
 /* 요약 카드 3개 */
 .mp-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
@@ -1392,6 +1392,129 @@ a {
 .mp-add svg {
   width: 22px;
   height: 22px;
+}
+
+/* 일정 추가 버튼은 <button> → 링크처럼 보이게 */
+button.mp-add {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* 내가 넣은 일정: 날짜 · 시간(선택) · 할 일 */
+.mp-plan-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #dfe5ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.mp-plan-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #5d6875;
+}
+
+/* 일정 목록: 타워 그림 아래에서 시작, 카드(옆 체크리스트와 같은 높이)를 넘으면 이 안에서만 스크롤 */
+.mp-schedule {
+  display: flex;
+  flex-direction: column;
+}
+
+.mp-timeline-scroll {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 140px;
+  margin-top: 24px; /* 타워 그림(위 18px + 높이 100px) 아래로 */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-right: -10px;
+  padding-right: 10px;
+}
+
+.mp-schedule > .mp-add {
+  align-self: flex-start;
+}
+
+/* 한 줄 배치(태블릿 이하)에서는 옆 카드가 없으니 목록 높이를 정해 둠 */
+@media (max-width: 860px) {
+  .mp-timeline-scroll {
+    flex: none;
+    max-height: 300px;
+  }
+}
+
+.mp-plan-form input,
+.mp-plan-form select {
+  padding: 8px 10px;
+  border: 1px solid #cfd7e0;
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+}
+
+.mp-plan-form .mp-plan-text {
+  grid-column: 1 / -1;
+}
+
+.mp-plan-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.mp-plan-actions button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mp-plan-cancel {
+  border: 1px solid #cfd7e0;
+  background: #fff;
+}
+
+.mp-plan-save {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+}
+
+.mp-plan-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mp-entry-remove {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.85rem;
+  color: #8a94a1;
+  cursor: pointer;
+}
+
+.mp-entry-remove:hover {
+  color: #c0392b;
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .mp-plan-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mp-checklist {

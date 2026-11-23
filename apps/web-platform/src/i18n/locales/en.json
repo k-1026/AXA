@@ -138,7 +138,8 @@
     "subtitle": "Manage saved hospitals, visit plans and trip prep in one place.",
     "stats": {
       "saved": "Saved hospitals",
-      "visits": "Visit history"
+      "visits": "Visit history",
+      "bookings": "My bookings"
     },
     "schedule": {
       "title": "My Daegu schedule",
@@ -149,6 +150,16 @@
         "userAdded": "Added by you",
         "experience": "Experience",
         "tour": "Sightseeing"
+      },
+      "remove": "Delete",
+      "form": {
+        "date": "Date",
+        "time": "Time (optional)",
+        "text": "Plan",
+        "placeholder": "e.g. Seomun Market night market",
+        "save": "Add",
+        "cancel": "Cancel",
+        "noTime": "No time"
       }
     },
     "checklist": {

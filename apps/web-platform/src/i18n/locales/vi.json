@@ -138,7 +138,8 @@
     "subtitle": "Quản lý bệnh viện đã lưu, lịch khám và chuẩn bị chuyến đi tại một nơi.",
     "stats": {
       "saved": "Bệnh viện đã lưu",
-      "visits": "Lịch sử khám"
+      "visits": "Lịch sử khám",
+      "bookings": "Quản lý lịch hẹn"
     },
     "schedule": {
       "title": "Lịch trình Daegu của tôi",
@@ -149,6 +150,16 @@
         "userAdded": "Bạn tự thêm",
         "experience": "Trải nghiệm",
         "tour": "Tham quan"
+      },
+      "remove": "Xóa",
+      "form": {
+        "date": "Ngày",
+        "time": "Giờ (không bắt buộc)",
+        "text": "Việc cần làm",
+        "placeholder": "VD: Đi chợ đêm Seomun",
+        "save": "Thêm",
+        "cancel": "Hủy",
+        "noTime": "Không chọn giờ"
       }
     },
     "checklist": {
