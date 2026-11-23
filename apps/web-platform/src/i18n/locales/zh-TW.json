@@ -15,7 +15,18 @@
       "expired": "您向{{hospital}}申請的希望日期均已過去。"
     },
     "reply": "{{hospital}}傳來{{count}}則諮詢回覆。",
-    "aftercare": "{{hospital}}醫護人員傳來{{count}}則術後管理訊息。"
+    "aftercare": "{{hospital}}醫護人員傳來{{count}}則術後管理訊息。",
+    "push": {
+      "enable": "在此裝置接收通知",
+      "disable": "關閉此裝置的通知",
+      "onNote": "即使關閉網站，也會在此裝置收到醫院的消息。",
+      "offNote": "即使關閉網站，也能以通知接收醫院的消息。",
+      "denied": "瀏覽器已封鎖此網站的通知，請在瀏覽器設定中允許。",
+      "unsupported": "此瀏覽器不支援通知。",
+      "ios": "iPhone・iPad 請點分享 →「加入主畫面」，從主畫面開啟後即可接收通知。",
+      "serverOff": "目前無法使用裝置通知，網站內通知仍會正常顯示。",
+      "failed": "無法變更通知設定，請稍後再試。"
+    }
   },
   "header": {
     "language": "語言",

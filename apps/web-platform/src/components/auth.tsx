@@ -3,6 +3,7 @@ import i18n from '../i18n';
 import { api, ApiError, setUnauthorizedHandler } from './api';
 import { accountKeyOf, removeAccountData, resetAccountMemory, setCurrentAccount, type AccountKey } from './account';
 import { readSessionSetting, readSetting, removeSetting, writeSessionSetting, writeSetting } from './storage';
+import { disablePush } from '../features/notifications/webPush';
 
 // 로그인 상태
 // - 실제 회원: 백엔드 회원가입·로그인. 토큰은 이 브라우저(localStorage)에 두고, 로그아웃하면 서버 세션도 끝냄
@@ -137,7 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    if (token) api('/auth/patient/logout', { method: 'POST', token }).catch(() => {});
+    // 이 브라우저의 웹 푸시 구독도 풀기 (같은 기기의 다음 사용자에게 앞 사람 알림이 가지 않게, 결정 30)
+    disablePush(token).finally(() => token && api('/auth/patient/logout', { method: 'POST', token }).catch(() => {}));
     clearToken();
     writeSessionSetting(DEMO_KEY, null);
     resetAccountMemory(); // 같은 탭에서 다음에 로그인한 사람에게 대화·상담이 보이지 않게
@@ -147,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 탈퇴: 비밀번호 확인 후 서버에서 계정 삭제 표시 + 모든 기기 로그아웃 → 이 브라우저도 로그아웃
   const withdraw = async (password: string) => {
     await api('/me', { method: 'DELETE', token, body: { password } });
+    disablePush(null); // 서버 구독은 탈퇴와 함께 지워짐 → 브라우저 구독만 풀기
     clearToken();
     removeAccountData(account); // 이 브라우저에 남은 이 계정의 찜·방문 기록 + 메모리 데이터
     setUser(null);

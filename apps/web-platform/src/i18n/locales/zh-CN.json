@@ -15,7 +15,18 @@
       "expired": "您向{{hospital}}申请的希望日期均已过去。"
     },
     "reply": "{{hospital}}发来{{count}}条咨询回复。",
-    "aftercare": "{{hospital}}医护人员发来{{count}}条术后管理消息。"
+    "aftercare": "{{hospital}}医护人员发来{{count}}条术后管理消息。",
+    "push": {
+      "enable": "在此设备接收通知",
+      "disable": "关闭此设备的通知",
+      "onNote": "即使关闭网站，也会在此设备收到医院的消息。",
+      "offNote": "即使关闭网站，也能以通知接收医院的消息。",
+      "denied": "浏览器已屏蔽此网站的通知，请在浏览器设置中允许。",
+      "unsupported": "此浏览器不支持通知。",
+      "ios": "iPhone・iPad 请点击分享 →“添加到主屏幕”，从主屏幕打开后即可接收通知。",
+      "serverOff": "目前无法使用设备通知，网站内通知仍会正常显示。",
+      "failed": "无法更改通知设置，请稍后再试。"
+    }
   },
   "header": {
     "language": "语言",
