@@ -356,7 +356,7 @@
     "quickMenu": "Show or hide quick menu",
     "placeholder": "Type your question",
     "send": "Send",
-    "disclaimer": "AI answers are for information only. Please confirm treatment and bookings with the hospital.",
+    "disclaimer": "AI answers are for information only and do not diagnose, judge results or recommend treatments. Please confirm treatment and bookings with the hospital, and call 119 in an emergency.",
     "cancel": "Cancel",
     "api": {
       "thinking": "Preparing an answer…",
