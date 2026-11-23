@@ -16,6 +16,7 @@ from core.config import get_settings
 from core.db import utcnow
 from core.errors import AppError
 from modules.booking.models import BookingRequest
+from modules.notification import push
 from modules.notification.models import KINDS, Notification
 
 NOTIFY_STATUS = ("confirmed", "rejected", "proposed", "visited", "no_show", "expired")
@@ -29,6 +30,7 @@ def notify(db: Session, patient_id: uuid.UUID | None, kind: str, request_id: uui
     if kind not in KINDS or (kind == "status" and status not in NOTIFY_STATUS):
         return
     db.add(Notification(patient_id=patient_id, kind=kind, request_id=request_id, status=status))
+    push.queue(db, patient_id, kind, request_id, status)  # 구독한 브라우저에 commit 뒤 푸시 (결정 30)
 
 
 def list_mine(db: Session, patient_id: uuid.UUID) -> list[tuple[Notification, int | None]]:

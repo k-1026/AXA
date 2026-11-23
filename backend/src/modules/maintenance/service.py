@@ -36,6 +36,7 @@ def purge_media(db: Session) -> int:
     except Exception:  # noqa: BLE001 — Storage 문제로 DB 정리까지 실패하지 않게
         return 0
     used = aftercare_service.referenced_media_paths(db)
+    used |= {media.thumb_path(p) for p in used}  # 쓰는 사진의 썸네일도 남김 (결정 29)
     cutoff = utcnow() - MEDIA_GRACE
     stale = [p for p, created in objects if p not in used and created is not None and created < cutoff]
     return media.remove(stale)

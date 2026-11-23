@@ -43,7 +43,7 @@ def test_plain_answer_keeps_history_and_ai_flag():
     assert [m["role"] for m in state.history] == ["user", "assistant"]
     system = llm.calls[0][0][0]
     assert system["role"] == "system" and "2026-11-10" in system["content"] and "residency=unknown" in system["content"]
-    assert len(llm.calls[0][1]) == 11  # 도구 11개 전달
+    assert len(llm.calls[0][1]) == 12  # 도구 12개 전달
 
 
 def test_tool_chain_builds_cards_from_tool_results():

@@ -64,12 +64,15 @@
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
 | `validation` | 422 | 입력 오류 |
 | `consent.required` | 422 | 필수 동의 없음 |
+| `residency.required` | 422 | 계정에 체류 형태 답이 없음 → `PUT /me/residency` 먼저 (예약 요청 때, 결정 28) |
+| `residency.not_eligible` | 403 | 국내 거주 외국인 → 상담·예약 요청 불가, 정보 열람만 (의료법 제27조 제3항 제2호, 결정 28) |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
 | `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`/`not_joined`(등록 기관이지만 메디대구 입점 안 함 = tenant 없음·`requests_enabled=false`, 예약 요청 때만). 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `storage.unavailable` | 503 | 사진·영상 저장소(Supabase Storage)를 쓸 수 없음 — 설정 없음·Supabase 오류 (결정 22) |
+| `push.unavailable` | 503 | 웹 푸시 VAPID 키가 없음 → 화면은 사이트 안 알림만 (결정 30) |
 | `realtime.unavailable` | 503 | 실시간 알림 토큰을 만들 수 없음 (`SUPABASE_URL`·`SUPABASE_JWT_SECRET` 없음) → 화면은 주기 확인 (결정 27) |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
 | `internal` | 500 | 처리하지 못한 서버 오류 (`detail` = `{}`, 로그에는 예외 종류만) |
@@ -111,7 +114,7 @@
 | `message` | str | X | 자유 입력 원문 → 번역은 백그라운드 |
 | `health_info` | str | X | 있으면 `health` 동의 필수 |
 | `consents` | list[{kind, version}] | O | `privacy` 항상 · `health_info`가 있으면 `health` · `message`나 `health_info`가 있으면 번역(해외 LLM)용 `overseas_transfer` → 빠지면 422 `consent.required` (`detail.missing`). 받은 동의는 그 요청서에 묶어 기록(`consents.booking_request_id`) |
-| `residency` | `short_term` | O | 체류 형태(자기 신고). 국내 거주 외국인은 유치 대상이 아니라 요청 불가(의료법 제27조 제3항 제2호) → `short_term` 외에는 422 `validation` (2026-11-18 필수로) |
+| `residency` | `short_term` | O | 체류 형태(자기 신고). 국내 거주 외국인은 유치 대상이 아니라 요청 불가(의료법 제27조 제3항 제2호) → `short_term` 외에는 422 `validation` (2026-11-18 필수로). **제출 때 한 번 더 확인하는 값** — 판단 기준은 계정의 `residency`(6-6절, 결정 28) |
 | `treatment` | str | X | 진료항목 코드 (대시보드 1-2) |
 
 - 요청서의 `privacy` 동의 = **이 요청서 내용을 고른 병원에 전달**하는 데 대한 동의 (가입 때 `privacy`와 별개로 요청서마다). 법적 구조가 제3자 제공(개인정보보호법 제17조 제1항 제1호)인지 처리 위탁(제26조)인지는 **개인정보위 질의 8번 회신 후** 문구 확정 ([plan.md](../subject/plan.md) 11절)
@@ -122,8 +125,9 @@
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
-| `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending` | 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.duplicate`, 422 `consent.required`·`validation` |
-| `GET /me/booking-requests` | 내 예약 요청 목록 (최근 순) | — |
+| `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending`. 먼저 계정 체류 형태 확인(6-6절) | 422 `residency.required`, 403 `residency.not_eligible`, 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.duplicate`, 422 `consent.required`·`validation` |
+| `GET /me/booking-requests` | 내 예약 요청 목록 (최근 순). 각 항목에 `questions[{text_original, text_translated, created_at}]` (방문 전 내 질문, 결정 32) | — |
+| `POST /me/booking-requests/{id}/questions` | `{text(1~1000자)}` → 201 `PatientBookingOut`. 방문 전(`pending`·`proposed`·`confirmed`)에만, 그 요청서에 번역 동의가 있으면 병원용 한국어 번역 (결정 32) | 409 `booking.invalid_transition`, 404, 422, 429 `rate_limited`(요청서당 30개) |
 | `GET /me/booking-requests/{id}` | 상세 | 404 `not_found`(남의 것 포함) |
 | `POST /me/booking-requests/{id}/accept` | 병원이 제안한 시간 수락 `proposed → confirmed` | 409 `booking.invalid_transition` |
 | `POST /me/booking-requests/{id}/cancel` | `{reason?}` (`CANCEL_REASONS`) → `cancelled`, `pending`·`proposed`에서만 | 409, 422 |
@@ -137,7 +141,7 @@
 | `GET /me/aftercare` | 내 대화 목록 (최근 메시지 순) `PatientThreadOut{id, request_id, status, last_message_at, last_message, unread}` — `unread` = 내가 마지막으로 보낸 뒤 병원이 보낸 수 | — |
 | `GET /me/booking-requests/{id}/aftercare` | 요청서 1건의 대화 + `messages[{id, sender(patient/staff), text_original, text_translated, has_photo, created_at}]` | 404 `not_found`(대화 없음·남의 것) |
 | `POST /me/booking-requests/{id}/aftercare/messages` | `{text(1~4,000자), photo?, attachments?[{path, kind(image/video), name}] (4개까지)}` → 201, 첫 메시지면 대화를 엶. 해결된 대화에 보내면 다시 `new` | 409 `booking.invalid_transition`(방문 완료 전·사후관리 미지원 병원), 404, 422 `validation`(빈 글·다른 요청서 경로의 파일) |
-| `POST /me/booking-requests/{id}/aftercare/uploads` | `{name, content_type, size}` → 201 `{path, kind, upload_url}`. 브라우저가 `upload_url`로 파일을 `PUT`(Content-Type 그대로) 한 뒤 `path`를 `attachments`에 넣어 보냄 | 422(사진·영상 아님, 50MB 초과), 404, 409(위와 같음), 503 `storage.unavailable` |
+| `POST /me/booking-requests/{id}/aftercare/uploads` | `{name, content_type, size, thumb?}` → 201 `{path, kind, upload_url, thumb_upload_url}`. 브라우저가 `upload_url`로 파일을 `PUT`(Content-Type 그대로) 한 뒤 `path`를 `attachments`에 넣어 보냄. 사진이고 `thumb: true`면 썸네일 주소도 → 썸네일(JPEG)을 올리고 첨부에 `thumb: true` (결정 29) | 422(사진·영상 아님, 50MB 초과), 404, 409(위와 같음), 503 `storage.unavailable` |
 
 - 사진·영상(결정 22): Supabase Storage 비공개 버킷 `aftercare-media`, 경로 `{tenant_id}/{request_id}/{무작위}.{확장자}`. 메시지 응답의 `attachments[{kind, name, url}]` — `url`은 1시간짜리 서명된 주소(못 만들면 `null`), 경로는 응답에 넣지 않음. 병원용 `GET /tenant/aftercare/{id}`도 같은 `attachments`
 - 지우기(결정 23): 탈퇴(`DELETE /me`)하면 그 환자가 보낸 파일을 바로 삭제하고 메시지 `attachments`를 비움(글·`has_photo`는 남음). 나머지 고아 파일은 7-1 정기 정리가 하루 뒤
@@ -151,7 +155,7 @@
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
 | `POST /tenant/booking-requests/{id}/replies` | `{text}`(1~2,000자, 한국어) → 201 `ReplyOut{id, text_ko, text_translated, sent_at}`. 대시보드 확인 창의 "보내기" = 직원 승인 → 바로 보낸 상태(`sent_at`), `approved_by` = 보낸 직원(직원 행이 없으면 비움). 상태는 바꾸지 않음 | 404 `not_found`, 422 `validation`(빈 글·공백만·2,000자 초과), 401 |
-| `GET /tenant/booking-requests`, `GET /tenant/booking-requests/{id}` | 응답이 `TenantBookingOut` = `BookingOut` + `replies[ReplyOut]`(보낸 순)으로 바뀜 (칸 추가만, 기존 칸 그대로) | — |
+| `GET /tenant/booking-requests`, `GET /tenant/booking-requests/{id}` | 응답이 `TenantBookingOut` = `BookingOut` + `replies[ReplyOut]`(보낸 순)으로 바뀜 (칸 추가만, 기존 칸 그대로). 2026-11-23: `questions[{text_original, text_translated, created_at}]` 추가 (방문 전 환자 질문, 결정 32) | — |
 
 - 번역(`text_translated`, 결정 25): 보낼 때 환자 언어로 (`ai/llm`, 요청서 번역 동의가 있을 때만, 실패하면 비움 → 환자 화면은 원문). AI 초안(`ai_draft`)은 승인 전에는 저장하지 않음 (compliance: 직원 승인 없이 발송 X)
 - 환자는 6-1절 `replies`로 봄 (보낸 것만)
@@ -176,11 +180,27 @@
 |---|---|---|
 | `GET /me/notifications` | 최근 50개 `[{id, kind(status/reply/aftercare), request_id, hospital_id, status, created_at, read}]` | — |
 | `POST /me/notifications/read` | `{ids?}` (비우면 모두) → `{updated}`. 남의 id는 무시 | 422 |
+| `GET /me/push/key` | `{public_key}` — VAPID 공개 키 (브라우저 `pushManager.subscribe`용, 결정 30) | 503 `push.unavailable` |
+| `POST /me/push/subscriptions` | `{endpoint(https), keys{p256dh, auth}}` → 204. 같은 endpoint면 지금 환자로 옮김 | 422, 503 |
+| `DELETE /me/push/subscriptions` | `{endpoint}` → 204 (내 것만) | — |
 | `POST /me/notifications/realtime-token` | `{url, token, expires_at}` — Supabase Realtime 접속용 1시간 토큰 (`sub` = 환자 id, `role` = authenticated) | 503 `realtime.unavailable` |
 
 - 기록 시점: `booking._move`(환자가 한 변경 제외) · `booking.staff_reply` · `aftercare.tenant_reply` — 모두 같은 commit
 - Supabase: `notifications` RLS 정책 `notifications_own`(authenticated, `patient_id = auth.jwt()->>'sub'`), Realtime 발행 `supabase_realtime`에 추가 (마이그레이션 0010)
 - 탈퇴하면 같이 삭제 (FK CASCADE)
+
+### 6-6. 환자 체류 형태 (A, `modules/patient/`, 결정 28)
+
+`ResidencyIn{country(ISO 2자리 거주국), alien_registration, domestic_residence, health_insurance}` — ① 외국인등록(G-1 제외) ② 국내거소신고 ③ 국민건강보험 가입자·피부양자. **하나라도 true거나 `country = KR`이면 `resident`**, 아니면 `short_term` (compliance 2-1)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `POST /auth/patient/signup` | 본문에 `residency?: ResidencyIn` 추가 (선택 — 없으면 계정 값 비움) | 422 `validation`(국가 코드 형식) |
+| `PUT /me/residency` | `ResidencyIn` → `PatientOut` (다시 답하기: 가입 때 안 했거나 체류 상태가 바뀜) | 401, 422 |
+| `GET /me`, `PATCH /me` | `PatientOut`에 `residency`(`short_term`/`resident`/`null`)·`residence_country` 추가 (칸 추가만) | — |
+
+- 챗봇: 계정 값이 있으면 대화 상태보다 우선하고 `record_residency`로 바꿀 수 없음 → `resident`면 조건 맞춤 제안·예약 초안 X (중립 목록 검색은 됨)
+- 저장: `patients.residency`·`residence_country`·`residency_answered_at` (마이그레이션 0011). 답만 저장, 근거 서류는 받지 않음 (자기 신고)
 
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
 
@@ -214,6 +234,10 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-23 | 6-3 | 사진 썸네일: 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb?`, 응답 첨부에 `thumb_url`(환자·병원, 없으면 null) — 칸 추가만 (결정 29) | A (**B 확인 필요** — aftercare는 B 모듈, `router_tenant` 응답 칸 추가) | `backend-A-media-thumbs` → `backend` |
+| 2026-11-23 | 6-1·6-2·7 | 방문 전 환자 질문 `POST /me/booking-requests/{id}/questions`, 환자·병원 예약 응답에 `questions`, 챗봇 `hospital_question` 카드(초안만) (결정 32, 마이그레이션 0013). 챗봇 조건 맞춤 제안·예약 = 입점 가상 병원만 (결정 31) | A (**B 확인 필요** — booking 응답 칸 추가, `router_tenant` 한 곳) | `backend-A-chatbot-demo-flow` → `backend` (`backend-A-web-push` 다음) |
+| 2026-11-23 | 4·5·6-5 | 웹 푸시: `/me/push/key`·`/me/push/subscriptions`, 에러 `push.unavailable`, `notify()`가 commit 뒤 푸시 (모양·호출 위치 그대로, 결정 30, 마이그레이션 0012) | A (**B 확인 필요**) | `backend-A-web-push` → `backend` (`backend-A-residency` 다음) |
+| 2026-11-23 | 4·6·6-1·6-6 | 환자 체류 형태 6-6 신설(가입 `residency?`, `PUT /me/residency`, `PatientOut` 칸 추가), 예약 요청 전 계정 값 확인, 에러 `residency.required`(422)·`residency.not_eligible`(403) (결정 28, 마이그레이션 0011) | A (**B 확인 필요**) | `backend-A-residency` → `backend` |
 | 2026-11-20 | 6-2 | 병원 상담 답장 `POST /tenant/booking-requests/{id}/replies` 신설, 병원 목록·상세 응답에 `replies` 추가 (`TenantBookingOut`) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-booking-replies` → `backend` |
 | 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
 | 2026-11-17 | 2 | 병원 직원 거절에 사유 코드(`fully_booked`/`not_offered`/`needs_consult`/`other`, 선택) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-contract-reject-reason` → `backend` |
