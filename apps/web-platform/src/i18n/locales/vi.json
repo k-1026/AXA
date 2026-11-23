@@ -356,6 +356,9 @@
       "listNote": "Sắp xếp theo tên. Đây không phải là gợi ý hay xếp hạng.",
       "suggestBasis": "Chỉ được gợi ý dựa trên mức độ phù hợp với điều kiện bạn đưa ra (ngôn ngữ hỗ trợ, ngày khám, giờ trống). Đây không phải là đánh giá về chất lượng y tế, tay nghề hay kết quả. Tất cả đều là cơ sở y tế đã đăng ký thu hút bệnh nhân nước ngoài. MediDaegu là đơn vị thu hút bệnh nhân đã đăng ký và có thể nhận phí môi giới từ bệnh viện; phí này không ảnh hưởng đến thứ tự.",
       "priceNote": "Giá ngoài bảo hiểm công bố cho bệnh nhân Hàn Quốc (giá trị minh họa). Chi phí thực tế có thể khác, vui lòng hỏi bệnh viện.",
+      "aftercare": "Tin nhắn hỏi sau điều trị gửi bệnh viện",
+      "aftercareOpen": "Mở trò chuyện sau điều trị để gửi",
+      "aftercareNote": "Chưa gửi. Hãy kiểm tra nội dung trong trò chuyện sau điều trị và tự gửi. Câu hỏi về triệu chứng hay điều trị, vui lòng liên hệ trực tiếp bệnh viện.",
       "reasons": {
         "staffLang": "Nhân viên nói {{lang}}",
         "aiTranslation": "Có trò chuyện dịch AI",
@@ -468,6 +471,12 @@
     "number": "Mã đặt lịch {{no}}",
     "cancelledOn": "Ngày hủy {{date}}",
     "rejectedNote": "Bệnh viện cho biết không thể đặt vào thời gian này.",
+    "rejectReason": {
+      "fully_booked": "Bệnh viện cho biết khung giờ đó đã kín lịch. Vui lòng yêu cầu ngày khác.",
+      "not_offered": "Bệnh viện cho biết không thực hiện dịch vụ bạn yêu cầu. Vui lòng tìm bệnh viện khác.",
+      "needs_consult": "Bệnh viện cho biết cần tư vấn trực tiếp trước. Hãy xem thông báo của bệnh viện trong mục tư vấn.",
+      "other": "Bệnh viện cho biết không thể nhận yêu cầu này. Hãy xem thông báo của bệnh viện trong mục tư vấn."
+    },
     "change": "Đổi lịch",
     "cancel": "Hủy lịch",
     "chat": "Tư vấn",
@@ -500,6 +509,8 @@
     "errType": "Chỉ có thể gửi ảnh hoặc video.",
     "errSize": "Mỗi tệp tối đa 50MB.",
     "errCount": "Mỗi lần gửi tối đa {{max}} tệp.",
+    "errClosed": "Bệnh viện này không nhận tin nhắn chăm sóc sau điều trị trên MediDaegu. Vui lòng liên hệ trực tiếp với bệnh viện.",
+    "errSend": "Không gửi được. Vui lòng thử lại sau ít phút.",
     "aftercareButton": "Chăm sóc sau khám"
   },
   "notFoundPage": {

@@ -6,7 +6,8 @@ import { PRIVACY } from '../legal/privacy';
 import { TERMS } from '../legal/terms';
 
 // 병원 관계자(입점 병원) 가입·로그인. 환자 계정과 따로 (가입할 때 나눔, docs/backend-contracts.md 3절)
-// 성공하면 직원 토큰을 들고 병원 대시보드로 이동 (대시보드는 ?token=&api= 를 읽음 — 임시 방식, B 대시보드와 같이 바꿀 것)
+// 성공하면 직원 토큰을 들고 병원 대시보드로 이동 (?token=&api=). 대시보드는 읽자마자 주소에서 지우고 그 탭에만 보관하며,
+// 대시보드 자체 로그인 창도 있음 (docs/dashboard-integration.md "시연용 대시보드 연결")
 const PASSWORD_MIN = 8;
 const REG_NO = /^M-\d{4}-\d{2}-\d{2}-\d{4,6}$/;
 

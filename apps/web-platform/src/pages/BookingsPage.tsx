@@ -143,7 +143,8 @@ export function BookingsPage() {
                   {status === 'cancelled' &&
                     booking.cancelledAt &&
                     t('bookings.cancelledOn', { date: new Date(booking.cancelledAt).toLocaleDateString(i18n.language, { timeZone: KST }) })}
-                  {status === 'rejected' && t('bookings.rejectedNote')}
+                  {status === 'rejected' &&
+                    (booking.rejectReason ? t(`bookings.rejectReason.${booking.rejectReason}`) : t('bookings.rejectedNote'))}
                   {status === 'proposed' && t('bookings.proposedNote')}
                   {status === 'expired' && t('bookings.expiredNote')}
                   {status === 'no_show' && t('bookings.noShowNote')}
