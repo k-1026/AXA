@@ -146,7 +146,8 @@
     "krwNote": "{{min}}~{{max}} 韩元",
     "fxNotice": "换算金额仅供参考，实际费用以医院告知的韩元金额为准。{{applied}} 适用汇率（韩国银行 {{base}} 数据，每天韩国时间 {{hour}}:00 更新）·",
     "fxProvider": "韩国银行经济统计系统",
-    "fxFallback": "无法获取汇率，以韩元显示。"
+    "fxFallback": "无法获取汇率，以韩元显示。",
+    "fxReference": "此币种按欧洲中央银行参考汇率（{{date}}）换算，实际付款金额可能不同。"
   },
   "mypage": {
     "home": "首页",

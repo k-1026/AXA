@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n';
 import { CURRENCIES, useCurrency, type Currency } from '../components/currency';
@@ -9,6 +9,8 @@ export function Header() {
   const { t, i18n } = useTranslation();
   const { currency, setCurrency } = useCurrency();
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const here = location.pathname;
 
   return (
     <header className="site-header">
@@ -42,7 +44,8 @@ export function Header() {
             {t('auth.logout')}
           </button>
         ) : (
-          <Link to="/login" className="header-button">
+          // 로그인 뒤 지금 보던 페이지로 돌아오게 (로그인 화면에서 누르면 그대로)
+          <Link to="/login" state={here === '/login' ? location.state : { from: here + location.search }} className="header-button">
             {t('header.login')}
           </Link>
         )}

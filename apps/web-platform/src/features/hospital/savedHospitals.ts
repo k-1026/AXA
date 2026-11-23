@@ -17,6 +17,13 @@ function toggle(id: string) {
   );
 }
 
+/** 지금 계정의 찜 목록이 비어 있을 때만 채움 (시연 계정 예시용, mypage/demoPatientSeed.ts) */
+export function seedSavedIfEmpty(ids: string[]) {
+  if (store.get().length) return;
+  const now = Date.now();
+  store.set(ids.map((id, i) => ({ id, savedAt: new Date(now - i * 86_400_000).toISOString() })));
+}
+
 export function useSavedHospitals() {
   const saved = useSyncExternalStore(store.subscribe, store.get);
   return { saved, isSaved: (id: string) => saved.some((e) => e.id === id), toggle };

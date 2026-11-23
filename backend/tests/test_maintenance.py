@@ -55,7 +55,7 @@ def test_purge_deletes_old_chats_and_dead_sessions(client, db_engine, cron_secre
 
     r = getattr(client, method)(PURGE, headers=bearer(SECRET))
     assert r.status_code == 200
-    assert r.json() == {"chat_sessions": 1, "auth_sessions": 1}
+    assert r.json() == {"chat_sessions": 1, "auth_sessions": 1, "media_files": 0}  # 저장소 설정 없음 → 0
     with Session(db_engine) as db:
         assert [s.title for s in db.scalars(select(ChatSession))] == ["new"]
         assert db.scalar(select(func.count()).select_from(ChatMessage)) == 2

@@ -146,7 +146,8 @@
     "krwNote": "{{min}}~{{max}} 韓元",
     "fxNotice": "換算金額僅供參考，實際費用以醫院告知的韓元金額為準。{{applied}} 適用匯率（韓國銀行 {{base}} 資料，每天韓國時間 {{hour}}:00 更新）·",
     "fxProvider": "韓國銀行經濟統計系統",
-    "fxFallback": "無法取得匯率，以韓元顯示。"
+    "fxFallback": "無法取得匯率，以韓元顯示。",
+    "fxReference": "此幣別以歐洲中央銀行參考匯率（{{date}}）換算，實際付款金額可能不同。"
   },
   "mypage": {
     "home": "首頁",

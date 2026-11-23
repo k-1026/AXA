@@ -15,8 +15,10 @@ from sqlalchemy.orm import Session
 
 from core.db import utcnow
 from core.errors import AppError
-from modules.booking.models import CANCEL_REASONS, REJECT_REASONS, BookingEvent, BookingRequest
-from modules.tenant.models import Tenant
+from modules.agent import translate
+from modules.notification import service as notification
+from modules.booking.models import CANCEL_REASONS, REJECT_REASONS, BookingEvent, BookingRequest, Reply
+from modules.tenant.models import StaffUser, Tenant
 
 # (현재 상태, 행동) → 다음 상태. 여기 없는 조합은 409 booking.invalid_transition
 TRANSITIONS: dict[tuple[str, str], str] = {
@@ -75,6 +77,8 @@ def _move(
         req.confirmed_slot = slot
     req.status = nxt
     req.updated_at = utcnow()
+    if actor_type != "patient":  # 병원·시스템이 바꾼 것만 환자에게 알림 (같은 commit, 결정 27)
+        notification.notify(db, req.patient_id, "status", req.id, nxt)
     db.commit()
     db.refresh(req)
     return req
@@ -178,3 +182,45 @@ def staff_act(
         raise AppError(422, "validation", "거절 사유 코드가 올바르지 않습니다", {"errors": [{"loc": ["reason"], "type": "enum"}]})
     req = staff_get(db, tenant_id, request_id)
     return _move(db, req, action, "staff", staff_id, slot=slot, reason=reason)
+
+
+# ---------- 상담 답장 (병원 직원) ----------
+# 대시보드의 "보내기" 확인 창 = 직원 승인 → 바로 보낸 상태(sent_at)로 저장. AI 초안은 승인 전 저장하지 않음 (compliance: 승인 없이 발송 X)
+# 번역(text_translated)은 ai/llm 연결 전이라 비움 → 환자 화면은 원문(한국어)
+
+
+def staff_reply(db: Session, tenant_id: uuid.UUID, staff_id: str, request_id: uuid.UUID, text: str) -> Reply:
+    req = staff_get(db, tenant_id, request_id)  # 다른 병원 요청은 404
+    if not text.strip():
+        raise AppError(422, "validation", "내용을 입력하세요", {"errors": [{"loc": ["text"], "type": "missing"}]})
+    try:
+        approver = db.get(StaffUser, uuid.UUID(staff_id))
+    except ValueError:
+        approver = None
+    reply = Reply(
+        request_id=req.id,
+        kind="free",
+        text_ko=text.strip(),
+        text_translated=translate.for_request(db, req.id, text, req.lang, tenant_id),  # 환자 언어로, 동의 없거나 실패면 None (결정 25)
+        ai_draft=False,
+        approved_by=approver.id if approver and approver.tenant_id == tenant_id else None,
+        sent_at=utcnow(),
+    )
+    db.add(reply)
+    notification.notify(db, req.patient_id, "reply", req.id)
+    db.commit()
+    db.refresh(reply)
+    return reply
+
+
+def sent_replies(db: Session, request_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[Reply]]:
+    """요청 id → 보낸 답장(보낸 순). 병원 목록·상세 응답에 붙임 (tenant 확인이 끝난 요청 id만 넘길 것)."""
+    out: dict[uuid.UUID, list[Reply]] = {i: [] for i in request_ids}
+    if not request_ids:
+        return out
+    rows = db.scalars(
+        select(Reply).where(Reply.request_id.in_(request_ids), Reply.sent_at.is_not(None)).order_by(Reply.sent_at)
+    )
+    for r in rows:
+        out[r.request_id].append(r)
+    return out
