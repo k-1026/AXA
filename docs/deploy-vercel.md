@@ -49,7 +49,8 @@
 
 ## 4. 백엔드를 Vercel에 올리는 방법 (확인 필요)
 
-- Vercel Python 런타임은 FastAPI `app`을 찾아 실행. 이 저장소는 `backend/src`와 루트의 `ai/`를 같이 불러와야 해서 **진입 파일**이 필요할 수 있음 (예: 루트 `api/index.py`에서 `sys.path`에 `backend/src`·루트를 넣고 `from main import app`)
+- **진입 파일 = 루트 `index.py`** (2026-11-23 추가): Vercel FastAPI는 기본 위치(루트 `index.py` 등)에서 `app`을 찾음. 처음 배포 때 `FASTAPI_ENTRYPOINT_NOT_FOUND`(`backend/src/main.py`만 찾음)가 나서 추가 — `sys.path`에 `backend/src`·루트를 넣고 `from main import app`. Vercel이 제안한 `[tool.vercel] entrypoint = "backend.src.main:app"`은 `core`·`modules`·`ai` import 경로가 안 맞아 쓰지 않음
+- **`.vercelignore`** (루트): 서버리스 함수 용량 제한(250MB) 대비 큰 자료(`data/raw`·`data/interim`(영업정보 빼고)·research·발표 등) 제외. 백엔드가 실행 중에 읽는 파일은 `data/processed/demo/demo_hospitals.json`뿐
 - 의존성은 `pyproject.toml` / `uv.lock` (Vercel이 읽는지 확인, 안 되면 `requirements.txt` 생성)
 - 지역: `icn1`(서울) 또는 `sin1` — Supabase 프로젝트 지역과 가깝게
 - 이 PC의 psycopg 차단 문제(앱 제어)는 Vercel(Linux)에는 해당 없음 → `PSYCOPG_IMPL` 넣지 않음
