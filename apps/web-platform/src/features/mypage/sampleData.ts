@@ -6,7 +6,7 @@ export interface Localized {
   en: string;
 }
 
-type ScheduleKind = 'hospital' | 'experience' | 'tour';
+type ScheduleKind = 'hospital' | 'experience' | 'tour' | 'plan'; // plan: 내가 직접 넣은 일정 (tripSchedule.ts)
 
 export interface ScheduleItem {
   id: string;
