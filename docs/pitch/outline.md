@@ -28,7 +28,7 @@
 | 1 문제 | `painpoint/evidence.csv` E01~E03 (26.1%·7/161·0곳) · `painpoint/voc_대만대구.md` (병원 정보 35건 1위) · `voc_classified.csv` (가격 299, v4 틱톡 포함 318) · `painpoint/voc_tiktok.md` (③ "일주일째 답이 없는데 다음 주 출국", 예약 채널 혼란 21건) · 대만 1,495명 (`bm/bm_canvas.md` 1절, 진흥원) | **인용** — Dcard 대구 글 | [근거] · VOC 대만·대구 검수 6건뿐 |
 | 2 해결 | `valuechain/step4_네층맵.md` 4-0 · `spec/processflow.md` · `docs/agent-spec.md` · `docs/compliance.md` v2.3 (main) | **표** — As-Is → To-Be + AI·사람 역할 | 흐름 [근거] · 코디 25→10분 **[가정]** · 병원별 "N시간 이내 답장률" 표시는 팀 계획 (11/19, `spec/processflow.md` VOC 3차 제안) |
 | 3 시장 | `market/competitors.md` (11/20 유치 플랫폼 4곳, K-Dia·오영뷰티 제외 — `research/company/유치플랫폼-규모.md`) · `positioning_map.html` · `bm/revenue_platform.md` 1절 · 진흥원 2025 표 2.1 | **차트(포지셔닝 맵)** | [근거] · 경유율 10% **[가정]** · 80.3%는 전국값 |
-| 4 BM | `bm/revenue_platform.md` 2·3절 · `bm/bm_canvas.md` · 통합 고시 제2·3조 | **차트(막대)** — 환자 1명 데려오는 비용 | 1건 100만 원 **[추정]** (카드 데이터 1인 153만 원을 건당 보정) · 구독료 상한 합산 [U] |
+| 4 BM | `bm/revenue_platform.md` 2·3절 · `bm/bm_canvas.md` · 통합 고시 제2·3조 | **차트(막대)** — 환자 1명 데려오는 비용 | 1건 100만 원 **[추정]** (카드 데이터 1인 153만 원을 건당 보정) · 프리미엄 회원비 상한 합산 [U] |
 | 5 MVP | `apps/web-platform/` · `ai/agent/eval/results/` (27/27·81/81·12/12) · `docs/review-수동테스트-2026-11-12.md` | **데모** — 과업 1개 | URL **[빈칸]** · 사람 테스트 **[빈칸]** |
 | 6 팀 | `subject/framework.md` 8절 (프론트 팀원 1·2 · 백엔드 팀원 3·4) · `docs/backend-roles.md` · `bm/redteam_log.md` · `painpoint/voc_review.md` · git log | **표** — 역할 × AI × 흔적 | 역할 제안 v0 · AI 쓴 곳 **[팀 확인]** |
 | 7 요청 | `ai/agent/eval/results/` (AI 평가만 통과) · `bm/revenue_platform.md` 2절 v4 (민감도) | **한 문장 + URL** — 사용자 테스트 참가자 | MVP URL · `results.md` **[빈칸]** |
