@@ -2,6 +2,7 @@ import { Outlet, useMatch } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
+import { NotificationsProvider } from '../features/notifications/NotificationsProvider';
 import { useDemoPatientSeed } from '../features/mypage/demoPatientSeed';
 
 export function Layout() {
@@ -13,8 +14,9 @@ export function Layout() {
   const isChat = chatbot || consult || aftercare;
 
   return (
-    <div className={isChat ? 'app-shell is-chat' : 'app-shell'}>
-      <Header />
+    <NotificationsProvider>
+      <div className={isChat ? 'app-shell is-chat' : 'app-shell'}>
+        <Header />
       <div className="app-body">
         <Sidebar />
         <main className="app-main">
@@ -22,6 +24,7 @@ export function Layout() {
         </main>
       </div>
       {!isChat && <Footer />}
-    </div>
+      </div>
+    </NotificationsProvider>
   );
 }

@@ -34,7 +34,12 @@ export type ChatCard =
         note: string;
       };
     }
-  | { type: 'sources' | 'time_slots' | 'booking_list' | 'aftercare_thread'; data: Record<string, unknown> };
+  | {
+      // 사후관리 대화 연결 (결정 26): 메시지는 보내지 않음 → 버튼으로 사후관리 화면을 열고 환자가 보냄
+      type: 'aftercare_thread';
+      data: { status: 'opened'; thread_id: string; booking_id?: string | null; hospital_id: number; topic: string; first_message: string; notice: string };
+    }
+  | { type: 'sources' | 'time_slots' | 'booking_list'; data: Record<string, unknown> };
 
 export interface ChatResponse {
   session_id: string;

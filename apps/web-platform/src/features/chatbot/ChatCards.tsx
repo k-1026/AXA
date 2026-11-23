@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { LANGUAGES } from '../../i18n';
@@ -74,6 +75,28 @@ function HospitalRow({ h, reasons }: { h: HospitalBrief; reasons?: string[] }) {
         <span className="chat-card-reasons">{reasons.map((r) => reasonLabel(t, i18n.language, r)).join(' · ')}</span>
       )}
     </li>
+  );
+}
+
+// 사후관리 화면으로 넘길 값 (주소에 글을 넣지 않고 화면 이동 state로 — 기록·공유 주소에 남지 않게)
+export interface AftercareHandoff {
+  booking?: string | null;
+  draft?: string;
+}
+
+function AftercareCard({ data }: { data: Extract<ChatCard, { type: 'aftercare_thread' }>['data'] }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const state: AftercareHandoff = { booking: data.booking_id, draft: data.first_message };
+  return (
+    <section className="chat-card">
+      <h3>{t('chat.card.aftercare')}</h3>
+      <blockquote className="chat-card-quote">{data.first_message}</blockquote>
+      <button type="button" onClick={() => navigate('/aftercare', { state })}>
+        {t('chat.card.aftercareOpen')}
+      </button>
+      <p className="chat-card-note">{t('chat.card.aftercareNote')}</p>
+    </section>
   );
 }
 
@@ -160,8 +183,10 @@ function Card({ card }: { card: ChatCard }) {
         </section>
       );
     }
+    case 'aftercare_thread':
+      return <AftercareCard data={card.data} />;
     default:
-      return null; // 나머지 카드(출처·시간 후보·내 요청·사후 문의)는 다음 단계에서
+      return null; // 나머지 카드(출처·시간 후보·내 요청)는 다음 단계에서
   }
 }
 

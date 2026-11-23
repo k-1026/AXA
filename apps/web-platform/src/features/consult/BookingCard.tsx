@@ -51,7 +51,9 @@ export function BookingCard({ booking, sentAt }: { booking: BookingRequest; sent
       <footer>
         <span>
           <InfoIcon />
-          {t(NOTE[status] ?? 'consult.decidedNote')}
+          {status === 'rejected' && booking.rejectReason
+            ? t(`bookings.rejectReason.${booking.rejectReason}`)
+            : t(NOTE[status] ?? 'consult.decidedNote')}
         </span>
         <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
           {t(open ? 'consult.hideDetail' : 'consult.showDetail')}

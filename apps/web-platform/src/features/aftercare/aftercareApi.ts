@@ -1,0 +1,78 @@
+// 환자 사후관리 API (docs/backend-contracts.md 6-3절). 예약 요청 1건(방문 완료) = 대화 1개
+// 사진·영상: 서버가 준 서명된 주소로 Supabase Storage에 바로 올리고(uploads), 보낼 때 경로를 붙임 (결정 22)
+// 저장소 설정이 없는 서버(503 storage.unavailable)면 예전처럼 "사진 있음"(photo)만 보내고 미리보기는 이 탭에서만
+import { api, ApiError } from '../../components/api';
+import type { AftercareMessage, Attachment } from './types';
+
+interface ServerMessage {
+  id: number;
+  sender: 'patient' | 'staff';
+  text_original: string;
+  text_translated: string | null;
+  has_photo: boolean;
+  attachments?: { kind: 'image' | 'video'; name: string | null; url: string | null }[]; // url = 1시간짜리 서명된 주소
+  created_at: string;
+}
+
+export interface ServerThread {
+  id: string;
+  request_id: string;
+  status: string;
+  last_message_at: string;
+  last_message: string | null;
+  unread: number;
+  messages: ServerMessage[] | null;
+}
+
+export const PHOTO_ONLY = '📷'; // 글 없이 사진만 보낼 때 (서버는 글이 꼭 있어야 함)
+
+export const toLocalMessage = (m: ServerMessage): AftercareMessage => {
+  const files: Attachment[] = (m.attachments ?? []).filter((a) => a.url).map((a) => ({ kind: a.kind, url: a.url!, name: a.name ?? '' }));
+  const photoOnly = m.sender === 'patient' && m.has_photo && m.text_original === PHOTO_ONLY;
+  return {
+    id: `srv-${m.id}`,
+    from: m.sender === 'staff' ? 'doctor' : 'user',
+    at: m.created_at,
+    // 사진만 보낸 메시지는 사진을 보여 주고 글은 숨김 (사진 주소가 없으면 📷 표시)
+    // 내 글은 내가 쓴 원문, 병원 글은 내 언어 번역(없으면 한국어 원문) — 결정 25
+    text: photoOnly && files.length ? undefined : m.sender === 'patient' ? m.text_original : m.text_translated || m.text_original,
+    attachments: files.length ? files : undefined,
+  };
+};
+
+export const listAftercare = (token: string) => api<ServerThread[]>('/me/aftercare', { token });
+
+export const getAftercare = (token: string, requestId: string) =>
+  api<ServerThread>(`/me/booking-requests/${requestId}/aftercare`, { token });
+
+export interface SentFile {
+  path: string;
+  kind: 'image' | 'video';
+  name: string;
+}
+
+export const sendAftercare = (token: string, requestId: string, text: string, photo: boolean, attachments: SentFile[] = []) =>
+  api<ServerThread>(`/me/booking-requests/${requestId}/aftercare/messages`, {
+    method: 'POST',
+    token,
+    body: { text: text || PHOTO_ONLY, photo, attachments },
+  });
+
+// 첨부 1개 올리기: 업로드 주소 받기 → Supabase에 바로 PUT. 저장소가 꺼진 서버면 null (사진 있음 표시만)
+export async function uploadAftercare(token: string, requestId: string, a: Attachment): Promise<SentFile | null> {
+  const file = await (await fetch(a.url)).blob(); // 이 탭의 미리보기(blob:) → 파일
+  let up: { path: string; kind: 'image' | 'video'; upload_url: string };
+  try {
+    up = await api(`/me/booking-requests/${requestId}/aftercare/uploads`, {
+      method: 'POST',
+      token,
+      body: { name: a.name, content_type: file.type, size: file.size },
+    });
+  } catch (e) {
+    if (e instanceof ApiError && e.code === 'storage.unavailable') return null;
+    throw e;
+  }
+  const res = await fetch(up.upload_url, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
+  if (!res.ok) throw new ApiError(res.status, 'storage.upload_failed');
+  return { path: up.path, kind: up.kind, name: a.name };
+}

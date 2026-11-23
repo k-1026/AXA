@@ -1,4 +1,22 @@
 {
+  "notify": {
+    "title": "通知",
+    "open": "{{count}}則通知",
+    "empty": "沒有新通知。",
+    "markAll": "全部已讀",
+    "hospital": "醫院",
+    "newCount": "{{count}}則新通知",
+    "status": {
+      "confirmed": "{{hospital}}已確認您的預約。",
+      "rejected": "{{hospital}}表示無法接受此次預約。",
+      "proposed": "{{hospital}}提議了其他時間。",
+      "visited": "您在{{hospital}}的就診已記錄為完成，現在可以使用術後管理對話。",
+      "no_show": "您在{{hospital}}的預約被記錄為未到診。",
+      "expired": "您向{{hospital}}申請的希望日期均已過去。"
+    },
+    "reply": "{{hospital}}傳來{{count}}則諮詢回覆。",
+    "aftercare": "{{hospital}}醫護人員傳來{{count}}則術後管理訊息。"
+  },
   "header": {
     "language": "語言",
     "currency": "貨幣",
@@ -367,6 +385,9 @@
       "listNote": "依名稱排序，並非推薦或排名。",
       "suggestBasis": "僅依各醫院與您所說條件（應對語言、看診日、可預約時間）的符合程度提出，並非對醫療水準、技術或結果的評價。皆為已登記的外國患者招攬醫療機構。MediDaegu 為登記的患者招攬業者，可能向醫院收取仲介費，但仲介費不影響排序。",
       "priceNote": "以韓國患者為準公開的非給付價格（示範數值）。實際費用可能不同，請向醫院確認。",
+      "aftercare": "要傳給醫院的術後諮詢",
+      "aftercareOpen": "開啟術後管理對話傳送",
+      "aftercareNote": "尚未傳送。請在術後管理頁面確認內容後自行傳送。症狀或治療問題請直接聯絡醫院。",
       "reasons": {
         "staffLang": "有會說{{lang}}的員工",
         "aiTranslation": "可使用 AI 翻譯聊天",
@@ -479,6 +500,12 @@
     "number": "預約編號 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
     "rejectedNote": "醫院告知此時間無法預約。",
+    "rejectReason": {
+      "fully_booked": "醫院表示該時段已額滿，請改選其他日期再申請。",
+      "not_offered": "醫院表示不提供您申請的診療項目，請尋找其他醫院。",
+      "needs_consult": "醫院表示需要先進行面診，請在諮詢頁面查看醫院的說明。",
+      "other": "醫院表示無法接受此次申請，請在諮詢頁面查看醫院的說明。"
+    },
     "change": "變更預約",
     "cancel": "取消預約",
     "chat": "諮詢",
@@ -511,6 +538,8 @@
     "errType": "只能傳送照片或影片。",
     "errSize": "每個檔案最大50MB。",
     "errCount": "一次最多傳送{{max}}個。",
+    "errClosed": "這家醫院不在MediDaegu接收術後管理訊息。請直接聯絡醫院。",
+    "errSend": "傳送失敗，請稍後再試。",
     "aftercareButton": "術後管理"
   },
   "notFoundPage": {
