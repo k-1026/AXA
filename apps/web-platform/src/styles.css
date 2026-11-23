@@ -5276,3 +5276,60 @@ body.chat-open {
 .load-more-sentinel {
   height: 1px;
 }
+
+/* 체류 형태 3문항 (결정 28) — 가입·예약·마이페이지 */
+.residency-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #e4e8ee;
+  border-radius: 10px;
+}
+
+.residency-questions legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.residency-intro {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.residency-note,
+.residency-blocked {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff6e5;
+  color: #8a5a00;
+  font-size: 0.85rem;
+}
+
+.residency-blocked a {
+  color: var(--accent);
+}
+
+.mp-residency {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.mp-residency strong {
+  color: var(--text);
+}
+
+.mp-residency-edit {
+  padding: 4px 10px;
+  border: 1px solid #d5dbe3;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}

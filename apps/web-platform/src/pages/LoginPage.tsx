@@ -6,6 +6,7 @@ import { ApiError } from '../components/api';
 import { LANGUAGES } from '../i18n';
 import { TERMS } from '../features/legal/terms';
 import { PRIVACY } from '../features/legal/privacy';
+import { emptyResidency, ResidencyQuestions } from '../features/residency/ResidencyQuestions';
 import { StaffLoginForm, StaffSignupForm } from '../features/staff/StaffAuth';
 
 // 로그인·회원가입. 실제 계정은 백엔드에, 데모 계정은 발표·화면 확인용으로 아래에 남겨 둠
@@ -189,6 +190,7 @@ function SignupForm() {
     privacy: false,
   });
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
+  const [residency, setResidency] = useState(emptyResidency);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -216,6 +218,7 @@ function SignupForm() {
           { kind: 'terms', version: TERMS.updated },
           { kind: 'privacy', version: PRIVACY.updated },
         ],
+        residency, // 체류 형태 3문항 (결정 28). 국내 거주여도 가입은 되고 정보 열람만
       });
       done();
     } catch (err) {
@@ -292,6 +295,8 @@ function SignupForm() {
           </select>
         </label>
       </div>
+
+      <ResidencyQuestions value={residency} onChange={setResidency} />
 
       <fieldset className="auth-consents">
         <legend>{t('auth.consentsTitle')}</legend>

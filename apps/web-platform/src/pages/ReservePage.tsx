@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { todayKst } from '../lib/common';
 import { nowKstTime } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
-import { BookingConsentFields, consentReady, emptyConsent, toExtra } from '../features/consult/BookingConsentFields';
+import { BookingConsentFields, consentReady, emptyConsent, toExtra, useResidencyCheck } from '../features/consult/BookingConsentFields';
+import { useAuth } from '../components/auth';
 import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { useHospitals } from '../features/hospital/useHospitals';
 import { hospitalNames, useHospitalName } from '../features/hospital/name';
@@ -25,6 +26,8 @@ export function ReservePage() {
   const [time, setTime] = useState('');
   const [done, setDone] = useState(false);
   const [consent, setConsent] = useState(emptyConsent);
+  const residency = useAuth().user?.residency;
+  const checkResidency = useResidencyCheck();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -72,10 +75,12 @@ export function ReservePage() {
   const member = consult.mode === 'member';
   const submit = async () => {
     if (!date || !time) return;
-    if (member && !consentReady(consent, false)) return setError(t('booking.err.consentNeeded'));
+    if (member && residency === 'resident') return setError(t('residency.err.notEligible'));
+    if (member && !consentReady(consent, false, residency)) return setError(t('booking.err.consentNeeded'));
     setError('');
     setBusy(true);
     try {
+      if (member) await checkResidency(consent);
       await consult.requestBookingFor(
         { hospitalId: h.id, name: hospitalNames(h), dept: h.depts[0], district: h.district, photo: h.photo },
         { date, time, language: locale },

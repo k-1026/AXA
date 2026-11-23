@@ -598,5 +598,30 @@
       "notRegistered": "Not a registered institution or not operating, so it cannot join.",
       "tooMany": "Too many attempts. Please try again later."
     }
+  },
+  "residency": {
+    "title": "Your stay in Korea",
+    "country": "Country you live in",
+    "intro": "Check every item that applies to you. Leave them blank if none apply.",
+    "q": {
+      "alien_registration": "I have registered as a foreign resident in Korea (not short-term G-1)",
+      "domestic_residence": "I have reported domestic residence in Korea (overseas Korean)",
+      "health_insurance": "I am enrolled in (or a dependent under) Korea's National Health Insurance"
+    },
+    "residentNote": "You count as a foreign resident of Korea. You can still browse hospital information, but by law you cannot request consultations or bookings or get hospital suggestions.",
+    "bookingBlocked": "By law, foreign residents of Korea cannot request consultations or bookings (you can still browse hospital information). If your status has changed, answer again in My Page.",
+    "editLink": "Go to My Page",
+    "status": "Stay in Korea",
+    "statusValue": {
+      "shortTerm": "Short-term visit",
+      "resident": "Resident (browse only)",
+      "none": "Not answered yet"
+    },
+    "edit": "Answer again",
+    "save": "Save",
+    "err": {
+      "required": "Please answer the questions about your stay first.",
+      "notEligible": "Foreign residents of Korea cannot request consultations or bookings. If your status has changed, answer again in My Page."
+    }
   }
 }
