@@ -25,7 +25,7 @@ class Tenant(Base):
     registration_no: Mapped[str | None] = mapped_column(String(40))  # 외국인환자 유치의료기관 등록번호
     requests_enabled: Mapped[bool] = mapped_column(Boolean, default=False)  # 등록 기관만 True
     aftercare_enabled: Mapped[bool] = mapped_column(Boolean, default=False)  # 사후관리 지원 여부 (환자 필터·요금)
-    joined_at: Mapped[datetime] = mapped_column(default=utcnow)  # 입점일 (첫 3개월 구독료 무료 계산용)
+    joined_at: Mapped[datetime] = mapped_column(default=utcnow)  # 입점일
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     __table_args__ = (Index("uq_tenants_hospital", "hospital_id", unique=True),)

@@ -56,6 +56,8 @@ html:lang(zh-TW) {
 /* 지도 팝업도 Leaflet 기본 글꼴(Helvetica) 대신 언어별 글꼴 (leaflet.css가 나중에 불러와져도 이기게 html 붙임) */
 html .leaflet-container {
   font-family: inherit;
+  /* 지도 안 층(타일 400 · 조작 버튼 1000)을 지도 안에 가둠 → 머리말 알림 창·메뉴가 지도 아래로 깔리지 않게 */
+  isolation: isolate;
 }
 
 * {

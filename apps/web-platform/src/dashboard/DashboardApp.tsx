@@ -82,7 +82,7 @@ export default function App() {
         <current.C data={data} mode={mode} dept={dept} setup={setup} toggleSetup={toggleSetup} />
       </main>
 
-      <footer className="foot">프로토타입 · 병원 이름과 운영 숫자는 가상 · 공공 카드는 출처의 실제 값 · 통계는 구독 확장 플랜 기능</footer>
+      <footer className="foot">프로토타입 · 병원 이름과 운영 숫자는 가상 · 공공 카드는 출처의 실제 값 · 통계(분석 탭)는 프리미엄 회원 기능</footer>
     </div>
   );
 }

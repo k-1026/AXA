@@ -23,4 +23,4 @@
   - 만드는 스크립트: `data/etl/build_dashboard_public.py` (원본은 `research-data` 브랜치의 `data/`). 다시 만든 파일은 이 위치로 복사
 - 예시 병원·운영 숫자: `features/analytics/sample.ts` (가상. 실제 병원·환자 아님)
 
-시연용 대시보드 `dashboard/대시보드.html`은 그대로 따로 있음 (docs/dashboard-integration.md "시연용 대시보드 연결")
+시연용 대시보드 `dashboard/대시보드.html`은 그대로 따로 있음 (`VITE_DASHBOARD_URL`이 있으면 병원 관계자 로그인 뒤 그쪽으로 이동)
