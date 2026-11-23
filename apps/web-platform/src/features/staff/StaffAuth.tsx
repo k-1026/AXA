@@ -1,13 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, API_BASE, ApiError } from '../../components/api';
 import { PRIVACY } from '../legal/privacy';
 import { TERMS } from '../legal/terms';
+import { saveStaffToken } from './staffSession';
 
 // 병원 관계자(입점 병원) 가입·로그인. 환자 계정과 따로 (가입할 때 나눔, docs/backend-contracts.md 3절)
-// 성공하면 직원 토큰을 들고 병원 대시보드로 이동 (?token=&api=). 대시보드는 읽자마자 주소에서 지우고 그 탭에만 보관하며,
-// 대시보드 자체 로그인 창도 있음 (docs/dashboard-integration.md "시연용 대시보드 연결")
+// 성공하면 직원 토큰을 이 탭에 저장하고 같은 사이트의 /dashboard(통계 대시보드)로 이동.
+// VITE_DASHBOARD_URL이 있으면 대신 시연용 대시보드(dashboard/대시보드.html)로 토큰을 들고 이동 (?token=&api=).
+// 그쪽은 읽자마자 주소에서 지우고 그 탭에만 보관하며, 자체 로그인 창도 있음 (docs/dashboard-integration.md "시연용 대시보드 연결")
 const PASSWORD_MIN = 8;
 const REG_NO = /^M-\d{4}-\d{2}-\d{2}-\d{4,6}$/;
 
@@ -18,12 +20,19 @@ interface HospitalOption {
   can_request: boolean;
 }
 
-function goDashboard(token: string): string | null {
+function goExternalDashboard(token: string): boolean {
   const base = import.meta.env.VITE_DASHBOARD_URL;
-  if (!base) return null;
-  const url = `${base}${base.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}&api=${encodeURIComponent(API_BASE)}`;
-  window.location.assign(url);
-  return url;
+  if (!base) return false;
+  window.location.assign(`${base}${base.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}&api=${encodeURIComponent(API_BASE)}`);
+  return true;
+}
+
+function useEnterDashboard() {
+  const navigate = useNavigate();
+  return (token: string) => {
+    saveStaffToken(token);
+    if (!goExternalDashboard(token)) navigate('/dashboard', { replace: true });
+  };
 }
 
 function errorKey(e: unknown): string {
@@ -40,23 +49,13 @@ function errorKey(e: unknown): string {
   return 'auth.err.unknown';
 }
 
-// 대시보드 주소가 없을 때(로컬 등) 보여 주는 완료 화면
-function Done() {
-  const { t } = useTranslation();
-  return (
-    <div className="auth-form">
-      <p className="auth-hint">{t('staff.doneNoDashboard')}</p>
-    </div>
-  );
-}
-
 export function StaffLoginForm() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
+  const enter = useEnterDashboard();
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -64,7 +63,7 @@ export function StaffLoginForm() {
     setBusy(true);
     try {
       const r = await api<{ access_token: string }>('/auth/staff/login', { method: 'POST', body: { email: email.trim(), password } });
-      if (!goDashboard(r.access_token)) setDone(true);
+      enter(r.access_token);
     } catch (err) {
       setError(errorKey(err));
     } finally {
@@ -72,7 +71,6 @@ export function StaffLoginForm() {
     }
   };
 
-  if (done) return <Done />;
   return (
     <form className="auth-form" onSubmit={submit} noValidate>
       <label className="auth-field">
@@ -98,7 +96,7 @@ export function StaffSignupForm() {
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
+  const enter = useEnterDashboard();
 
   // 입점은 등록 외국인환자 유치의료기관만 (영업 중인 곳)
   useEffect(() => {
@@ -132,7 +130,7 @@ export function StaffSignupForm() {
           ],
         },
       });
-      if (!goDashboard(r.access_token)) setDone(true);
+      enter(r.access_token);
     } catch (err) {
       setError(errorKey(err));
     } finally {
@@ -140,7 +138,6 @@ export function StaffSignupForm() {
     }
   };
 
-  if (done) return <Done />;
   return (
     <form className="auth-form" onSubmit={submit} noValidate>
       <p className="auth-hint">{t('staff.signupIntro')}</p>

@@ -8,13 +8,15 @@
 
 ## 0. 한 줄 요약
 
-화면은 `apps/web-hospital`에 프로토타입이 있음 (예시 데이터). 백엔드가 이 문서의 API를 같은 모양으로 주면, 프론트는 `src/features/analytics/sample.ts`를 API 호출로 바꾸기만 하면 됨
+화면은 환자 사이트의 `/dashboard`에 프로토타입이 있음 (`apps/web-platform/src/dashboard`, 예시 데이터. 예전 `apps/web-hospital`). 백엔드가 이 문서의 API를 같은 모양으로 주면, 프론트는 `src/dashboard/features/analytics/sample.ts`를 API 호출로 바꾸기만 하면 됨
 
 ### 프로토타입 보기
 
 ```bash
-cd apps/web-hospital && npm install && npm run dev   # http://localhost:5175
+cd apps/web-platform && npm install && npm run dev   # http://localhost:5173/dashboard
 ```
+
+- 직원 토큰이 있을 때만 열림 (없으면 로그인 화면의 "병원 관계자"로). 환자 사이트에서 병원 관계자 로그인하면 이 탭에 저장되고 `/dashboard`로 이동 (`VITE_DASHBOARD_URL`을 비웠을 때)
 
 - 위쪽 버튼: **초기 (데이터 없음)** ↔ **운영 후 (예시)**, 진료과 전환
 - 탭 4개: 홈 `#home` · 유입·관심 `#inflow` · 상담·예약 `#booking` · 사후관리 `#aftercare`
@@ -22,7 +24,7 @@ cd apps/web-hospital && npm install && npm run dev   # http://localhost:5175
 
 ### 시연용 대시보드 연결 (`dashboard/대시보드.html`, 2026-11-20)
 
-지금 시연은 `apps/web-hospital`이 아니라 **`dashboard/대시보드.html`**(파일 1개)을 씀. 서버 3개를 띄움
+지금 시연은 `/dashboard` 프로토타입이 아니라 **`dashboard/대시보드.html`**(파일 1개)을 씀. 서버 3개를 띄움
 
 | 서버 | 띄우는 법 (저장소 루트에서) | 주소 |
 |---|---|---|

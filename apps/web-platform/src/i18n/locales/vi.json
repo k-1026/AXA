@@ -592,7 +592,6 @@
     "pickHospital": "Chọn bệnh viện",
     "regNo": "Số đăng ký cơ sở thu hút bệnh nhân nước ngoài",
     "regNoHint": "Định dạng: M-2009-03-01-0013",
-    "doneNoDashboard": "Đã đăng nhập. Chưa đặt địa chỉ trang quản lý (VITE_DASHBOARD_URL).",
     "err": {
       "hospitalTaken": "Bệnh viện này đã tham gia. Liên hệ tài khoản đại diện.",
       "notRegistered": "Không phải cơ sở đã đăng ký hoặc không hoạt động nên không thể tham gia.",

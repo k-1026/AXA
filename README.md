@@ -81,8 +81,7 @@ AX Native Bootcamp Local 모듈 · **AXA (데이터 2팀)** · 트랙 AX 데이�
 
 ```
 apps/
-├── web-platform/     환자용 웹 (React + TS, Vite) — 챗봇·병원 찾기·상담 예약·마이페이지·사후관리
-└── web-hospital/     입점 병원 대시보드
+└── web-platform/     환자용 웹 + 입점 병원 대시보드(/dashboard) (React + TS, Vite, 포트 5173 하나) — 챗봇·병원 찾기·상담 예약·마이페이지·사후관리
 backend/              FastAPI — 인증·병원·예약(booking)·병원 계정(tenant)·사후관리
 ai/
 ├── llm/              LLM 클라이언트 (모든 LLM 호출은 여기로만), safety

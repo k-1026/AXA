@@ -7,8 +7,10 @@ React + TypeScript (Vite). 지도는 Leaflet + OpenStreetMap (API 키 필요 없
 ```bash
 cd apps/web-platform
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173  (병원 대시보드: http://localhost:5173/dashboard)
 ```
+
+병원 대시보드(예전 `apps/web-hospital`, 포트 5175)는 이 앱의 `/dashboard`로 합쳤다 → [src/dashboard/README.md](src/dashboard/README.md)
 
 `npm run dev`·`npm run build` 전에 `scripts/build-hospitals.mjs`가 자동으로 돌아서
 `data/interim/영업정보/daegu_hospital_hours.csv` → `public/data/hospitals.json`을 만든다 (git에는 안 올림).
@@ -17,7 +19,8 @@ npm run dev        # http://localhost:5173
 
 ```
 src/
-├── main.tsx              라우트 (메인·병원 정보·가격 가이드·챗봇·서비스 소개·로그인)
+├── main.tsx              라우트 (메인·병원 정보·가격 가이드·챗봇·서비스 소개·로그인·/dashboard)
+├── dashboard/            입점 병원 대시보드 (React.lazy로 따로 불러옴, CSS는 .hd 아래로만)
 ├── layout/               Header(언어·통화·로그인) · Sidebar(메뉴) · Footer(고지·출처)
 ├── pages/                MainPage(지도+진료과 필터+광고 자리), HospitalsPage(카드 목록), HospitalDetailPage, PriceGuidePage, PlaceholderPage
 ├── components/           AdSlot, currency(통화 선택 상태), storage(설정 저장)
