@@ -11,6 +11,7 @@ interface ServerBooking {
   id: string;
   hospital_id: number;
   replies?: { text_ko: string; text_translated: string | null; sent_at: string }[]; // 병원이 보낸 답장만 (contracts 6-1)
+  questions?: { text_original: string; created_at: string }[]; // 방문 전 내가 보낸 질문 (결정 32)
   status: BookingStatus;
   lang: string;
   preferred_slots: string[];

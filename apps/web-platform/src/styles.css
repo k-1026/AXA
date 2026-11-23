@@ -5278,3 +5278,29 @@ body.chat-open {
 .load-more-sentinel {
   height: 1px;
 }
+
+/* 챗봇 카드: 환자가 직접 보내는 요청서·질문 (결정 32) */
+.chat-card-edit {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.chat-card-error {
+  margin: 0 0 8px;
+  color: #b3261e;
+  font-size: 0.85rem;
+}
+
+.chat-card-done {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.chat-card-done a {
+  color: var(--accent);
+}
