@@ -1,0 +1,447 @@
+<meta name="dash-one-writer">
+<style>
+.vd { display: flex; flex-direction: column; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.vd-head { display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+.vd-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+.vd-lede { margin: 0; max-width: 70ch; line-height: 1.6; }
+.vd-lede b { font-weight: var(--cds-font-weight-medium); }
+.vd-meta { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.vd-meta a { color: inherit; text-decoration: underline; }
+.vd-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--cds-gap-md); }
+.vd-tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-xs); min-width: 0; }
+.vd-tile-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.vd-tile-num { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; }
+.vd-tile-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.vd-tile.is-ok .vd-tile-num { color: var(--color-ok); }
+.vd-sec { display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+.vd-sec h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.vd-sec > p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); max-width: 72ch; line-height: 1.5; }
+.vd-chart { position: relative; min-height: 220px; }
+.vd-chart.tall { min-height: 560px; }
+.vd-chart svg text { font-size: var(--cds-font-size-caption); fill: var(--cds-text-secondary); }
+.vd-chart svg .lbl { fill: var(--color-fg); }
+.vd-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.vd-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.vd-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.vd-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); font-size: var(--cds-font-size-caption); line-height: 1.5; max-width: 260px; z-index: 2; }
+.vd-tip b { font-weight: var(--cds-font-weight-medium); }
+.vd-scroll { overflow-x: auto; }
+.vd-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-body); font-variant-numeric: tabular-nums; }
+.vd-table th { text-align: left; font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); border-bottom: 1px solid var(--color-border-line); padding: var(--cds-pad-sm); white-space: nowrap; }
+.vd-table td { border-bottom: 1px solid var(--color-border-line); padding: var(--cds-pad-sm); vertical-align: top; }
+.vd-table td.num, .vd-table th.num { text-align: right; }
+.vd-table td.sum { min-width: 220px; }
+.vd-pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: var(--cds-font-size-caption); border: 1px solid var(--color-border-line); white-space: nowrap; }
+.vd-pill.t-불만 { color: var(--color-bad); border-color: currentColor; }
+.vd-pill.t-요청 { color: var(--color-warn); border-color: currentColor; }
+.vd-pill.t-질문 { color: var(--color-fg); }
+.vd-pill.t-칭찬 { color: var(--color-ok); border-color: currentColor; }
+.vd-lv { display: inline-flex; gap: 2px; }
+.vd-lv i { width: 7px; height: 12px; border-radius: 1px; background: var(--cds-chart-grid); display: inline-block; }
+.vd-lv i.on { background: var(--color-bad); }
+.vd-filters { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; }
+.vd-filters input[type=search] { font: inherit; padding: 6px 10px; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); color: var(--color-fg); min-width: 0; flex: 1 1 180px; }
+.vd-count { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.vd-foot { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.6; }
+.vd-foot summary { cursor: pointer; }
+[data-dash-source-state=refreshing] { opacity: .5; }
+</style>
+
+<div class="vd">
+  <header class="vd-head" id="summary">
+    <h1 class="vd-title">메디대구 VOC 분류 현황</h1>
+    <p class="vd-lede" data-read lang="ko">세 출처에서 판정한 댓글 <b data-draw="k-judged" data-source="kpi" data-field="판정대상" data-row="0">—</b>건 중 <b data-draw="k-rel" data-source="kpi" data-field="관련" data-row="0">—</b>건이 외국인 환자 여정과 관련됩니다. 가장 많이 나온 원인은 <b data-draw="top-big" data-source="bigs" data-field="원인_대분류" data-row="0">—</b>(<b data-draw="top-big-n" data-source="bigs" data-field="건수" data-row="0">—</b>건)이고, 대만·대구 목소리에서는 <b data-draw="tw-top" data-source="twTop" data-field="원인_대분류" data-row="0">—</b>(<b data-draw="tw-top-n" data-source="twTop" data-field="건수" data-row="0">—</b>건)이 가장 많습니다.</p>
+    <p class="vd-meta">유튜브 영상 8개 · 대만·대구(Dcard 글 7개 · 유튜브 영상 6개) · 인스타그램 #韓国肌管理 · 2026-11-13~17 수집 · Claude Code 분류, 규칙 v6 · 사람 검수 8차 20/20 일치 (판정자 1명) · 기준은 painpoint/voc_rules.md</p>
+    <p class="vd-meta" id="review-link">사람 검수는 <a href="https://claude.ai/artifact/4PD3ex4htBCBms6vNhuWVi" target="_blank" rel="noopener">메디대구 VOC 검수 페이지</a>에서 하고, 결과는 painpoint/voc_review.md에 기록합니다.</p>
+  </header>
+
+  <section class="vd-tiles" id="tiles" aria-label="요약 수치">
+    <div class="vd-tile" id="tile-total"><span class="vd-tile-label">수집한 댓글·글</span><span class="vd-tile-num" data-draw="k-total" data-source="kpi" data-field="수집" data-row="0">—</span><span class="vd-tile-note">출처 3종</span></div>
+    <div class="vd-tile" id="tile-rel"><span class="vd-tile-label">여정과 관련</span><span class="vd-tile-num" data-draw="k-rel2" data-source="kpi" data-field="관련" data-row="0">—</span><span class="vd-tile-note">판정 대상 중 <span data-draw="k-relpct" data-source="kpi" data-field="관련비율" data-row="0">—</span></span></div>
+    <div class="vd-tile" id="tile-tw"><span class="vd-tile-label">대만·대구 관련</span><span class="vd-tile-num" data-draw="k-tw" data-source="kpi" data-field="대만관련" data-row="0">—</span><span class="vd-tile-note">페르소나와 같은 국적·지역</span></div>
+    <div class="vd-tile" id="tile-strong"><span class="vd-tile-label">강도 2 이상</span><span class="vd-tile-num" data-draw="k-strong" data-source="kpi" data-field="강도2이상" data-row="0">—</span><span class="vd-tile-note">결정에 영향·손해</span></div>
+    <div class="vd-tile is-ok" id="tile-review"><span class="vd-tile-label">사람 검수 8차</span><span class="vd-tile-num">20 / 20</span><span class="vd-tile-note">원인 대분류 기준, 1~7차는 미통과</span></div>
+  </section>
+
+  <section class="vd-sec" id="bigs">
+    <h2>원인 대분류 5개 × 출처</h2>
+    <p>사람 검수를 통과한 기준(대분류)으로 센 건수입니다. 막대 색은 출처입니다.</p>
+    <div class="vd-legend" data-draw="src-legend"></div>
+    <div class="vd-chart" data-draw="big-chart" data-source="bigs">—</div>
+  </section>
+
+  <section class="vd-sec" id="stages">
+    <h2>여정 단계별 댓글 수</h2>
+    <p>여정 지도의 5단계에 맞춰 나눈 관련 댓글. 영상만 보고 단 반응은 ① 알아보기로 셉니다. 막대 색은 유형입니다.</p>
+    <div class="vd-legend" data-draw="type-legend"></div>
+    <div class="vd-chart" data-draw="stage-chart" data-source="stages">—</div>
+  </section>
+
+  <section class="vd-sec" id="causes">
+    <h2>세부 원인 순위 (참고)</h2>
+    <p>Claude가 붙인 세부 원인 23개입니다. 사람 검수는 대분류만 했으므로 참고용입니다. 진한 부분은 강도 2 이상, 오른쪽은 그 원인이 나온 출처(영상·글) 수입니다.</p>
+    <div class="vd-chart tall" data-draw="cause-chart" data-source="causes">—</div>
+  </section>
+
+  <section class="vd-sec" id="sources">
+    <h2>출처별 수집·관련 건수</h2>
+    <p>유튜브가 대부분을 차지합니다. 대만·대구는 수집할 때 여정과 관련된 말만 골라 넣어 관련 비율이 높습니다.</p>
+    <div class="vd-scroll">
+      <table class="vd-table" data-source="srcs" data-row-key="출처종류">
+        <thead><tr><th data-field="출처종류">출처</th><th class="num" data-field="전체">전체</th><th class="num" data-field="관련">관련</th><th class="num" data-field="관련비율">관련 비율</th><th data-field="최다대분류">가장 많은 대분류</th></tr></thead>
+        <tbody data-draw="src-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="vd-sec" id="list">
+    <h2>댓글 목록</h2>
+    <p>필터로 원하는 댓글만 골라 봅니다. 좋아요가 많은 순서로 최대 150건을 보여줍니다.</p>
+    <div class="vd-filters">
+      <select class="dash-select" id="f-judge" aria-label="판정">
+        <option value="rel">관련 댓글 (분류 + 검토)</option>
+        <option value="검토">검토만</option>
+        <option value="해당 없음">해당 없음</option>
+        <option value="all">전체</option>
+      </select>
+      <select class="dash-select" id="f-src" aria-label="출처">
+        <option value="">모든 출처</option>
+        <option value="유튜브">유튜브</option>
+        <option value="대만·대구">대만·대구</option>
+        <option value="인스타그램">인스타그램</option>
+      </select>
+      <select class="dash-select" data-draw="f-big" aria-label="원인 대분류" data-source="voc"></select>
+      <select class="dash-select" data-draw="f-stage" aria-label="단계" data-source="voc"></select>
+      <select class="dash-select" data-draw="f-type" aria-label="유형" data-source="voc"></select>
+      <select class="dash-select" data-draw="f-cause" aria-label="세부 원인" data-source="voc"></select>
+      <select class="dash-select" id="f-lv" aria-label="강도">
+        <option value="">모든 강도</option>
+        <option value="2">강도 2 이상</option>
+        <option value="3">강도 3</option>
+      </select>
+      <input type="search" id="f-q" placeholder="요약·voc_id 검색" aria-label="검색">
+    </div>
+    <span class="vd-count" data-draw="match-count">—</span>
+    <div class="vd-scroll">
+      <table class="vd-table" data-source="voc" data-row-key="voc_id">
+        <thead><tr><th data-field="voc_id">voc_id</th><th data-field="출처종류">출처</th><th data-field="원인_대분류">대분류</th><th data-field="단계">단계</th><th data-field="유형">유형</th><th data-field="강도">강도</th><th data-field="원인_묶음">세부 원인</th><th data-field="요약">요약</th><th class="num" data-field="좋아요">좋아요</th></tr></thead>
+        <tbody data-draw="voc-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <details class="vd-foot" id="notes">
+    <summary>분류 기준과 한계</summary>
+    <p>원인 대분류는 가격 · 병원 정보 · 시술 정보·효과·회복 · 안전·통증·불신 · 한국 시술 기대·신뢰 5개입니다. 단계는 여정 지도 5단계(① 알아보기 ~ ⑤ 귀국 후 관리)이고, 예약했거나 다녀왔다고 말할 때만 ③~⑤로 셉니다. 유형은 질문·요청(부탁하는 말)·칭찬·불만, 강도는 1 언급 · 2 결정에 영향·반복 불만 · 3 실제 손해·포기입니다. 크리에이터 본인 댓글은 뺐습니다.</p>
+    <p>관련 댓글의 85%가 서울 병원을 다룬 영어·일본어 유튜브 댓글이라, 대만 방문객·대구라는 우리 대상은 대만·대구 89건으로만 직접 확인됩니다. 사람 검수는 1~7차를 통과하지 못했고, 대분류 5개와 규칙 v6로 바꾼 8차에서 20/20 일치했습니다(판정자 1명). 세부 원인 23개는 사람 검수를 거치지 않았습니다.</p>
+  </details>
+</div>
+
+<script>
+const STAGES = ['① 알아보기', '② 비교·결정', '③ 상담 예약', '④ 방문·진료', '⑤ 귀국 후 관리'];
+const TYPES = ['불만', '질문', '요청', '칭찬'];
+const BIGS = ['가격', '안전·통증·불신', '시술 정보·효과·회복', '병원 정보', '한국 시술 기대·신뢰'];
+const SRCS = ['유튜브', '대만·대구', '인스타그램'];
+window.VD = { STAGES, TYPES, BIGS, SRCS, filter: { judge: 'rel', src: '', big: '', stage: '', type: '', cause: '', lv: '', q: '' } };
+window.fmtInt = d3.format(',');
+window.fmtPct = d3.format('.0%');
+const fmtInt = window.fmtInt, fmtPct = window.fmtPct;
+
+dash.calc('kpi', {
+  title: '요약 수치',
+  description: '판정 결과별 건수, 대만·대구 관련 건수, 강도 2 이상 건수',
+  inputs: ['voc'],
+  fn: (voc) => {
+    const judged = voc.filter((r) => r['판정'] !== '제외(크리에이터)');
+    const rel = judged.filter((r) => r['판정'] === '분류' || r['판정'] === '검토');
+    return [{
+      수집: voc.length,
+      판정대상: judged.length,
+      관련: rel.length,
+      관련비율: judged.length ? rel.length / judged.length : 0,
+      대만관련: rel.filter((r) => r['출처종류'] === '대만·대구').length,
+      강도2이상: rel.filter((r) => Number(r['강도']) >= 2).length,
+      검토: voc.filter((r) => r['판정'] === '검토').length,
+    }];
+  },
+});
+
+dash.calc('bigs', {
+  title: '원인 대분류별 건수',
+  description: '원인 대분류 5개마다 출처별 관련 댓글 수와 강도 2 이상 건수',
+  inputs: ['voc'],
+  fn: (voc) => {
+    const rel = voc.filter((r) => (r['판정'] === '분류' || r['판정'] === '검토') && r['원인_대분류']);
+    const order = ['가격', '안전·통증·불신', '시술 정보·효과·회복', '병원 정보', '한국 시술 기대·신뢰'];
+    return order.map((b) => {
+      const rs = rel.filter((r) => r['원인_대분류'] === b);
+      return { 원인_대분류: b, 건수: rs.length,
+        유튜브: rs.filter((r) => r['출처종류'] === '유튜브').length,
+        '대만·대구': rs.filter((r) => r['출처종류'] === '대만·대구').length,
+        인스타그램: rs.filter((r) => r['출처종류'] === '인스타그램').length,
+        강도2이상: rs.filter((r) => Number(r['강도']) >= 2).length };
+    }).sort((a, b) => b.건수 - a.건수);
+  },
+});
+
+dash.calc('twTop', {
+  title: '대만·대구에서 가장 많은 대분류',
+  description: '대만·대구 출처 관련 댓글에서 건수가 가장 많은 원인 대분류',
+  inputs: ['bigs'],
+  fn: (bigs) => [...bigs].map((b) => ({ 원인_대분류: b['원인_대분류'], 건수: b['대만·대구'] })).sort((a, b) => b.건수 - a.건수).slice(0, 1),
+});
+
+dash.calc('stages', {
+  title: '단계별 건수',
+  description: '여정 단계마다 유형별 관련 댓글 수',
+  inputs: ['voc'],
+  fn: (voc) => {
+    const order = ['① 알아보기', '② 비교·결정', '③ 상담 예약', '④ 방문·진료', '⑤ 귀국 후 관리'];
+    const rel = voc.filter((r) => r['판정'] === '분류' || r['판정'] === '검토');
+    return order.map((s) => {
+      const rs = rel.filter((r) => r['단계'] === s);
+      const row = { 단계: s, 합계: rs.length };
+      for (const t of ['불만', '질문', '요청', '칭찬']) row[t] = rs.filter((r) => r['유형'] === t).length;
+      return row;
+    });
+  },
+});
+
+dash.calc('causes', {
+  title: '세부 원인 순위',
+  description: '세부 원인별 건수, 강도 2 이상 건수, 나온 출처 수와 대분류',
+  inputs: ['voc'],
+  fn: (voc) => {
+    const rel = voc.filter((r) => (r['판정'] === '분류' || r['판정'] === '검토') && r['원인_묶음']);
+    const g = new Map();
+    for (const r of rel) {
+      const k = r['원인_묶음'];
+      if (!g.has(k)) g.set(k, { 원인_묶음: k, 원인_대분류: r['원인_대분류'], 건수: 0, 강도2이상: 0, srcs: new Set(), 불만: 0, 질문: 0, 요청: 0, 칭찬: 0 });
+      const o = g.get(k);
+      o.건수 += 1;
+      if (Number(r['강도']) >= 2) o.강도2이상 += 1;
+      o.srcs.add(r['출처']);
+      if (o[r['유형']] !== undefined) o[r['유형']] += 1;
+    }
+    return [...g.values()].map((o) => ({ 원인_묶음: o.원인_묶음, 원인_대분류: o.원인_대분류, 건수: o.건수, 강도2이상: o.강도2이상, 출처수: o.srcs.size, 불만: o.불만, 질문: o.질문, 요청: o.요청, 칭찬: o.칭찬 }))
+      .sort((a, b) => b.건수 - a.건수 || b.강도2이상 - a.강도2이상);
+  },
+});
+
+dash.calc('srcs', {
+  title: '출처별 건수',
+  description: '출처 종류마다 전체·관련 건수와 가장 많은 원인 대분류',
+  inputs: ['voc'],
+  fn: (voc) => ['유튜브', '대만·대구', '인스타그램'].map((s) => {
+    const all = voc.filter((r) => r['출처종류'] === s && r['판정'] !== '제외(크리에이터)');
+    const rel = all.filter((r) => r['판정'] === '분류' || r['판정'] === '검토');
+    const cnt = {};
+    for (const r of rel) cnt[r['원인_대분류']] = (cnt[r['원인_대분류']] || 0) + 1;
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
+    return { 출처종류: s, 전체: all.length, 관련: rel.length, 관련비율: all.length ? rel.length / all.length : 0, 최다대분류: top ? top[0] : '' };
+  }),
+});
+
+function one(id, field, fmt) {
+  return (el) => {
+    const d = dash.data(id);
+    if (d.status !== 'ok' || !d.data || !d.data.length) { el.textContent = '—'; return; }
+    const v = d.data[0][field];
+    el.textContent = fmt ? fmt(v) : v;
+  };
+}
+dash.draw('k-judged', one('kpi', '판정대상', fmtInt));
+dash.draw('k-rel', one('kpi', '관련', fmtInt));
+dash.draw('k-rel2', one('kpi', '관련', fmtInt));
+dash.draw('k-relpct', one('kpi', '관련비율', fmtPct));
+dash.draw('k-total', one('kpi', '수집', fmtInt));
+dash.draw('k-tw', one('kpi', '대만관련', fmtInt));
+dash.draw('k-strong', one('kpi', '강도2이상', fmtInt));
+dash.draw('top-big', one('bigs', '원인_대분류'));
+dash.draw('top-big-n', one('bigs', '건수', fmtInt));
+dash.draw('tw-top', one('twTop', '원인_대분류'));
+dash.draw('tw-top-n', one('twTop', '건수', fmtInt));
+</script>
+
+<script>
+const fmtInt = window.fmtInt, fmtPct = window.fmtPct;
+function legend(el, names) {
+  el.replaceChildren(...names.map((t, i) => {
+    const s = document.createElement('span'); const sw = document.createElement('i');
+    sw.style.background = dash.colors[i]; s.append(sw, document.createTextNode(t)); return s;
+  }));
+}
+dash.draw('type-legend', (el) => legend(el, window.VD.TYPES));
+dash.draw('src-legend', (el) => legend(el, window.VD.SRCS));
+
+function tipIn(box) {
+  let tip = box.querySelector('.vd-tip');
+  if (!tip) { tip = document.createElement('div'); tip.className = 'vd-tip'; tip.hidden = true; box.append(tip); }
+  return tip;
+}
+function placeTip(box, tip, ev) {
+  const r = box.getBoundingClientRect();
+  let x = ev.clientX - r.left + 12; const y = ev.clientY - r.top + 12;
+  tip.hidden = false;
+  const w = tip.offsetWidth;
+  if (x + w > box.clientWidth) x = Math.max(0, ev.clientX - r.left - w - 12);
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function tipLines(tip, title, lines) {
+  tip.replaceChildren();
+  const b = document.createElement('b'); b.textContent = title; tip.append(b);
+  for (const l of lines) tip.append(document.createElement('br'), document.createTextNode(l));
+}
+
+// Horizontal stacked bars: rows of {label, total, parts:[{name, v, color}]}.
+function stacked(el, rows, labelKey, keys, aria, note) {
+  el.replaceChildren();
+  const W = el.clientWidth || 600, rowH = 34, top = 6, bottom = 24;
+  const H = top + rows.length * rowH + bottom;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', aria);
+  const lab = svg.append('g');
+  rows.forEach((r, i) => lab.append('text').attr('class', 'lbl').attr('x', 0).attr('y', top + i * rowH + rowH / 2).attr('dy', '0.35em').text(r[labelKey]));
+  let left = 0; lab.selectAll('text').each(function () { left = Math.max(left, this.getComputedTextLength()); });
+  left = Math.ceil(left) + 12;
+  const total = (r) => keys.reduce((s, k) => s + (r[k] || 0), 0);
+  const max = d3.max(rows, total) || 1;
+  const x = d3.scaleLinear().domain([0, max]).range([left, Math.max(left + 40, W - 48)]).nice();
+  svg.append('g').attr('transform', `translate(0,${H - bottom})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((W - left) / 90))).tickSizeOuter(0))
+    .call((g) => g.select('.domain').style('stroke', 'var(--cds-chart-axis)')).call((g) => g.selectAll('line').style('stroke', 'var(--cds-chart-axis)'));
+  const tip = tipIn(el);
+  rows.forEach((r, i) => {
+    let acc = 0;
+    keys.forEach((k, j) => {
+      const v = r[k]; if (!v) return;
+      svg.append('rect').attr('x', x(acc)).attr('y', top + i * rowH + 6).attr('width', Math.max(0, x(acc + v) - x(acc))).attr('height', rowH - 12)
+        .style('fill', dash.colors[j])
+        .on('mousemove', (ev) => { tipLines(tip, r[labelKey], [`${k} ${fmtInt(v)}건 · 합계 ${fmtInt(total(r))}건`].concat(note ? [note(r)] : [])); placeTip(el, tip, ev); })
+        .on('mouseleave', () => { tip.hidden = true; });
+      acc += v;
+    });
+    svg.append('text').attr('x', x(total(r)) + 6).attr('y', top + i * rowH + rowH / 2).attr('dy', '0.35em').attr('class', 'lbl').text(fmtInt(total(r)));
+  });
+}
+function failText(el, d) { el.textContent = d.status === 'error' ? '불러오지 못했습니다' : '—'; }
+
+dash.draw('big-chart', (el) => {
+  const d = dash.data('bigs');
+  if (d.status !== 'ok' || !Array.isArray(d.data)) return failText(el, d);
+  stacked(el, d.data, '원인_대분류', window.VD.SRCS, '원인 대분류 5개별 관련 댓글 수, 출처별로 쌓은 막대', (r) => `강도 2 이상 ${fmtInt(r['강도2이상'])}건`);
+});
+
+dash.draw('stage-chart', (el) => {
+  const d = dash.data('stages');
+  if (d.status !== 'ok' || !Array.isArray(d.data)) return failText(el, d);
+  stacked(el, d.data, '단계', window.VD.TYPES, '여정 단계별 관련 댓글 수, 유형별로 쌓은 막대');
+});
+
+dash.draw('cause-chart', (el) => {
+  const d = dash.data('causes');
+  if (d.status !== 'ok' || !Array.isArray(d.data)) return failText(el, d);
+  el.replaceChildren();
+  const rows = d.data;
+  const W = el.clientWidth || 600, rowH = 24, top = 4, bottom = 24;
+  const H = top + rows.length * rowH + bottom;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', '세부 원인별 댓글 수 순위와 강도 2 이상 건수');
+  const lab = svg.append('g');
+  rows.forEach((r, i) => lab.append('text').attr('class', 'lbl').attr('x', 0).attr('y', top + i * rowH + rowH / 2).attr('dy', '0.35em').text(r['원인_묶음']));
+  let left = 0; lab.selectAll('text').each(function () { left = Math.max(left, this.getComputedTextLength()); });
+  left = Math.ceil(left) + 12;
+  const right = 92;
+  const x = d3.scaleLinear().domain([0, d3.max(rows, (r) => r['건수']) || 1]).range([left, Math.max(left + 40, W - right)]).nice();
+  svg.append('g').attr('transform', `translate(0,${H - bottom})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((W - left - right) / 80))).tickSizeOuter(0))
+    .call((g) => g.select('.domain').style('stroke', 'var(--cds-chart-axis)')).call((g) => g.selectAll('line').style('stroke', 'var(--cds-chart-axis)'));
+  const tip = tipIn(el);
+  const ci = (b) => Math.max(0, window.VD.BIGS.indexOf(b));
+  rows.forEach((r, i) => {
+    const y = top + i * rowH + 4, h = rowH - 8;
+    const g = svg.append('g')
+      .on('mousemove', (ev) => { tipLines(tip, r['원인_묶음'], [`대분류: ${r['원인_대분류']}`, `${r['건수']}건 · 강도 2 이상 ${r['강도2이상']}건`, `불만 ${r['불만']} · 질문 ${r['질문']} · 요청 ${r['요청']} · 칭찬 ${r['칭찬']}`, `출처 ${r['출처수']}곳`]); placeTip(el, tip, ev); })
+      .on('mouseleave', () => { tip.hidden = true; });
+    g.append('rect').attr('x', left).attr('y', y).attr('width', Math.max(0, x(r['건수']) - left)).attr('height', h).style('fill', dash.colors[ci(r['원인_대분류'])]).style('opacity', 0.45);
+    if (r['강도2이상']) g.append('rect').attr('x', left).attr('y', y).attr('width', Math.max(0, x(r['강도2이상']) - left)).attr('height', h).style('fill', dash.colors[ci(r['원인_대분류'])]);
+    g.append('text').attr('class', 'lbl').attr('x', x(r['건수']) + 6).attr('y', y + h / 2).attr('dy', '0.35em').text(fmtInt(r['건수']));
+    g.append('text').attr('x', W).attr('text-anchor', 'end').attr('y', y + h / 2).attr('dy', '0.35em').text(`출처 ${r['출처수']}곳`);
+  });
+});
+
+dash.draw('src-rows', (tb) => {
+  const d = dash.data('srcs');
+  if (d.status !== 'ok' || !Array.isArray(d.data)) { tb.replaceChildren(); return; }
+  tb.replaceChildren(...d.data.map((r) => {
+    const tr = document.createElement('tr');
+    const cells = [r['출처종류'], fmtInt(r['전체']), fmtInt(r['관련']), fmtPct(r['관련비율']), r['최다대분류']];
+    cells.forEach((v, i) => { const td = document.createElement('td'); td.textContent = v; if (i >= 1 && i <= 3) td.className = 'num'; tr.append(td); });
+    return tr;
+  }));
+});
+</script>
+
+<script>
+const fmtInt = window.fmtInt;
+function vdOptions(sel, allLabel, values, key) {
+  const F = window.VD.filter;
+  sel.replaceChildren(new Option(allLabel, ''), ...values.map((v) => new Option(v, v)));
+  sel.value = values.includes(F[key]) ? F[key] : '';
+  sel.onchange = () => { F[key] = sel.value; if (key === 'big') { F.cause = ''; dash.draw('f-cause'); } dash.draw('voc-rows'); dash.draw('match-count'); };
+}
+dash.draw('f-big', (sel) => vdOptions(sel, '모든 대분류', window.VD.BIGS, 'big'));
+dash.draw('f-stage', (sel) => vdOptions(sel, '모든 단계', window.VD.STAGES, 'stage'));
+dash.draw('f-type', (sel) => vdOptions(sel, '모든 유형', window.VD.TYPES, 'type'));
+dash.draw('f-cause', (sel) => {
+  const d = dash.data('voc');
+  const F = window.VD.filter;
+  const vals = d.status === 'ok' ? [...new Set(d.data.filter((r) => !F.big || r['원인_대분류'] === F.big).map((r) => r['원인_묶음']).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko')) : [];
+  vdOptions(sel, '모든 세부 원인', vals, 'cause');
+});
+
+window.VD.match = function (rows) {
+  const F = window.VD.filter;
+  const q = F.q.trim().toLowerCase();
+  return rows.filter((r) => {
+    if (r['판정'] === '제외(크리에이터)') return false;
+    if (F.judge === 'rel' && !(r['판정'] === '분류' || r['판정'] === '검토')) return false;
+    if (F.judge !== 'rel' && F.judge !== 'all' && r['판정'] !== F.judge) return false;
+    if (F.src && r['출처종류'] !== F.src) return false;
+    if (F.big && r['원인_대분류'] !== F.big) return false;
+    if (F.stage && r['단계'] !== F.stage) return false;
+    if (F.type && r['유형'] !== F.type) return false;
+    if (F.cause && r['원인_묶음'] !== F.cause) return false;
+    if (F.lv && !(Number(r['강도']) >= Number(F.lv))) return false;
+    if (q && !((r['요약'] || '').toLowerCase().includes(q) || r['voc_id'].toLowerCase().includes(q))) return false;
+    return true;
+  });
+};
+
+dash.draw('match-count', (el) => {
+  const d = dash.data('voc');
+  if (d.status !== 'ok') { el.textContent = '—'; return; }
+  const n = window.VD.match(d.data).length;
+  el.textContent = n > 150 ? `조건에 맞는 댓글 ${fmtInt(n)}건 중 좋아요 순 150건` : `조건에 맞는 댓글 ${fmtInt(n)}건`;
+});
+
+dash.draw('voc-rows', (tb) => {
+  const d = dash.data('voc');
+  if (d.status !== 'ok' || !Array.isArray(d.data)) { tb.replaceChildren(); return; }
+  const rows = window.VD.match(d.data).sort((a, b) => (Number(b['좋아요']) || 0) - (Number(a['좋아요']) || 0)).slice(0, 150);
+  tb.replaceChildren(...rows.map((r) => {
+    const tr = document.createElement('tr');
+    tr.dataset.key = r['voc_id'];
+    const td = (v, cls) => { const c = document.createElement('td'); if (cls) c.className = cls; if (v !== undefined) c.textContent = v; return c; };
+    const ty = td();
+    if (r['유형']) { const p = document.createElement('span'); p.className = 'vd-pill t-' + r['유형']; p.textContent = r['유형']; ty.append(p); } else ty.textContent = r['판정'];
+    const lv = td();
+    if (r['강도']) { const w = document.createElement('span'); w.className = 'vd-lv'; w.setAttribute('aria-label', '강도 ' + r['강도']); for (let i = 1; i <= 3; i++) { const b = document.createElement('i'); if (i <= Number(r['강도'])) b.className = 'on'; w.append(b); } lv.append(w); } else lv.textContent = '—';
+    const ca = td(r['원인_묶음'] || '—');
+    if (r['판정'] === '검토') { const p = document.createElement('span'); p.className = 'vd-pill t-요청'; p.textContent = '검토'; ca.append(document.createTextNode(' '), p); }
+    tr.append(td(r['voc_id']), td(r['출처종류']), td(r['원인_대분류'] || '—'), td(r['단계'] || '—'), ty, lv, ca, td(r['요약'] || '—', 'sum'), td(fmtInt(Number(r['좋아요']) || 0), 'num'));
+    return tr;
+  }));
+});
+
+for (const el of document.querySelectorAll('#f-judge')) el.addEventListener('change', () => { window.VD.filter.judge = el.value; dash.draw('voc-rows'); dash.draw('match-count'); });
+for (const el of document.querySelectorAll('#f-src')) el.addEventListener('change', () => { window.VD.filter.src = el.value; dash.draw('voc-rows'); dash.draw('match-count'); });
+for (const el of document.querySelectorAll('#f-lv')) el.addEventListener('change', () => { window.VD.filter.lv = el.value; dash.draw('voc-rows'); dash.draw('match-count'); });
+for (const el of document.querySelectorAll('#f-q')) el.addEventListener('input', () => { window.VD.filter.q = el.value; dash.draw('voc-rows'); dash.draw('match-count'); });
+</script>

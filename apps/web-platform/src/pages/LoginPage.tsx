@@ -100,10 +100,12 @@ export function LoginPage() {
   );
 }
 
+// 환자 로그인·가입 뒤: 로그인 버튼을 누른 페이지로 돌아감 (주소로 바로 들어왔으면 메인). 병원 관계자는 대시보드로 (StaffAuth)
 function useAfterLogin() {
   const navigate = useNavigate();
-  const from = (useLocation().state as { from?: string } | null)?.from ?? '/mypage';
-  return () => navigate(from, { replace: true });
+  const from = (useLocation().state as { from?: string } | null)?.from;
+  const to = from && from.startsWith('/') && !from.startsWith('/login') ? from : '/';
+  return () => navigate(to, { replace: true });
 }
 
 function errorKey(e: unknown): string {

@@ -50,6 +50,8 @@ DOC_TOPICS = ["visa", "procedure", "rights", "payment", "other"]
 
 MEDICAL_DISCLAIMER = "General information only. Diagnosis and suitable treatment must be decided by a doctor."
 NEUTRAL_NOTE = "Listed in name order. This is not a recommendation or ranking."
+LANGUAGE_UNKNOWN_NOTE = ("Language support is not in the hospital data, so the list is not filtered by language. "
+                         "Ask the hospital which languages they support.")
 RECOMMEND_BASIS = (
     "Suggested only by how well each hospital matches the user's stated conditions (language support, opening day, "
     "available time). This is not a judgment of medical quality, skill or results. All are registered foreign-patient "
@@ -103,6 +105,17 @@ def suggest_department(args: JSON, ctx: ToolContext) -> JSON:
 
 def search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     dept = args["department"]
+    if ctx.hospitals is not None:  # 실제 병원 DB
+        code = DEPT_CODES.get(dept)
+        note = NEUTRAL_NOTE + (" " + LANGUAGE_UNKNOWN_NOTE if args.get("language") else "")
+        if code is None:
+            return {"count": 0, "hospitals": [], "note": f"{note} The hospital data has only these departments: "
+                                                         f"{', '.join(DEPT_CODES)}."}
+        found = ctx.hospitals.search(
+            dept_code=code, district=args.get("district"), registered_only=args.get("registered_only", True),
+            open_on=args.get("open_on"), limit=args.get("limit", 5),
+        )
+        return {**found, "note": note}
     rows = [h for h in fd.HOSPITALS if dept in h["departments"]]
     if args.get("district"):
         rows = [h for h in rows if h["district"] == args["district"]]
@@ -163,6 +176,11 @@ def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
 
 
 def get_hospital(args: JSON, ctx: ToolContext) -> JSON:
+    if ctx.hospitals is not None:  # 실제 병원 DB
+        found = ctx.hospitals.get(args["hospital_id"])
+        if found is None:
+            raise ToolError(f"병원 {args['hospital_id']}을(를) 찾을 수 없습니다")
+        return found
     h = _find_hospital(args["hospital_id"])
     return {**_hospital_card(h), "hours": h["hours"], "address_en": h["address_en"], "tel": h["tel"],
             "hours_source": "demo", "can_request_consultation": h["is_registered_facility"]}

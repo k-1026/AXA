@@ -157,13 +157,15 @@ class ChatService:
         limiter: RateLimiter | None = None,
         clock: Callable[[], datetime] | None = None,
         safety_check: Callable[[str, str], safety.SafetyResult] | None = safety.check,
+        hospitals: Any = None,  # 실제 병원 DB 게이트웨이 (없으면 가상 병원)
     ):
         self.sessions = sessions
         self.bookings = bookings
         self.limiter = limiter or RateLimiter()
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self.orchestrator = Orchestrator(
-            llm, registry or build_registry(), store=bookings, safety_check=safety_check, today=lambda: self._clock().date()
+            llm, registry or build_registry(), store=bookings, safety_check=safety_check,
+            today=lambda: self._clock().date(), hospitals=hospitals,
         )
 
     # ------------------------------------------------------------------ 대화

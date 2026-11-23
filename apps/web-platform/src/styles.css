@@ -498,6 +498,11 @@ a {
   font-weight: 600;
 }
 
+.procedure-price,
+.procedure-price-krw {
+  word-break: keep-all;
+}
+
 .procedure-price.is-pending {
   font-weight: 400;
   color: var(--text-muted);

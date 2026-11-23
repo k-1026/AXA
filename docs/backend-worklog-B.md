@@ -18,6 +18,36 @@
 
 ## 기록
 
+### 2026-11-17 (2) · backend-B-dashboard · Claude
+- 한 일: 대시보드 "예약 확정"·사후관리를 병원 계정과 연동
+  - 병원 계정 API `modules/tenant/router.py`: `GET /tenant/me`(병원 이름·등록·사후관리 지원 여부), `PATCH /tenant/me`(`aftercare_enabled` 켜기·끄기)
+  - 사후관리 `modules/aftercare/`: `aftercare_threads`(요청서 1건당 1개, tenant에 묶임, 상태 new·in_progress·resolved, 태그)·`aftercare_messages`(원문·번역·사진 여부) 모델, 서비스(환자 `patient_open` = 방문 완료 + 사후관리 지원 병원만, 병원 `tenant_list·messages·reply·update`), 병원용 API `GET /tenant/aftercare`, `GET /tenant/aftercare/{id}`, `POST …/messages`, `PATCH …/{id}`(상태·태그)
+  - 대시보드 시안: 상담 채팅 목록 = `GET /tenant/booking-requests`(pending·proposed), "예약 확정" = 첫 희망 시간으로 `POST …/confirm`, "시간 제안" = 두 번째 희망 시간으로 `propose`, 사후관리 채팅 = aftercare API(답장·처리 중·해결됨), 사후관리 지원 스위치 = `PATCH /tenant/me`. 모두 DB에 저장되는 것 브라우저에서 확인
+  - 데모 시드: 가상 문의 5건(번체·영어·간체·베트남어, 원문+번역), 사후관리 대화 3개
+- 공통 파일 변경 (A 승인 필요): `core/db_models.py` import 1줄, `main.py` 라우터 2줄
+- 바뀐 계약: 있음(제안) — contracts 5절에 `aftercare.service.patient_open(db, patient_id, request_id, text, photo)` 추가(A의 환자 라우터가 호출). 사후관리를 열 수 없을 때는 새 코드 없이 409 `booking.invalid_transition`
+- 마이그레이션: 없음 (A에게 요청 — `aftercare_threads`·`aftercare_messages` 추가)
+- 테스트: 통과 147개 (새 `test_aftercare_tenant.py` 9개: /tenant/me 토글, 방문 전·미지원 병원·남의 환자 열기 차단, 목록·답장·해결 흐름, 다른 병원 404, 빈 답장 422, 환자 토큰 403, 대시보드 확정)
+- 다음 할 일: 상담 답장 API(`replies` 저장·승인 발송), 번역 연결(ai/llm), 열람 기록(audit_logs)
+- A에게 요청:
+  1. (앞 요청 1에 추가) `aftercare_threads`·`aftercare_messages` 마이그레이션
+  2. 환자 라우터에 사후관리 열기·메시지 보내기 연결 (`aftercare.service.patient_open`), 환자 사이트 사후관리 화면과 연결
+- 막힌 것·질문: 이 PC는 Supabase 연결이 안 됨 (psycopg DLL 차단 → pg8000은 설치했지만 Supabase 인증서 파일 필요). 확인은 로컬 SQLite 데모로 함
+
+### 2026-11-17 · backend-B-dashboard · Claude
+- 한 일: 병원 대시보드 1단계(예약 지표) — `tenant`(`tenants`·`staff_users`), `booking`(`booking_requests`·`booking_events`·`replies`) 모델, 상태 흐름 `booking/service.py`(전이 규칙 한 곳, 변경마다 이벤트 1건, `visited`·`no_show` 추가), 병원용 API `router_tenant.py`(`GET /tenant/booking-requests`·상세, `POST …/confirm·reject·propose·visited·no-show`, `GET /tenant/analytics/summary`), 지표 계산 `booking/analytics.py`(대시보드 명세 3-1 응답 모양, 방문자는 page_events 전이라 `suppressed`), 로컬 데모 시드 `backend/scripts/seed_demo.py`(SQLite 파일 전용, 팀 DB X), 대시보드 시안(`dashboard/index.html`) 홈이 `?token=`으로 summary API를 불러 숫자 표시
+- 공통 파일 변경 (A 승인 필요): `core/db_models.py` import 2줄, `main.py` `booking_tenant_router` 등록 1줄
+- 바뀐 계약: 있음(제안) — contracts 2절 상태에 `visited`·`no_show` 추가, 환자가 `proposed`를 거절하면 `cancelled` → **contracts PR 별도로 필요** (결정 19)
+- 마이그레이션: 없음 (A에게 요청)
+- 테스트: 통과 138개 (`uv run --no-sync python -m pytest backend/tests`, 새 `test_booking_tenant.py` 13개: 전이·이벤트 기록·409·중복·환자 격리·병원 격리 404·환자 토큰 403·summary 기간·다른 병원 제외)
+- 다음 할 일: contracts PR(상태 2개) → backend로 PR, 2단계(`tenant_settings`·설정 API)
+- A에게 요청:
+  1. `tenants`·`staff_users`·`booking_requests`·`booking_events`·`replies` 마이그레이션 리비전 생성 (모델: `modules/tenant/models.py`, `modules/booking/models.py`, Supabase RLS 켜기). `hospitals`가 아직 없어 `hospital_id`는 FK 없이 둠
+  2. 직원 로그인 `POST /auth/staff/login` (`staff_users.password_hash` argon2id, 이메일 소문자)
+  3. 환자용 `router_patient.py`에서 `booking.service.create_request`·`list_for_patient`·`get_for_patient`·`patient_accept`·`patient_cancel(reason)` 연결, `chatbot/bookings.py`도 `list_for_patient`로
+  4. `notification.service.notify()`·`consent.service.require()` 생기면 알려주기 (service.py TODO)
+- 막힌 것·질문: 이 PC는 스마트 앱 컨트롤 때문에 `uvicorn.exe`가 막힘 → `python -m uvicorn`으로 실행. 팀 Supabase에는 테이블이 없어 로컬 SQLite(`data/dev/`, git 제외)로 확인함. contracts의 "환자 취소는 pending·proposed에서만"은 그대로 둠 → 확정 뒤 취소는 지금 불가(대시보드 취소율 = 기간 내 취소 ÷ 확정)
+
 ### 2026-10-30 · backend · —
 - 한 일: worklog 파일 생성 (아직 코드 작업 없음)
 - 다음 할 일: contracts 초안 같이 확정, `docker-compose.yml`·`core/db.py`·Alembic 첫 마이그레이션

@@ -15,6 +15,7 @@ from modules.chatbot.models import ChatMessage, ChatSession
 from modules.chatbot.store import DbSessionStore
 
 from test_auth_patient import auth, signup, withdraw
+from test_hospitals import files, hosp, load  # noqa: F401 — files는 fixture
 
 ASK = "/api/v1/chatbot/ask"
 
@@ -93,7 +94,13 @@ def test_first_ask_creates_db_session_with_masked_text_only(client, llm, db_engi
         assert [(m.role, m.content) for m in msgs] == [("user", "Hi, my email is [email]"), ("assistant", "Hello!")]
 
 
-def test_follow_up_reads_history_from_db_and_restores_shown_hospitals(client, llm, db_engine):
+def test_follow_up_reads_history_from_db_and_restores_shown_hospitals(client, llm, db_engine, files):
+    # 챗봇 병원 찾기는 실제 병원 DB를 읽음 (modules/chatbot/hospitals.py) → 가상 값으로 2곳 적재
+    load(db_engine, **files(
+        [hosp("Y1", "테스트피부과A", sgguCdNm="대구수성구"), hosp("Y2", "테스트피부과B", sgguCdNm="대구수성구")],
+        registered=[{"registration_no": "M-1", "ykiho": "Y1"}, {"registration_no": "M-2", "ykiho": "Y2"}],
+        hours=[{"ykiho": "Y1", "has_dermatology": "Y"}, {"ykiho": "Y2", "has_dermatology": "Y"}],
+    ))
     token = signup(client)
     llm.script = [
         call("search_hospitals", {"department": "피부과", "district": "수성구", "language": "en"}),
