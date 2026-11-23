@@ -1,12 +1,19 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AdSlot } from '../components/AdSlot';
+import { AdRotator, type Ad } from '../components/AdRotator';
 import { DepartmentFilter } from '../features/map/DepartmentFilter';
 import { HospitalMap } from '../features/map/HospitalMap';
 import { HospitalSearch } from '../features/map/HospitalSearch';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { DepartmentKey, Hospital } from '../features/hospital/types';
 import { onMap } from '../features/hospital/filters';
+
+// 메인 하단 광고 배너 (비의료 일반 광고주만 · 5초마다 돌아감)
+const ADS: Ad[] = [
+  { image: '/ads/hanbang-skincare.webp', alt: 'Yakryeongsi — Hanbang skincare. Rooted in Daegu.' },
+  { image: '/ads/biseulsan-ice-festival.webp', alt: 'Biseulsan Ice Festival — Daegu, on ice. Dalseong, Daegu' },
+  { image: '/ads/eworld-daegu.webp', alt: "E-World Daegu — Your Daegu play date. Let's play" },
+];
 
 export function MainPage() {
   const { t } = useTranslation();
@@ -62,16 +69,7 @@ export function MainPage() {
 
       <DepartmentFilter selected={dept} onSelect={selectDept} />
 
-      <div className="ad-row">
-        <AdSlot
-          image="/ads/hanbang-skincare.webp"
-          alt="Yakryeongsi — Hanbang skincare. Rooted in Daegu."
-        />
-        <AdSlot
-          image="/ads/biseulsan-ice-festival.webp"
-          alt="Biseulsan Ice Festival — Daegu, on ice. Dalseong, Daegu"
-        />
-      </div>
+      <AdRotator ads={ADS} />
     </div>
   );
 }
