@@ -1104,6 +1104,59 @@ a {
   color: var(--text-muted);
 }
 
+/* 메인: 지도 오른쪽에 진료과 선택 (세로 버튼) */
+.map-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 168px;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.map-area {
+  min-width: 0;
+}
+
+.map-body .dept-filter {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.map-body .dept-chip {
+  width: 100%;
+  height: auto;
+  min-height: 60px;
+  flex: 1 1 0;
+  max-height: 84px;
+  border-radius: 16px;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+@media (max-width: 860px) {
+  .map-body {
+    grid-template-columns: 1fr;
+  }
+
+  .map-body .dept-filter {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .map-body .dept-chip {
+    width: auto;
+    flex: 0 0 auto;
+    min-height: 44px;
+    border-radius: 999px;
+    padding: 8px 16px;
+  }
+}
+
 /* 광고 자리 */
 .ad-row {
   display: grid;

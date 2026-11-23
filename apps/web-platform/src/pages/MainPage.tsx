@@ -61,14 +61,18 @@ export function MainPage() {
             <HospitalSearch key={searchKey} hospitals={mapItems} onSearch={search} />
           )}
         </div>
-        {state.status === 'loading' && <p className="map-status">{t('map.loading')}</p>}
-        {state.status === 'error' && <p className="map-status">{t('map.error')}</p>}
-        {state.status === 'ready' && (
-          <HospitalMap hospitals={visible} fetchedAt={state.data.meta.fetchedAt} selectedDept={dept} focus={found} />
-        )}
+        {/* 지도 왼쪽 · 진료과 선택 오른쪽 (태블릿 이하는 지도 아래) */}
+        <div className="map-body">
+          <div className="map-area">
+            {state.status === 'loading' && <p className="map-status">{t('map.loading')}</p>}
+            {state.status === 'error' && <p className="map-status">{t('map.error')}</p>}
+            {state.status === 'ready' && (
+              <HospitalMap hospitals={visible} fetchedAt={state.data.meta.fetchedAt} selectedDept={dept} focus={found} />
+            )}
+          </div>
+          <DepartmentFilter selected={dept} onSelect={selectDept} />
+        </div>
       </section>
-
-      <DepartmentFilter selected={dept} onSelect={selectDept} />
 
       <AdRotator ads={ADS} />
     </div>
