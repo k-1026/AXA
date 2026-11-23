@@ -119,7 +119,8 @@ class BookingListData(_Model):
 
 class AftercareThreadData(_Model):
     status: Literal["opened"]
-    thread_id: str
+    thread_id: str  # 아직 대화가 없으면 "" (첫 메시지를 사후관리 화면에서 보내면 생김)
+    booking_id: str | None = None  # 사후관리 화면에서 이 예약을 열기 위한 id
     hospital_id: int
     topic: str
     first_message: str

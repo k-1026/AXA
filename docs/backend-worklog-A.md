@@ -17,6 +17,85 @@
 
 ## 기록
 
+### 2026-11-20 (5) · backend-A-notifications · Claude (사이트 안 알림)
+- 브랜치: `backend-A-audit-translate` 위 → 그것이 먼저 머지돼야 함
+- 한 일: 결정 27. 새 모듈 `modules/notification/`(A) — 모델·`notify`·목록·읽음·Realtime 토큰(PyJWT HS256, `SUPABASE_JWT_SECRET`), 마이그레이션 **0010** (표 + Supabase에서만 RLS 정책·authenticated SELECT·Realtime 발행). `booking/service._move`·`staff_reply`, `aftercare/service.tenant_reply`에 `notify` 한 줄 (B 모듈). `core/config.py`에 `supabase_jwt_secret` (공통 파일). `.env.example` 정리 (CORS·Supabase 묶음)
+- 바뀐 계약: contracts 4·5·6-5
+- 테스트: 전체 452개 통과 (`conftest`에서 `SUPABASE_JWT_SECRET` 비움)
+- Supabase `AXA`: 0010 적용, 정책 `notifications_own`·Realtime 발행 확인
+- B에게 요청: booking·aftercare에 넣은 `notify` 줄, `core/config.py` 확인
+
+### 2026-11-19 · backend-A-demo-seed · Claude (시연용 가상 병원 공용 DB 시드)
+- 한 일: `backend/scripts/seed_demo_shared.py` — 시연은 **가상 병원 9001**로 (사용자 결정, compliance 2-6: 예시 일정·예약은 `is_demo` 병원에만). 공용 DB에 여러 번 돌려도 같은 결과
+  - 9001 이름·가상 주소·좌표·진료시간·진료과를 `data/processed/demo/demo_hospital.json`(환자 웹 목록과 같이 읽을 파일)로 채움, `is_registered_facility = true`(요청 흐름용) · `is_demo = true`
+  - 9001 tenant 요청·사후관리 켬, 직원 `demo-staff@example.com`(owner), 환자 `demo-patient@example.com` + 그 환자 예약 2건(방문 완료·확정, 동의·이벤트 포함 — 대기는 넣지 않음: 있으면 시연 중 새 요청이 409 `booking.duplicate`). 다시 돌리면 이 환자 예약만 새로 만듦
+  - 비밀번호는 처음 만들 때만 생성 → `data/dev/demo_accounts.txt`(git 제외), `--reset-passwords`로 새로
+  - B 시드(`seed_demo.py`, 로컬 SQLite)와 9001 대시보드 데이터(환자 없는 요청 167건)는 그대로
+  - 이메일은 `example.com` — `.test`는 `EmailStr`이 거부(로그인 422)
+- 확인 (로컬 SQLite, 새 DB에 3번 실행): 예약 3·이벤트 6·동의 5 그대로(대기 포함 버전), 환자 로그인 200 → `/me/booking-requests` 3건. Supabase 실행 후 브라우저로 요청 → 대시보드 확정 → 환자 예약 관리 "확정"·예약번호까지 확인, 직원 로그인 200 → `/tenant/booking-requests` 200, `/hospitals/9001` `is_demo`·`can_request` true
+- 바뀐 계약: 없음
+- 테스트: pytest는 이 PC에서 실행 불가 → 위 수동 확인만
+- 다음 할 일: 병원 재적재(등록 126 → 160) 끝난 뒤 Supabase에 실행, 환자 웹 목록에 9001 "가상 · 시연용"으로 표시(프론트 브랜치)
+- B에게 요청: 대시보드 시연은 `demo-staff@example.com`으로 로그인 (`?token=` 대신). 기존 `coordinator@demo.test`는 비밀번호 해시가 없어 로그인 불가 — 그대로 둠
+### 2026-11-20 (4) · backend-A-audit-translate · Claude (열람 기록 · 번역 · 챗봇 사후관리 카드)
+- 브랜치: `backend-A-aftercare-patient` + `backend-A-booking-replies` + `backend-A-chatbot-bookings`를 합친 위 → **그 셋이 먼저 머지돼야 함**
+- 한 일
+  - 결정 24 열람 기록: 새 모듈 `modules/audit/`(B 모듈) 모델·`log_action`·`GET /tenant/audit-logs`, 마이그레이션 **0009**. 병원 요청서 목록·1건·답장, 사후관리 열람·답장에서 기록
+  - 결정 25 번역: `modules/agent/translate.py`(B 모듈) — `ai/llm` 클라이언트, `mask_pii`, 동의 확인(`consent.given_for_request` 추가). 사후관리 환자·직원 글, 상담 답장, 요청서 글(저장 뒤)
+  - 결정 26 챗봇: `open_aftercare_thread`가 `BookingGateway.aftercare_for()`로 실제 가능 여부·대화 id 확인, 카드에 `booking_id`, 보내지 않음. 프롬프트 한 줄 (`ai/agent` — AI 담당 확인)
+- 테스트: 전체 443개 통과 (`conftest`에서 번역 LLM 끔 — 실제 LLM 안 부름)
+- B에게 요청: `audit/`·`agent/translate.py`·`booking/service.staff_reply`·`aftercare/service` 번역 줄·`router_tenant` 기록 줄 확인
+- 다음: Supabase에 0009 적용, 환자 웹 챗봇 카드·자기 글 원문 표시
+
+### 2026-11-20 (3) · backend-A-aftercare-patient · Claude (사진·영상 지우기)
+- 한 일: 결정 23. 탈퇴(`auth.service.withdraw`)에서 `aftercare.detach_patient_media()` → commit 뒤 `media.remove()`. 정기 정리 `maintenance.purge_media()` — Storage 목록(`media.list_objects`) 중 DB가 가리키지 않는 하루 지난 파일 삭제, Storage 오류여도 다른 정리는 끝남. 테스트 `conftest.py`에서 `SUPABASE_*`를 비움 (.env에 키가 있어도 실제 Storage를 부르지 않게)
+- B 모듈 변경 (**B 확인 필요**): `aftercare/service.py`에 `detach_patient_media`·`referenced_media_paths`
+- 바뀐 계약: contracts 6-3·7-1 (`media_files`)
+- 테스트: 전체 224개 통과
+- 다음 할 일: Vercel Cron에 `/internal/purge` 등록 (배포 때)
+
+### 2026-11-20 (2) · backend-A-aftercare-patient · Claude (사후관리 사진·영상 = Supabase Storage)
+- 한 일: 결정 22. 새 모듈 `modules/media/`(A) — 서명된 업로드·보기 주소 (httpx, 서비스 키는 서버만). `POST /me/booking-requests/{id}/aftercare/uploads`, 보내기에 `attachments`, 환자·병원 메시지 응답에 `attachments[{kind, name, url}]`. 마이그레이션 **0008** (`aftercare_messages.attachments`). 버킷 만들기 `backend/scripts/setup_storage.py`
+- 공통 파일 변경: `core/config.py`에 `supabase_url`·`supabase_service_role_key` (**B 승인 필요**), `.env.example`
+- B 모듈 변경 (**B 확인 필요**): `aftercare/models.py` 칸 1개, `service.py` `_openable`·`media_prefix`·`patient_upload_prefix` + `_add(attachments)`, `router_tenant.py` 메시지에 `attachments`
+- 바뀐 계약: contracts 4절(`storage.unavailable`)·6-3
+- 테스트: 전체 218개 통과 (업로드·보기 주소, 다른 요청서 파일 422, 파일 종류·크기·권한, 설정 없음 503, Supabase 응답 처리)
+- 다음 할 일: `.env`에 키 → `setup_storage.py` → Supabase에 0008 적용 → 환자 웹·대시보드 연결 확인
+- 막힌 것·질문: 탈퇴·대화 삭제 때 Storage 파일도 지우기는 아직 (DB 행만 지워짐) → 정리 API(`maintenance`)에 추가 필요
+
+### 2026-11-20 · backend-A-aftercare-patient · Claude
+- 한 일: 환자 사후관리 API 3개 (`GET /me/aftercare`, `GET·POST /me/booking-requests/{id}/aftercare[/messages]`). 새 파일 `aftercare/router_patient.py`(A), `aftercare/service.py`에 조회 함수 `patient_list`·`patient_messages` 추가 (B 모듈 — 확인 요청), `main.py`에 라우터 등록
+- 바뀐 계약: contracts 6-3 신설
+- 테스트: 전체 210개 통과 (새 `test_aftercare_patient.py` 5개: 열기·답장 안 읽은 수, 409, 남의 것 404, 빈 글 422, 401·403)
+- 다음 할 일: 환자 웹 사후관리 화면을 이 API로 (회원 모드)
+- B에게 요청: `aftercare/service.py` 추가 함수 2개와 6-3절 확인. 사진 저장 방식(스토리지) 정하기
+- 막힌 것·질문: 없음
+
+### 2026-11-20 · backend-A-booking-replies · Claude (병원 상담 답장 API)
+- 한 일: 사용자 요청으로 **B 모듈(booking)에 상담 답장 쓰기 API** — 대시보드 상담 답장이 화면에만 붙고 새로고침하면 사라지던 것
+  - `POST /tenant/booking-requests/{id}/replies` `{text}` → `Reply` 저장 (`sent_at` 지금, `approved_by` = 보낸 직원, `ai_draft` false, 번역 비움). 확인 창 "보내기" = 직원 승인
+  - 병원 목록·상세 응답 `TenantBookingOut` = `BookingOut` + `replies` (한 번에 조회, `service.sent_replies`)
+  - `/replies` 경로를 `/{action}`보다 먼저 등록 (행동 이름으로 잡히지 않게)
+  - 환자 쪽 `_out()`이 답장을 dict로 넣어 Pydantic 경고 → `ReplyOut`으로 (답장이 실제로 생기면서 드러남)
+- 바뀐 계약: 있음 6-2절 신설 + 변경 이력 (**B 확인 필요**)
+- 테스트: `backend/tests/test_booking_replies.py` 5개 (저장·병원/환자 조회, 다른 병원 404, 빈 글·2,001자 422, 로그인·환자 토큰 막기, 경로 충돌 없음), 백엔드+AI 410개 통과
+- 다음 할 일: 대시보드 상담 채팅이 이 API로 보내고 불러오기, 환자 웹 상담 화면에 답장 표시 (프론트 브랜치)
+- B에게 요청: 6-2절·`staff_reply()` 확인. 상태 이력(`booking_events`)에는 답장을 넣지 않음 — 넣어야 하면 알려 주기
+- 막힌 것·질문: 번역은 `ai/llm` 연결 후 (`text_translated`)
+
+### 2026-11-19 (2) · backend-A-chatbot-bookings · Claude (챗봇 "내 예약" 연결)
+- 한 일: `modules/chatbot/bookings.py` 빈 목록 → `booking.service.list_for_patient`·`get_for_patient`(계약 5절) 어댑터
+  - 챗봇 도구 모양 그대로: `id`·`hospital_id`·`hospital_name_en`·`status`·`preferred`·`confirmed_slot`·`proposed_slot`·`created_at`·`visited`, 시간은 한국 시간 "YYYY-MM-DD HH:MM"
+  - `confirmed_slot` 칸(확정·제안 시간 같이 담음)을 상태로 나눔: proposed → `proposed_slot`, confirmed·visited·no_show → `confirmed_slot`
+  - 요청서 원문·건강정보·동의·답장은 넘기지 않음, 남의 요청·UUID 아닌 id는 `BookingError("not_found")`
+  - 이걸로 챗봇 "제출 확인"(초안 병원에 새 요청이 생기면 제출로 봄)도 실제 DB 기준으로 동작
+- 확인: Supabase + 시연 환자로 "내 예약 상태 알려줘" → 9001 예약 3건 상태(확정·미방문·방문 완료)로 답함 (확인용 대화는 지움)
+- 바뀐 계약: 없음
+- 테스트: `backend/tests/test_chatbot_bookings.py` 3개 추가, 백엔드+AI 408개 통과 (**이 PC에서도 pytest 실행됨** — 11/18 메모의 "실행 불가"는 지금은 아님)
+- 다음 할 일: 없음 (사후관리 열기 `open_aftercare_thread`는 아직 데모 응답 — 환자 사후관리 API 생기면)
+- B에게 요청: 없음
+
+
 ### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
 - 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**
 - 확인: alembic `0007` · hospitals 4,242(등록 126) 그대로 · 새 표 7개 모두 0행 · public 표 RLS 꺼진 것 0 · FK `tenants·booking_requests.hospital_id → hospitals`, `consents.booking_request_id → booking_requests` 있음

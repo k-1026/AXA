@@ -55,3 +55,5 @@ class ReplyOut(BaseModel):
 
 class PatientBookingOut(BookingOut):
     replies: list[ReplyOut] = []
+    # 거절됐으면 병원이 고른 사유 코드 (fully_booked·not_offered·needs_consult·other, 없으면 None). 문장은 프론트 i18n
+    reject_reason: str | None = None
