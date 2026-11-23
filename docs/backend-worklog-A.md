@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-23 (2) · backend-A-media-thumbs · Claude (사진 썸네일)
+- 한 일: 결정 29. `media.thumb_path`·`with_thumbs`, 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb`, `attachments_out`에 `thumb_url`. 탈퇴 삭제·정기 정리에 썸네일 포함
+- 바뀐 계약: contracts 6-3 (칸 추가만)
+- 테스트: 전체 456개 통과 (새 4개)
+- 다음 할 일: 환자 웹 업로드 전 줄이기·썸네일 (`frontend-media-thumbs`), 대시보드 썸네일 표시
+- B에게 요청: 결정 29 확인 — `router_tenant` 응답 첨부에 `thumb_url`이 생김 (B 파일은 안 고침, `media.attachments_out`이 같이 줌)
+- 막힌 것·질문: 없음
+
 ### 2026-11-20 (5) · backend-A-notifications · Claude (사이트 안 알림)
 - 브랜치: `backend-A-audit-translate` 위 → 그것이 먼저 머지돼야 함
 - 한 일: 결정 27. 새 모듈 `modules/notification/`(A) — 모델·`notify`·목록·읽음·Realtime 토큰(PyJWT HS256, `SUPABASE_JWT_SECRET`), 마이그레이션 **0010** (표 + Supabase에서만 RLS 정책·authenticated SELECT·Realtime 발행). `booking/service._move`·`staff_reply`, `aftercare/service.tenant_reply`에 `notify` 한 줄 (B 모듈). `core/config.py`에 `supabase_jwt_secret` (공통 파일). `.env.example` 정리 (CORS·Supabase 묶음)

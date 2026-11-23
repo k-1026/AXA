@@ -4,6 +4,8 @@
 - 볼 때도 서명된 주소(1시간)만 줌 → 버킷은 공개하지 않음. 누구에게 줄지는 부르는 쪽(aftercare)이 권한 확인 뒤 결정
 - 서비스 키는 서버 전용 (core/config.py). 설정이 없으면 `enabled() = False` → 업로드 API는 503 `storage.unavailable`
 - 지우기: 탈퇴 때 그 환자 파일 바로(`remove`), 그 밖에 DB에 없는 파일은 정기 정리가 하루 뒤(`list_objects` → `remove`)
+- 사진 썸네일(결정 29): 브라우저가 줄인 사진과 작은 썸네일을 같이 올림. 썸네일 경로는 원본 경로에서 정해짐(`thumb_path`)
+  → DB에는 `thumb: true`만, 지우기·정기 정리는 원본 경로로 썸네일도 같이 다룸
 """
 
 from datetime import datetime
@@ -19,6 +21,7 @@ from core.errors import AppError
 BUCKET = "aftercare-media"
 MAX_BYTES = 50 * 1024 * 1024  # 1개 50MB (환자 화면 안내와 같음, Supabase 무료 플랜 파일 상한)
 VIEW_SECONDS = 3600
+THUMB_SUFFIX = ".thumb.jpg"
 KINDS = ("image", "video")
 TIMEOUT = 10.0
 
@@ -60,6 +63,16 @@ def new_path(prefix: str, name: str) -> str:
     return f"{prefix}/{uuid.uuid4().hex}" + (f".{m.group(1).lower()}" if m else "")
 
 
+def thumb_path(path: str) -> str:
+    """원본 경로 → 썸네일 경로 (`a/b/c.jpg` → `a/b/c.thumb.jpg`). 같은 폴더라 권한·정리 규칙이 그대로."""
+    return re.sub(r"\.[A-Za-z0-9]{1,5}$", "", path) + THUMB_SUFFIX
+
+
+def with_thumbs(paths: list[str]) -> list[str]:
+    """지울 때: 원본마다 썸네일 경로도 (없는 파일을 지워도 Storage는 오류 없이 넘어감)."""
+    return [x for p in paths if p for x in (p, thumb_path(p))]
+
+
 def sign_upload(path: str) -> str:
     """한 번 쓰는 업로드 주소 (브라우저가 이 주소로 파일을 PUT)."""
     if not enabled():
@@ -87,12 +100,15 @@ def sign_views(paths: list[str]) -> dict[str, str]:
 
 
 def attachments_out(messages) -> dict[int, list[dict]]:
-    """메시지 id → [{kind, name, url}] (url은 1시간, 못 만들면 None → 화면은 "사진 있음"만)."""
-    urls = sign_views([a.get("path") for m in messages for a in (m.attachments or [])])
-    return {
-        m.id: [{"kind": a.get("kind"), "name": a.get("name"), "url": urls.get(a.get("path"))} for a in (m.attachments or [])]
-        for m in messages
-    }
+    """메시지 id → [{kind, name, url, thumb_url}] (1시간, 못 만들면 None → 화면은 "사진 있음"만, 썸네일이 없으면 원본)."""
+    atts = [a for m in messages for a in (m.attachments or [])]
+    urls = sign_views([a.get("path") for a in atts] + [thumb_path(a["path"]) for a in atts if a.get("thumb") and a.get("path")])
+
+    def one(a: dict) -> dict:
+        thumb = urls.get(thumb_path(a["path"])) if a.get("thumb") and a.get("path") else None
+        return {"kind": a.get("kind"), "name": a.get("name"), "url": urls.get(a.get("path")), "thumb_url": thumb}
+
+    return {m.id: [one(a) for a in (m.attachments or [])] for m in messages}
 
 
 def remove(paths: list[str]) -> int:
