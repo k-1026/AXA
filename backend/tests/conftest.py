@@ -13,6 +13,7 @@ def test_settings(monkeypatch):
     # .env에 Supabase 키가 있어도 테스트는 실제 Storage를 부르지 않음 (필요한 테스트만 가짜로 켬)
     monkeypatch.setenv("SUPABASE_URL", "")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    monkeypatch.setenv("SUPABASE_JWT_SECRET", "")
     get_settings.cache_clear()
     get_engine.cache_clear()
     # 번역은 실제 LLM을 부르지 않음 (번역을 보는 테스트만 가짜 LLM으로 바꿈)

@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-20 (5) · backend-A-notifications · Claude (사이트 안 알림)
+- 브랜치: `backend-A-audit-translate` 위 → 그것이 먼저 머지돼야 함
+- 한 일: 결정 27. 새 모듈 `modules/notification/`(A) — 모델·`notify`·목록·읽음·Realtime 토큰(PyJWT HS256, `SUPABASE_JWT_SECRET`), 마이그레이션 **0010** (표 + Supabase에서만 RLS 정책·authenticated SELECT·Realtime 발행). `booking/service._move`·`staff_reply`, `aftercare/service.tenant_reply`에 `notify` 한 줄 (B 모듈). `core/config.py`에 `supabase_jwt_secret` (공통 파일). `.env.example` 정리 (CORS·Supabase 묶음)
+- 바뀐 계약: contracts 4·5·6-5
+- 테스트: 전체 452개 통과 (`conftest`에서 `SUPABASE_JWT_SECRET` 비움)
+- Supabase `AXA`: 0010 적용, 정책 `notifications_own`·Realtime 발행 확인
+- B에게 요청: booking·aftercare에 넣은 `notify` 줄, `core/config.py` 확인
+
 ### 2026-11-19 · backend-A-demo-seed · Claude (시연용 가상 병원 공용 DB 시드)
 - 한 일: `backend/scripts/seed_demo_shared.py` — 시연은 **가상 병원 9001**로 (사용자 결정, compliance 2-6: 예시 일정·예약은 `is_demo` 병원에만). 공용 DB에 여러 번 돌려도 같은 결과
   - 9001 이름·가상 주소·좌표·진료시간·진료과를 `data/processed/demo/demo_hospital.json`(환자 웹 목록과 같이 읽을 파일)로 채움, `is_registered_facility = true`(요청 흐름용) · `is_demo = true`
