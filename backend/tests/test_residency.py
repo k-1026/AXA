@@ -91,3 +91,10 @@ def test_답을_고치면_바로_반영(client, db):
     assert book(client, hospital, h).status_code == 422
     client.put(f"{API}/me/residency", json=VISITOR, headers=h)
     assert book(client, hospital, h).status_code == 201
+
+
+def test_브라우저_사전_요청에서_PUT_허용(client):
+    r = client.options(f"{API}/me/residency", headers={
+        "Origin": "http://localhost:5173", "Access-Control-Request-Method": "PUT",
+        "Access-Control-Request-Headers": "authorization,content-type"})
+    assert r.status_code == 200 and "PUT" in r.headers["access-control-allow-methods"]
