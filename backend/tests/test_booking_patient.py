@@ -22,6 +22,7 @@ SIGNUP = {
     "preferred_lang": "zh-TW",
     "timezone": "Asia/Taipei",
     "consents": [{"kind": "terms", "version": "2026-11-03"}, {"kind": "privacy", "version": "2026-11-03"}],
+    "residency": {"country": "TW", "alien_registration": False, "domestic_residence": False, "health_insurance": False},
 }
 
 

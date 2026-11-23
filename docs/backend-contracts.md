@@ -64,6 +64,8 @@
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
 | `validation` | 422 | 입력 오류 |
 | `consent.required` | 422 | 필수 동의 없음 |
+| `residency.required` | 422 | 계정에 체류 형태 답이 없음 → `PUT /me/residency` 먼저 (예약 요청 때, 결정 28) |
+| `residency.not_eligible` | 403 | 국내 거주 외국인 → 상담·예약 요청 불가, 정보 열람만 (의료법 제27조 제3항 제2호, 결정 28) |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
 | `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
 | `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`/`not_joined`(등록 기관이지만 메디대구 입점 안 함 = tenant 없음·`requests_enabled=false`, 예약 요청 때만). 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
@@ -111,7 +113,7 @@
 | `message` | str | X | 자유 입력 원문 → 번역은 백그라운드 |
 | `health_info` | str | X | 있으면 `health` 동의 필수 |
 | `consents` | list[{kind, version}] | O | `privacy` 항상 · `health_info`가 있으면 `health` · `message`나 `health_info`가 있으면 번역(해외 LLM)용 `overseas_transfer` → 빠지면 422 `consent.required` (`detail.missing`). 받은 동의는 그 요청서에 묶어 기록(`consents.booking_request_id`) |
-| `residency` | `short_term` | O | 체류 형태(자기 신고). 국내 거주 외국인은 유치 대상이 아니라 요청 불가(의료법 제27조 제3항 제2호) → `short_term` 외에는 422 `validation` (2026-11-18 필수로) |
+| `residency` | `short_term` | O | 체류 형태(자기 신고). 국내 거주 외국인은 유치 대상이 아니라 요청 불가(의료법 제27조 제3항 제2호) → `short_term` 외에는 422 `validation` (2026-11-18 필수로). **제출 때 한 번 더 확인하는 값** — 판단 기준은 계정의 `residency`(6-6절, 결정 28) |
 | `treatment` | str | X | 진료항목 코드 (대시보드 1-2) |
 
 - 요청서의 `privacy` 동의 = **이 요청서 내용을 고른 병원에 전달**하는 데 대한 동의 (가입 때 `privacy`와 별개로 요청서마다). 법적 구조가 제3자 제공(개인정보보호법 제17조 제1항 제1호)인지 처리 위탁(제26조)인지는 **개인정보위 질의 8번 회신 후** 문구 확정 ([plan.md](../subject/plan.md) 11절)
@@ -122,7 +124,7 @@
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
-| `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending` | 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.duplicate`, 422 `consent.required`·`validation` |
+| `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending`. 먼저 계정 체류 형태 확인(6-6절) | 422 `residency.required`, 403 `residency.not_eligible`, 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.duplicate`, 422 `consent.required`·`validation` |
 | `GET /me/booking-requests` | 내 예약 요청 목록 (최근 순) | — |
 | `GET /me/booking-requests/{id}` | 상세 | 404 `not_found`(남의 것 포함) |
 | `POST /me/booking-requests/{id}/accept` | 병원이 제안한 시간 수락 `proposed → confirmed` | 409 `booking.invalid_transition` |
@@ -182,6 +184,19 @@
 - Supabase: `notifications` RLS 정책 `notifications_own`(authenticated, `patient_id = auth.jwt()->>'sub'`), Realtime 발행 `supabase_realtime`에 추가 (마이그레이션 0010)
 - 탈퇴하면 같이 삭제 (FK CASCADE)
 
+### 6-6. 환자 체류 형태 (A, `modules/patient/`, 결정 28)
+
+`ResidencyIn{country(ISO 2자리 거주국), alien_registration, domestic_residence, health_insurance}` — ① 외국인등록(G-1 제외) ② 국내거소신고 ③ 국민건강보험 가입자·피부양자. **하나라도 true거나 `country = KR`이면 `resident`**, 아니면 `short_term` (compliance 2-1)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `POST /auth/patient/signup` | 본문에 `residency?: ResidencyIn` 추가 (선택 — 없으면 계정 값 비움) | 422 `validation`(국가 코드 형식) |
+| `PUT /me/residency` | `ResidencyIn` → `PatientOut` (다시 답하기: 가입 때 안 했거나 체류 상태가 바뀜) | 401, 422 |
+| `GET /me`, `PATCH /me` | `PatientOut`에 `residency`(`short_term`/`resident`/`null`)·`residence_country` 추가 (칸 추가만) | — |
+
+- 챗봇: 계정 값이 있으면 대화 상태보다 우선하고 `record_residency`로 바꿀 수 없음 → `resident`면 조건 맞춤 제안·예약 초안 X (중립 목록 검색은 됨)
+- 저장: `patients.residency`·`residence_country`·`residency_answered_at` (마이그레이션 0011). 답만 저장, 근거 서류는 받지 않음 (자기 신고)
+
 ## 7. 챗봇 API (A, `modules/chatbot/`, 결정 16)
 
 모두 **환자 로그인 필요**. 경로 앞 `/api/v1`. 응답 모델은 `ai/agent/schemas.py`(카드 형식의 기준) → OpenAPI
@@ -214,6 +229,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-23 | 4·6·6-1·6-6 | 환자 체류 형태 6-6 신설(가입 `residency?`, `PUT /me/residency`, `PatientOut` 칸 추가), 예약 요청 전 계정 값 확인, 에러 `residency.required`(422)·`residency.not_eligible`(403) (결정 28, 마이그레이션 0011) | A (**B 확인 필요**) | `backend-A-residency` → `backend` |
 | 2026-11-20 | 6-2 | 병원 상담 답장 `POST /tenant/booking-requests/{id}/replies` 신설, 병원 목록·상세 응답에 `replies` 추가 (`TenantBookingOut`) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-booking-replies` → `backend` |
 | 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
 | 2026-11-17 | 2 | 병원 직원 거절에 사유 코드(`fully_booked`/`not_offered`/`needs_consult`/`other`, 선택) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-contract-reject-reason` → `backend` |

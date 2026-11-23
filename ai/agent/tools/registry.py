@@ -28,6 +28,7 @@ class ToolContext:
     # 국내 거주 여부: "short_term"(단기 방문) | "resident"(외국인등록·거소신고·건보 가입) | None(아직 모름)
     # resident는 상담 예약 연결 불가 (의료법 제27조 제3항 제2호, 시행규칙 제19조의2)
     residency: str | None = None
+    residency_locked: bool = False  # 계정에 답이 있으면 True → record_residency가 바꾸지 않음
     last_user_text: str = ""  # 이번 턴 사용자 메시지 원문 (record_residency가 실제 발화인지 확인하는 데 씀)
     timezone: str = "UTC"  # 환자 프로필의 IANA 시간대 (프론트가 넣음). 요청서 patient_timezone으로 쓰임
     today: date | None = None  # 오늘 날짜(서버 시계). 있으면 초안 단계에서 지난 희망 일시를 거른다

@@ -148,6 +148,9 @@ def seed_patient(db: Session, reset: bool, now: datetime) -> tuple[Patient, str 
             db.add(Consent(patient_id=p.id, kind=kind, version=version, lang="zh-TW", agreed_at=now))
     elif hashed:
         p.password_hash = hashed
+    # 체류 형태 (결정 28): 시연 환자는 대만에서 온 단기 방문자 — 3문항 모두 "아니오"
+    if p.residency is None:
+        p.residency, p.residence_country, p.residency_answered_at = "short_term", "TW", now
     db.flush()
     return p, pw
 
