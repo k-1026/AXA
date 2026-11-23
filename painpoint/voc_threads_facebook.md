@@ -1,6 +1,6 @@
 # VOC 4차 — Threads(대만·홍콩) · 페이스북(베트남)
 
-> 작성 2026-11-23 · 분류 기준: [voc_rules.md](voc_rules.md) **v6** (원인 대분류 5개) 그대로 적용 · **Claude 1차 분류, 사람 검수 전**
+> 작성 2026-11-23 · 분류 기준: [voc_rules.md](voc_rules.md) **v6** (원인 대분류 5개) 그대로 적용 · **Claude 1차 분류 · 15차 사람 검수 미통과 (처음 제출 3/20, 단계 기준 차이가 대부분 — [voc_review.md](voc_review.md) 15차)**
 > 결과: [voc_th_classified.csv](voc_th_classified.csv) · [voc_fb_classified.csv](voc_fb_classified.csv) · 원자료: [voc/threads_韓國醫美_comments.json](voc/threads_韓國醫美_comments.json) · [voc/facebook_vn_한국피부과_comments.json](voc/facebook_vn_한국피부과_comments.json) · [voc/facebook_vn_한국성형_comments.json](voc/facebook_vn_한국성형_comments.json)
 > CSV에 `비고` 칸을 추가함: **홍보 의심**(클리닉 계정·업체가 쓴 것 같은 칭찬), **국내 거주 추정**(한국에 사는 외국인, 메디대구 유치 대상 아님), **검토**(판정이 애매한 이유)
 
@@ -72,7 +72,7 @@
 
 ## 5. 한계
 
-- **사람 검수 전** — Claude 1차 분류. 9~14차 검수(틱톡)에서 원인 대분류가 판정자와 갈린 경험이 있어 비중은 ±몇 %p로 읽어야 함
+- **15차 검수 미통과** — 처음 제출 3/20 (단계 4/15 · 원인 7/15 일치). 원인 대분류 비중은 ±몇 %p, 단계 분포는 참고용으로만 읽어야 함. 대표 원문 인용은 그대로 쓸 수 있음
 - **Threads 70건 중 17건은 광둥어(홍콩)** — 1순위 대만과 다름. 번체 중국어 51건도 대만·홍콩이 섞였을 수 있음
 - **홍보 의심 9건** — 클리닉 이름을 들며 "영업 없음·통역 친절"만 칭찬하는 글. 수집 노트에도 "가짜 계정 자기 홍보가 많다"(TH-032)는 댓글이 있음 → 칭찬 건수는 부풀려졌을 수 있음
 - **대구는 0건** — 大邱自由行 검색 결과는 맛집·숙소뿐, 대구 클리닉 이야기는 없었음 (수집 메모). 대부분 서울·부산
