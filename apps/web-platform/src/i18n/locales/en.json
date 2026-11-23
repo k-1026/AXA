@@ -395,7 +395,16 @@
         "openOn": "Open on {{day}} ({{hours}})",
         "slotsOn": "Consultation slots on {{date}}",
         "inDistrict": "In {{district}}"
-      }
+      },
+      "submitted": "Request sent. We will let you know when the hospital responds.",
+      "goBookings": "View my bookings",
+      "submitNote": "Tick the consents and send it yourself. The hospital confirms the booking.",
+      "question": "Question for {{hospital}}",
+      "questionEdit": "Edit question",
+      "questionSend": "Send as is",
+      "questionSent": "Your question was sent to the hospital. See replies in Consultations.",
+      "goConsult": "Open Consultations",
+      "questionNote": "Not sent yet. Edit it if you like, then send. Hospital staff will answer."
     },
     "consent": {
       "privacy": "Collection and use of personal data",

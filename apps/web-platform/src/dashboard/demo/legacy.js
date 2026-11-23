@@ -127,7 +127,8 @@ export function startDashboard(host, { onLeave }) {
     const media = files.length
       ? `<span class="media">${files.map((a) => a.kind === 'video'
         ? `<video src="${esc(a.url)}" controls preload="metadata" aria-label="${esc(a.name || '영상')}"></video>`
-        : `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(a.url)}" alt="${esc(a.name || '사진')}"></a>`).join('')}</span>`
+        // 목록에는 썸네일(결정 29), 누르면 원본. 썸네일이 없으면(예전 사진) 원본
+        : `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(/^https:\/\//.test(a.thumb_url || '') ? a.thumb_url : a.url)}" alt="${esc(a.name || '사진')}" loading="lazy"></a>`).join('')}</span>`
       : m.img ? '<span class="img">📷 사진 있음 (직원만 열람)</span>' : '';
     return `<div class="msg ${m.f}">${m.o === '📷' && files.length ? '' : esc(main)}${media}<span class="tr">${esc(tr)}</span><span class="t">${esc(m.t)}</span></div>`;
   }
@@ -307,17 +308,25 @@ export function startDashboard(host, { onLeave }) {
   const chatRoot = (key) => document.querySelector(`.chat[data-chat=${key}]`);
 
   async function loadBooking(keepId) {
-    const [p, q] = await Promise.all([call('/tenant/booking-requests?status=pending'), call('/tenant/booking-requests?status=proposed')]);
-    CHATS.booking = [...p, ...q].map((r) => ({
+    // 확정된 예약도: 방문 전 환자 질문(결정 32)이 확정 뒤에도 올 수 있음
+    const [p, q, c] = await Promise.all(['pending', 'proposed', 'confirmed'].map((st) => call(`/tenant/booking-requests?status=${st}`)));
+    // 마지막 글이 환자 질문이면 아직 답 안 함 → 빨간 숫자
+    const lastAsk = (r) => Math.max(0, ...(r.questions || []).map((x) => Date.parse(x.created_at)));
+    const lastReply = (r) => Math.max(0, ...(r.replies || []).map((x) => Date.parse(x.sent_at)));
+    CHATS.booking = [...p, ...q, ...c].map((r) => ({
       req: toR(r), rid: r.id, id: 'R-' + short(r.id), who: `${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`,
       // 빨간 숫자: 대기 중인데 병원 답장이 아직 없으면 1 (답장은 서버에 저장 → 새로고침해도 유지)
-      unread: r.status === 'pending' && !(r.replies || []).length ? 1 : 0, title: TRT[r.treatment] || r.treatment || '상담',
-      sub: (r.status === 'proposed' ? '시간 제안함 ' + kdate(r.confirmed_slot) : '희망 ' + kdate(r.preferred_slots[0])) + (r.visa_needed ? ' · 예약확인서 필요' : ''),
+      unread: (r.status === 'pending' && !(r.replies || []).length) || lastAsk(r) > lastReply(r) ? 1 : 0, title: TRT[r.treatment] || r.treatment || '상담',
+      sub: (r.status === 'proposed' ? '시간 제안함 ' + kdate(r.confirmed_slot) : r.status === 'confirmed' ? '확정 ' + kdate(r.confirmed_slot) : '희망 ' + kdate(r.preferred_slots[0])) + (r.visa_needed ? ' · 예약확인서 필요' : ''),
       slots: r.preferred_slots, sum: r.message_translated || '(번역 전)',
       tags: [TRT[r.treatment] || r.treatment, '희망일 ' + r.preferred_slots.length + '개', r.visa_needed ? '비자 서류' : '비자 불필요'].filter(Boolean),
       msgs: [
         ...(r.message_original ? [{ f: 'p', o: r.message_original, k: r.message_translated || '(번역 전)', t: kdate(r.created_at) }] : []),
-        ...(r.replies || []).map((x) => ({ f: 's', k: x.text_ko, o: x.text_translated || '(번역 연결 전 — 환자에게 한국어 원문)', t: kdate(x.sent_at) })),
+        // 답장과 방문 전 환자 질문(결정 32)을 시간 순으로
+        ...[
+          ...(r.replies || []).map((x) => ({ at: x.sent_at, m: { f: 's', k: x.text_ko, o: x.text_translated || '(번역 연결 전 — 환자에게 한국어 원문)', t: kdate(x.sent_at) } })),
+          ...(r.questions || []).map((x) => ({ at: x.created_at, m: { f: 'p', o: x.text_original, k: x.text_translated || '(번역 전 — 번역 동의 없음)', t: kdate(x.created_at) } })),
+        ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at)).map((x) => x.m),
       ],
     }));
     const i = Math.max(0, CHATS.booking.findIndex((c) => c.rid === keepId));

@@ -395,7 +395,16 @@
         "openOn": "Mở cửa {{day}} ({{hours}})",
         "slotsOn": "Có lịch tư vấn ngày {{date}}",
         "inDistrict": "Tại {{district}}"
-      }
+      },
+      "submitted": "Đã gửi yêu cầu. Chúng tôi sẽ báo khi bệnh viện phản hồi.",
+      "goBookings": "Xem quản lý đặt lịch",
+      "submitNote": "Hãy đánh dấu đồng ý và tự gửi. Bệnh viện sẽ xác nhận lịch hẹn.",
+      "question": "Câu hỏi gửi {{hospital}}",
+      "questionEdit": "Sửa câu hỏi",
+      "questionSend": "Gửi như vậy",
+      "questionSent": "Đã gửi câu hỏi tới bệnh viện. Xem trả lời ở trang Tư vấn.",
+      "goConsult": "Mở trang Tư vấn",
+      "questionNote": "Chưa gửi. Bạn có thể sửa rồi gửi. Nhân viên bệnh viện sẽ trả lời."
     },
     "consent": {
       "privacy": "Thu thập và sử dụng thông tin cá nhân",
