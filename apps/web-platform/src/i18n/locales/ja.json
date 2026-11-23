@@ -363,7 +363,16 @@
         "openOn": "{{day}}に診療 ({{hours}})",
         "slotsOn": "{{date}}に相談枠あり",
         "inDistrict": "{{district}}にあります"
-      }
+      },
+      "submitted": "申し込みを送りました。病院が確認したらお知らせします。",
+      "goBookings": "予約管理を見る",
+      "submitNote": "同意にチェックしてご自身で送ってください。予約は病院が確定します。",
+      "question": "{{hospital}}への質問",
+      "questionEdit": "質問を編集",
+      "questionSend": "このまま送る",
+      "questionSent": "病院に質問を送りました。返信は相談画面で確認できます。",
+      "goConsult": "相談画面を見る",
+      "questionNote": "まだ送っていません。必要なら修正してから送ってください。回答は病院スタッフが行います。"
     },
     "consent": {
       "privacy": "個人情報の収集・利用",
