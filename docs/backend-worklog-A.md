@@ -17,6 +17,16 @@
 
 ## 기록
 
+### 2026-11-20 (4) · backend-A-audit-translate · Claude (열람 기록 · 번역 · 챗봇 사후관리 카드)
+- 브랜치: `backend-A-aftercare-patient` + `backend-A-booking-replies` + `backend-A-chatbot-bookings`를 합친 위 → **그 셋이 먼저 머지돼야 함**
+- 한 일
+  - 결정 24 열람 기록: 새 모듈 `modules/audit/`(B 모듈) 모델·`log_action`·`GET /tenant/audit-logs`, 마이그레이션 **0009**. 병원 요청서 목록·1건·답장, 사후관리 열람·답장에서 기록
+  - 결정 25 번역: `modules/agent/translate.py`(B 모듈) — `ai/llm` 클라이언트, `mask_pii`, 동의 확인(`consent.given_for_request` 추가). 사후관리 환자·직원 글, 상담 답장, 요청서 글(저장 뒤)
+  - 결정 26 챗봇: `open_aftercare_thread`가 `BookingGateway.aftercare_for()`로 실제 가능 여부·대화 id 확인, 카드에 `booking_id`, 보내지 않음. 프롬프트 한 줄 (`ai/agent` — AI 담당 확인)
+- 테스트: 전체 443개 통과 (`conftest`에서 번역 LLM 끔 — 실제 LLM 안 부름)
+- B에게 요청: `audit/`·`agent/translate.py`·`booking/service.staff_reply`·`aftercare/service` 번역 줄·`router_tenant` 기록 줄 확인
+- 다음: Supabase에 0009 적용, 환자 웹 챗봇 카드·자기 글 원문 표시
+
 ### 2026-11-20 (3) · backend-A-aftercare-patient · Claude (사진·영상 지우기)
 - 한 일: 결정 23. 탈퇴(`auth.service.withdraw`)에서 `aftercare.detach_patient_media()` → commit 뒤 `media.remove()`. 정기 정리 `maintenance.purge_media()` — Storage 목록(`media.list_objects`) 중 DB가 가리키지 않는 하루 지난 파일 삭제, Storage 오류여도 다른 정리는 끝남. 테스트 `conftest.py`에서 `SUPABASE_*`를 비움 (.env에 키가 있어도 실제 Storage를 부르지 않게)
 - B 모듈 변경 (**B 확인 필요**): `aftercare/service.py`에 `detach_patient_media`·`referenced_media_paths`
@@ -40,6 +50,7 @@
 - 다음 할 일: 환자 웹 사후관리 화면을 이 API로 (회원 모드)
 - B에게 요청: `aftercare/service.py` 추가 함수 2개와 6-3절 확인. 사진 저장 방식(스토리지) 정하기
 - 막힌 것·질문: 없음
+
 ### 2026-11-20 · backend-A-booking-replies · Claude (병원 상담 답장 API)
 - 한 일: 사용자 요청으로 **B 모듈(booking)에 상담 답장 쓰기 API** — 대시보드 상담 답장이 화면에만 붙고 새로고침하면 사라지던 것
   - `POST /tenant/booking-requests/{id}/replies` `{text}` → `Reply` 저장 (`sent_at` 지금, `approved_by` = 보낸 직원, `ai_draft` false, 번역 비움). 확인 창 "보내기" = 직원 승인
@@ -51,6 +62,7 @@
 - 다음 할 일: 대시보드 상담 채팅이 이 API로 보내고 불러오기, 환자 웹 상담 화면에 답장 표시 (프론트 브랜치)
 - B에게 요청: 6-2절·`staff_reply()` 확인. 상태 이력(`booking_events`)에는 답장을 넣지 않음 — 넣어야 하면 알려 주기
 - 막힌 것·질문: 번역은 `ai/llm` 연결 후 (`text_translated`)
+
 ### 2026-11-19 (2) · backend-A-chatbot-bookings · Claude (챗봇 "내 예약" 연결)
 - 한 일: `modules/chatbot/bookings.py` 빈 목록 → `booking.service.list_for_patient`·`get_for_patient`(계약 5절) 어댑터
   - 챗봇 도구 모양 그대로: `id`·`hospital_id`·`hospital_name_en`·`status`·`preferred`·`confirmed_slot`·`proposed_slot`·`created_at`·`visited`, 시간은 한국 시간 "YYYY-MM-DD HH:MM"
@@ -62,6 +74,7 @@
 - 테스트: `backend/tests/test_chatbot_bookings.py` 3개 추가, 백엔드+AI 408개 통과 (**이 PC에서도 pytest 실행됨** — 11/18 메모의 "실행 불가"는 지금은 아님)
 - 다음 할 일: 없음 (사후관리 열기 `open_aftercare_thread`는 아직 데모 응답 — 환자 사후관리 API 생기면)
 - B에게 요청: 없음
+
 
 ### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
 - 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**

@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from core.db import utcnow
 from core.errors import AppError
+from modules.agent import translate
 from modules.aftercare.models import THREAD_STATUSES, AftercareMessage, AftercareThread
 from modules.booking.models import BookingRequest
 from modules.tenant.models import Tenant
@@ -72,7 +73,9 @@ def patient_open(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, text
         db.flush()
     else:
         thread.status = "new" if thread.status == "resolved" else thread.status
-    _add(db, thread, "patient", text, photo=photo, attachments=attachments)
+    # 병원 직원용 한국어 번역 (요청서 번역 동의가 있을 때만, 실패하면 원문만 — 결정 25)
+    ko = translate.for_request(db, req.id, text, "ko", req.tenant_id)
+    _add(db, thread, "patient", text, photo=photo, attachments=attachments, translated=ko)
     db.commit()
     db.refresh(thread)
     return thread
@@ -200,7 +203,9 @@ def tenant_reply(db: Session, tenant_id: uuid.UUID, staff_id: str, thread_id: uu
         sid = uuid.UUID(staff_id)
     except ValueError:
         sid = None
-    _add(db, thread, "staff", text, staff_id=sid)
+    req = db.get(BookingRequest, thread.request_id)
+    to_patient = translate.for_request(db, req.id, text, req.lang, tenant_id) if req else None  # 환자 언어로 (결정 25)
+    _add(db, thread, "staff", text, staff_id=sid, translated=to_patient)
     if thread.status == "new":
         thread.status = "in_progress"
     db.commit()

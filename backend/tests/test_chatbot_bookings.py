@@ -71,3 +71,40 @@ def test_other_patient_and_bad_ids(client, db):
     with pytest.raises(BookingError):
         gw.get_for_patient(me(client, a), str(uuid.uuid4()))
     assert gw.list_for_patient("demo-patient-1") == []  # UUID가 아닌 id
+
+
+def test_aftercare_for_chat_card(db):
+    """챗봇 사후관리 카드: 방문 완료 + 사후관리 지원 병원만 열 수 있음, 이미 있는 대화 id, 메시지는 보내지 않음."""
+    from modules.aftercare import service as aftercare
+    from modules.aftercare.models import AftercareMessage
+    from test_aftercare_tenant import _patient, _req, _tenant
+
+    p, t = _patient(db), _tenant(db)
+    gw = BookingGateway(db)
+    before = _req(db, p, t, visited=False)
+    assert gw.aftercare_for(str(p.id), str(before.id)) == {"available": False}
+    r = _req(db, p, _tenant(db, 9002))
+    assert gw.aftercare_for(str(p.id), str(r.id)) == {"available": True, "thread_id": None}
+    assert db.query(AftercareMessage).count() == 0  # 열기만, 보내지 않음
+    thread = aftercare.patient_open(db, p.id, r.id, "receipt please")
+    assert gw.aftercare_for(str(p.id), str(r.id)) == {"available": True, "thread_id": str(thread.id)}
+    assert gw.aftercare_for(str(_patient(db).id), str(r.id)) == {"available": False}  # 남의 예약
+    off = _req(db, p, _tenant(db, 9003, aftercare_on=False))
+    assert gw.aftercare_for(str(p.id), str(off.id)) == {"available": False}
+    assert gw.aftercare_for("x", "y") == {"available": False}
+
+
+def test_aftercare_tool_uses_gateway(db):
+    from ai.agent.tools.chat_tools import build_registry
+    from ai.agent.tools.registry import ToolContext
+    from test_aftercare_tenant import _patient, _req, _tenant
+
+    p, t = _patient(db), _tenant(db)
+    r = _req(db, p, t)
+    ctx = ToolContext(patient_id=str(p.id), store=BookingGateway(db))
+    out = build_registry().run("open_aftercare_thread", {"booking_id": str(r.id), "topic": "documents", "message": "Need receipt"}, ctx)
+    assert out["status"] == "opened" and out["booking_id"] == str(r.id) and out["thread_id"] == ""
+    assert "Not sent yet" in out["note"]
+    off = _req(db, p, _tenant(db, 9002, aftercare_on=False))
+    out = build_registry().run("open_aftercare_thread", {"booking_id": str(off.id), "topic": "documents", "message": "x"}, ctx)
+    assert out["status"] == "not_available" and "directly" in out["reason"]

@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from ai.agent.session_store import JSON
 from ai.agent.tools.booking_store import BookingError
 from core.errors import AppError
+from modules.aftercare import service as aftercare_service
 from modules.booking import service as booking_service
 from modules.booking.models import BookingRequest
 from modules.hospital.models import Hospital
@@ -84,3 +85,18 @@ class BookingGateway:
         except AppError as e:  # 남의 요청도 404 (계약 4절)
             raise BookingError("not_found", "요청을 찾을 수 없습니다") from e
         return _row(req, _names(self.db, {req.hospital_id}))
+
+    def aftercare_for(self, patient_id: str, booking_id: str) -> JSON:
+        """챗봇 사후관리 카드용: 사후관리 대화를 열 수 있는지 + 이미 있는 대화 id. 메시지는 보내지 않음."""
+        pid, bid = _uuid(patient_id), _uuid(booking_id)
+        if pid is None or bid is None:
+            return {"available": False}
+        try:
+            aftercare_service.patient_upload_prefix(self.db, pid, bid)  # 방문 완료 + 사후관리 지원 병원인지 (아니면 404·409)
+        except AppError:
+            return {"available": False}
+        try:
+            thread, _ = aftercare_service.patient_messages(self.db, pid, bid)
+            return {"available": True, "thread_id": str(thread.id)}
+        except AppError:  # 아직 대화 없음
+            return {"available": True, "thread_id": None}

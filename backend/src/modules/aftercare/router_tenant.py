@@ -12,6 +12,7 @@ from core.db import get_db
 from core.errors import AppError
 from core.security import StaffPrincipal, current_staff
 from modules.aftercare import service
+from modules.audit import service as audit
 from modules.media import service as media
 
 router = APIRouter(prefix="/tenant/aftercare", tags=["tenant"])
@@ -86,6 +87,7 @@ def list_threads(db: Db, staff: Staff, status: str | None = None):
 @router.get("/{thread_id}", response_model=ThreadOut)
 def get_thread(thread_id: uuid.UUID, db: Db, staff: Staff):
     thread, req, msgs = service.tenant_messages(db, _tenant(staff), thread_id)
+    audit.log_and_commit(db, _tenant(staff), staff.staff_id, "aftercare.view", f"aftercare_thread:{thread_id}")
     return _out(thread, req, messages=msgs)
 
 
@@ -93,6 +95,7 @@ def get_thread(thread_id: uuid.UUID, db: Db, staff: Staff):
 def reply(thread_id: uuid.UUID, data: ReplyIn, db: Db, staff: Staff):
     service.tenant_reply(db, _tenant(staff), staff.staff_id, thread_id, data.text)
     thread, req, msgs = service.tenant_messages(db, _tenant(staff), thread_id)
+    audit.log_and_commit(db, _tenant(staff), staff.staff_id, "aftercare.reply", f"aftercare_thread:{thread_id}")
     return _out(thread, req, messages=msgs)
 
 
