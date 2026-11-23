@@ -1,4 +1,4 @@
-"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 11개 — 지금은 가짜 응답 (fake_data.py).
+"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 12개 — 지금은 가짜 응답 (fake_data.py).
 
 | 의도 | 도구 |
 |---|---|
@@ -9,6 +9,7 @@
 | 정보질문 | retrieve_docs |
 | 예약 | check_availability, prepare_booking_request, record_residency |
 | 예약상태 | get_my_bookings |
+| 예약문의 (방문 전) | draft_hospital_question |
 | 사후문의 | open_aftercare_thread |
 
 규칙 (docs/agent-spec.md, subject/plan.md 12절)
@@ -25,7 +26,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from ai.agent.tools import fake_data as fd
 from ai.agent.tools.booking_store import (
@@ -80,6 +81,34 @@ def _find_hospital(hospital_id: int) -> dict:
         if h["id"] == hospital_id:
             return h
     raise ToolError(f"병원 {hospital_id}을(를) 찾을 수 없습니다")
+
+
+def _uses_db(ctx: ToolContext) -> bool:
+    return ctx.hospitals is not None and hasattr(ctx.hospitals, "booking_info")
+
+
+def _booking_hospital(ctx: ToolContext, hospital_id: int) -> dict:
+    """조건 맞춤 제안·예약용 병원. 실제 서버에서는 DB (가상 입점 병원만 요청을 받음, 결정 31), 테스트는 가상 데이터."""
+    if _uses_db(ctx):
+        h = ctx.hospitals.booking_info(hospital_id)
+        if h is None:
+            raise ToolError(f"병원 {hospital_id}을(를) 찾을 수 없습니다")
+        return h
+    return {**_find_hospital(hospital_id), "accepts_requests": True}
+
+
+WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+
+
+def _slots_from_hours(h: dict, day: date) -> list[str]:
+    """진료 시간 안의 정시 후보 (마감 1시간 전까지, 점심 13시 제외). 확정은 병원이 함."""
+    span = h.get("hours", {}).get(WEEKDAYS[day.weekday()])
+    if not span:
+        return []
+    open_, close = span.split("-")
+    start = int(open_[:2]) + (0 if open_[3:] == "00" else 1)  # 09:30 시작이면 10시부터
+    end = int(close[:2])
+    return [f"{t:02d}:00" for t in range(start, end) if t != 13]
 
 
 def _parse_date(s: str, key: str) -> date:
@@ -139,12 +168,16 @@ def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
         return {"status": "not_available",
                 "reason": "Hospital suggestions are for short-term visitors. Use search_hospitals to show the neutral list instead."}
     dept = args["department"]
-    rows = [h for h in fd.HOSPITALS if dept in h["departments"] and h["is_registered_facility"]]
-    if args.get("district"):
-        rows = [h for h in rows if h["district"] == args["district"]]
+    if _uses_db(ctx):  # 실제 서버: 메디대구 입점 가상 병원만 (결정 31)
+        code = DEPT_CODES.get(dept)
+        rows = ctx.hospitals.demo_candidates(code, args.get("district")) if code else []
+    else:
+        rows = [h for h in fd.HOSPITALS if dept in h["departments"] and h["is_registered_facility"]]
+        if args.get("district"):
+            rows = [h for h in rows if h["district"] == args["district"]]
     lang, day, pref = args.get("language"), args.get("open_on"), args.get("preferred_date")
     if pref:
-        _parse_date(pref, "preferred_date")
+        pref_day = _parse_date(pref, "preferred_date")
     scored = []
     for h in rows:
         score, reasons = 0, []
@@ -160,7 +193,8 @@ def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
         if day and h["hours"].get(day):
             score += 1
             reasons.append(f"open on {day} ({h['hours'][day]})")
-        if pref and fd.AVAILABILITY.get(h["id"], {}).get(pref):
+        has_slot = _slots_from_hours(h, pref_day) if pref and _uses_db(ctx) else fd.AVAILABILITY.get(h["id"], {}).get(pref)
+        if pref and has_slot:
             score += 1
             reasons.append(f"consultation slots on {pref}")
         if args.get("district"):
@@ -208,12 +242,16 @@ def retrieve_docs(args: JSON, ctx: ToolContext) -> JSON:
 
 
 def check_availability(args: JSON, ctx: ToolContext) -> JSON:
-    h = _find_hospital(args["hospital_id"])
+    h = _booking_hospital(ctx, args["hospital_id"])
     start = _parse_date(args["date_from"], "date_from")
     end = _parse_date(args.get("date_to") or args["date_from"], "date_to")
     if end < start:
         raise ToolError("date_to가 date_from보다 빠릅니다")
-    slots = {d: t for d, t in fd.AVAILABILITY.get(h["id"], {}).items() if start <= date.fromisoformat(d) <= end}
+    if _uses_db(ctx):  # 가상 병원 진료 시간에서 정시 후보 (최대 14일)
+        days = [start + timedelta(days=i) for i in range(min((end - start).days + 1, 14))]
+        slots = {d.isoformat(): t for d in days if (t := _slots_from_hours(h, d))}
+    else:
+        slots = {d: t for d, t in fd.AVAILABILITY.get(h["id"], {}).items() if start <= date.fromisoformat(d) <= end}
     return {"hospital_id": h["id"], "slots": slots,
             "note": "Times are candidates only. The hospital confirms the booking."}
 
@@ -222,7 +260,7 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
     if ctx.residency is None:
         return {"status": "needs_info", "ask": "residency",
                 "question": "Are you visiting Korea short-term, or do you live in Korea (alien registration / NHIS)?"}
-    h = _find_hospital(args["hospital_id"])
+    h = _booking_hospital(ctx, args["hospital_id"])
     if ctx.residency == "resident":
         return {"status": "not_available",
                 "reason": "Consultation requests through MediDaegu are for short-term visitors. Please contact the hospital directly.",
@@ -230,6 +268,11 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
     if not h["is_registered_facility"]:
         return {"status": "not_available",
                 "reason": "This hospital is not a registered foreign-patient facility, so requests can't be sent here.",
+                "hospital_tel": h["tel"]}
+    if not h.get("accepts_requests", True):  # 등록 병원이지만 메디대구 입점 X (결정 31: 예약은 가상 입점 병원만)
+        return {"status": "not_available",
+                "reason": "This hospital has not joined MediDaegu, so consultation requests can't be sent through us. "
+                          "Use recommend_hospitals to suggest MediDaegu partner hospitals (demo), or share the hospital's phone.",
                 "hospital_tel": h["tel"]}
     # 백엔드 BookingCreate(docs/backend-contracts.md 6절)가 요구하는 칸. 연락 방법은 계정 이메일로 고정
     department = args.get("department") or (h["departments"][0] if len(h["departments"]) == 1 else None)
@@ -332,6 +375,33 @@ def open_aftercare_thread(args: JSON, ctx: ToolContext) -> JSON:
         "hospital_id": bk["hospital_id"], "topic": args["topic"], "first_message": args["message"],
         "notice": "For schedule, cost, documents or accommodation questions only. This is not medical consultation.",
         "note": "Not sent yet. Tell the user to press the button on the card to open the follow-up chat and send it.",
+    }
+
+
+QUESTION_OPEN = ("pending", "proposed", "confirmed")
+
+
+def draft_hospital_question(args: JSON, ctx: ToolContext) -> JSON:
+    """방문 전 질문 초안 카드 (결정 32). 보내지 않음 — 환자가 카드에서 [보내기] (POST /me/booking-requests/{id}/questions)."""
+    if not ctx.patient_id:
+        return {"status": "login_required"}
+    try:
+        bk = _store(ctx).get_for_patient(ctx.patient_id, args["booking_id"])
+    except BookingError as e:
+        raise ToolError("내 예약에서 해당 booking_id를 찾을 수 없습니다") from e
+    if bk.get("visited"):
+        return {"status": "not_available", "reason": "The visit is done. Use open_aftercare_thread for follow-up questions."}
+    if bk.get("status") not in QUESTION_OPEN:
+        return {"status": "not_available", "reason": f"This booking is {bk.get('status')}. Questions can be sent only "
+                "before the visit while the booking is pending, proposed or confirmed."}
+    draft = " ".join(str(args["draft"]).split())[:1000]
+    if not draft:
+        raise ToolError("draft가 비어 있습니다")
+    return {
+        "status": "draft", "booking_id": bk["id"], "hospital_id": bk["hospital_id"],
+        "hospital_name_en": bk.get("hospital_name_en"), "draft": draft,
+        "notice": "The hospital staff answer this. MediDaegu does not give medical advice.",
+        "note": "Not sent yet. Ask the user to check the draft and press Send on the card.",
     }
 
 
@@ -445,4 +515,13 @@ def build_registry() -> ToolRegistry:
             "message": {"type": "string", "description": "병원에 보낼 첫 메시지 (사용자 표현 그대로)"}},
          "required": ["booking_id", "topic", "message"]},
         open_aftercare_thread, "사후문의"))
+    r.register(Tool(
+        "draft_hospital_question",
+        "방문 **전** 예약(대기·제안·확정)에 대해 병원에 보낼 질문 **초안 카드**를 만든다. 보내지 않는다 — 사용자가 카드에서 [보내기]. "
+        "의료 판단은 직접 답하지 말고 이 도구로 병원에 묻게 한다.",
+        {"type": "object", "properties": {
+            "booking_id": {"type": "string", "description": "get_my_bookings의 예약 id"},
+            "draft": {"type": "string", "description": "병원에 보낼 질문 초안 (사용자 언어, 짧고 정중하게, 1000자 이내)"}},
+         "required": ["booking_id", "draft"]},
+        draft_hospital_question, "예약문의"))
     return r

@@ -1,13 +1,13 @@
-"""시연용 가상 병원 9001을 공용 DB(Supabase)에서 쓸 수 있게 채운다 (A). 여러 번 돌려도 같은 결과.
+"""시연용 가상 병원(9001~9004)을 공용 DB(Supabase)에서 쓸 수 있게 채운다 (A). 여러 번 돌려도 같은 결과.
 
     uv run --no-sync python backend/scripts/seed_demo_shared.py             # .env의 DATABASE_URL로
     uv run --no-sync python backend/scripts/seed_demo_shared.py --dry-run   # 바뀔 내용만 보고 저장 안 함
 
 하는 일 (실제 병원은 건드리지 않음 — compliance 2-6: 예시 일정·예약은 가상 병원에만)
-1. 가상 병원 9001 (`is_demo`): 이름·가상 주소·좌표·진료시간·진료과를 `data/processed/demo/demo_hospital.json` 값으로
-   (없으면 새로 만듦, 환자 웹 목록도 같은 파일을 읽음)
-2. 입점 계정(tenant): 9001에 없으면 만들고, 요청·사후관리 받기 켬
-3. 시연 직원 계정 `demo-staff@example.com` — 대시보드 로그인용 (`POST /auth/staff/login`)
+1. 가상 병원 (`is_demo`): 이름·가상 주소·좌표·진료시간·진료과를 `data/processed/demo/demo_hospitals.json` 값으로
+   (없으면 새로 만듦, 환자 웹 목록·챗봇 조건 맞춤 제안도 같은 파일을 읽음 — 결정 31)
+2. 입점 계정(tenant): 병원마다 없으면 만들고, 요청·사후관리 받기 켬
+3. 시연 직원 계정 — 대시보드 로그인용 (`POST /auth/staff/login`). 9001은 `demo-staff@example.com`, 나머지는 `demo-staff-{id}@example.com`
 4. 시연 환자 계정 `demo-patient@example.com` + 그 환자의 예약 2건 (방문 완료·확정). 다시 돌리면 이 환자 예약만 새로 만듦
    B가 넣은 9001 대시보드 데이터(환자 없는 요청)는 그대로 둠
 
@@ -43,7 +43,7 @@ from modules.patient.models import Patient  # noqa: E402
 from modules.tenant.models import StaffUser, Tenant  # noqa: E402
 
 KST = ZoneInfo("Asia/Seoul")
-DEMO_FILE = ROOT / "data" / "processed" / "demo" / "demo_hospital.json"
+DEMO_FILE = ROOT / "data" / "processed" / "demo" / "demo_hospitals.json"
 ACCOUNTS_FILE = ROOT / "data" / "dev" / "demo_accounts.txt"
 STAFF_EMAIL = "demo-staff@example.com"
 PATIENT_EMAIL = "demo-patient@example.com"
@@ -106,7 +106,7 @@ def seed_hospital(db: Session, demo: dict, now: datetime) -> Hospital:
 def seed_tenant(db: Session, h: Hospital, now: datetime) -> Tenant:
     t = db.scalar(select(Tenant).where(Tenant.hospital_id == h.id))
     if t is None:
-        t = Tenant(hospital_id=h.id, display_name=h.name_ko, registration_no="DEMO-0001", joined_at=now - timedelta(days=100))
+        t = Tenant(hospital_id=h.id, display_name=h.name_ko, registration_no=f"DEMO-{h.id}", joined_at=now - timedelta(days=100))
         db.add(t)
     t.requests_enabled = True
     t.aftercare_enabled = True
@@ -122,11 +122,15 @@ def _password(existing: str | None, reset: bool) -> tuple[str | None, str | None
     return pw, password_hash.hash(pw)
 
 
-def seed_staff(db: Session, t: Tenant, reset: bool) -> str | None:
-    s = db.scalar(select(StaffUser).where(StaffUser.email == STAFF_EMAIL))
+def staff_email(hospital_id: int) -> str:
+    return STAFF_EMAIL if hospital_id == 9001 else f"demo-staff-{hospital_id}@example.com"
+
+
+def seed_staff(db: Session, t: Tenant, reset: bool, email: str = STAFF_EMAIL) -> str | None:
+    s = db.scalar(select(StaffUser).where(StaffUser.email == email))
     pw, hashed = _password(s and s.password_hash, reset)
     if s is None:
-        s = StaffUser(tenant_id=t.id, email=STAFF_EMAIL, password_hash=hashed, role="owner")
+        s = StaffUser(tenant_id=t.id, email=email, password_hash=hashed, role="owner")
         db.add(s)
     elif hashed:
         s.password_hash = hashed
@@ -204,34 +208,39 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--reset-passwords", action="store_true")
     args = ap.parse_args()
-    demo = json.loads(DEMO_FILE.read_text(encoding="utf-8"))
+    demos = json.loads(DEMO_FILE.read_text(encoding="utf-8"))["hospitals"]
     now = datetime.now(timezone.utc)
+    new_pw: dict[str, str] = {}  # 이메일 → 새로 만든 비밀번호
     with Session(get_engine()) as db:
-        h = seed_hospital(db, demo, now)
-        t = seed_tenant(db, h, now)
-        staff_pw = seed_staff(db, t, args.reset_passwords)
+        tenants = {}
+        for demo in demos:
+            h = seed_hospital(db, demo, now)
+            tenants[h.id] = seed_tenant(db, h, now)
+            if pw := seed_staff(db, tenants[h.id], args.reset_passwords, staff_email(h.id)):
+                new_pw[staff_email(h.id)] = pw
         p, patient_pw = seed_patient(db, args.reset_passwords, now)
-        n = seed_patient_bookings(db, p, t, now)
+        if patient_pw:
+            new_pw[PATIENT_EMAIL] = patient_pw
+        n = seed_patient_bookings(db, p, tenants[9001], now)  # 시연 환자 예약은 9001에만
         if args.dry_run:
             db.rollback()
         else:
             db.commit()
-    print(f"가상 병원 {demo['id']} · tenant · 직원 · 환자 · 환자 예약 {n}건", "(dry-run, 저장 안 함)" if args.dry_run else "저장함")
+    ids = ", ".join(str(d["id"]) for d in demos)
+    print(f"가상 병원 {ids} · tenant · 직원 · 환자 · 환자 예약 {n}건", "(dry-run, 저장 안 함)" if args.dry_run else "저장함")
     if args.dry_run:
         return
-    if staff_pw or patient_pw:
+    if new_pw:
         ACCOUNTS_FILE.parent.mkdir(parents=True, exist_ok=True)
         lines = ACCOUNTS_FILE.read_text(encoding="utf-8").splitlines() if ACCOUNTS_FILE.exists() else []
-        keep = [x for x in lines if not ((staff_pw and x.startswith(STAFF_EMAIL)) or (patient_pw and x.startswith(PATIENT_EMAIL)))]
-        if staff_pw:
-            keep.append(f"{STAFF_EMAIL} {staff_pw}  (병원 직원 · 대시보드)")
-        if patient_pw:
-            keep.append(f"{PATIENT_EMAIL} {patient_pw}  (환자 · 환자 웹)")
+        keep = [x for x in lines if x.split(" ")[0] not in new_pw]
+        for email, pw in new_pw.items():
+            who = "환자 · 환자 웹" if email == PATIENT_EMAIL else "병원 직원 · 대시보드"
+            keep.append(f"{email} {pw}  ({who})")
         ACCOUNTS_FILE.write_text("\n".join(keep) + "\n", encoding="utf-8")
         print(f"새 비밀번호 → {ACCOUNTS_FILE} (git 제외)")
     else:
         print(f"비밀번호는 그대로 ({ACCOUNTS_FILE})")
-
 
 if __name__ == "__main__":
     main()

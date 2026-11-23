@@ -64,7 +64,9 @@ def test_submit_rules_use_backend_error_codes():
 
 def test_consents_required_by_kind():
     assert required_consents(draft()) == ["privacy", "overseas_transfer"]
-    assert required_consents(draft(language="ko")) == ["privacy"]
+    # 글이 있으면 언어와 상관없이 번역 동의 (백엔드 _required_consents와 같은 규칙 — 다르면 카드 그대로 보낼 때 422)
+    assert required_consents(draft(language="ko")) == ["privacy", "overseas_transfer"]
+    assert required_consents({**draft(language="ko"), "inquiry": ""}) == ["privacy"]
     assert required_consents(draft(health_info="x")) == ["privacy", "health", "overseas_transfer"]
     store = BookingStore()
     with pytest.raises(BookingError) as e:

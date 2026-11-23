@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-23 (4) · backend-A-chatbot-demo-flow · Claude (챗봇 가상 병원 흐름 + 방문 전 질문, `backend-A-web-push` 위)
+- 한 일: 결정 31·32. 가상 병원 4곳 `demo_hospitals.json`(예전 `demo_hospital.json` 대신), 시드가 4곳·병원별 직원 계정. 챗봇 게이트웨이 `demo_candidates`·`booking_info`(입점 가상 병원만), `recommend_hospitals`·`check_availability`·`prepare_booking_request`가 서버에서는 DB 사용(테스트는 가상 데이터 그대로). 새 모듈 `question`(마이그레이션 **0013**), `POST /me/booking-requests/{id}/questions`, 응답 `questions`, 챗봇 도구 `draft_hospital_question` + 카드 `hospital_question`
+- 바뀐 계약: contracts 6-1·6-2·7
+- 테스트: 전체 484개 통과 (새 `test_questions.py` 5개, `test_chatbot_hospitals.py` 3개, 도구 12개)
+- 다음 할 일: 공용 DB 0013 + 시드 다시, 환자 웹 카드·상담 화면, 대시보드에 질문 표시
+- B에게 요청: `booking/router_tenant.py`·`schemas.py`에 `questions` 칸 (A 작성, 확인 부탁)
+- 막힌 것·질문: AI 담당 확인 — 도구 1개·프롬프트 한 절("Questions before the visit")·서버에서 DB 쓰는 분기
+
 ### 2026-11-23 (3) · backend-A-web-push · Claude (웹 푸시, `backend-A-residency` 위)
 - 한 일: 결정 30. `pywebpush` 의존성, 설정 `VAPID_*`, 모델 `PushSubscription`(마이그레이션 **0012**), `notification/push.py`(구독·해제·commit 뒤 보내기·410 정리), API `/me/push/key`·`/me/push/subscriptions`, 키 생성 `scripts/make_vapid_keys.py`. `notify()`에 한 줄(`push.queue`)
 - 바뀐 계약: contracts 4·6-5

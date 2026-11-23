@@ -60,13 +60,13 @@ def required_consents(draft: JSON) -> list[str]:
 
     - privacy: 이 요청서 내용을 고른 병원에 전달하는 데 대한 동의 (항상)
     - health: 건강정보(health_info)를 적었을 때
-    - overseas_transfer: 한국어가 아닌 글을 번역하느라 해외 AI 서비스를 쓰는 경우 — 우리 가정이며
-      개인정보보호위원회 질의 8번 회신 후 확정
+    - overseas_transfer: 글(문의·건강정보)이 있으면 — 병원용 번역에 해외 AI를 씀. 백엔드 `_required_consents`와 같은 규칙
+      (router_patient.py, 결정 25). 한국어 글이어도 백엔드가 요구하므로 같이 받음 (안 맞으면 카드 그대로 보낼 때 422)
     """
     kinds = ["privacy"]
     if draft.get("health_info"):
         kinds.append("health")
-    if (draft.get("lang") or draft.get("language")) != "ko":  # 요청서 payload는 lang, 챗봇 초안은 language
+    if draft.get("inquiry") or draft.get("message") or draft.get("health_info"):  # 챗봇 초안은 inquiry, payload는 message
         kinds.append("overseas_transfer")
     return kinds
 
@@ -83,6 +83,8 @@ def to_booking_create(draft: JSON, patient_timezone: str) -> JSON:
         "visa_needed": draft["visa_needed"],
         "message": draft["inquiry"],
         "health_info": draft.get("health_info"),
+        # 계약 6절 필수 칸 (2026-11-18). 초안은 단기 방문(short_term)일 때만 만들어짐 (prepare_booking_request)
+        "residency": "short_term",
     }
 
 
