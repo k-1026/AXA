@@ -180,6 +180,8 @@ function noHiraItem(reg) {
     lat: Number(near.YPos),
     lng: Number(near.XPos),
     depts: extra.depts,
+    // 심평원 기호가 없는 곳은 사진 파일에 등록번호로 넣어 둠
+    photo: photos.get(reg.registration_no),
   };
 }
 
