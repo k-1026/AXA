@@ -1,15 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { api, API_BASE, ApiError } from '../../components/api';
+import { api, ApiError } from '../../components/api';
 import { PRIVACY } from '../legal/privacy';
 import { TERMS } from '../legal/terms';
 import { saveStaffToken } from './staffSession';
 
 // 병원 관계자(입점 병원) 가입·로그인. 환자 계정과 따로 (가입할 때 나눔, docs/backend-contracts.md 3절)
-// 성공하면 직원 토큰을 이 탭에 저장하고 같은 사이트의 /dashboard(통계 대시보드)로 이동.
-// VITE_DASHBOARD_URL이 있으면 대신 시연용 대시보드(dashboard/대시보드.html)로 토큰을 들고 이동 (?token=&api=).
-// 그쪽은 읽자마자 주소에서 지우고 그 탭에만 보관하며, 자체 로그인 창도 있음 (docs/dashboard-integration.md "시연용 대시보드 연결")
+// 성공하면 직원 토큰을 이 탭(sessionStorage)에 저장하고 같은 사이트의 /dashboard(병원 대시보드)로 이동
 const PASSWORD_MIN = 8;
 const REG_NO = /^M-\d{4}-\d{2}-\d{2}-\d{4,6}$/;
 
@@ -20,18 +18,11 @@ interface HospitalOption {
   can_request: boolean;
 }
 
-function goExternalDashboard(token: string): boolean {
-  const base = import.meta.env.VITE_DASHBOARD_URL;
-  if (!base) return false;
-  window.location.assign(`${base}${base.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}&api=${encodeURIComponent(API_BASE)}`);
-  return true;
-}
-
 function useEnterDashboard() {
   const navigate = useNavigate();
   return (token: string) => {
     saveStaffToken(token);
-    if (!goExternalDashboard(token)) navigate('/dashboard', { replace: true });
+    navigate('/dashboard', { replace: true });
   };
 }
 

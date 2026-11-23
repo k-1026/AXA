@@ -1,15 +1,14 @@
 # deploy-vercel.md — Vercel 배포 준비 (2026-11-20 초안)
 
 > 상태: **배포해 본 적 없음**. 아래 백엔드 설정 파일은 제안이고, 실제 배포로 확인한 뒤 저장소에 넣는다 (확인 안 된 설정을 커밋하지 않음)
-> 관련: 결정 12(Supabase + Vercel), [dashboard-integration.md](dashboard-integration.md) "시연용 대시보드 연결", contracts 7-1(정기 정리)
+> 관련: 결정 12(Supabase + Vercel), [dashboard-integration.md](dashboard-integration.md), contracts 7-1(정기 정리)
 
-## 1. 프로젝트 3개
+## 1. 프로젝트 2개
 
 | Vercel 프로젝트 | Root Directory | 내용 | 상태 |
 |---|---|---|---|
-| 환자 웹 | `apps/web-platform` | Vite 정적 빌드. **"Include files outside the root directory" 켜기** (빌드 때 `data/`에서 병원 JSON을 만듦, 꺼지면 병원 0곳) | 설정 있음 |
+| 환자 웹 | `apps/web-platform` | Vite 정적 빌드 (병원 대시보드도 이 안의 `/dashboard`). **"Include files outside the root directory" 켜기** (빌드 때 `data/`에서 병원 JSON을 만듦, 꺼지면 병원 0곳) | 설정 있음 |
 | 백엔드 | 저장소 루트 | FastAPI (`backend/src/main.py`) + `ai/` 패키지 | **새로 만들어야 함** |
-| 대시보드 | `dashboard` | 정적 HTML 1개 (`대시보드.html`) | 새로 만들어야 함 (빌드 없음) |
 
 ## 2. 환경변수
 
@@ -17,14 +16,13 @@
 | 이름 | 값 |
 |---|---|
 | `VITE_API_URL` | 백엔드 주소 (예: `https://<백엔드>.vercel.app`) |
-| `VITE_DASHBOARD_URL` | 대시보드 주소 + `/대시보드.html` |
 
 ### 백엔드 (비밀 값은 Vercel에만, 저장소·채팅 X)
 | 이름 | 필수 | 메모 |
 |---|---|---|
 | `JWT_SECRET` | O | 32자 이상 무작위 |
 | `DATABASE_URL` | O | Supabase **pooler** 주소 (서버리스 → 연결 수 제한) |
-| `CORS_ORIGINS` | O | `["https://<환자웹>","https://<대시보드>"]` (JSON 목록) |
+| `CORS_ORIGINS` | O | `["https://<환자웹>"]` (JSON 목록, 대시보드도 같은 주소) |
 | `CRON_SECRET` | O | 16자 이상. 없으면 정기 정리 API가 꺼짐(404) |
 | `SUPABASE_URL` · `SUPABASE_SERVICE_ROLE_KEY` | 사진 쓸 때 | 비밀 키는 `sb_secret_…` (공개 키 `sb_publishable_` X). 없으면 "사진 있음"만 |
 | `GEMINI_API_KEY` · `GEMINI_MODEL` (· `NEMOTRON_*`) | 챗봇·번역 | `LLM_PROVIDER_ORDER` 기본 `gemini,nemotron` |

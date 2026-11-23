@@ -10,7 +10,7 @@ npm install
 npm run dev        # http://localhost:5173  (병원 대시보드: http://localhost:5173/dashboard)
 ```
 
-병원 대시보드(예전 `apps/web-hospital`, 포트 5175)는 이 앱의 `/dashboard`로 합쳤다 → [src/dashboard/README.md](src/dashboard/README.md)
+병원 대시보드(예전 `dashboard/대시보드.html`·`apps/web-hospital`, 포트 5175)는 이 앱의 `/dashboard`·`/dashboard/analytics`로 합쳤다 → [src/dashboard/README.md](src/dashboard/README.md)
 
 `npm run dev`·`npm run build` 전에 `scripts/build-hospitals.mjs`가 자동으로 돌아서
 `data/interim/영업정보/daegu_hospital_hours.csv` → `public/data/hospitals.json`을 만든다 (git에는 안 올림).

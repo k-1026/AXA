@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './dashboard.css';
+import { Link, useNavigate } from 'react-router-dom';
+import './analytics.css';
 import { clearStaffToken } from '../features/staff/staffSession';
 import publicData from './data/dashboard-public.json';
 import type { DeptKey, Mode, PublicData } from './features/analytics/types';
@@ -41,10 +41,10 @@ export default function App() {
   const toggleSetup = (key: string) => setSetup((s) => s.map((x) => (x.key === key ? { ...x, done: !x.done } : x)));
 
   return (
-    // 최상위 .hd 아래로만 대시보드 스타일이 적용됨 (dashboard.css) — 환자 화면과 클래스 이름이 겹쳐도 섞이지 않게
+    // 최상위 .hd 아래로만 이 화면 스타일이 적용됨 (analytics.css) — 환자 화면과 클래스 이름이 겹쳐도 섞이지 않게
     <div className="hd app">
       <header className="top">
-        <div className="brand">MediDaegu <span>병원</span></div>
+        <Link to="/dashboard" className="brand">MediDaegu <span>병원</span></Link>
         <div className="hospital">
           <b>예시 {DEPT_LABEL[dept]}의원</b>
           <span>대구 {SAMPLE_DISTRICT} · 가상 병원</span>
