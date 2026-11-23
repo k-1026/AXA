@@ -46,7 +46,7 @@ class Tool:
     description: str
     parameters: JSON
     handler: Handler
-    intent: str  # 병원찾기 / 정보질문 / 가격 / 예약 / 예약상태 / 사후문의 / 진료과안내
+    intent: str  # 병원찾기 / 정보질문 / 가격 / 예약 / 예약상태 / 예약문의 / 사후문의 / 진료과안내
     fake: bool = True  # 아직 가짜 응답이면 True (실제 DB·API 연결 후 False)
 
     def spec(self) -> JSON:

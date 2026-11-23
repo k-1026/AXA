@@ -9,13 +9,13 @@ SHORT = ToolContext(patient_id="demo-patient-1", language="en", residency="short
 
 def test_tools_have_valid_specs():
     specs = R.openai_specs()
-    assert len(specs) == 11
+    assert len(specs) == 12
     for s in specs:
         fn = s["function"]
         assert s["type"] == "function" and fn["name"] and fn["description"]
         assert fn["parameters"]["type"] == "object"
     intents = {t.intent for t in R.tools.values()}
-    assert intents == {"진료과안내", "병원찾기", "병원추천", "가격", "정보질문", "예약", "예약상태", "사후문의"}
+    assert intents == {"진료과안내", "병원찾기", "병원추천", "가격", "정보질문", "예약", "예약상태", "예약문의", "사후문의"}
 
 
 def test_validation_errors_are_returned_not_raised():

@@ -1,0 +1,212 @@
+{
+  "_note": "시연용 가상 병원 목록 (실제 병원 아님). DB 적재 backend/scripts/seed_demo_shared.py, 환자 웹 목록 apps/web-platform/scripts/build-hospitals.mjs, 챗봇 조건 맞춤 제안·예약(backend/src/modules/chatbot/hospitals.py)이 이 파일 하나를 같이 읽음. 이름·주소·전화·진료시간·응대 언어 모두 지어낸 값 (결정 31)",
+  "hospitals": [
+    {
+      "id": 9001,
+      "ykiho": "DEMO-9001",
+      "name_ko": "예시 피부과의원 (가상)",
+      "name_en": "Example Dermatology Clinic (Demo)",
+      "type_code": "31",
+      "type_name_ko": "의원",
+      "sggu": "대구중구",
+      "addr_ko": "대구광역시 중구 (가상 주소 · 시연용)",
+      "addr_en": "Jung-gu, Daegu (demo address)",
+      "lat": 35.8688,
+      "lng": 128.5975,
+      "depts": [
+        "dermatology",
+        "plastic"
+      ],
+      "hours": {
+        "mon": [
+          "10:00",
+          "19:00"
+        ],
+        "tue": [
+          "10:00",
+          "19:00"
+        ],
+        "wed": [
+          "10:00",
+          "19:00"
+        ],
+        "thu": [
+          "10:00",
+          "19:00"
+        ],
+        "fri": [
+          "10:00",
+          "19:00"
+        ],
+        "sat": [
+          "10:00",
+          "15:00"
+        ],
+        "sun": null
+      },
+      "lunch": [
+        "13:00",
+        "14:00"
+      ],
+      "source": "demo (가상 데이터)",
+      "staff_languages": [
+        "en",
+        "zh"
+      ],
+      "ai_translation_chat": true
+    },
+    {
+      "id": 9002,
+      "ykiho": "DEMO-9002",
+      "name_ko": "예시 수성피부과의원 (가상)",
+      "name_en": "Example Suseong Skin Clinic (Demo)",
+      "type_code": "31",
+      "type_name_ko": "의원",
+      "sggu": "대구수성구",
+      "addr_ko": "대구광역시 수성구 (가상 주소 · 시연용)",
+      "addr_en": "Suseong-gu, Daegu (demo address)",
+      "lat": 35.8582,
+      "lng": 128.6305,
+      "depts": [
+        "dermatology"
+      ],
+      "hours": {
+        "mon": [
+          "09:30",
+          "18:30"
+        ],
+        "tue": [
+          "09:30",
+          "18:30"
+        ],
+        "wed": [
+          "09:30",
+          "18:30"
+        ],
+        "thu": [
+          "09:30",
+          "20:00"
+        ],
+        "fri": [
+          "09:30",
+          "18:30"
+        ],
+        "sat": [
+          "09:30",
+          "14:00"
+        ],
+        "sun": null
+      },
+      "lunch": [
+        "13:00",
+        "14:00"
+      ],
+      "source": "demo (가상 데이터)",
+      "staff_languages": [
+        "en"
+      ],
+      "ai_translation_chat": true
+    },
+    {
+      "id": 9003,
+      "ykiho": "DEMO-9003",
+      "name_ko": "예시 동성로성형외과의원 (가상)",
+      "name_en": "Example Dongseongno Plastic Surgery (Demo)",
+      "type_code": "31",
+      "type_name_ko": "의원",
+      "sggu": "대구중구",
+      "addr_ko": "대구광역시 중구 (가상 주소 · 시연용)",
+      "addr_en": "Jung-gu, Daegu (demo address)",
+      "lat": 35.8705,
+      "lng": 128.5958,
+      "depts": [
+        "plastic",
+        "dermatology"
+      ],
+      "hours": {
+        "mon": [
+          "10:00",
+          "19:00"
+        ],
+        "tue": [
+          "10:00",
+          "19:00"
+        ],
+        "wed": [
+          "10:00",
+          "19:00"
+        ],
+        "thu": [
+          "10:00",
+          "19:00"
+        ],
+        "fri": [
+          "10:00",
+          "19:00"
+        ],
+        "sat": [
+          "10:00",
+          "16:00"
+        ],
+        "sun": null
+      },
+      "lunch": [
+        "13:00",
+        "14:00"
+      ],
+      "source": "demo (가상 데이터)",
+      "staff_languages": [
+        "zh",
+        "vi"
+      ],
+      "ai_translation_chat": false
+    },
+    {
+      "id": 9004,
+      "ykiho": "DEMO-9004",
+      "name_ko": "예시 달서안과의원 (가상)",
+      "name_en": "Example Dalseo Eye Clinic (Demo)",
+      "type_code": "31",
+      "type_name_ko": "의원",
+      "sggu": "대구달서구",
+      "addr_ko": "대구광역시 달서구 (가상 주소 · 시연용)",
+      "addr_en": "Dalseo-gu, Daegu (demo address)",
+      "lat": 35.8299,
+      "lng": 128.5328,
+      "depts": [
+        "ophthalmology"
+      ],
+      "hours": {
+        "mon": [
+          "09:00",
+          "18:00"
+        ],
+        "tue": [
+          "09:00",
+          "18:00"
+        ],
+        "wed": null,
+        "thu": [
+          "09:00",
+          "18:00"
+        ],
+        "fri": [
+          "09:00",
+          "18:00"
+        ],
+        "sat": null,
+        "sun": null
+      },
+      "lunch": [
+        "12:30",
+        "13:30"
+      ],
+      "source": "demo (가상 데이터)",
+      "staff_languages": [
+        "en",
+        "vi"
+      ],
+      "ai_translation_chat": true
+    }
+  ]
+}

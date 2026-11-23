@@ -32,6 +32,7 @@ CARD_TYPES = {
     "prepare_booking_request": "booking_draft",
     "get_my_bookings": "booking_list",
     "open_aftercare_thread": "aftercare_thread",
+    "draft_hospital_question": "hospital_question",
 }
 
 

@@ -126,7 +126,8 @@
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
 | `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending`. 먼저 계정 체류 형태 확인(6-6절) | 422 `residency.required`, 403 `residency.not_eligible`, 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.duplicate`, 422 `consent.required`·`validation` |
-| `GET /me/booking-requests` | 내 예약 요청 목록 (최근 순) | — |
+| `GET /me/booking-requests` | 내 예약 요청 목록 (최근 순). 각 항목에 `questions[{text_original, text_translated, created_at}]` (방문 전 내 질문, 결정 32) | — |
+| `POST /me/booking-requests/{id}/questions` | `{text(1~1000자)}` → 201 `PatientBookingOut`. 방문 전(`pending`·`proposed`·`confirmed`)에만, 그 요청서에 번역 동의가 있으면 병원용 한국어 번역 (결정 32) | 409 `booking.invalid_transition`, 404, 422, 429 `rate_limited`(요청서당 30개) |
 | `GET /me/booking-requests/{id}` | 상세 | 404 `not_found`(남의 것 포함) |
 | `POST /me/booking-requests/{id}/accept` | 병원이 제안한 시간 수락 `proposed → confirmed` | 409 `booking.invalid_transition` |
 | `POST /me/booking-requests/{id}/cancel` | `{reason?}` (`CANCEL_REASONS`) → `cancelled`, `pending`·`proposed`에서만 | 409, 422 |
@@ -154,7 +155,7 @@
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
 | `POST /tenant/booking-requests/{id}/replies` | `{text}`(1~2,000자, 한국어) → 201 `ReplyOut{id, text_ko, text_translated, sent_at}`. 대시보드 확인 창의 "보내기" = 직원 승인 → 바로 보낸 상태(`sent_at`), `approved_by` = 보낸 직원(직원 행이 없으면 비움). 상태는 바꾸지 않음 | 404 `not_found`, 422 `validation`(빈 글·공백만·2,000자 초과), 401 |
-| `GET /tenant/booking-requests`, `GET /tenant/booking-requests/{id}` | 응답이 `TenantBookingOut` = `BookingOut` + `replies[ReplyOut]`(보낸 순)으로 바뀜 (칸 추가만, 기존 칸 그대로) | — |
+| `GET /tenant/booking-requests`, `GET /tenant/booking-requests/{id}` | 응답이 `TenantBookingOut` = `BookingOut` + `replies[ReplyOut]`(보낸 순)으로 바뀜 (칸 추가만, 기존 칸 그대로). 2026-11-23: `questions[{text_original, text_translated, created_at}]` 추가 (방문 전 환자 질문, 결정 32) | — |
 
 - 번역(`text_translated`, 결정 25): 보낼 때 환자 언어로 (`ai/llm`, 요청서 번역 동의가 있을 때만, 실패하면 비움 → 환자 화면은 원문). AI 초안(`ai_draft`)은 승인 전에는 저장하지 않음 (compliance: 직원 승인 없이 발송 X)
 - 환자는 6-1절 `replies`로 봄 (보낸 것만)
@@ -233,6 +234,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-23 | 6-1·6-2·7 | 방문 전 환자 질문 `POST /me/booking-requests/{id}/questions`, 환자·병원 예약 응답에 `questions`, 챗봇 `hospital_question` 카드(초안만) (결정 32, 마이그레이션 0013). 챗봇 조건 맞춤 제안·예약 = 입점 가상 병원만 (결정 31) | A (**B 확인 필요** — booking 응답 칸 추가, `router_tenant` 한 곳) | `backend-A-chatbot-demo-flow` → `backend` (`backend-A-web-push` 다음) |
 | 2026-11-23 | 4·5·6-5 | 웹 푸시: `/me/push/key`·`/me/push/subscriptions`, 에러 `push.unavailable`, `notify()`가 commit 뒤 푸시 (모양·호출 위치 그대로, 결정 30, 마이그레이션 0012) | A (**B 확인 필요**) | `backend-A-web-push` → `backend` (`backend-A-residency` 다음) |
 | 2026-11-23 | 4·6·6-1·6-6 | 환자 체류 형태 6-6 신설(가입 `residency?`, `PUT /me/residency`, `PatientOut` 칸 추가), 예약 요청 전 계정 값 확인, 에러 `residency.required`(422)·`residency.not_eligible`(403) (결정 28, 마이그레이션 0011) | A (**B 확인 필요**) | `backend-A-residency` → `backend` |
 | 2026-11-20 | 6-2 | 병원 상담 답장 `POST /tenant/booking-requests/{id}/replies` 신설, 병원 목록·상세 응답에 `replies` 추가 (`TenantBookingOut`) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-booking-replies` → `backend` |

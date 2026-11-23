@@ -14,6 +14,7 @@ from core.security import StaffPrincipal, current_staff
 from modules.audit import service as audit
 from modules.booking import analytics, service
 from modules.booking.schemas import BookingOut, ReplyIn, ReplyOut, StaffAction, TenantBookingOut
+from modules.question import service as question_service
 
 router = APIRouter(prefix="/tenant", tags=["tenant"])
 
@@ -31,8 +32,13 @@ def _tenant(staff: StaffPrincipal) -> uuid.UUID:
 def _with_replies(db: Session, reqs: list) -> list[TenantBookingOut]:
     """요청서 + 보낸 답장 (한 번에 조회)"""
     replies = service.sent_replies(db, [r.id for r in reqs])
+    asked = question_service.for_requests(db, [r.id for r in reqs])  # 방문 전 환자 질문 (A, 결정 32)
     return [
-        TenantBookingOut.model_validate(r).model_copy(update={"replies": [ReplyOut.model_validate(x) for x in replies[r.id]]})
+        TenantBookingOut.model_validate(r).model_copy(update={
+            "replies": [ReplyOut.model_validate(x) for x in replies[r.id]],
+            "questions": [{"text_original": q.text_original, "text_translated": q.text_translated, "created_at": q.created_at}
+                          for q in asked[r.id]],
+        })
         for r in reqs
     ]
 
