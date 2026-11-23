@@ -15,7 +15,18 @@
       "expired": "Các ngày mong muốn trong yêu cầu gửi {{hospital}} đều đã qua."
     },
     "reply": "{{hospital}} đã gửi {{count}} phản hồi tư vấn.",
-    "aftercare": "Nhân viên y tế {{hospital}} đã gửi {{count}} tin nhắn sau điều trị."
+    "aftercare": "Nhân viên y tế {{hospital}} đã gửi {{count}} tin nhắn sau điều trị.",
+    "push": {
+      "enable": "Nhận thông báo trên thiết bị này",
+      "disable": "Tắt thông báo trên thiết bị này",
+      "onNote": "Bạn sẽ nhận tin từ bệnh viện trên thiết bị này kể cả khi đã đóng trang.",
+      "offNote": "Nhận tin từ bệnh viện dưới dạng thông báo kể cả khi đã đóng trang.",
+      "denied": "Trình duyệt đang chặn thông báo của trang này. Hãy cho phép trong cài đặt trình duyệt.",
+      "unsupported": "Trình duyệt này không hỗ trợ thông báo.",
+      "ios": "Trên iPhone/iPad, nhấn Chia sẻ → \"Thêm vào Màn hình chính\" rồi mở từ đó để nhận thông báo.",
+      "serverOff": "Hiện chưa dùng được thông báo trên thiết bị. Thông báo trong trang vẫn hoạt động.",
+      "failed": "Không đổi được cài đặt thông báo. Vui lòng thử lại sau."
+    }
   },
   "header": {
     "language": "Ngôn ngữ",

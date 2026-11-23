@@ -5279,6 +5279,33 @@ body.chat-open {
   height: 1px;
 }
 
+/* 이 기기에서 알림 받기 (웹 푸시, 결정 30) */
+.notify-push {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.notify-push p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.notify-push button {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 /* 체류 형태 3문항 (결정 28) — 가입·예약·마이페이지 */
 .residency-questions {
   display: flex;

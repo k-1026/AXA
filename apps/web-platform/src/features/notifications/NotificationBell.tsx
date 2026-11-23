@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLocalized } from '../../lib/common';
+import { useAuth } from '../../components/auth';
 import { useNotifications, type Notice } from './NotificationsProvider';
+import { disablePush, enablePush, isIos, pushState, type PushState } from './webPush';
 
 function BellIcon() {
   return (
@@ -87,7 +89,53 @@ export function NotificationBell() {
               ))}
             </ul>
           )}
+          <PushToggle />
         </div>
+      )}
+    </div>
+  );
+}
+
+// 이 기기에서 알림 받기 (웹 푸시, 결정 30) — 사이트를 닫아도 병원 소식을 알림으로
+function PushToggle() {
+  const { t } = useTranslation();
+  const { token } = useAuth();
+  const [state, setState] = useState<PushState | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    pushState().then(setState, () => setState('unsupported'));
+  }, []);
+
+  if (!token || state === null) return null;
+  const toggle = async () => {
+    setBusy(true);
+    setFailed(false);
+    try {
+      if (state === 'on') {
+        await disablePush(token);
+        setState('off');
+      } else setState(await enablePush(token));
+    } catch {
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const note =
+    state === 'unsupported' ? (isIos() ? 'notify.push.ios' : 'notify.push.unsupported')
+    : state === 'denied' ? 'notify.push.denied'
+    : state === 'server-off' ? 'notify.push.serverOff'
+    : failed ? 'notify.push.failed'
+    : state === 'on' ? 'notify.push.onNote' : 'notify.push.offNote';
+  return (
+    <div className="notify-push">
+      <p>{t(note)}</p>
+      {(state === 'on' || state === 'off') && (
+        <button type="button" onClick={toggle} disabled={busy}>
+          {t(state === 'on' ? 'notify.push.disable' : 'notify.push.enable')}
+        </button>
       )}
     </div>
   );
