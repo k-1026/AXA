@@ -17,6 +17,18 @@
 
 ## 기록
 
+### 2026-11-19 · backend-A-demo-seed · Claude (시연용 가상 병원 공용 DB 시드)
+- 한 일: `backend/scripts/seed_demo_shared.py` — 시연은 **가상 병원 9001**로 (사용자 결정, compliance 2-6: 예시 일정·예약은 `is_demo` 병원에만). 공용 DB에 여러 번 돌려도 같은 결과
+  - 9001 이름·가상 주소·좌표·진료시간·진료과를 `data/processed/demo/demo_hospital.json`(환자 웹 목록과 같이 읽을 파일)로 채움, `is_registered_facility = true`(요청 흐름용) · `is_demo = true`
+  - 9001 tenant 요청·사후관리 켬, 직원 `demo-staff@example.com`(owner), 환자 `demo-patient@example.com` + 그 환자 예약 2건(방문 완료·확정, 동의·이벤트 포함 — 대기는 넣지 않음: 있으면 시연 중 새 요청이 409 `booking.duplicate`). 다시 돌리면 이 환자 예약만 새로 만듦
+  - 비밀번호는 처음 만들 때만 생성 → `data/dev/demo_accounts.txt`(git 제외), `--reset-passwords`로 새로
+  - B 시드(`seed_demo.py`, 로컬 SQLite)와 9001 대시보드 데이터(환자 없는 요청 167건)는 그대로
+  - 이메일은 `example.com` — `.test`는 `EmailStr`이 거부(로그인 422)
+- 확인 (로컬 SQLite, 새 DB에 3번 실행): 예약 3·이벤트 6·동의 5 그대로(대기 포함 버전), 환자 로그인 200 → `/me/booking-requests` 3건. Supabase 실행 후 브라우저로 요청 → 대시보드 확정 → 환자 예약 관리 "확정"·예약번호까지 확인, 직원 로그인 200 → `/tenant/booking-requests` 200, `/hospitals/9001` `is_demo`·`can_request` true
+- 바뀐 계약: 없음
+- 테스트: pytest는 이 PC에서 실행 불가 → 위 수동 확인만
+- 다음 할 일: 병원 재적재(등록 126 → 160) 끝난 뒤 Supabase에 실행, 환자 웹 목록에 9001 "가상 · 시연용"으로 표시(프론트 브랜치)
+- B에게 요청: 대시보드 시연은 `demo-staff@example.com`으로 로그인 (`?token=` 대신). 기존 `coordinator@demo.test`는 비밀번호 해시가 없어 로그인 불가 — 그대로 둠
 ### 2026-11-20 (4) · backend-A-audit-translate · Claude (열람 기록 · 번역 · 챗봇 사후관리 카드)
 - 브랜치: `backend-A-aftercare-patient` + `backend-A-booking-replies` + `backend-A-chatbot-bookings`를 합친 위 → **그 셋이 먼저 머지돼야 함**
 - 한 일
