@@ -11,11 +11,12 @@ const DEMO_SUFFIX: Record<string, string> = {
   'zh-TW': '（虛擬 · 示範用）',
   'zh-CN': '（虚拟 · 演示用）',
   vi: ' (Ảo · dùng để minh họa)',
+  ja: '（架空 · デモ用）',
 };
 const nameIn = (h: Hospital, lang: string) =>
   (lang === 'ko' ? h.name : localHospitalName(h.nameEn, lang)) + (h.demo ? DEMO_SUFFIX[lang] ?? DEMO_SUFFIX.en : '');
 
-// 한국어는 원래 이름, 영어는 영어 이름, 중국어·베트남어는 진료과·기관 종류를 번역한 이름 (localize.ts)
+// 한국어는 원래 이름, 영어는 영어 이름, 중국어·베트남어·일본어는 진료과·기관 종류를 번역한 이름 (localize.ts)
 // 언어가 바뀔 때만 새 함수 → useMemo 의존성으로 써도 매번 다시 계산하지 않음
 export function useHospitalName() {
   const { i18n } = useTranslation();
@@ -30,13 +31,14 @@ export function useHospitalAddress() {
   return useCallback((h: Hospital) => localAddress(h.addr, lang), [lang]);
 }
 
-/** 찜·상담처럼 이름을 저장해 두는 곳에서 쓰는 5개 언어 이름 */
+/** 찜·상담처럼 이름을 저장해 두는 곳에서 쓰는 6개 언어 이름 */
 export const hospitalNames = (h: Hospital): KoEn => ({
   ko: nameIn(h, 'ko'),
   en: nameIn(h, 'en'),
   'zh-TW': nameIn(h, 'zh-TW'),
   'zh-CN': nameIn(h, 'zh-CN'),
   vi: nameIn(h, 'vi'),
+  ja: nameIn(h, 'ja'),
 });
 
 // https://www.instagram.com/abc/ → @abc

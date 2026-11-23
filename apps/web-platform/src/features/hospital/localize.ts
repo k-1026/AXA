@@ -1,49 +1,49 @@
 // 병원 이름·주소를 화면 언어로 (데이터에는 한국어 이름·주소와 영어 이름만 있음)
 // - 이름: 영어 이름(scripts/romanize.mjs englishName) = "발음 표기 + 진료과 + 기관 종류" →
-//   중국어·베트남어는 진료과·기관 종류만 번역하고 발음 표기는 그대로 (고유 이름을 지어내지 않음)
+//   중국어·베트남어·일본어는 진료과·기관 종류만 번역하고 발음 표기는 그대로 (고유 이름을 지어내지 않음)
 // - 주소: 도로명 주소를 국어의 로마자 표기법(음절 단위, romanize.mjs와 같은 표)으로 옮김.
-//   중국어는 시·구를 한자로. 정확한 위치 확인용 한국어 원문은 화면에서 함께 보여 준다
+//   중국어·일본어는 시·구를 한자로. 정확한 위치 확인용 한국어 원문은 화면에서 함께 보여 준다
 
-type Lang = 'zh-TW' | 'zh-CN' | 'vi';
-type Row = [en: string, zhTW: string, zhCN: string, vi: string];
+type Lang = 'zh-TW' | 'zh-CN' | 'vi' | 'ja';
+type Row = [en: string, zhTW: string, zhCN: string, vi: string, ja: string];
 
 // 긴 것부터 (Korean Medicine Clinic이 Clinic으로 잘리지 않게)
 const INSTITUTIONS: Row[] = [
-  ['University Hospital', '大學醫院', '大学医院', 'Bệnh viện Đại học'],
-  ['Long-term Care Hospital', '療養醫院', '疗养医院', 'Bệnh viện Dưỡng lão'],
-  ['Korean Medicine Hospital', '韓醫醫院', '韩医医院', 'Bệnh viện Y học Hàn Quốc'],
-  ["Children's Hospital", '兒童醫院', '儿童医院', 'Bệnh viện Nhi'],
-  ['Korean Medicine Clinic', '韓醫診所', '韩医诊所', 'Phòng khám Y học Hàn Quốc'],
-  ['Medical Center', '醫療院', '医疗院', 'Trung tâm Y tế'],
-  ['Public Health Branch', '保健支所', '保健支所', 'Trạm Y tế'],
-  ['Public Health Center', '保健所', '保健所', 'Trung tâm Y tế Công cộng'],
-  ['Hospital', '醫院', '医院', 'Bệnh viện'],
-  ['Clinic', '診所', '诊所', 'Phòng khám'],
+  ['University Hospital', '大學醫院', '大学医院', 'Bệnh viện Đại học', '大学病院'],
+  ['Long-term Care Hospital', '療養醫院', '疗养医院', 'Bệnh viện Dưỡng lão', '療養病院'],
+  ['Korean Medicine Hospital', '韓醫醫院', '韩医医院', 'Bệnh viện Y học Hàn Quốc', '韓方病院'],
+  ["Children's Hospital", '兒童醫院', '儿童医院', 'Bệnh viện Nhi', '小児病院'],
+  ['Korean Medicine Clinic', '韓醫診所', '韩医诊所', 'Phòng khám Y học Hàn Quốc', '韓医院'],
+  ['Medical Center', '醫療院', '医疗院', 'Trung tâm Y tế', '医療院'],
+  ['Public Health Branch', '保健支所', '保健支所', 'Trạm Y tế', '保健支所'],
+  ['Public Health Center', '保健所', '保健所', 'Trung tâm Y tế Công cộng', '保健所'],
+  ['Hospital', '醫院', '医院', 'Bệnh viện', '病院'],
+  ['Clinic', '診所', '诊所', 'Phòng khám', 'クリニック'],
 ];
 const DEPARTMENTS: Row[] = [
-  ['Rehabilitation Medicine', '復健科', '康复医学科', 'Phục hồi chức năng'],
-  ['Internal Medicine', '內科', '内科', 'Nội khoa'],
-  ['Thoracic Surgery', '胸腔外科', '胸外科', 'Ngoại Lồng ngực'],
-  ['Plastic Surgery', '整形外科', '整形外科', 'Thẩm mỹ'],
-  ['Family Medicine', '家庭醫學科', '家庭医学科', 'Y học Gia đình'],
-  ['Pain Medicine', '疼痛科', '疼痛科', 'Giảm đau'],
-  ['Neurosurgery', '神經外科', '神经外科', 'Ngoại Thần kinh'],
-  ['Orthopedics', '骨科', '骨科', 'Chấn thương Chỉnh hình'],
-  ['Dermatology', '皮膚科', '皮肤科', 'Da liễu'],
-  ['Psychiatry', '身心科', '精神科', 'Tâm thần'],
-  ['Pediatrics', '小兒科', '儿科', 'Nhi'],
-  ['Radiology', '放射科', '放射科', 'Chẩn đoán Hình ảnh'],
-  ['Neurology', '神經科', '神经科', 'Thần kinh'],
-  ['Urology', '泌尿科', '泌尿外科', 'Tiết niệu'],
-  ['OB/GYN', '婦產科', '妇产科', 'Sản Phụ khoa'],
-  ['Surgery', '外科', '外科', 'Ngoại khoa'],
-  ['ENT', '耳鼻喉科', '耳鼻喉科', 'Tai Mũi Họng'],
-  ['Eye', '眼科', '眼科', 'Mắt'],
+  ['Rehabilitation Medicine', '復健科', '康复医学科', 'Phục hồi chức năng', 'リハビリテーション科'],
+  ['Internal Medicine', '內科', '内科', 'Nội khoa', '内科'],
+  ['Thoracic Surgery', '胸腔外科', '胸外科', 'Ngoại Lồng ngực', '胸部外科'],
+  ['Plastic Surgery', '整形外科', '整形外科', 'Thẩm mỹ', '形成外科'],
+  ['Family Medicine', '家庭醫學科', '家庭医学科', 'Y học Gia đình', '家庭医療科'],
+  ['Pain Medicine', '疼痛科', '疼痛科', 'Giảm đau', 'ペイン科'],
+  ['Neurosurgery', '神經外科', '神经外科', 'Ngoại Thần kinh', '脳神経外科'],
+  ['Orthopedics', '骨科', '骨科', 'Chấn thương Chỉnh hình', '整形外科'],
+  ['Dermatology', '皮膚科', '皮肤科', 'Da liễu', '皮膚科'],
+  ['Psychiatry', '身心科', '精神科', 'Tâm thần', '精神科'],
+  ['Pediatrics', '小兒科', '儿科', 'Nhi', '小児科'],
+  ['Radiology', '放射科', '放射科', 'Chẩn đoán Hình ảnh', '放射線科'],
+  ['Neurology', '神經科', '神经科', 'Thần kinh', '脳神経内科'],
+  ['Urology', '泌尿科', '泌尿外科', 'Tiết niệu', '泌尿器科'],
+  ['OB/GYN', '婦產科', '妇产科', 'Sản Phụ khoa', '産婦人科'],
+  ['Surgery', '外科', '外科', 'Ngoại khoa', '外科'],
+  ['ENT', '耳鼻喉科', '耳鼻喉科', 'Tai Mũi Họng', '耳鼻咽喉科'],
+  ['Eye', '眼科', '眼科', 'Mắt', '眼科'],
 ];
-const COL: Record<Lang, 1 | 2 | 3> = { 'zh-TW': 1, 'zh-CN': 2, vi: 3 };
+const COL: Record<Lang, 1 | 2 | 3 | 4> = { 'zh-TW': 1, 'zh-CN': 2, vi: 3, ja: 4 };
 const isLocal = (lang: string): lang is Lang => lang in COL;
 
-/** 영어 이름 → 중국어·베트남어 이름. 형식을 모르면 영어 이름 그대로 */
+/** 영어 이름 → 중국어·베트남어·일본어 이름. 형식을 모르면 영어 이름 그대로 */
 export function localHospitalName(nameEn: string, lang: string): string {
   if (!isLocal(lang)) return nameEn;
   // 시연 데이터의 끝 글자 구분자 ("Demo Dermatology Clinic A")
@@ -107,6 +107,10 @@ const DISTRICT_ZH: Record<string, [string, string]> = {
   중구: ['中區', '中区'], 동구: ['東區', '东区'], 서구: ['西區', '西区'], 남구: ['南區', '南区'], 북구: ['北區', '北区'],
   수성구: ['壽城區', '寿城区'], 달서구: ['達西區', '达西区'], 달성군: ['達城郡', '达城郡'], 군위군: ['軍威郡', '军威郡'],
 };
+const DISTRICT_JA: Record<string, string> = {
+  중구: '中区', 동구: '東区', 서구: '西区', 남구: '南区', 북구: '北区',
+  수성구: '寿城区', 달서구: '達西区', 달성군: '達城郡', 군위군: '軍威郡',
+};
 
 /** 한국어 도로명 주소 → 화면 언어 주소. 한국어 화면이거나 형식을 모르면 원문 그대로 */
 export function localAddress(addr: string, lang: string): string {
@@ -124,6 +128,7 @@ export function localAddress(addr: string, lang: string): string {
     const zh = DISTRICT_ZH[district]?.[lang === 'zh-TW' ? 0 : 1] ?? romanWord(district);
     return `${lang === 'zh-TW' ? '大邱廣域市' : '大邱广域市'} ${zh} ${mainRo}${parenRo}`;
   }
+  if (lang === 'ja') return `大邱広域市 ${DISTRICT_JA[district] ?? romanWord(district)} ${mainRo}${parenRo}`;
   // 영어·베트남어: 번지를 도로 이름 앞으로 (138 Chimsan-ro), 그다음 읍·면, 구·시 (영문 주소 순서)
   const town = mainRo.match(/^(\S+-(?:eup|myeon)) /)?.[1];
   const road = town ? mainRo.slice(town.length + 1) : mainRo;
