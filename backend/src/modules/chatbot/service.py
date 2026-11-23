@@ -51,7 +51,7 @@ def _app_error(e: ChatServiceError) -> AppError:
 def ask(db: Session, llm: ChatLLM, limiter: RateLimiter, patient_id: uuid.UUID,
         session_id: uuid.UUID | None, message: str, language: str | None) -> ChatResponse:
     patient = patient_service.get(db, patient_id)
-    info = PatientInfo(str(patient_id), patient.timezone)
+    info = PatientInfo(str(patient_id), patient.timezone, patient.residency)
     try:
         return _service(db, llm, limiter).ask(info, str(session_id) if session_id else None, message,
                                               language or patient.preferred_lang)

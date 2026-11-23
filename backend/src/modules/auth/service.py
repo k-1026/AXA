@@ -48,6 +48,7 @@ def signup(db: Session, data: SignupRequest) -> TokenOut:
             preferred_lang=data.preferred_lang,
             timezone=data.timezone,
             age14_confirmed_at=utcnow(),
+            residency=data.residency,
         )
         latest = {c.kind: c for c in data.consents}  # 같은 종류를 두 번 보내면 마지막 것만
         for c in latest.values():

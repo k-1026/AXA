@@ -1,6 +1,6 @@
 """환자용 예약 요청 · 내 예약 API (A). 상태 전이는 booking.service(B)만 함 (contracts 5절).
 
-- `POST /hospitals/{hospital_id}/booking-requests`: 요청 가능 병원 확인 → 동의 확인 → `create_request` → 동의를 요청서에 묶어 기록
+- `POST /hospitals/{hospital_id}/booking-requests`: 계정 체류 형태 확인(국내 거주 X) → 요청 가능 병원 확인 → 동의 확인 → `create_request` → 동의를 요청서에 묶어 기록
 - `GET /me/booking-requests`, `GET /me/booking-requests/{id}`: 내 것만 (남의 것은 404), 답장은 직원이 보낸 것만
 - `POST /me/booking-requests/{id}/accept` (병원이 제안한 시간 수락), `/cancel` (pending·proposed에서만)
 """
@@ -18,9 +18,11 @@ from core.security import PatientPrincipal, current_patient, patient_uuid
 from modules.agent import translate
 from modules.booking import service
 from modules.booking.models import BookingEvent, Reply
-from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut, ReplyOut
+from modules.booking.schemas_patient import BookingCreate, CancelIn, PatientBookingOut, QuestionIn, QuestionOut, ReplyOut
 from modules.consent import service as consent_service
 from modules.hospital import service as hospital_service
+from modules.patient import service as patient_service
+from modules.question import service as question_service
 from modules.tenant.models import Tenant
 
 router = APIRouter(tags=["booking"])
@@ -45,6 +47,8 @@ def _out(db: Session, req) -> PatientBookingOut:
         select(Reply).where(Reply.request_id == req.id, Reply.sent_at.is_not(None)).order_by(Reply.sent_at)
     )
     out.replies = [ReplyOut(text_ko=r.text_ko, text_translated=r.text_translated, sent_at=r.sent_at) for r in replies]
+    out.questions = [QuestionOut.model_validate(q, from_attributes=True)
+                     for q in question_service.for_requests(db, [req.id])[req.id]]
     if req.status == "rejected":  # 거절 사유 (contracts 2절, booking_events.reason)
         out.reject_reason = db.scalar(
             select(BookingEvent.reason).where(BookingEvent.request_id == req.id, BookingEvent.to_status == "rejected")
@@ -56,6 +60,8 @@ def _out(db: Session, req) -> PatientBookingOut:
 @router.post("/hospitals/{hospital_id}/booking-requests", response_model=PatientBookingOut, status_code=201)
 def create(hospital_id: int, body: BookingCreate, db: Db, me: Me):
     patient_id = patient_uuid(me)
+    # 계정의 체류 형태 (가입 때 3문항, 결정 28). 본문 residency는 제출 때 한 번 더 확인하는 값
+    patient_service.require_short_term(db, patient_id)
     hospital_service.require_requestable(db, hospital_id)  # 미등록·영업 중 아님 → 403, 없으면 404
     tenant = db.scalar(select(Tenant).where(Tenant.hospital_id == hospital_id))
     if tenant is None or not tenant.requests_enabled:
@@ -114,3 +120,10 @@ def accept(request_id: uuid.UUID, db: Db, me: Me):
 @router.post("/me/booking-requests/{request_id}/cancel", response_model=PatientBookingOut)
 def cancel(request_id: uuid.UUID, body: CancelIn, db: Db, me: Me):
     return _out(db, service.patient_cancel(db, patient_uuid(me), request_id, body.reason))
+
+
+@router.post("/me/booking-requests/{request_id}/questions", response_model=PatientBookingOut, status_code=201)
+def ask_question(request_id: uuid.UUID, body: QuestionIn, db: Db, me: Me):
+    """방문 전 병원에 질문 (결정 32). pending·proposed·confirmed에서만 → 아니면 409. 답은 병원 상담 답장으로."""
+    question_service.ask(db, patient_uuid(me), request_id, body.text)
+    return _out(db, service.get_for_patient(db, patient_uuid(me), request_id))
