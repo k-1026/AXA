@@ -17,6 +17,18 @@
 
 ## 기록
 
+### 2026-11-19 (2) · backend-A-chatbot-bookings · Claude (챗봇 "내 예약" 연결)
+- 한 일: `modules/chatbot/bookings.py` 빈 목록 → `booking.service.list_for_patient`·`get_for_patient`(계약 5절) 어댑터
+  - 챗봇 도구 모양 그대로: `id`·`hospital_id`·`hospital_name_en`·`status`·`preferred`·`confirmed_slot`·`proposed_slot`·`created_at`·`visited`, 시간은 한국 시간 "YYYY-MM-DD HH:MM"
+  - `confirmed_slot` 칸(확정·제안 시간 같이 담음)을 상태로 나눔: proposed → `proposed_slot`, confirmed·visited·no_show → `confirmed_slot`
+  - 요청서 원문·건강정보·동의·답장은 넘기지 않음, 남의 요청·UUID 아닌 id는 `BookingError("not_found")`
+  - 이걸로 챗봇 "제출 확인"(초안 병원에 새 요청이 생기면 제출로 봄)도 실제 DB 기준으로 동작
+- 확인: Supabase + 시연 환자로 "내 예약 상태 알려줘" → 9001 예약 3건 상태(확정·미방문·방문 완료)로 답함 (확인용 대화는 지움)
+- 바뀐 계약: 없음
+- 테스트: `backend/tests/test_chatbot_bookings.py` 3개 추가, 백엔드+AI 408개 통과 (**이 PC에서도 pytest 실행됨** — 11/18 메모의 "실행 불가"는 지금은 아님)
+- 다음 할 일: 없음 (사후관리 열기 `open_aftercare_thread`는 아직 데모 응답 — 환자 사후관리 API 생기면)
+- B에게 요청: 없음
+
 ### 2026-11-17 (7) · backend-A-migration-0007 · Claude (Supabase 0007 적용)
 - 한 일: 사용자 요청으로 **#29 머지 전에 Supabase `AXA`(`afypgiqkrohgoybqhtsi`)에 `0007` 적용** (이 PC, PostgreSQL 18 libpq). `medi`는 **미적용**
 - 확인: alembic `0007` · hospitals 4,242(등록 126) 그대로 · 새 표 7개 모두 0행 · public 표 RLS 꺼진 것 0 · FK `tenants·booking_requests.hospital_id → hospitals`, `consents.booking_request_id → booking_requests` 있음
