@@ -5334,6 +5334,7 @@ body.chat-open {
   background: #fff;
   cursor: pointer;
   font-size: 0.85rem;
+}
 
 /* 챗봇 카드: 환자가 직접 보내는 요청서·질문 (결정 32) */
 .chat-card-edit {
