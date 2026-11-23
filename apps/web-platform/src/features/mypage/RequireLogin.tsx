@@ -20,7 +20,7 @@ export function RequireLogin({ children }: { children: ReactNode }) {
       </span>
       <h1>{t('auth.requiredTitle')}</h1>
       <p>{t('auth.requiredDesc')}</p>
-      <Link to="/login" state={{ from: location.pathname }} className="mp-login-button">
+      <Link to="/login" state={{ from: location.pathname + location.search }} className="mp-login-button">
         {t('header.login')}
       </Link>
     </section>

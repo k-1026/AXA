@@ -1,0 +1,26 @@
+{
+  "_note": "시연용 가상 병원 (실제 병원 아님). DB 적재는 backend/scripts/seed_demo_shared.py, 환자 웹 목록은 apps/web-platform/scripts/build-hospitals.mjs가 이 파일 하나를 같이 읽음. 이름·주소·전화·진료시간 모두 지어낸 값",
+  "id": 9001,
+  "ykiho": "DEMO-9001",
+  "name_ko": "예시 피부과의원 (가상)",
+  "name_en": "Example Dermatology Clinic (Demo)",
+  "type_code": "31",
+  "type_name_ko": "의원",
+  "sggu": "대구중구",
+  "addr_ko": "대구광역시 중구 (가상 주소 · 시연용)",
+  "addr_en": "Jung-gu, Daegu (demo address)",
+  "lat": 35.8688,
+  "lng": 128.5975,
+  "depts": ["dermatology", "plastic"],
+  "hours": {
+    "mon": ["10:00", "19:00"],
+    "tue": ["10:00", "19:00"],
+    "wed": ["10:00", "19:00"],
+    "thu": ["10:00", "19:00"],
+    "fri": ["10:00", "19:00"],
+    "sat": ["10:00", "15:00"],
+    "sun": null
+  },
+  "lunch": ["13:00", "14:00"],
+  "source": "demo (가상 데이터)"
+}

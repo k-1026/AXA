@@ -10,6 +10,7 @@ export const OVERSEAS_VERSION = '2026-11-18';
 interface ServerBooking {
   id: string;
   hospital_id: number;
+  replies?: { text_ko: string; text_translated: string | null; sent_at: string }[]; // 병원이 보낸 답장만 (contracts 6-1)
   status: BookingStatus;
   lang: string;
   preferred_slots: string[];
