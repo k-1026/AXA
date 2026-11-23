@@ -416,7 +416,8 @@
       "cancelled": "Đã hủy",
       "visited": "Đã khám",
       "proposed": "Đề xuất giờ khác",
-      "expired": "Đã hết hạn"
+      "expired": "Đã hết hạn",
+      "no_show": "Không đến"
     },
     "quick": {
       "booking": "Hỏi đặt lịch",
@@ -477,7 +478,8 @@
     "footnote": "Giờ hẹn theo giờ Hàn Quốc (KST).",
     "sampleNote": "Bệnh viện và lịch hẹn mẫu.",
     "proposedNote": "Bệnh viện đã đề xuất giờ khác. Vui lòng kiểm tra trong phần tư vấn.",
-    "expiredNote": "Tất cả ngày mong muốn đã qua nên yêu cầu này đã hết hạn."
+    "expiredNote": "Tất cả ngày mong muốn đã qua nên yêu cầu này đã hết hạn.",
+    "noShowNote": "Bệnh viện đã đánh dấu lịch hẹn này là không đến. Nếu muốn khám, vui lòng gửi yêu cầu đặt lịch mới."
   },
   "aftercare": {
     "list": "Lịch sử chăm sóc sau khám",

@@ -416,7 +416,8 @@
       "cancelled": "已取消",
       "visited": "已就诊",
       "proposed": "医院提议其他时间",
-      "expired": "已过期"
+      "expired": "已过期",
+      "no_show": "未到诊"
     },
     "quick": {
       "booking": "预约咨询",
@@ -477,7 +478,8 @@
     "footnote": "预约时间以韩国时间（KST）为准。",
     "sampleNote": "示例医院和预约信息。",
     "proposedNote": "医院提议了其他时间，请在咨询中确认。",
-    "expiredNote": "所有希望日期均已过去，此申请已过期。"
+    "expiredNote": "所有希望日期均已过去，此申请已过期。",
+    "noShowNote": "医院已将此预约标记为未到诊。如需就诊，请重新提交预约申请。"
   },
   "aftercare": {
     "list": "术后管理记录",

@@ -416,7 +416,8 @@
       "cancelled": "已取消",
       "visited": "已就診",
       "proposed": "醫院提議其他時間",
-      "expired": "已過期"
+      "expired": "已過期",
+      "no_show": "未到診"
     },
     "quick": {
       "booking": "預約諮詢",
@@ -477,7 +478,8 @@
     "footnote": "預約時間以韓國時間（KST）為準。",
     "sampleNote": "範例醫院與預約資訊。",
     "proposedNote": "醫院提議了其他時間，請在諮詢中確認。",
-    "expiredNote": "所有希望日期皆已過去，此申請已過期。"
+    "expiredNote": "所有希望日期皆已過去，此申請已過期。",
+    "noShowNote": "醫院已將此預約標示為未到診。如需就診，請重新提出預約申請。"
   },
   "aftercare": {
     "list": "術後管理紀錄",

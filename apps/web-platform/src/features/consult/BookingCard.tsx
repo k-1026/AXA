@@ -13,6 +13,7 @@ const NOTE: Partial<Record<DisplayStatus, string>> = {
   rejected: 'bookings.rejectedNote',
   expired: 'bookings.expiredNote',
   visited: 'consult.visitedNote',
+  no_show: 'bookings.noShowNote',
 };
 
 // 대화 속 예약 신청 카드. 병원이 확인하기 전까지는 "확인 대기"
