@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from core.db import utcnow
 from core.errors import AppError
 from modules.agent import translate
+from modules.notification import service as notification
 from modules.booking.models import CANCEL_REASONS, REJECT_REASONS, BookingEvent, BookingRequest, Reply
 from modules.tenant.models import StaffUser, Tenant
 
@@ -76,6 +77,8 @@ def _move(
         req.confirmed_slot = slot
     req.status = nxt
     req.updated_at = utcnow()
+    if actor_type != "patient":  # 병원·시스템이 바꾼 것만 환자에게 알림 (같은 commit, 결정 27)
+        notification.notify(db, req.patient_id, "status", req.id, nxt)
     db.commit()
     db.refresh(req)
     return req
@@ -204,6 +207,7 @@ def staff_reply(db: Session, tenant_id: uuid.UUID, staff_id: str, request_id: uu
         sent_at=utcnow(),
     )
     db.add(reply)
+    notification.notify(db, req.patient_id, "reply", req.id)
     db.commit()
     db.refresh(reply)
     return reply

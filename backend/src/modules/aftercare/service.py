@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from core.db import utcnow
 from core.errors import AppError
 from modules.agent import translate
+from modules.notification import service as notification
 from modules.aftercare.models import THREAD_STATUSES, AftercareMessage, AftercareThread
 from modules.booking.models import BookingRequest
 from modules.tenant.models import Tenant
@@ -206,6 +207,8 @@ def tenant_reply(db: Session, tenant_id: uuid.UUID, staff_id: str, thread_id: uu
     req = db.get(BookingRequest, thread.request_id)
     to_patient = translate.for_request(db, req.id, text, req.lang, tenant_id) if req else None  # 환자 언어로 (결정 25)
     _add(db, thread, "staff", text, staff_id=sid, translated=to_patient)
+    if req:
+        notification.notify(db, req.patient_id, "aftercare", req.id)  # 같은 commit (결정 27)
     if thread.status == "new":
         thread.status = "in_progress"
     db.commit()
