@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { DepartmentKey } from '../hospital/types';
-import { DEPARTMENT_COLORS, DEPARTMENTS } from '../hospital/filters';
+import { DEPARTMENT_COLORS, MAP_DEPARTMENTS } from '../hospital/filters';
 
 interface Props {
   selected: DepartmentKey | null;
@@ -20,7 +20,7 @@ export function DepartmentFilter({ selected, onSelect }: Props) {
       >
         {t('dept.all')}
       </button>
-      {DEPARTMENTS.map((key) => (
+      {MAP_DEPARTMENTS.map((key) => (
         <button
           key={key}
           type="button"
