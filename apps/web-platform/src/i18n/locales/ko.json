@@ -51,6 +51,7 @@
     "plastic": "성형외과",
     "internal": "내과",
     "ophthalmology": "안과",
+    "korean_medicine": "한방",
     "other": "기타",
     "notReady": "데이터 준비 중"
   },
