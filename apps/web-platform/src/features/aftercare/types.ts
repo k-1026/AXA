@@ -5,6 +5,7 @@ export interface Attachment {
   kind: 'image' | 'video';
   url: string; // 백엔드 연결 전: 이 탭에서만 쓰는 임시 주소 (blob:)
   name: string;
+  thumbUrl?: string; // 서버 썸네일 (결정 29). 없으면 url을 그대로 보여 줌
 }
 
 export interface AftercareMessage {

@@ -395,7 +395,16 @@
         "openOn": "{{day}}看診（{{hours}}）",
         "slotsOn": "{{date}}有可諮詢時段",
         "inDistrict": "位於{{district}}"
-      }
+      },
+      "submitted": "已送出申請。醫院確認後會通知您。",
+      "goBookings": "查看預約管理",
+      "submitNote": "請勾選同意後由您親自送出。預約由醫院確認。",
+      "question": "要傳給{{hospital}}的問題",
+      "questionEdit": "修改問題",
+      "questionSend": "直接送出",
+      "questionSent": "已將問題傳給醫院。可在諮詢頁面查看回覆。",
+      "goConsult": "前往諮詢頁面",
+      "questionNote": "尚未送出。需要修改的話請修改後再送出。由醫院人員回覆。"
     },
     "consent": {
       "privacy": "個人資料蒐集與使用",
@@ -592,7 +601,6 @@
     "pickHospital": "請選擇醫院",
     "regNo": "外國患者招攬醫療機構登記號碼",
     "regNoHint": "格式：M-2009-03-01-0013",
-    "doneNoDashboard": "已登入。尚未設定管理頁面網址（VITE_DASHBOARD_URL）。",
     "err": {
       "hospitalTaken": "這家醫院已經入駐，請聯絡醫院代表帳號。",
       "notRegistered": "不是已登記機構或未營業，無法入駐。",

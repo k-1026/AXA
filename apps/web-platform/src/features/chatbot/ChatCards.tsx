@@ -6,6 +6,7 @@ import { LANGUAGES } from '../../i18n';
 import type { DepartmentKey } from '../hospital/types';
 import type { ChatCard, HospitalBrief } from './chatApi';
 import { localHospitalName } from '../hospital/localize';
+import { BookingDraftActions, QuestionCard } from './ActionCards';
 
 // 카드의 진료과는 한국어 이름(피부과 등)으로 온다 (ai/agent/tools/chat_tools.py DEPT_CODES와 같은 표)
 // 화면 진료과 키가 있는 것만 번역하고, 나머지(치과·한방 등)는 받은 그대로 보여 준다
@@ -167,24 +168,15 @@ function Card({ card }: { card: ChatCard }) {
             <dt>{t('chat.card.slots')}</dt>
             <dd>{slots.join(', ') || '-'}</dd>
           </dl>
-          <fieldset>
-            <legend>{t('chat.card.consents')}</legend>
-            {card.data.consents_required.map((k) => (
-              <label key={k}>
-                <input type="checkbox" disabled /> {t(`chat.consent.${k}`, { defaultValue: k })}
-              </label>
-            ))}
-          </fieldset>
-          {/* 제출 = 사람이 쓰는 요청서와 같은 API. 예약 요청 API(B)가 생기면 연결 */}
-          <button type="button" disabled>
-            {t('chat.card.submit')}
-          </button>
-          <p className="chat-card-note">{t('chat.card.submitLater')}</p>
+          {/* 제출 = 사람이 쓰는 요청서와 같은 API (결정 3). 동의를 체크하고 환자가 누름 */}
+          <BookingDraftActions data={card.data} />
         </section>
       );
     }
     case 'aftercare_thread':
       return <AftercareCard data={card.data} />;
+    case 'hospital_question':
+      return <QuestionCard data={card.data} />;
     default:
       return null; // 나머지 카드(출처·시간 후보·내 요청)는 다음 단계에서
   }

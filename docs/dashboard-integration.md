@@ -1,51 +1,25 @@
 # dashboard-integration.md — 병원 대시보드 연결 명세 (초안)
 
 > 작성 2026-11-12 · 상태: **팀 검토 전 초안**
-> 대상: `apps/web-hospital` (병원 대시보드), `apps/web-platform` (환자 사이트), `backend`
+> 대상: `apps/web-platform` (환자 사이트 + 병원 대시보드 `/dashboard`), `backend`
 > 기준 문서: [backend-plan.md](backend-plan.md) v2, [backend-contracts.md](backend-contracts.md), [subscription-plans.md](subscription-plans.md)
 > 기획: `research/의료관광/병원-대시보드-구성안.md` (research-data 브랜치)
 > 이 문서는 **기존 문서에 없는 것만** 추가·변경 제안. 기존 테이블·API는 이름만 참조
 
 ## 0. 한 줄 요약
 
-화면은 `apps/web-hospital`에 프로토타입이 있음 (예시 데이터). 백엔드가 이 문서의 API를 같은 모양으로 주면, 프론트는 `src/features/analytics/sample.ts`를 API 호출로 바꾸기만 하면 됨
+병원 대시보드는 환자 사이트 안에 있음 (`apps/web-platform/src/dashboard`, 포트 5173 하나). `/dashboard` = 시연용 대시보드(예전 `dashboard/대시보드.html`), `/dashboard/analytics` = 통계 상세 프로토타입(예전 `apps/web-hospital`, 예시 데이터). 백엔드가 이 문서의 API를 같은 모양으로 주면, 프론트는 `src/dashboard/features/analytics/sample.ts`를 API 호출로 바꾸기만 하면 됨
 
 ### 프로토타입 보기
 
 ```bash
-cd apps/web-hospital && npm install && npm run dev   # http://localhost:5175
+cd apps/web-platform && npm install && npm run dev   # http://localhost:5173/dashboard (통계 상세: /dashboard/analytics)
 ```
 
-- 위쪽 버튼: **초기 (데이터 없음)** ↔ **운영 후 (예시)**, 진료과 전환
+- 직원 토큰이 있을 때만 열림 (없으면 로그인 화면의 "병원 관계자"로). 환자 사이트에서 병원 관계자 로그인하면 토큰이 이 탭(sessionStorage)에 저장되고 `/dashboard`로 이동. 백엔드 `CORS_ORIGINS`는 5173만 있으면 됨
+- 통계 상세 위쪽 버튼: **초기 (데이터 없음)** ↔ **운영 후 (예시)**, 진료과 전환
 - 탭 4개: 홈 `#home` · 유입·관심 `#inflow` · 상담·예약 `#booking` · 사후관리 `#aftercare`
 - 카드 종류: `설정`(병원 입력) · `공공`(공공데이터) · `예시`(→ 이 문서의 API로 교체) · `집계 전`(데이터 부족 시)
-
-### 시연용 대시보드 연결 (`dashboard/대시보드.html`, 2026-11-20)
-
-지금 시연은 `apps/web-hospital`이 아니라 **`dashboard/대시보드.html`**(파일 1개)을 씀. 서버 3개를 띄움
-
-| 서버 | 띄우는 법 (저장소 루트에서) | 주소 |
-|---|---|---|
-| 백엔드 | `uv run python -m uvicorn main:app --app-dir backend/src --port 8000` | http://localhost:8000 |
-| 환자 사이트 | `npm run dev --prefix apps/web-platform` | http://localhost:5173 |
-| 대시보드 | `python -m http.server 5175 --directory dashboard` | http://localhost:5175/대시보드.html |
-
-설정 2곳 (둘 다 git 제외 파일)
-
-| 파일 | 넣을 값 | 없으면 |
-|---|---|---|
-| 루트 `.env` | `CORS_ORIGINS=["http://localhost:5173","http://localhost:5175"]` | 대시보드에서 API 호출이 CORS로 막힘 (기본값에 5175 없음) |
-| `apps/web-platform/.env.local` | `VITE_DASHBOARD_URL=http://localhost:5175/대시보드.html` (`VITE_API_URL`은 기본 `http://localhost:8000`) | 환자 사이트 "병원 관계자 로그인" 뒤 "대시보드 주소가 설정되지 않음" |
-
-로그인 (2가지, 토큰은 그 탭의 `sessionStorage`에만 — 탭을 닫으면 사라짐)
-
-1. 대시보드 오른쪽 위 **직원 로그인** → `POST /api/v1/auth/staff/login`
-2. 환자 사이트 **병원 관계자 로그인** → 대시보드로 이동하며 `?token=&api=`를 넘김 → 대시보드가 읽자마자 주소에서 지움
-- 로그인 안 하면 **예시 데이터**, 토큰이 만료되면(401) 지우고 다시 로그인 안내
-- API 주소 기본값 `http://localhost:8000/api/v1`. 다른 주소면 환자 사이트에서 넘어오거나 `?api=` 로 한 번 열기
-- 시연 계정: `demo-staff@example.com` (비밀번호는 `data/dev/demo_accounts.txt`, git 제외)
-
-배포할 때: `VITE_DASHBOARD_URL` = 배포한 대시보드 주소, 백엔드 `CORS_ORIGINS`에 환자 사이트·대시보드 주소 둘 다
 
 ## 1. 지표 → 데이터 출처
 
@@ -136,7 +110,7 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 
 모든 경로 앞 `/api/v1`. 병원용은 직원 토큰(`role: staff`)의 `tenant_id`로 자동 필터 ([backend-plan.md](backend-plan.md) 8절)
 
-### 3-1. 병원용 · 통계 (구독 확장 플랜)
+### 3-1. 병원용 · 통계 (프리미엄 회원 · 분석 탭)
 
 | 메서드·경로 | 응답 | 교체되는 프로토타입 값 (`sample.ts`) |
 |---|---|---|
@@ -181,22 +155,22 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 | 메서드·경로 | 로그인 | 하는 일 | 주의 |
 |---|---|---|---|
 | `POST /events` | X | `{ hospitalId, type, target?, channel?, lang, visitorKey }` 기록 | 요청 횟수 제한, 응답 기다리지 않음 (`sendBeacon`) |
-| `GET /hospitals/{id}` | X | (기존) + `settings` 중 공개 항목 (통역 언어, FAQ, 가격 안내, 등록 유치의료기관 여부) | 구독 여부로 노출·정렬 차이 X |
+| `GET /hospitals/{id}` | X | (기존) + `settings` 중 공개 항목 (통역 언어, FAQ, 가격 안내, 등록 유치의료기관 여부) | 회원 등급으로 노출·정렬 차이 X |
 | `POST /me/booking-requests/{id}/cancel` | O | (기존) + `reason` 받음 | 사유는 선택 |
 | `POST /me/booking-requests/{id}/satisfaction` | O | `visited` 후 1회 | 공개 X |
 
 ### 3-4. 공공 카드
 
-- 지금: `apps/web-hospital/public/data/dashboard-public.json` (스크립트 `data/etl/build_dashboard_public.py`, research-data 브랜치)
+- 지금: `apps/web-platform/src/dashboard/data/dashboard-public.json` (스크립트 `data/etl/build_dashboard_public.py`, research-data 브랜치)
 - 나중에 옮길 수 있음: 진료시간 분포는 `hospital_hours`, 가격은 `price_stats`에서 계산하는 `GET /public/daegu-stats`. 통계 보고서·법무부·관광공사 값은 파일 유지로 충분 **(제안)**
 
 ## 4. 프론트 할 일
 
-### 4-1. `apps/web-hospital`
+### 4-1. 병원 대시보드 (`apps/web-platform/src/dashboard`)
 
 | 할 일 | 내용 |
 |---|---|
-| 직원 로그인 화면 | `POST /auth/staff/login` → 토큰 보관 → 대시보드 |
+| 직원 로그인 화면 | ✅ 환자 사이트 로그인의 "병원 관계자" → `POST /auth/staff/login` → 토큰 보관(sessionStorage) → `/dashboard` |
 | API 연결 | `sample.ts` 상수 → 3-1 API 호출. 기간 선택(이번 달·지난달·직접) 추가 |
 | 초기/운영 전환 버튼 제거 | 실제 데이터로 판단: 칸마다 `suppressed`이면 "집계 전" 카드 |
 | 설정 저장 | 홈 "입력하기", 예약 요일, FAQ, 안내문, 홍보 링크 → 3-2 API |
@@ -242,8 +216,8 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 ### 5-4. 의료광고·요금
 
 - 만족도·후기는 환자 화면에 공개 X (의료법 제56조 제2항 제2호 유형, `웹사이트-법적-점검.md`)
-- 통계는 구독 확장 플랜 기능. 요금은 예약·환자 수와 연동 X ([subscription-plans.md](subscription-plans.md))
-- 구독 여부는 환자 화면 노출·정렬에 영향 X
+- 통계(분석 탭)는 **프리미엄 회원** 기능 (요금 v4). 회원비는 환자 수와 무관, 수수료는 결제 확인된 진료비 기준 (기본 13% / 프리미엄 8%) ([subscription-plans.md](subscription-plans.md))
+- 회원 등급은 환자 화면 노출·정렬에 영향 X
 
 ## 6. 팀이 정할 것
 

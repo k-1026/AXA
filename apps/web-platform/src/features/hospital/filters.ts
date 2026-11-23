@@ -2,6 +2,10 @@ import type { DepartmentKey } from './types';
 
 export const DEPARTMENTS: DepartmentKey[] = ['dermatology', 'plastic', 'internal', 'ophthalmology', 'other'];
 
+// 메인 지도에 보이는 진료과 (서비스 4개). 한의원·치과 등 '기타'만 있는 병원은 지도에서 뺌 (병원 정보 목록에는 그대로)
+export const MAP_DEPARTMENTS: DepartmentKey[] = ['dermatology', 'plastic', 'internal', 'ophthalmology'];
+export const onMap = (h: { depts: DepartmentKey[] }) => h.depts.some((d) => MAP_DEPARTMENTS.includes(d));
+
 // 지도 점 색상
 export const DEPARTMENT_COLORS: Record<DepartmentKey, string> = {
   dermatology: '#ec4899',

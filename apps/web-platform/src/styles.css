@@ -56,6 +56,8 @@ html:lang(zh-TW) {
 /* 지도 팝업도 Leaflet 기본 글꼴(Helvetica) 대신 언어별 글꼴 (leaflet.css가 나중에 불러와져도 이기게 html 붙임) */
 html .leaflet-container {
   font-family: inherit;
+  /* 지도 안 층(타일 400 · 조작 버튼 1000)을 지도 안에 가둠 → 머리말 알림 창·메뉴가 지도 아래로 깔리지 않게 */
+  isolation: isolate;
 }
 
 * {
@@ -5332,4 +5334,29 @@ body.chat-open {
   background: #fff;
   cursor: pointer;
   font-size: 0.85rem;
+
+/* 챗봇 카드: 환자가 직접 보내는 요청서·질문 (결정 32) */
+.chat-card-edit {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.chat-card-error {
+  margin: 0 0 8px;
+  color: #b3261e;
+  font-size: 0.85rem;
+}
+
+.chat-card-done {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.chat-card-done a {
+  color: var(--accent);
 }
