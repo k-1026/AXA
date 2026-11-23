@@ -1,4 +1,4 @@
-// public/data/dashboard-public.json 구조 (data/etl/build_dashboard_public.py 가 만든다)
+// data/dashboard-public.json 구조 (data/etl/build_dashboard_public.py 가 만든다)
 export type NameN = { name: string; n: number };
 export type DeptKey = 'dermatology' | 'internal' | 'ophthalmology';
 

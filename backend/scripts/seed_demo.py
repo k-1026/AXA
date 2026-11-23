@@ -161,13 +161,13 @@ def main() -> None:
         token = create_access_token(str(staff.id), "staff", tenant_id=str(tenant.id))
 
     ENV_FILE.write_text(
-        f"DATABASE_URL={url}\nCORS_ORIGINS='[\"http://localhost:5176\",\"http://localhost:5175\"]'\nDISABLE_SQLALCHEMY_CEXT=1\n",
+        f"DATABASE_URL={url}\nCORS_ORIGINS='[\"http://localhost:5173\",\"http://localhost:5176\"]'\nDISABLE_SQLALCHEMY_CEXT=1\n",
         encoding="utf-8",
     )
     print(f"로컬 DB: {DB_FILE}")
     print(f"서버 환경 파일: {ENV_FILE}")
     (ENV_FILE.parent / "staff_token.txt").write_text(token, encoding="utf-8")
-    print(f"직원 토큰(8시간): {ENV_FILE.parent / 'staff_token.txt'} → 대시보드 주소 뒤에 ?token=<값>")
+    print(f"직원 토큰(8시간): {ENV_FILE.parent / 'staff_token.txt'} (API 직접 호출용. 화면은 http://localhost:5173/login → 병원 관계자 로그인 → /dashboard)")
 
 
 if __name__ == "__main__":

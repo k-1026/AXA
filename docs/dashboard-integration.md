@@ -1,22 +1,23 @@
 # dashboard-integration.md — 병원 대시보드 연결 명세 (초안)
 
 > 작성 2026-11-12 · 상태: **팀 검토 전 초안**
-> 대상: `apps/web-hospital` (병원 대시보드), `apps/web-platform` (환자 사이트), `backend`
+> 대상: `apps/web-platform` (환자 사이트 + 병원 대시보드 `/dashboard`), `backend`
 > 기준 문서: [backend-plan.md](backend-plan.md) v2, [backend-contracts.md](backend-contracts.md), [subscription-plans.md](subscription-plans.md)
 > 기획: `research/의료관광/병원-대시보드-구성안.md` (research-data 브랜치)
 > 이 문서는 **기존 문서에 없는 것만** 추가·변경 제안. 기존 테이블·API는 이름만 참조
 
 ## 0. 한 줄 요약
 
-화면은 `apps/web-hospital`에 프로토타입이 있음 (예시 데이터). 백엔드가 이 문서의 API를 같은 모양으로 주면, 프론트는 `src/features/analytics/sample.ts`를 API 호출로 바꾸기만 하면 됨
+병원 대시보드는 환자 사이트 안에 있음 (`apps/web-platform/src/dashboard`, 포트 5173 하나). `/dashboard` = 시연용 대시보드(예전 `dashboard/대시보드.html`), `/dashboard/analytics` = 통계 상세 프로토타입(예전 `apps/web-hospital`, 예시 데이터). 백엔드가 이 문서의 API를 같은 모양으로 주면, 프론트는 `src/dashboard/features/analytics/sample.ts`를 API 호출로 바꾸기만 하면 됨
 
 ### 프로토타입 보기
 
 ```bash
-cd apps/web-hospital && npm install && npm run dev   # http://localhost:5175
+cd apps/web-platform && npm install && npm run dev   # http://localhost:5173/dashboard (통계 상세: /dashboard/analytics)
 ```
 
-- 위쪽 버튼: **초기 (데이터 없음)** ↔ **운영 후 (예시)**, 진료과 전환
+- 직원 토큰이 있을 때만 열림 (없으면 로그인 화면의 "병원 관계자"로). 환자 사이트에서 병원 관계자 로그인하면 토큰이 이 탭(sessionStorage)에 저장되고 `/dashboard`로 이동. 백엔드 `CORS_ORIGINS`는 5173만 있으면 됨
+- 통계 상세 위쪽 버튼: **초기 (데이터 없음)** ↔ **운영 후 (예시)**, 진료과 전환
 - 탭 4개: 홈 `#home` · 유입·관심 `#inflow` · 상담·예약 `#booking` · 사후관리 `#aftercare`
 - 카드 종류: `설정`(병원 입력) · `공공`(공공데이터) · `예시`(→ 이 문서의 API로 교체) · `집계 전`(데이터 부족 시)
 
@@ -160,16 +161,16 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 
 ### 3-4. 공공 카드
 
-- 지금: `apps/web-hospital/public/data/dashboard-public.json` (스크립트 `data/etl/build_dashboard_public.py`, research-data 브랜치)
+- 지금: `apps/web-platform/src/dashboard/data/dashboard-public.json` (스크립트 `data/etl/build_dashboard_public.py`, research-data 브랜치)
 - 나중에 옮길 수 있음: 진료시간 분포는 `hospital_hours`, 가격은 `price_stats`에서 계산하는 `GET /public/daegu-stats`. 통계 보고서·법무부·관광공사 값은 파일 유지로 충분 **(제안)**
 
 ## 4. 프론트 할 일
 
-### 4-1. `apps/web-hospital`
+### 4-1. 병원 대시보드 (`apps/web-platform/src/dashboard`)
 
 | 할 일 | 내용 |
 |---|---|
-| 직원 로그인 화면 | `POST /auth/staff/login` → 토큰 보관 → 대시보드 |
+| 직원 로그인 화면 | ✅ 환자 사이트 로그인의 "병원 관계자" → `POST /auth/staff/login` → 토큰 보관(sessionStorage) → `/dashboard` |
 | API 연결 | `sample.ts` 상수 → 3-1 API 호출. 기간 선택(이번 달·지난달·직접) 추가 |
 | 초기/운영 전환 버튼 제거 | 실제 데이터로 판단: 칸마다 `suppressed`이면 "집계 전" 카드 |
 | 설정 저장 | 홈 "입력하기", 예약 요일, FAQ, 안내문, 홍보 링크 → 3-2 API |

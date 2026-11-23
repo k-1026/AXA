@@ -559,7 +559,6 @@
     "pickHospital": "病院を選ぶ",
     "regNo": "外国人患者誘致医療機関 登録番号",
     "regNoHint": "形式: M-2009-03-01-0013",
-    "doneNoDashboard": "ログインしました。ダッシュボードのアドレス (VITE_DASHBOARD_URL) が設定されていません。",
     "err": {
       "hospitalTaken": "この病院はすでに登録されています。代表アカウントにお問い合わせください。",
       "notRegistered": "登録機関でないか運営していないため、登録できません。",

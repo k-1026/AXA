@@ -601,7 +601,6 @@
     "pickHospital": "請選擇醫院",
     "regNo": "外國患者招攬醫療機構登記號碼",
     "regNoHint": "格式：M-2009-03-01-0013",
-    "doneNoDashboard": "已登入。尚未設定管理頁面網址（VITE_DASHBOARD_URL）。",
     "err": {
       "hospitalTaken": "這家醫院已經入駐，請聯絡醫院代表帳號。",
       "notRegistered": "不是已登記機構或未營業，無法入駐。",
