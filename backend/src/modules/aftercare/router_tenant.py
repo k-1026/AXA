@@ -12,6 +12,7 @@ from core.db import get_db
 from core.errors import AppError
 from core.security import StaffPrincipal, current_staff
 from modules.aftercare import service
+from modules.media import service as media
 
 router = APIRouter(prefix="/tenant/aftercare", tags=["tenant"])
 
@@ -25,6 +26,7 @@ class MessageOut(BaseModel):
     text_original: str
     text_translated: str | None
     has_photo: bool
+    attachments: list[dict] = []  # [{kind, name, url(1시간)}] — A 추가 (Storage, B 확인)
     created_at: datetime
 
 
@@ -60,13 +62,19 @@ def _tenant(staff: StaffPrincipal) -> uuid.UUID:
         raise AppError(401, "auth.required", "로그인이 필요합니다")
 
 
+def _messages(messages) -> list[MessageOut]:
+    files = media.attachments_out(messages)
+    return [MessageOut.model_validate(m, from_attributes=True).model_copy(update={"attachments": files.get(m.id, [])})
+            for m in messages]
+
+
 def _out(thread, req, last=None, unanswered=0, messages=None) -> ThreadOut:
     return ThreadOut(
         id=thread.id, request_id=thread.request_id, status=thread.status, tags=thread.tags or [],
         summary=thread.summary, lang=req.lang, nationality=req.nationality, treatment=req.treatment,
         visited_slot=req.confirmed_slot, last_message_at=thread.last_message_at,
         last_message=last.text_original if last else None, unanswered=unanswered,
-        messages=[MessageOut.model_validate(m, from_attributes=True) for m in messages] if messages is not None else None,
+        messages=_messages(messages) if messages is not None else None,
     )
 
 
