@@ -109,7 +109,7 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 
 모든 경로 앞 `/api/v1`. 병원용은 직원 토큰(`role: staff`)의 `tenant_id`로 자동 필터 ([backend-plan.md](backend-plan.md) 8절)
 
-### 3-1. 병원용 · 통계 (구독 확장 플랜)
+### 3-1. 병원용 · 통계 (프리미엄 회원 · 분석 탭)
 
 | 메서드·경로 | 응답 | 교체되는 프로토타입 값 (`sample.ts`) |
 |---|---|---|
@@ -154,7 +154,7 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 | 메서드·경로 | 로그인 | 하는 일 | 주의 |
 |---|---|---|---|
 | `POST /events` | X | `{ hospitalId, type, target?, channel?, lang, visitorKey }` 기록 | 요청 횟수 제한, 응답 기다리지 않음 (`sendBeacon`) |
-| `GET /hospitals/{id}` | X | (기존) + `settings` 중 공개 항목 (통역 언어, FAQ, 가격 안내, 등록 유치의료기관 여부) | 구독 여부로 노출·정렬 차이 X |
+| `GET /hospitals/{id}` | X | (기존) + `settings` 중 공개 항목 (통역 언어, FAQ, 가격 안내, 등록 유치의료기관 여부) | 회원 등급으로 노출·정렬 차이 X |
 | `POST /me/booking-requests/{id}/cancel` | O | (기존) + `reason` 받음 | 사유는 선택 |
 | `POST /me/booking-requests/{id}/satisfaction` | O | `visited` 후 1회 | 공개 X |
 
@@ -215,8 +215,8 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 ### 5-4. 의료광고·요금
 
 - 만족도·후기는 환자 화면에 공개 X (의료법 제56조 제2항 제2호 유형, `웹사이트-법적-점검.md`)
-- 통계는 구독 확장 플랜 기능. 요금은 예약·환자 수와 연동 X ([subscription-plans.md](subscription-plans.md))
-- 구독 여부는 환자 화면 노출·정렬에 영향 X
+- 통계(분석 탭)는 **프리미엄 회원** 기능 (요금 v4). 회원비는 환자 수와 무관, 수수료는 결제 확인된 진료비 기준 (기본 13% / 프리미엄 8%) ([subscription-plans.md](subscription-plans.md))
+- 회원 등급은 환자 화면 노출·정렬에 영향 X
 
 ## 6. 팀이 정할 것
 
