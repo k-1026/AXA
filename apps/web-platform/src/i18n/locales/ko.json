@@ -1,4 +1,22 @@
 {
+  "notify": {
+    "title": "알림",
+    "open": "알림 {{count}}개",
+    "empty": "새 알림이 없어요.",
+    "markAll": "모두 읽음",
+    "hospital": "병원",
+    "newCount": "새 알림 {{count}}개",
+    "status": {
+      "confirmed": "{{hospital}}에서 예약을 확정했어요.",
+      "rejected": "{{hospital}}에서 예약이 어렵다고 알려 왔어요.",
+      "proposed": "{{hospital}}에서 다른 시간을 제안했어요.",
+      "visited": "{{hospital}} 방문이 완료로 기록됐어요. 사후 관리 대화를 할 수 있어요.",
+      "no_show": "{{hospital}} 예약이 미방문으로 기록됐어요.",
+      "expired": "{{hospital}} 요청의 희망 날짜가 모두 지났어요."
+    },
+    "reply": "{{hospital}}에서 상담 답장 {{count}}개가 왔어요.",
+    "aftercare": "{{hospital}} 의료진이 사후 관리 메시지 {{count}}개를 보냈어요."
+  },
   "header": {
     "language": "언어",
     "currency": "통화",
