@@ -119,6 +119,12 @@ export function ReservePage() {
         <p className="hospital-type">{t('reserve.title')}</p>
         <h1>{nameOf(h)}</h1>
       </header>
+      {member && residency === 'resident' && (
+        // 국내 거주로 답한 계정은 날짜를 고르기 전에 먼저 알림 (결정 28)
+        <p className="residency-blocked" role="alert">
+          {t('residency.bookingBlocked')} <Link to="/mypage">{t('residency.editLink')}</Link>
+        </p>
+      )}
 
       <div className="reserve-grid">
         <div className="reserve-card">
