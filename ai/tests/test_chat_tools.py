@@ -63,7 +63,7 @@ def test_booking_draft_rules():
     with_health = R.run("prepare_booking_request", {**args, "health_info": "scars on cheeks since 2024"}, SHORT)
     assert with_health["consents_required"] == ["privacy", "health", "overseas_transfer"]
     ko = R.run("prepare_booking_request", {**args, "language": "ko"}, SHORT)
-    assert ko["consents_required"] == ["privacy"]
+    assert ko["consents_required"] == ["privacy", "overseas_transfer"]  # 글이 있으면 백엔드가 요구 (언어 무관)
 
 
 def test_booking_draft_input_checks():
