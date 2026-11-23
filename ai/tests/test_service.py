@@ -344,3 +344,26 @@ def test_user_text_is_masked_even_without_a_safety_check():
     r = service.ask(ME, None, "my email is tester@example.com", "en")
     stored = [m.content for m in sessions.messages(r.session_id, 10)]
     assert not any("tester@example.com" in t for t in stored)
+
+
+# ------------------------------------------------------------------ 계정 체류 형태 (결정 28)
+def test_account_residency_wins_and_the_chat_cannot_change_it():
+    resident = PatientInfo("demo-patient-4", "UTC", "resident")
+    service, llm, sessions, _, _ = make([
+        call("record_residency", {"residency": "short_term", "user_statement": "I am visiting"}),
+        call("recommend_hospitals", {"department": "dermatology"}, cid="c2"),
+        say("Here is the neutral list instead."),
+    ])
+    r = service.ask(resident, None, "I am visiting for a week, recommend a clinic", "en")
+    tool_results = [m["content"] for m in llm.calls[-1] if m["role"] == "tool"]
+    assert '"not_recorded"' in tool_results[0] and '"not_available"' in tool_results[1]
+    assert sessions.get(resident.patient_id, r.session_id).state["residency"] == "resident"
+
+
+def test_account_without_an_answer_still_uses_what_the_chat_recorded():
+    service, _, sessions, _, _ = make([
+        call("record_residency", {"residency": "short_term", "user_statement": "visiting for a week"}),
+        say("Noted."),
+    ])
+    r = service.ask(ME, None, "I am visiting for a week", "en")
+    assert sessions.get(ME.patient_id, r.session_id).state["residency"] == "short_term"

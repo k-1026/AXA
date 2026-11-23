@@ -285,6 +285,9 @@ def record_residency(args: JSON, ctx: ToolContext) -> JSON:
     # 사용자가 채팅에서 직접 말한 값만 기록 (자기 신고). 실제 서비스에서는 가입 단계 확인 값이 우선.
     # 모델이 추측으로 기록하는 것을 코드로 막는다: 인용문이 이번 사용자 메시지 안에 실제로 있어야 함
     # (2026-11-10 실제 호출에서 사용자가 답하기 전에 short_term으로 기록한 사례 확인)
+    if ctx.residency_locked:  # 가입 때 답한 값이 있음 → 바꾸려면 마이페이지에서 다시 답함 (결정 28)
+        return {"status": "not_recorded", "residency": ctx.residency,
+                "reason": "Residency comes from the user's account answers. To change it, the user updates it in My Page."}
     quote = " ".join(args["user_statement"].split()).lower()
     said = " ".join(ctx.last_user_text.split()).lower()
     if len(quote) < 3 or quote not in said:

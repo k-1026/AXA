@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from modules.consent.schemas import ConsentIn
-from modules.patient.schemas import Lang, Timezone, blank_to_none
+from modules.patient.schemas import Lang, ResidencyIn, Timezone, blank_to_none
 
 # 비밀번호 길이 규칙 (초안, 팀 확인). 최대 길이는 해시 계산 남용 방지
 PASSWORD_MIN = 8
@@ -18,6 +18,8 @@ class SignupRequest(BaseModel):
     preferred_lang: Lang = "en"
     timezone: Timezone = "Asia/Seoul"
     consents: list[ConsentIn] = Field(default_factory=list, max_length=4)  # terms·privacy 필수
+    # 거주국 + 3문항 (결정 28). 없으면 비워 두고 첫 예약 요청 전에 PUT /me/residency로 받음
+    residency: ResidencyIn | None = None
 
     @field_validator("display_name")
     @classmethod

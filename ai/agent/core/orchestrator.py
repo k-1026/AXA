@@ -44,6 +44,7 @@ class ConversationState:
     language: str = "en"
     patient_id: str | None = None
     residency: str | None = None  # "short_term" | "resident" | None
+    residency_locked: bool = False  # 계정(가입 3문항)에서 온 값이면 대화로 바꾸지 않음 (결정 28)
     history: list[Message] = field(default_factory=list)  # system 메시지 제외
     booking_draft: JSON | None = None  # 마지막으로 만든 요청서 초안 (제출 전)
     timezone: str = "UTC"  # 환자 프로필의 IANA 시간대 (요청서 patient_timezone)
@@ -182,7 +183,7 @@ class Orchestrator:
 
         ctx = ToolContext(
             patient_id=state.patient_id, language=state.language, residency=state.residency, last_user_text=user_text,
-            timezone=state.timezone, store=self.store, today=self._today(), hospitals=self.hospitals,
+            residency_locked=state.residency_locked, timezone=state.timezone, store=self.store, today=self._today(), hospitals=self.hospitals,
         )
         system = {
             "role": "system",

@@ -9,7 +9,7 @@ from modules.auth import service as auth_service
 from modules.auth.attempts import client_ip
 from modules.auth.schemas import WithdrawRequest
 from modules.patient import service
-from modules.patient.schemas import PatientOut, PatientUpdate
+from modules.patient.schemas import PatientOut, PatientUpdate, ResidencyIn
 
 router = APIRouter(prefix="/me", tags=["patient"])
 
@@ -25,6 +25,12 @@ def get_me(db: Db, me: Me):
 @router.patch("", response_model=PatientOut)
 def update_me(data: PatientUpdate, db: Db, me: Me):
     return service.update(db, patient_uuid(me), data)
+
+
+@router.put("/residency", response_model=PatientOut)
+def set_residency(data: ResidencyIn, db: Db, me: Me):
+    """체류 형태 3문항 다시 답하기 (가입 때 안 했거나 바뀌었을 때). 국내 거주면 정보 열람만 (결정 28)."""
+    return service.set_residency(db, patient_uuid(me), data)
 
 
 @router.delete("", status_code=204)

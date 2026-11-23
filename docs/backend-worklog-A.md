@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-23 · backend-A-residency · Claude (체류 형태 가입 때 묻기)
+- 한 일: 결정 28. `patients`에 `residency`·`residence_country`·`residency_answered_at` (마이그레이션 **0011**, 칸 추가만), 가입 `residency?`(3문항 + 거주국), `PUT /me/residency`, `PatientOut` 칸 추가. 예약 요청 전 `patient.service.require_short_term()` (없으면 422 `residency.required`, 국내 거주 403 `residency.not_eligible`). 챗봇 `PatientInfo.residency` → 계정 값 우선·`record_residency`가 못 바꿈 (`ai/agent` 3줄: `residency_locked`)
+- 바뀐 계약: contracts 4·6·6-1·6-6
+- 테스트: 전체 467개 통과 (새 `test_residency.py` 13개, `ai/tests/test_service.py` 2개, `test_booking_patient` 가입에 3문항 추가)
+- 다음 할 일: 공용 DB 0011 적용, 시연 환자 계정 `short_term`으로, 프론트 가입·예약 화면 (`frontend-residency`)
+- B에게 요청: 결정 28·contracts 6-6 확인 (예약 요청 앞에서 막음 — booking 서비스는 안 고침)
+- 막힌 것·질문: AI 담당 확인 — `ai/agent` `residency_locked` (ToolContext·ConversationState 칸 1개씩, `record_residency` 첫 줄)
+
 ### 2026-11-20 (5) · backend-A-notifications · Claude (사이트 안 알림)
 - 브랜치: `backend-A-audit-translate` 위 → 그것이 먼저 머지돼야 함
 - 한 일: 결정 27. 새 모듈 `modules/notification/`(A) — 모델·`notify`·목록·읽음·Realtime 토큰(PyJWT HS256, `SUPABASE_JWT_SECRET`), 마이그레이션 **0010** (표 + Supabase에서만 RLS 정책·authenticated SELECT·Realtime 발행). `booking/service._move`·`staff_reply`, `aftercare/service.tenant_reply`에 `notify` 한 줄 (B 모듈). `core/config.py`에 `supabase_jwt_secret` (공통 파일). `.env.example` 정리 (CORS·Supabase 묶음)
