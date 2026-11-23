@@ -19,6 +19,7 @@ const DEPT_WORDS: Record<DepartmentKey, string[]> = {
   plastic: ['성형', 'plastic', '整形', 'thẩm mỹ'],
   internal: ['내과', 'internal', '内科', '內科', 'nội'],
   ophthalmology: ['안과', 'eye', 'ophthal', '眼科', 'mắt'],
+  korean_medicine: ['한방', '한의', '추나', '약침', 'korean medicine', 'acupuncture', 'chuna', '韩医', '韓醫', '中医', '中醫', '韓方', '漢方', 'đông y'],
   other: [],
 };
 

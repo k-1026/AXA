@@ -83,7 +83,7 @@ const photos = new Map(readCsv('daegu_hospital_photos.csv', resolve(repo, 'data/
 // - 내과·안과: 진료과목 코드를 아직 수집하지 않아서 임시로 "의원·병원 이름에 '내과'·'안과'" 기준
 //   → 내과·안과가 있는 종합병원 등은 빠짐. 진료과목 01·12 수집 후 교체
 // 여러 진료과면 병원 이름에 들어 있는 진료과를 맨 앞에 둔다 (지도 색상 기준)
-const DEPT_NAMES = { dermatology: '피부과', plastic: '성형외과', internal: '내과', ophthalmology: '안과' };
+const DEPT_NAMES = { dermatology: '피부과', plastic: '성형외과', internal: '내과', ophthalmology: '안과', korean_medicine: '한' };
 function departments(r) {
   const depts = [];
   if (r.has_dermatology === 'Y') depts.push('dermatology');
@@ -91,8 +91,10 @@ function departments(r) {
   const medical = !r.clCdNm.startsWith('치과') && !r.clCdNm.startsWith('한');
   if (medical && r.yadmNm.includes('내과')) depts.push('internal');
   if (medical && r.yadmNm.includes('안과')) depts.push('ophthalmology');
+  // 한방: 종별이 한의원·한방병원인 곳 (심평원 종별 코드 기준, 2026-11-23 추가)
+  if (r.clCdNm.startsWith('한')) depts.push('korean_medicine');
   depts.sort((a, b) => r.yadmNm.includes(DEPT_NAMES[b]) - r.yadmNm.includes(DEPT_NAMES[a]));
-  // 4개 진료과가 아닌 등록 유치기관(치과·한방·종합병원 등)은 "기타"
+  // 5개 진료과가 아닌 등록 유치기관(치과·종합병원 등)은 "기타"
   return depts.length ? depts : ['other'];
 }
 
@@ -227,28 +229,29 @@ const items = registeredRows
   })
   .sort((a, b) => collator.compare(a.name, b.name));
 
-// 시연용 가상 병원 (is_demo). 백엔드 seed_demo_shared.py와 같은 파일을 읽어 DB와 값이 같음
-// 실제 병원에는 예시 일정·예약을 붙이지 않고 이 병원으로만 시연 (compliance 2-6)
-const demoPath = resolve(repo, 'data/processed/demo/demo_hospital.json');
+// 시연용 가상 병원 (is_demo, 9001~). 백엔드 seed_demo_shared.py·챗봇과 같은 파일을 읽어 DB와 값이 같음 (결정 31)
+// 실제 병원에는 예시 일정·예약을 붙이지 않고 이 병원들로만 시연 (compliance 2-6)
+const demoPath = resolve(repo, 'data/processed/demo/demo_hospitals.json');
 if (existsSync(demoPath)) {
-  const d = JSON.parse(readFileSync(demoPath, 'utf8'));
   const strip = (s) => s.replace(/\s*\((가상|Demo)\)\s*$/, ''); // "시연용" 표시는 화면에서 언어별로 붙임
-  const week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((k) => d.hours[k] ?? null);
-  items.push({
-    id: d.ykiho,
-    demo: true,
-    name: strip(d.name_ko),
-    nameEn: strip(d.name_en),
-    type: d.type_name_ko,
-    district: d.sggu.replace(/^대구/, ''),
-    addr: d.addr_ko,
-    lat: d.lat,
-    lng: d.lng,
-    depts: d.depts,
-    hours: week,
-    lunchWeek: d.lunch ? `${d.lunch[0]}~${d.lunch[1]}` : undefined,
-    sunday: week[6] ? undefined : 'closed',
-  });
+  for (const d of JSON.parse(readFileSync(demoPath, 'utf8')).hospitals) {
+    const week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((k) => d.hours[k] ?? null);
+    items.push({
+      id: d.ykiho,
+      demo: true,
+      name: strip(d.name_ko),
+      nameEn: strip(d.name_en),
+      type: d.type_name_ko,
+      district: d.sggu.replace(/^대구/, ''),
+      addr: d.addr_ko,
+      lat: d.lat,
+      lng: d.lng,
+      depts: d.depts,
+      hours: week,
+      lunchWeek: d.lunch ? `${d.lunch[0]}~${d.lunch[1]}` : undefined,
+      sunday: week[6] ? undefined : 'closed',
+    });
+  }
   items.sort((a, b) => collator.compare(a.name, b.name));
 }
 

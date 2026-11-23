@@ -70,7 +70,8 @@ export function AftercarePage() {
     e.target.value = '';
     const kindOf = (f: File) => (f.type.startsWith('image/') ? 'image' : f.type.startsWith('video/') ? 'video' : null);
     if (chosen.some((f) => !kindOf(f))) return setError(t('aftercare.errType'));
-    if (chosen.some((f) => f.size > MAX_BYTES)) return setError(t('aftercare.errSize'));
+    // 사진은 올리기 전에 줄이므로 크기 제한은 영상만 (결정 29)
+    if (chosen.some((f) => !f.type.startsWith('image/') && f.size > MAX_BYTES)) return setError(t('aftercare.errSize'));
     if (files.length + chosen.length > MAX_FILES) return setError(t('aftercare.errCount', { max: MAX_FILES }));
     const ok: Attachment[] = chosen.map((f) => ({ kind: kindOf(f)!, url: URL.createObjectURL(f), name: f.name }));
     setError('');

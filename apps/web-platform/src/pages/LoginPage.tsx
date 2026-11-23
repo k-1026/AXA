@@ -45,9 +45,11 @@ export function LoginPage() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [mode, setMode] = useState<Mode>('login');
-  const [who, setWho] = useState<'patient' | 'staff'>('patient');
+  // /dashboard에서 직원 토큰 없이 넘어오면 병원 관계자 쪽을 먼저 보여 줌 (RequireStaff)
+  const initialWho = (useLocation().state as { who?: string } | null)?.who === 'staff' ? 'staff' : 'patient';
+  const [who, setWho] = useState<'patient' | 'staff'>(initialWho);
 
-  if (user) {
+  if (user && who === 'patient') {
     return (
       <section className="mp-card mp-login-required">
         <h1>{t('header.login')}</h1>

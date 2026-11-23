@@ -51,6 +51,7 @@
     "plastic": "성형외과",
     "internal": "내과",
     "ophthalmology": "안과",
+    "korean_medicine": "한방",
     "other": "기타",
     "notReady": "데이터 준비 중"
   },
@@ -397,7 +398,16 @@
         "openOn": "{{day}} 진료 ({{hours}})",
         "slotsOn": "{{date}} 상담 가능 시간 있음",
         "inDistrict": "{{district}} 위치"
-      }
+      },
+      "submitted": "요청을 보냈어요. 병원이 확인하면 알려 드려요.",
+      "goBookings": "예약 관리 보기",
+      "submitNote": "동의를 체크하고 직접 보내 주세요. 확정은 병원이 해요.",
+      "question": "{{hospital}}에 보낼 질문",
+      "questionEdit": "질문 고치기",
+      "questionSend": "이대로 보내기",
+      "questionSent": "병원에 질문을 보냈어요. 답장은 상담 화면에서 볼 수 있어요.",
+      "goConsult": "상담 화면 보기",
+      "questionNote": "아직 보내지 않았어요. 고칠 것이 있으면 고친 뒤 보내 주세요. 답은 병원 직원이 해요."
     },
     "consent": {
       "privacy": "개인정보 수집·이용",
@@ -594,7 +604,6 @@
     "pickHospital": "병원을 고르세요",
     "regNo": "외국인환자 유치의료기관 등록번호",
     "regNoHint": "형식: M-2009-03-01-0013 (보건복지부 등록증)",
-    "doneNoDashboard": "로그인했어요. 대시보드 주소(VITE_DASHBOARD_URL)가 설정되지 않아 이동하지 못했어요.",
     "err": {
       "hospitalTaken": "이미 입점한 병원이에요. 병원 대표 계정에 문의해 주세요.",
       "notRegistered": "등록 유치의료기관이 아니거나 영업 중이 아니라 입점할 수 없어요.",

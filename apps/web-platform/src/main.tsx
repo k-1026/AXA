@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './i18n';
@@ -24,6 +24,11 @@ import { ReservePage } from './pages/ReservePage';
 import { BookingsPage } from './pages/BookingsPage';
 import { AftercarePage } from './pages/AftercarePage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { RequireStaff } from './features/staff/RequireStaff';
+
+// 병원 대시보드는 따로 떼어 불러옴 (환자 화면에서는 대시보드 코드·CSS를 내려받지 않음)
+const DashboardPage = lazy(() => import('./dashboard/DashboardPage'));
+const AnalyticsApp = lazy(() => import('./dashboard/AnalyticsApp')); // 통계 상세 프로토타입 (예전 apps/web-hospital)
 
 // 계정별 저장(이름@계정) 전의 찜·방문 기록 키는 주인을 알 수 없어 지운다
 removeLegacySettings();
@@ -34,6 +39,9 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* 입점 병원 대시보드: 환자 사이트 헤더·메뉴 없이 따로. 직원 토큰 있을 때만 (실제 권한은 백엔드가 확인) */}
+          <Route path="dashboard" element={<RequireStaff><Suspense fallback={null}><DashboardPage /></Suspense></RequireStaff>} />
+          <Route path="dashboard/analytics" element={<RequireStaff><Suspense fallback={null}><AnalyticsApp /></Suspense></RequireStaff>} />
           <Route element={<Layout />}>
             <Route index element={<MainPage />} />
             <Route path="hospitals" element={<HospitalsPage />} />

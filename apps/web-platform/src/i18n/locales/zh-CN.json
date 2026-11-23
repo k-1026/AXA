@@ -51,6 +51,7 @@
     "plastic": "整形外科",
     "internal": "内科",
     "ophthalmology": "眼科",
+    "korean_medicine": "韩医",
     "other": "其他",
     "notReady": "数据准备中"
   },
@@ -397,7 +398,16 @@
         "openOn": "{{day}}就诊（{{hours}}）",
         "slotsOn": "{{date}}有可咨询时段",
         "inDistrict": "位于{{district}}"
-      }
+      },
+      "submitted": "已提交申请。医院确认后会通知您。",
+      "goBookings": "查看预约管理",
+      "submitNote": "请勾选同意后由您亲自提交。预约由医院确认。",
+      "question": "要发给{{hospital}}的问题",
+      "questionEdit": "修改问题",
+      "questionSend": "直接发送",
+      "questionSent": "已将问题发给医院。可在咨询页面查看回复。",
+      "goConsult": "前往咨询页面",
+      "questionNote": "尚未发送。需要修改的话请修改后再发送。由医院人员回复。"
     },
     "consent": {
       "privacy": "个人信息收集与使用",
@@ -594,7 +604,6 @@
     "pickHospital": "请选择医院",
     "regNo": "外国患者招揽医疗机构登记号",
     "regNoHint": "格式：M-2009-03-01-0013",
-    "doneNoDashboard": "已登录。尚未设置管理页面地址（VITE_DASHBOARD_URL）。",
     "err": {
       "hospitalTaken": "这家医院已经入驻，请联系医院代表账号。",
       "notRegistered": "不是已登记机构或未营业，无法入驻。",
