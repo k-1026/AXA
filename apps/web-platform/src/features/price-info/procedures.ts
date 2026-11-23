@@ -37,10 +37,10 @@ const estimate = (ko: string): PriceRange | undefined => {
 };
 
 // 한방: 시술 종류와 가격 모두 심평원 비급여 진료비 공개 항목 (대구 한의원·한방병원, 기관별 하위 10%~상위 10%) → koreanMedicinePrices.ts
-const kmed = (...rows: [string, string][]): Procedure[] =>
-  rows.map(([ko, en]) => {
+const kmed = (...rows: [string, string, string?][]): Procedure[] =>
+  rows.map(([ko, en, image]) => {
     const k = KMED_PRICES[ko];
-    return { ko, en, price: k && { min: k.min, max: k.max, source: `심평원 비급여 진료비 (대구 한방 ${k.clinics}곳)`, date: KMED_PRICE_DATE } };
+    return { ko, en, image, price: k && { min: k.min, max: k.max, source: `심평원 비급여 진료비 (대구 한방 ${k.clinics}곳)`, date: KMED_PRICE_DATE } };
   });
 
 export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
@@ -291,24 +291,35 @@ export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
     dept: 'korean_medicine',
     ko: '추나요법',
     en: 'Chuna Manual Therapy',
-    items: kmed(['단순추나', 'Simple Chuna'], ['복잡추나', 'Complex Chuna'], ['특수추나', 'Special Chuna (Dislocation · Visceral · Craniosacral)']),
+    items: kmed(
+      ['단순추나', 'Simple Chuna', '67_simple_chuna.jpg'],
+      ['복잡추나', 'Complex Chuna', '68_complex_chuna.jpg'],
+      ['특수추나', 'Special Chuna (Dislocation · Visceral · Craniosacral)', '69_special_chuna.jpg'],
+    ),
   },
   {
     dept: 'korean_medicine',
     ko: '약침',
     en: 'Pharmacopuncture',
-    items: kmed(['약침술', 'Pharmacopuncture (Acupoint)']),
+    items: kmed(['약침술', 'Pharmacopuncture (Acupoint)', '70_pharmacopuncture.jpg']),
   },
   {
     dept: 'korean_medicine',
     ko: '한방물리요법',
     en: 'Korean Medicine Physical Therapy',
-    items: kmed(['경근간섭저주파요법', 'Interferential Current Therapy'], ['경피전기자극요법', 'Transcutaneous Electrical Nerve Stimulation (TENS)'], ['한방 향기요법', 'Korean Medicine Aromatherapy']),
+    items: kmed(
+      ['경근간섭저주파요법', 'Interferential Current Therapy', '71_interferential_current_therapy.jpg'],
+      ['경피전기자극요법', 'Transcutaneous Electrical Nerve Stimulation (TENS)', '72_tens_therapy.jpg'],
+      ['한방 향기요법', 'Korean Medicine Aromatherapy', '73_korean_aromatherapy.jpg'],
+    ),
   },
   {
     dept: 'korean_medicine',
     ko: '한방 검사',
     en: 'Korean Medicine Tests',
-    items: kmed(['경피온열검사', 'Digital Infrared Thermal Imaging (Full Body)'], ['사상체질검사', 'Sasang Constitution Test (QSCC II)']),
+    items: kmed(
+      ['경피온열검사', 'Digital Infrared Thermal Imaging (Full Body)', '74_thermal_imaging_test.jpg'],
+      ['사상체질검사', 'Sasang Constitution Test (QSCC II)', '75_sasang_constitution_test.jpg'],
+    ),
   },
 ];
