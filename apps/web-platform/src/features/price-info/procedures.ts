@@ -1,5 +1,6 @@
 import type { DepartmentKey } from '../hospital/types';
 import { ESTIMATE_DATE, ESTIMATES } from './estimates';
+import { KMED_PRICE_DATE, KMED_PRICES } from './koreanMedicinePrices';
 
 // 출처: 팀 문서 "병원별 시술 모음.docx" (진료과별 대표 진료·시술 분류, 자료 확인 2026-11-02)
 
@@ -35,6 +36,12 @@ const estimate = (ko: string): PriceRange | undefined => {
   return e && { min: e[0], max: e[1], source: '대구 시장 예상가 (팀원 수집)', date: ESTIMATE_DATE };
 };
 
+// 한방: 시술 종류와 가격 모두 심평원 비급여 진료비 공개 항목 (대구 한의원·한방병원, 기관별 하위 10%~상위 10%) → koreanMedicinePrices.ts
+const kmed = (...rows: [string, string][]): Procedure[] =>
+  rows.map(([ko, en]) => {
+    const k = KMED_PRICES[ko];
+    return { ko, en, price: k && { min: k.min, max: k.max, source: `심평원 비급여 진료비 (대구 한방 ${k.clinics}곳)`, date: KMED_PRICE_DATE } };
+  });
 
 export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
   // 피부과
@@ -278,5 +285,30 @@ export const PROCEDURE_CATEGORIES: ProcedureCategory[] = [
     ko: '눈꺼풀·눈물길',
     en: 'Eyelid & Tear Duct',
     items: list(['안검하수·눈꺼풀 이상·눈물길 질환 진료', 'Ptosis, Eyelid & Tear Duct Disorder Care', '66_eyelid_and_tear_duct_care.jpg']),
+  },
+  // 한방 (2026-11-23 추가)
+  {
+    dept: 'korean_medicine',
+    ko: '추나요법',
+    en: 'Chuna Manual Therapy',
+    items: kmed(['단순추나', 'Simple Chuna'], ['복잡추나', 'Complex Chuna'], ['특수추나', 'Special Chuna (Dislocation · Visceral · Craniosacral)']),
+  },
+  {
+    dept: 'korean_medicine',
+    ko: '약침',
+    en: 'Pharmacopuncture',
+    items: kmed(['약침술', 'Pharmacopuncture (Acupoint)']),
+  },
+  {
+    dept: 'korean_medicine',
+    ko: '한방물리요법',
+    en: 'Korean Medicine Physical Therapy',
+    items: kmed(['경근간섭저주파요법', 'Interferential Current Therapy'], ['경피전기자극요법', 'Transcutaneous Electrical Nerve Stimulation (TENS)'], ['한방 향기요법', 'Korean Medicine Aromatherapy']),
+  },
+  {
+    dept: 'korean_medicine',
+    ko: '한방 검사',
+    en: 'Korean Medicine Tests',
+    items: kmed(['경피온열검사', 'Digital Infrared Thermal Imaging (Full Body)'], ['사상체질검사', 'Sasang Constitution Test (QSCC II)']),
   },
 ];

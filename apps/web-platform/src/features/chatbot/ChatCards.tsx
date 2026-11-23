@@ -9,7 +9,7 @@ import { localHospitalName } from '../hospital/localize';
 
 // 카드의 진료과는 한국어 이름(피부과 등)으로 온다 (ai/agent/tools/chat_tools.py DEPT_CODES와 같은 표)
 // 화면 진료과 키가 있는 것만 번역하고, 나머지(치과·한방 등)는 받은 그대로 보여 준다
-const DEPT_KEYS: Record<string, DepartmentKey> = { 피부과: 'dermatology', 성형외과: 'plastic', 내과: 'internal', 안과: 'ophthalmology' };
+const DEPT_KEYS: Record<string, DepartmentKey> = { 피부과: 'dermatology', 성형외과: 'plastic', 내과: 'internal', 안과: 'ophthalmology', 한방: 'korean_medicine', 한의원: 'korean_medicine' };
 const deptLabel = (t: TFunction, d: string) => {
   const key = DEPT_KEYS[d] ?? (Object.values(DEPT_KEYS).includes(d as DepartmentKey) ? d : null);
   return key ? t(`dept.${key}`) : d;
