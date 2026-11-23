@@ -815,7 +815,8 @@
     const media = files.length
       ? `<span class="media">${files.map((a) => a.kind === 'video'
         ? `<video src="${esc(a.url)}" controls preload="metadata" aria-label="${esc(a.name || '영상')}"></video>`
-        : `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(a.url)}" alt="${esc(a.name || '사진')}"></a>`).join('')}</span>`
+        // 목록에는 썸네일(결정 29), 누르면 원본. 썸네일이 없으면(예전 사진) 원본
+        : `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(/^https:\/\//.test(a.thumb_url || '') ? a.thumb_url : a.url)}" alt="${esc(a.name || '사진')}" loading="lazy"></a>`).join('')}</span>`
       : m.img ? '<span class="img">📷 사진 있음 (직원만 열람)</span>' : '';
     return `<div class="msg ${m.f}">${m.o === '📷' && files.length ? '' : esc(main)}${media}<span class="tr">${esc(tr)}</span><span class="t">${esc(m.t)}</span></div>`;
   }
