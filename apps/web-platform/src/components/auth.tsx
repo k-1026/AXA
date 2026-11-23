@@ -3,6 +3,7 @@ import i18n from '../i18n';
 import { api, ApiError, setUnauthorizedHandler } from './api';
 import { accountKeyOf, removeAccountData, resetAccountMemory, setCurrentAccount, type AccountKey } from './account';
 import { readSessionSetting, readSetting, removeSetting, writeSessionSetting, writeSetting } from './storage';
+import type { Residency, ResidencyAnswers } from '../features/residency/ResidencyQuestions';
 
 // 로그인 상태
 // - 실제 회원: 백엔드 회원가입·로그인. 토큰은 이 브라우저(localStorage)에 두고, 로그아웃하면 서버 세션도 끝냄
@@ -12,6 +13,8 @@ export interface User {
   name: string;
   demo: boolean; // true면 예시 데이터를 보여준다
   email?: string;
+  // 체류 형태 (결정 28): null이면 아직 안 답함 → 첫 예약 요청 때 물음. resident면 정보 열람만
+  residency?: Residency | null;
 }
 
 export interface SignupInput {
@@ -22,6 +25,7 @@ export interface SignupInput {
   timezone: string;
   age14_confirmed: boolean;
   consents: { kind: 'terms' | 'privacy'; version: string }[];
+  residency: ResidencyAnswers;
 }
 
 interface Me {
@@ -29,6 +33,7 @@ interface Me {
   email: string;
   display_name: string | null;
   preferred_lang: string;
+  residency?: Residency | null;
 }
 
 const DEMO_KEY = 'demoLogin';
@@ -36,7 +41,7 @@ const TOKEN_KEY = 'token';
 const DEMO_USER: User = { name: 'Emma', demo: true };
 
 function toUser(me: Me): User {
-  return { id: me.id, name: me.display_name || me.email.split('@')[0], demo: false, email: me.email };
+  return { id: me.id, name: me.display_name || me.email.split('@')[0], demo: false, email: me.email, residency: me.residency ?? null };
 }
 
 const AuthContext = createContext<{
@@ -48,6 +53,7 @@ const AuthContext = createContext<{
   login: (email: string, password: string) => Promise<void>;
   signup: (input: SignupInput) => Promise<void>;
   withdraw: (password: string) => Promise<void>;
+  setResidency: (answers: ResidencyAnswers) => Promise<Residency>;
   logout: () => void;
 }>({
   user: null,
@@ -58,6 +64,7 @@ const AuthContext = createContext<{
   login: async () => {},
   signup: async () => {},
   withdraw: async () => {},
+  setResidency: async () => 'short_term',
   logout: () => {},
 });
 
@@ -130,6 +137,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await startSession(r.access_token);
   };
 
+  // 체류 형태 다시 답하기 (PUT /me/residency). 판단은 서버가 하고 결과를 돌려줌
+  const setResidency = async (answers: ResidencyAnswers) => {
+    const me = await api<Me>('/me/residency', { method: 'PUT', token, body: answers });
+    setUser(toUser(me));
+    return me.residency ?? 'short_term';
+  };
+
   const loginDemo = () => {
     resetAccountMemory();
     writeSessionSetting(DEMO_KEY, '1');
@@ -153,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, account, token: user && !user.demo ? token : null, ready, loginDemo, login, signup, withdraw, logout }}>
+    <AuthContext.Provider value={{ user, account, token: user && !user.demo ? token : null, ready, loginDemo, login, signup, withdraw, setResidency, logout }}>
       {children}
     </AuthContext.Provider>
   );

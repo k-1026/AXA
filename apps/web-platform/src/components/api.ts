@@ -19,7 +19,7 @@ export const setUnauthorizedHandler = (fn: ((token: string) => void) | null) => 
 };
 
 interface Options {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
 }
