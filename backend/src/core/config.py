@@ -43,8 +43,13 @@ class Settings(BaseSettings):
     supabase_service_role_key: str | None = None
     # Realtime 알림 토큰 서명 (Supabase JWT Keys > Legacy JWT Secret, 결정 27). 없으면 알림은 주기 확인만
     supabase_jwt_secret: str | None = None
+    # 웹 푸시 (결정 30). VAPID 키 한 쌍(base64url, `backend/scripts/make_vapid_keys.py`로 만듦). 없으면 푸시 끔
+    vapid_public_key: str | None = None
+    vapid_private_key: str | None = None
+    vapid_subject: str = "mailto:noreply@example.com"  # 푸시 서비스가 문제 있을 때 연락할 주소 (운영 때 팀 주소로)
 
-    @field_validator("supabase_url", "supabase_service_role_key", "supabase_jwt_secret", mode="before")
+    @field_validator("supabase_url", "supabase_service_role_key", "supabase_jwt_secret", "vapid_public_key",
+                     "vapid_private_key", mode="before")
     @classmethod
     def _empty_str_is_none(cls, v: str | None) -> str | None:
         return v or None

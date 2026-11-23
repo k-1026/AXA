@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-23 (3) · backend-A-web-push · Claude (웹 푸시, `backend-A-residency` 위)
+- 한 일: 결정 30. `pywebpush` 의존성, 설정 `VAPID_*`, 모델 `PushSubscription`(마이그레이션 **0012**), `notification/push.py`(구독·해제·commit 뒤 보내기·410 정리), API `/me/push/key`·`/me/push/subscriptions`, 키 생성 `scripts/make_vapid_keys.py`. `notify()`에 한 줄(`push.queue`)
+- 바뀐 계약: contracts 4·6-5
+- 테스트: 전체 통과 (새 `test_push.py` 8개 — 실제 pywebpush 암호화·서명 포함, 네트워크는 가짜)
+- 다음 할 일: 환자 웹 서비스 워커·구독 버튼 (`frontend-web-push`), 공용 DB 0012, 배포 때 Vercel에 `VAPID_*`
+- B에게 요청: 결정 30 확인 — B 코드는 안 고침 (notify 호출 그대로, commit 뒤 푸시)
+- 막힌 것·질문: `VAPID_SUBJECT` 운영 연락 주소는 팀이 정함
+
 ### 2026-11-23 · backend-A-residency · Claude (체류 형태 가입 때 묻기)
 - 한 일: 결정 28. `patients`에 `residency`·`residence_country`·`residency_answered_at` (마이그레이션 **0011**, 칸 추가만), 가입 `residency?`(3문항 + 거주국), `PUT /me/residency`, `PatientOut` 칸 추가. 예약 요청 전 `patient.service.require_short_term()` (없으면 422 `residency.required`, 국내 거주 403 `residency.not_eligible`). 챗봇 `PatientInfo.residency` → 계정 값 우선·`record_residency`가 못 바꿈 (`ai/agent` 3줄: `residency_locked`)
 - 바뀐 계약: contracts 4·6·6-1·6-6

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from core.config import get_settings
 from core.db import get_db
 from core.security import PatientPrincipal, current_patient, patient_uuid
-from modules.notification import service
+from modules.notification import push, service
 
 router = APIRouter(prefix="/me/notifications", tags=["notification"])
 
@@ -56,3 +56,42 @@ def read(body: ReadIn, db: Db, me: Me) -> dict[str, int]:
 def realtime_token(me: Me):
     token, exp = service.realtime_token(patient_uuid(me))
     return RealtimeOut(url=get_settings().supabase_url, token=token, expires_at=exp)
+
+
+# ---------- 웹 푸시 (결정 30) ----------
+
+push_router = APIRouter(prefix="/me/push", tags=["notification"])
+
+
+class PushKeyOut(BaseModel):
+    public_key: str  # VAPID 공개 키 (base64url) → pushManager.subscribe의 applicationServerKey
+
+
+class PushKeys(BaseModel):
+    p256dh: str = Field(min_length=1, max_length=200)
+    auth: str = Field(min_length=1, max_length=100)
+
+
+class PushSubscriptionIn(BaseModel):
+    endpoint: str = Field(pattern=r"^https://", max_length=1000)  # 브라우저 푸시 서비스 주소
+    keys: PushKeys
+
+
+class PushUnsubscribeIn(BaseModel):
+    endpoint: str = Field(max_length=1000)
+
+
+@push_router.get("/key", response_model=PushKeyOut)
+def push_key(me: Me):
+    return PushKeyOut(public_key=push.public_key())
+
+
+@push_router.post("/subscriptions", status_code=204)
+def push_subscribe(body: PushSubscriptionIn, db: Db, me: Me):
+    push.public_key()  # 꺼진 서버면 503 (저장해도 보낼 수 없음)
+    push.subscribe(db, patient_uuid(me), body.endpoint, body.keys.p256dh, body.keys.auth)
+
+
+@push_router.delete("/subscriptions", status_code=204)
+def push_unsubscribe(body: PushUnsubscribeIn, db: Db, me: Me):
+    push.unsubscribe(db, patient_uuid(me), body.endpoint)
