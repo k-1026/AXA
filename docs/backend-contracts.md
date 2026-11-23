@@ -72,6 +72,7 @@
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
 | `storage.unavailable` | 503 | 사진·영상 저장소(Supabase Storage)를 쓸 수 없음 — 설정 없음·Supabase 오류 (결정 22) |
+| `push.unavailable` | 503 | 웹 푸시 VAPID 키가 없음 → 화면은 사이트 안 알림만 (결정 30) |
 | `realtime.unavailable` | 503 | 실시간 알림 토큰을 만들 수 없음 (`SUPABASE_URL`·`SUPABASE_JWT_SECRET` 없음) → 화면은 주기 확인 (결정 27) |
 | `chatbot.unavailable` | 503 | 모든 LLM 제공자가 실패 (대화는 저장하지 않음, 잠시 뒤 다시) |
 | `internal` | 500 | 처리하지 못한 서버 오류 (`detail` = `{}`, 로그에는 예외 종류만) |
@@ -178,6 +179,9 @@
 |---|---|---|
 | `GET /me/notifications` | 최근 50개 `[{id, kind(status/reply/aftercare), request_id, hospital_id, status, created_at, read}]` | — |
 | `POST /me/notifications/read` | `{ids?}` (비우면 모두) → `{updated}`. 남의 id는 무시 | 422 |
+| `GET /me/push/key` | `{public_key}` — VAPID 공개 키 (브라우저 `pushManager.subscribe`용, 결정 30) | 503 `push.unavailable` |
+| `POST /me/push/subscriptions` | `{endpoint(https), keys{p256dh, auth}}` → 204. 같은 endpoint면 지금 환자로 옮김 | 422, 503 |
+| `DELETE /me/push/subscriptions` | `{endpoint}` → 204 (내 것만) | — |
 | `POST /me/notifications/realtime-token` | `{url, token, expires_at}` — Supabase Realtime 접속용 1시간 토큰 (`sub` = 환자 id, `role` = authenticated) | 503 `realtime.unavailable` |
 
 - 기록 시점: `booking._move`(환자가 한 변경 제외) · `booking.staff_reply` · `aftercare.tenant_reply` — 모두 같은 commit
@@ -229,6 +233,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-23 | 4·5·6-5 | 웹 푸시: `/me/push/key`·`/me/push/subscriptions`, 에러 `push.unavailable`, `notify()`가 commit 뒤 푸시 (모양·호출 위치 그대로, 결정 30, 마이그레이션 0012) | A (**B 확인 필요**) | `backend-A-web-push` → `backend` (`backend-A-residency` 다음) |
 | 2026-11-23 | 4·6·6-1·6-6 | 환자 체류 형태 6-6 신설(가입 `residency?`, `PUT /me/residency`, `PatientOut` 칸 추가), 예약 요청 전 계정 값 확인, 에러 `residency.required`(422)·`residency.not_eligible`(403) (결정 28, 마이그레이션 0011) | A (**B 확인 필요**) | `backend-A-residency` → `backend` |
 | 2026-11-20 | 6-2 | 병원 상담 답장 `POST /tenant/booking-requests/{id}/replies` 신설, 병원 목록·상세 응답에 `replies` 추가 (`TenantBookingOut`) | A (**B 확인 필요** — booking은 B 모듈) | `backend-A-booking-replies` → `backend` |
 | 2026-11-17 | 4·5 | **병원 정보 공개는 등록 병원만** (결정 21): `GET /hospitals`(`ids` 포함)·챗봇 병원 찾기는 등록 병원만, 미등록 병원 상세는 404 `not_found`. `get_basic()`·`require_requestable()`(내부 호출)은 그대로 | A (**B 확인 필요**) | `backend-A-contract-registered` → `backend` |
