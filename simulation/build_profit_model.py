@@ -1123,11 +1123,10 @@ def build_results():
 
 
 def build_snapshot():
-    """서버 없이 더블클릭으로 여는 대시보드 한 파일 (결과·진행 기록을 HTML 안에 넣음)"""
+    """서버 없이 더블클릭으로 여는 대시보드 한 파일 (결과를 HTML 안에 넣음)"""
     html = (BASE / "dashboard" / "index.html").read_text(encoding="utf-8")
-    prog_path = BASE / "output" / "progress.json"
-    data = {"results": json.loads(RESULTS.read_text(encoding="utf-8")),
-            "progress": json.loads(prog_path.read_text(encoding="utf-8")) if prog_path.exists() else None}
+    from datetime import date
+    data = {"results": json.loads(RESULTS.read_text(encoding="utf-8")), "generated": date.today().isoformat()}
     inject = "<script>window.__SNAPSHOT__ = " + json.dumps(data, ensure_ascii=False) + ";</script>\n"
     out = BASE / "output" / "수익시뮬레이션_대시보드.html"
     marker = "<script>\nconst man"

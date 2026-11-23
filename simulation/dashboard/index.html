@@ -51,8 +51,6 @@ details summary{cursor:pointer;padding:14px 18px;font-weight:600}
 details .in{padding:0 18px 18px}
 .glossary{font-size:12.5px;color:var(--sub);display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
 .glossary b{color:var(--ink)}
-.steps{list-style:none;margin:0;padding:0;font-size:13.5px}
-.steps li{padding:4px 0}
 .note{color:var(--sub);font-size:12.5px;margin-top:8px}
 .empty{color:var(--sub);padding:40px;text-align:center}
 </style>
@@ -60,7 +58,7 @@ details .in{padding:0 18px 18px}
 <body>
 <div class="wrap">
   <h1>메디대구 수익 시뮬레이션</h1>
-  <div class="lead">운영 시작 후 3년(1년 단위) · 팀 인건비 4명×주 4일×하루 4시간 · 광고 배너 월 15만 원 포함 · 요금안 v4: 기본 수수료 13%, 프리미엄 월 15만 원 + 8% · 숫자는 추정이며 실적이 아닙니다 · <span id="upd"></span></div>
+  <div class="lead">운영 시작 후 3년(1년 단위) · 팀 인건비 4명×주 4일×하루 4시간 · 광고 배너 월 15만 원 포함 · 요금: 기본 수수료 13%, 프리미엄 연 180만 원(월 15만 원으로 나눠 계산) + 8%, 수수료는 진료비 기준 · 숫자는 추정이며 실적이 아닙니다 · <span id="upd"></span></div>
   <div id="app"><div class="card empty">결과 계산 전입니다.</div></div>
 </div>
 
@@ -74,7 +72,7 @@ const SC_DESC = {
   '기준':'시장규모 문서의 팀 가정 그대로 (병원당 월 기본 0.5건 · 프리미엄 4건, 진료비 73만 원)',
   '낙관':'거래 빈도·진료비 +20%, 전환율 높고 직접비 낮음'};
 const URLQ = new URLSearchParams(location.search);  // ?L=0|1|2 인건비 단계, ?open=1 세부 펼침 (이미지 저장용)
-let R=null, P=null, L=URLQ.has('L')?+URLQ.get('L'):1, charts={}, lastR='';
+let R=null, L=URLQ.has('L')?+URLQ.get('L'):1, charts={}, lastR='';
 
 function css(k){return getComputedStyle(document.documentElement).getPropertyValue(k).trim()}
 function chart(id,cfg){ if(charts[id]) charts[id].destroy(); charts[id]=new Chart(document.getElementById(id),cfg) }
@@ -140,12 +138,11 @@ function render(){
   <details><summary>거래 1건·병원 1곳·환자 1명 기준 (단위경제)</summary><div class="in"><table><tbody>${R.unit.map(u=>`<tr><td>${u[0]}</td><td>${u[1]}</td></tr>`).join('')}</tbody></table></div></details>
   <details><summary>손익분기에 필요한 거래 수</summary><div class="in"><table><thead><tr><th>팀 인건비</th><th>필요 월 진료 완료</th><th>3년차 말 예상</th><th>배수</th><th>필요 평균 병원 수</th></tr></thead><tbody>
     ${R.breakeven.map(b=>`<tr><td>${b.label}</td><td>${b.need.toFixed(1)}건</td><td>${b.have.toFixed(1)}건</td><td>${(b.need/b.have).toFixed(2)}배</td><td>${b.hospitals.toFixed(0)}곳</td></tr>`).join('')}</tbody></table><div class="note">${R.breakeven_note}</div></div></details>
-  <details><summary>결론 · 주의할 점</summary><div class="in"><h3>결론</h3><ul class="c">${R.conclusions.map(c=>`<li>${c}</li>`).join('')}</ul><h3 style="margin-top:14px">주의할 점</h3><ul class="c">${R.cautions.map(c=>`<li>${c}</li>`).join('')}</ul></div></details>
-  <details><summary>작업 진행 기록</summary><div class="in" id="prog"></div></details>`;
+  <details><summary>결론 · 주의할 점</summary><div class="in"><h3>결론</h3><ul class="c">${R.conclusions.map(c=>`<li>${c}</li>`).join('')}</ul><h3 style="margin-top:14px">주의할 점</h3><ul class="c">${R.cautions.map(c=>`<li>${c}</li>`).join('')}</ul></div></details>`;
 
   app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{L=+b.dataset.l;render()});
   app.querySelectorAll('[data-tsc]').forEach(b=>b.onclick=()=>{app.querySelectorAll('[data-tsc]').forEach(x=>x.classList.toggle('on',x===b));table(b.dataset.tsc)});
-  table('기준'); renderProgress();
+  table('기준');
   if(URLQ.get('open')==='1') app.querySelectorAll('details').forEach(d=>d.open=true);
 
   Chart.defaults.color = css('--sub'); Chart.defaults.borderColor = css('--line'); Chart.defaults.font.size = 12; Chart.defaults.animation = false;
@@ -167,24 +164,17 @@ function render(){
 
 function table(sc){
   const Y = run(sc,L).years;
-  const rows = [['hospitals_end','연말 입점 병원 (곳)',1],['deals','진료 완료 (건)',1],['fee_basic','기본 수수료 (13%)'],['fee_prem','프리미엄 수수료 (8%)'],['sub','구독료'],['ad','광고 배너'],['revenue','매출 합계'],['contrib','공헌이익 (매출 − 건별 비용)'],['labor','팀 인건비'],['mkt','마케팅비'],['fixed','기타 고정비'],['onboard','병원 온보딩비'],['op','연간 손익'],['cash_end','연말 통장 잔고']];
+  const rows = [['hospitals_end','연말 입점 병원 (곳)',1],['deals','진료 완료 (건)',1],['fee_basic','기본 수수료 (13%)'],['fee_prem','프리미엄 수수료 (8%)'],['sub','프리미엄 연회비'],['ad','광고 배너'],['revenue','매출 합계'],['contrib','공헌이익 (매출 − 건별 비용)'],['labor','팀 인건비'],['mkt','마케팅비'],['fixed','기타 고정비'],['onboard','병원 온보딩비'],['op','연간 손익'],['cash_end','연말 통장 잔고']];
   document.getElementById('tbl').innerHTML = `<table><thead><tr><th>항목</th>${Y.map(y=>`<th>${y.y}</th>`).join('')}<th>3년 합계</th></tr></thead><tbody>
     ${rows.map(([k,n,cnt])=>{const tot=['hospitals_end','cash_end'].includes(k)?'':(cnt?Y.reduce((a,y)=>a+y[k],0).toFixed(0):man(Y.reduce((a,y)=>a+y[k],0)));
       return `<tr><td>${n}</td>${Y.map(y=>`<td class="${['op','cash_end'].includes(k)?cls(y[k]):''}">${cnt?y[k].toFixed(cnt&&k==='deals'?1:0):man(y[k])}</td>`).join('')}<td>${tot}</td></tr>`}).join('')}</tbody></table>`;
 }
 
-function renderProgress(){
-  const el = document.getElementById('prog'); if(!el || !P) return;
-  document.getElementById('upd').textContent = '갱신 ' + (P.updated||'');
-  el.innerHTML = `<ul class="steps">${P.steps.map((s,i)=>`<li>${s.status==='done'?'✅':s.status==='doing'?'⏳':'⬜'} ${i+1}. ${s.name}${s.note?` <span class="note">— ${s.note}</span>`:''}</li>`).join('')}</ul>`;
-}
-
 async function getJSON(p){ try{ const r=await fetch(p+'?t='+Date.now()); return r.ok?r.json():null }catch(e){ return null } }
 async function tick(){
-  if(window.__SNAPSHOT__){ P=window.__SNAPSHOT__.progress; if(!R){ R=window.__SNAPSHOT__.results; render(); } return; }
-  P = await getJSON('../output/progress.json') || P;
+  if(window.__SNAPSHOT__){ if(!R){ R=window.__SNAPSHOT__.results; document.getElementById('upd').textContent='계산 '+(window.__SNAPSHOT__.generated||''); render(); } return; }
   const r = await getJSON('../output/results.json');
-  if(r){ const s=JSON.stringify(r); if(s!==lastR){ lastR=s; R=r; if(!URLQ.has('L')) L=r.L_selected??1; render(); } else renderProgress(); }
+  if(r){ const s=JSON.stringify(r); if(s!==lastR){ lastR=s; R=r; if(!URLQ.has('L')) L=r.L_selected??1; render(); } }
 }
 tick(); setInterval(tick, 3000);
 </script>

@@ -14,7 +14,7 @@ v3(2026-11-20): 3년·연 단위, 팀 인건비 4명 × 주 4일 × 하루 4시�
 | `build_profit_model.py` | 엑셀·results.json·대시보드 파일 생성 |
 | `verify_model.py` | 수식 검증 (`formulas` 패키지 필요) |
 | `conclusions.json` | 대시보드 결론·주의 문구 |
-| `dashboard/index.html` · `progress.py` | 작업 중 진행 상황 대시보드 (`.claude/launch.json`의 `simulation`, 포트 5176) |
+| `dashboard/index.html` | 대시보드 틀 — `build_profit_model.py`가 결과를 넣어 `output/수익시뮬레이션_대시보드.html`을 만듦 |
 | `source/` | 원본: 분석계획 md, 실습양식 엑셀·안내 md, Day15 PDF |
 
 다시 만들기:
