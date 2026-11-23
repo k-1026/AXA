@@ -141,7 +141,7 @@
 | `GET /me/aftercare` | 내 대화 목록 (최근 메시지 순) `PatientThreadOut{id, request_id, status, last_message_at, last_message, unread}` — `unread` = 내가 마지막으로 보낸 뒤 병원이 보낸 수 | — |
 | `GET /me/booking-requests/{id}/aftercare` | 요청서 1건의 대화 + `messages[{id, sender(patient/staff), text_original, text_translated, has_photo, created_at}]` | 404 `not_found`(대화 없음·남의 것) |
 | `POST /me/booking-requests/{id}/aftercare/messages` | `{text(1~4,000자), photo?, attachments?[{path, kind(image/video), name}] (4개까지)}` → 201, 첫 메시지면 대화를 엶. 해결된 대화에 보내면 다시 `new` | 409 `booking.invalid_transition`(방문 완료 전·사후관리 미지원 병원), 404, 422 `validation`(빈 글·다른 요청서 경로의 파일) |
-| `POST /me/booking-requests/{id}/aftercare/uploads` | `{name, content_type, size}` → 201 `{path, kind, upload_url}`. 브라우저가 `upload_url`로 파일을 `PUT`(Content-Type 그대로) 한 뒤 `path`를 `attachments`에 넣어 보냄 | 422(사진·영상 아님, 50MB 초과), 404, 409(위와 같음), 503 `storage.unavailable` |
+| `POST /me/booking-requests/{id}/aftercare/uploads` | `{name, content_type, size, thumb?}` → 201 `{path, kind, upload_url, thumb_upload_url}`. 브라우저가 `upload_url`로 파일을 `PUT`(Content-Type 그대로) 한 뒤 `path`를 `attachments`에 넣어 보냄. 사진이고 `thumb: true`면 썸네일 주소도 → 썸네일(JPEG)을 올리고 첨부에 `thumb: true` (결정 29) | 422(사진·영상 아님, 50MB 초과), 404, 409(위와 같음), 503 `storage.unavailable` |
 
 - 사진·영상(결정 22): Supabase Storage 비공개 버킷 `aftercare-media`, 경로 `{tenant_id}/{request_id}/{무작위}.{확장자}`. 메시지 응답의 `attachments[{kind, name, url}]` — `url`은 1시간짜리 서명된 주소(못 만들면 `null`), 경로는 응답에 넣지 않음. 병원용 `GET /tenant/aftercare/{id}`도 같은 `attachments`
 - 지우기(결정 23): 탈퇴(`DELETE /me`)하면 그 환자가 보낸 파일을 바로 삭제하고 메시지 `attachments`를 비움(글·`has_photo`는 남음). 나머지 고아 파일은 7-1 정기 정리가 하루 뒤
@@ -234,6 +234,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-23 | 6-3 | 사진 썸네일: 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb?`, 응답 첨부에 `thumb_url`(환자·병원, 없으면 null) — 칸 추가만 (결정 29) | A (**B 확인 필요** — aftercare는 B 모듈, `router_tenant` 응답 칸 추가) | `backend-A-media-thumbs` → `backend` |
 | 2026-11-23 | 6-1·6-2·7 | 방문 전 환자 질문 `POST /me/booking-requests/{id}/questions`, 환자·병원 예약 응답에 `questions`, 챗봇 `hospital_question` 카드(초안만) (결정 32, 마이그레이션 0013). 챗봇 조건 맞춤 제안·예약 = 입점 가상 병원만 (결정 31) | A (**B 확인 필요** — booking 응답 칸 추가, `router_tenant` 한 곳) | `backend-A-chatbot-demo-flow` → `backend` (`backend-A-web-push` 다음) |
 | 2026-11-23 | 4·5·6-5 | 웹 푸시: `/me/push/key`·`/me/push/subscriptions`, 에러 `push.unavailable`, `notify()`가 commit 뒤 푸시 (모양·호출 위치 그대로, 결정 30, 마이그레이션 0012) | A (**B 확인 필요**) | `backend-A-web-push` → `backend` (`backend-A-residency` 다음) |
 | 2026-11-23 | 4·6·6-1·6-6 | 환자 체류 형태 6-6 신설(가입 `residency?`, `PUT /me/residency`, `PatientOut` 칸 추가), 예약 요청 전 계정 값 확인, 에러 `residency.required`(422)·`residency.not_eligible`(403) (결정 28, 마이그레이션 0011) | A (**B 확인 필요**) | `backend-A-residency` → `backend` |

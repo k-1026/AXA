@@ -31,6 +31,7 @@ class AttachmentOut(BaseModel):
     kind: str  # image / video
     name: str | None
     url: str | None = None  # 1시간짜리 서명된 주소. 못 만들면 None ("사진 있음"만 표시)
+    thumb_url: str | None = None  # 썸네일 (1시간). 없으면(영상·예전 사진) url을 그대로 씀
 
 
 class PatientMessageOut(BaseModel):
@@ -57,6 +58,7 @@ class AttachmentIn(BaseModel):
     path: str = Field(max_length=300)  # 업로드 API가 준 경로 (이 요청서 경로만 허용)
     kind: Literal["image", "video"]
     name: str = Field(default="", max_length=200)
+    thumb: bool = False  # 썸네일도 올렸음 (사진만, 경로는 서버가 정함 — 결정 29)
 
 
 class PatientMessageIn(BaseModel):
@@ -69,12 +71,14 @@ class UploadIn(BaseModel):
     name: str = Field(default="", max_length=200)
     content_type: str = Field(max_length=100)
     size: int = Field(gt=0)
+    thumb: bool = False  # 사진이면 썸네일 업로드 주소도 (JPEG, 결정 29)
 
 
 class UploadOut(BaseModel):
     path: str
     kind: str
     upload_url: str  # 이 주소로 파일을 PUT (Content-Type = content_type), 2시간 안에 한 번
+    thumb_upload_url: str | None = None  # 썸네일을 PUT (image/jpeg). 사진이고 thumb를 요청했을 때만
 
 
 def _out(thread, msgs=None, last=None, unread=0) -> PatientThreadOut:
@@ -105,8 +109,10 @@ def get_mine(request_id: uuid.UUID, db: Db, me: Me):
 @router.post("/me/booking-requests/{request_id}/aftercare/messages", response_model=PatientThreadOut, status_code=201)
 def send(request_id: uuid.UUID, body: PatientMessageIn, db: Db, me: Me):
     pid = patient_uuid(me)
-    service.patient_open(db, pid, request_id, body.text, photo=body.photo,
-                         attachments=[a.model_dump() for a in body.attachments])
+    # 썸네일 표시는 사진만 (경로는 원본에서 정해지므로 저장은 thumb: true만)
+    atts = [{**a.model_dump(exclude={"thumb"}), **({"thumb": True} if a.thumb and a.kind == "image" else {})}
+            for a in body.attachments]
+    service.patient_open(db, pid, request_id, body.text, photo=body.photo, attachments=atts)
     thread, msgs = service.patient_messages(db, pid, request_id)
     return _out(thread, msgs)
 
@@ -119,4 +125,5 @@ def upload_url(request_id: uuid.UUID, body: UploadIn, db: Db, me: Me):
         raise AppError(422, "validation", "사진·영상만, 1개 50MB까지 올릴 수 있습니다", {"errors": [{"loc": [loc], "type": "invalid"}]})
     prefix = service.patient_upload_prefix(db, patient_uuid(me), request_id)  # 404·409 먼저
     path = media.new_path(prefix, body.name)
-    return UploadOut(path=path, kind=kind, upload_url=media.sign_upload(path))
+    thumb = media.sign_upload(media.thumb_path(path)) if body.thumb and kind == "image" else None
+    return UploadOut(path=path, kind=kind, upload_url=media.sign_upload(path), thumb_upload_url=thumb)

@@ -17,6 +17,13 @@
 
 ## 기록
 
+### 2026-11-23 (2) · backend-A-media-thumbs · Claude (사진 썸네일)
+- 한 일: 결정 29. `media.thumb_path`·`with_thumbs`, 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb`, `attachments_out`에 `thumb_url`. 탈퇴 삭제·정기 정리에 썸네일 포함
+- 바뀐 계약: contracts 6-3 (칸 추가만)
+- 테스트: 전체 456개 통과 (새 4개)
+- 다음 할 일: 환자 웹 업로드 전 줄이기·썸네일 (`frontend-media-thumbs`), 대시보드 썸네일 표시
+- B에게 요청: 결정 29 확인 — `router_tenant` 응답 첨부에 `thumb_url`이 생김 (B 파일은 안 고침, `media.attachments_out`이 같이 줌)
+- 막힌 것·질문: 없음
 ### 2026-11-23 (4) · backend-A-chatbot-demo-flow · Claude (챗봇 가상 병원 흐름 + 방문 전 질문, `backend-A-web-push` 위)
 - 한 일: 결정 31·32. 가상 병원 4곳 `demo_hospitals.json`(예전 `demo_hospital.json` 대신), 시드가 4곳·병원별 직원 계정. 챗봇 게이트웨이 `demo_candidates`·`booking_info`(입점 가상 병원만), `recommend_hospitals`·`check_availability`·`prepare_booking_request`가 서버에서는 DB 사용(테스트는 가상 데이터 그대로). 새 모듈 `question`(마이그레이션 **0013**), `POST /me/booking-requests/{id}/questions`, 응답 `questions`, 챗봇 도구 `draft_hospital_question` + 카드 `hospital_question`
 - 바뀐 계약: contracts 6-1·6-2·7

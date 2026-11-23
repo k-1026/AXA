@@ -80,3 +80,9 @@ def test_목록은_폴더를_따라_내려간다(monkeypatch, on):
     monkeypatch.setattr(media.httpx, "post", lambda url, headers, timeout, json: _resp(200, tree[json["prefix"]]))
     [(path, created)] = media.list_objects()
     assert path == "t1/r1/f.png" and created.year == 2026 and created.tzinfo is not None
+
+
+def test_썸네일_경로는_같은_폴더_확장자만_바꿈():
+    assert media.thumb_path("t/r/abc.png") == "t/r/abc.thumb.jpg"
+    assert media.thumb_path("t/r/abc") == "t/r/abc.thumb.jpg"
+    assert media.with_thumbs(["t/r/a.jpg", ""]) == ["t/r/a.jpg", "t/r/a.thumb.jpg"]
