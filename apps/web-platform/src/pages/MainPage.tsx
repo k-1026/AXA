@@ -6,6 +6,7 @@ import { HospitalMap } from '../features/map/HospitalMap';
 import { HospitalSearch } from '../features/map/HospitalSearch';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { DepartmentKey, Hospital } from '../features/hospital/types';
+import { onMap } from '../features/hospital/filters';
 
 export function MainPage() {
   const { t } = useTranslation();
@@ -29,12 +30,15 @@ export function MainPage() {
     }
   };
 
+  // 지도는 서비스 진료과(피부·성형·내과·안과)가 있는 병원만 — 한의원·치과 등 '기타'만 있는 병원은 뺌
+  const mapItems = useMemo(() => (state.status === 'ready' ? state.data.items.filter(onMap) : []), [state]);
+
   const visible = useMemo(() => {
     if (state.status !== 'ready') return [];
     if (found) return found;
-    const items = state.data.items;
+    const items = mapItems;
     return dept ? items.filter((h) => h.depts.includes(dept)) : items;
-  }, [state, dept, found]);
+  }, [mapItems, dept, found]);
 
   return (
     <div className="main-page">
@@ -46,7 +50,7 @@ export function MainPage() {
             <span className="map-count">{t('map.count', { count: visible.length })}</span>
           )}
           {state.status === 'ready' && (
-            <HospitalSearch key={searchKey} hospitals={state.data.items} onSearch={search} />
+            <HospitalSearch key={searchKey} hospitals={mapItems} onSearch={search} />
           )}
         </div>
         {state.status === 'loading' && <p className="map-status">{t('map.loading')}</p>}

@@ -1,6 +1,6 @@
 // 백엔드 API 호출. 에러는 백엔드 형식 {code, message, detail}의 code로 구분 (docs/backend-contracts.md 4절)
 const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
-export const API_BASE = `${BASE}/api/v1`; // 병원 대시보드에 넘겨 줄 API 주소
+export const API_BASE = `${BASE}/api/v1`; // 병원 대시보드(/dashboard)도 같은 주소를 씀
 
 export class ApiError extends Error {
   constructor(
@@ -19,7 +19,7 @@ export const setUnauthorizedHandler = (fn: ((token: string) => void) | null) => 
 };
 
 interface Options {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
 }

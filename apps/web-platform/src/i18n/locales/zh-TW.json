@@ -406,7 +406,16 @@
         "openOn": "{{day}}看診（{{hours}}）",
         "slotsOn": "{{date}}有可諮詢時段",
         "inDistrict": "位於{{district}}"
-      }
+      },
+      "submitted": "已送出申請。醫院確認後會通知您。",
+      "goBookings": "查看預約管理",
+      "submitNote": "請勾選同意後由您親自送出。預約由醫院確認。",
+      "question": "要傳給{{hospital}}的問題",
+      "questionEdit": "修改問題",
+      "questionSend": "直接送出",
+      "questionSent": "已將問題傳給醫院。可在諮詢頁面查看回覆。",
+      "goConsult": "前往諮詢頁面",
+      "questionNote": "尚未送出。需要修改的話請修改後再送出。由醫院人員回覆。"
     },
     "consent": {
       "privacy": "個人資料蒐集與使用",
@@ -603,11 +612,35 @@
     "pickHospital": "請選擇醫院",
     "regNo": "外國患者招攬醫療機構登記號碼",
     "regNoHint": "格式：M-2009-03-01-0013",
-    "doneNoDashboard": "已登入。尚未設定管理頁面網址（VITE_DASHBOARD_URL）。",
     "err": {
       "hospitalTaken": "這家醫院已經入駐，請聯絡醫院代表帳號。",
       "notRegistered": "不是已登記機構或未營業，無法入駐。",
       "tooMany": "嘗試次數過多，請稍後再試。"
+    }
+  },
+  "residency": {
+    "title": "在韓居留狀態確認",
+    "country": "目前居住的國家",
+    "intro": "如有符合以下任一項，請全部勾選；都不符合請留空。",
+    "q": {
+      "alien_registration": "我已在韓國辦理外國人登錄（短期訪問 G-1 除外）",
+      "domestic_residence": "我已在韓國辦理國內居所申報（外國國籍同胞）",
+      "health_insurance": "我是韓國國民健康保險的加保人或受扶養人"
+    },
+    "residentNote": "您屬於居住在韓國的外國人。您仍可查看醫院資訊，但依法無法申請諮詢・預約，也無法使用醫院推薦。",
+    "bookingBlocked": "依法，居住在韓國的外國人無法申請諮詢・預約（仍可查看醫院資訊）。如居留狀態有變，請到我的頁面重新回答。",
+    "editLink": "前往我的頁面",
+    "status": "在韓居留",
+    "statusValue": {
+      "shortTerm": "短期訪問",
+      "resident": "居住在韓國（僅能查看資訊）",
+      "none": "尚未回答"
+    },
+    "edit": "重新回答",
+    "save": "儲存",
+    "err": {
+      "required": "請先回答居留狀態問題。",
+      "notEligible": "居住在韓國的外國人無法申請諮詢・預約。如居留狀態有變，請到我的頁面重新回答。"
     }
   }
 }

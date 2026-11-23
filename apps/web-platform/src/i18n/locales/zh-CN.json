@@ -406,7 +406,16 @@
         "openOn": "{{day}}就诊（{{hours}}）",
         "slotsOn": "{{date}}有可咨询时段",
         "inDistrict": "位于{{district}}"
-      }
+      },
+      "submitted": "已提交申请。医院确认后会通知您。",
+      "goBookings": "查看预约管理",
+      "submitNote": "请勾选同意后由您亲自提交。预约由医院确认。",
+      "question": "要发给{{hospital}}的问题",
+      "questionEdit": "修改问题",
+      "questionSend": "直接发送",
+      "questionSent": "已将问题发给医院。可在咨询页面查看回复。",
+      "goConsult": "前往咨询页面",
+      "questionNote": "尚未发送。需要修改的话请修改后再发送。由医院人员回复。"
     },
     "consent": {
       "privacy": "个人信息收集与使用",
@@ -603,11 +612,35 @@
     "pickHospital": "请选择医院",
     "regNo": "外国患者招揽医疗机构登记号",
     "regNoHint": "格式：M-2009-03-01-0013",
-    "doneNoDashboard": "已登录。尚未设置管理页面地址（VITE_DASHBOARD_URL）。",
     "err": {
       "hospitalTaken": "这家医院已经入驻，请联系医院代表账号。",
       "notRegistered": "不是已登记机构或未营业，无法入驻。",
       "tooMany": "尝试次数过多，请稍后再试。"
+    }
+  },
+  "residency": {
+    "title": "在韩居留状态确认",
+    "country": "目前居住的国家",
+    "intro": "如符合以下任一项，请全部勾选；都不符合请留空。",
+    "q": {
+      "alien_registration": "我已在韩国办理外国人登录（短期访问 G-1 除外）",
+      "domestic_residence": "我已在韩国办理国内居所申报（外国国籍同胞）",
+      "health_insurance": "我是韩国国民健康保险的参保人或被扶养人"
+    },
+    "residentNote": "您属于居住在韩国的外国人。您仍可查看医院信息，但依法无法申请咨询・预约，也无法使用医院推荐。",
+    "bookingBlocked": "依法，居住在韩国的外国人无法申请咨询・预约（仍可查看医院信息）。如居留状态有变，请到我的页面重新回答。",
+    "editLink": "前往我的页面",
+    "status": "在韩居留",
+    "statusValue": {
+      "shortTerm": "短期访问",
+      "resident": "居住在韩国（仅可查看信息）",
+      "none": "尚未回答"
+    },
+    "edit": "重新回答",
+    "save": "保存",
+    "err": {
+      "required": "请先回答居留状态问题。",
+      "notEligible": "居住在韩国的外国人无法申请咨询・预约。如居留状态有变，请到我的页面重新回答。"
     }
   }
 }
