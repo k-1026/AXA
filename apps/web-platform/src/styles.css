@@ -5271,3 +5271,8 @@ body.chat-open {
 .booking-consents .auth-field select {
   max-width: 260px;
 }
+
+/* 무한 스크롤: 목록 맨 아래 보이지 않는 표시 (보이면 다음 묶음을 불러옴) */
+.load-more-sentinel {
+  height: 1px;
+}
