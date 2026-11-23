@@ -1107,9 +1107,9 @@ a {
 /* 메인: 지도 오른쪽에 진료과 선택 (세로 버튼) */
 .map-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 168px;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .map-area {
@@ -1123,17 +1123,18 @@ a {
   gap: 10px;
 }
 
+/* 좁은 화면과 같은 작은 알약 버튼 */
 .map-body .dept-chip {
   width: 100%;
   height: auto;
-  min-height: 60px;
-  flex: 1 1 0;
-  max-height: 84px;
-  border-radius: 16px;
+  min-height: 44px;
+  flex: 0 0 auto;
+  border-radius: 999px;
   flex-direction: row;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
   text-align: left;
 }
 
