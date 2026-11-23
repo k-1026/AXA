@@ -83,6 +83,8 @@ def to_booking_create(draft: JSON, patient_timezone: str) -> JSON:
         "visa_needed": draft["visa_needed"],
         "message": draft["inquiry"],
         "health_info": draft.get("health_info"),
+        # 계약 6절 필수 칸 (2026-11-18). 초안은 단기 방문(short_term)일 때만 만들어짐 (prepare_booking_request)
+        "residency": "short_term",
     }
 
 

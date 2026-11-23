@@ -131,3 +131,23 @@ def test_가상_병원_예약_가능_시간은_진료_시간에서(client, db_en
     client.post(ASK, headers=auth(token), json={"message": "when can I go?"})
     slots = _tool_result(llm, "check_availability")["slots"]
     assert slots == {"2026-12-05": ["10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"]}  # 일요일(12-06) 휴진
+
+
+def test_챗봇_요청서_카드는_그대로_예약_API로_보낼_수_있다(client, db_engine, llm):
+    """카드의 request + 환자가 체크한 동의 = 사람이 쓰는 요청서와 같은 API (결정 3). 계약 필수 칸이 빠지면 422가 나던 것."""
+    from sqlalchemy.orm import Session
+
+    from db_rows import demo_partner
+
+    with Session(db_engine) as s:
+        demo_partner(s, 9002)
+    token = _visitor(client)
+    llm.script += [call("prepare_booking_request", {"hospital_id": 9002, "department": "피부과", "preferred_slots": ["2030-12-05 10:00"],
+                                                    "language": "ko", "nationality": "TW", "visa_needed": False,
+                                                    "inquiry": "레이저 몇 번?"}), say("Check the card.")]
+    card = cards(client.post(ASK, headers=auth(token), json={"message": "book 9002"}))["booking_draft"]
+    consents = [{"kind": k, "version": "2026-11-03" if k == "privacy" else "2026-11-18"} for k in card["consents_required"]]
+    r = client.post(f"/api/v1/hospitals/{card['hospital_id']}/booking-requests", headers=auth(token),
+                    json={**card["request"], "consents": consents})
+    assert r.status_code == 201, r.json()
+    assert r.json()["status"] == "pending" and r.json()["hospital_id"] == 9002
