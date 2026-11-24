@@ -116,7 +116,7 @@ def test_my_bookings_and_aftercare():
 def test_prices_and_docs():
     p = R.run("get_prices", {"item": "scar"}, SHORT)
     assert len(p["prices"]) == 2 and "Korean patients" in p["note"]
-    assert R.run("retrieve_docs", {"query": "visa", "topic": "visa"}, SHORT)["documents"][0]["source"]
+    assert R.run("retrieve_docs", {"query": "rights", "topic": "rights"}, SHORT)["documents"][0]["source"]
     assert R.run("retrieve_docs", {"query": "zzz unknown"}, SHORT)["documents"] == []
 
 
@@ -168,3 +168,10 @@ def test_past_slots_are_rejected_when_the_draft_is_made():
     assert "error" in R.run("prepare_booking_request", args, late)
     early = ToolContext(patient_id="demo-patient-1", residency="short_term", today=date(2026, 11, 12))
     assert R.run("prepare_booking_request", args, early)["status"] == "draft"
+
+
+def test_visa_documents_are_not_returned():
+    # 비자는 답하지 않고 대사관·영사관 안내 (2026-11-24). 문서 검색이 비자 안내문을 돌려주면 모델이 그대로 설명함
+    for args in ({"query": "medical visa", "topic": "visa"}, {"query": "C-3-3 visa documents"}, {"query": "비자", "topic": "other"}):
+        res = R.run("retrieve_docs", args, SHORT)
+        assert res["documents"] == [] and "embassy" in res["note"], args

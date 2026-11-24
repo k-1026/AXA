@@ -241,5 +241,6 @@ class Orchestrator:
         state.history = base + turn
         return ChatReply(
             text=text, cards=cards, trace=trace, truncated=truncated,
-            safety_categories=categories, medical_notice=bool(categories), user_text=user_text,
+            # 비자는 의료 판단이 아니라 "의료 상담 아님" 고지를 붙이지 않는다
+            safety_categories=categories, medical_notice=bool(set(categories) - safety.NON_MEDICAL_CATEGORIES), user_text=user_text,
         )

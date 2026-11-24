@@ -211,3 +211,10 @@ def test_submit_draft_with_a_read_only_gateway_fails_with_a_clear_message():
     state = ConversationState(language="en", patient_id="p", residency="short_term", booking_draft={"hospital_id": 9001})
     with pytest.raises(NotImplementedError, match="booking-requests"):
         orch.submit_draft(state, [])
+
+
+def test_visa_question_gets_note_but_no_medical_notice():
+    orch, llm = make([say("비자는 안내할 수 없어요. 주베트남 한국 대사관·영사관에 문의해 주세요.")])
+    reply = orch.handle(ConversationState(), "의료비자 받을 수 있을까요?")
+    assert reply.safety_categories == ["visa"] and reply.medical_notice is False
+    assert any(m["role"] == "system" and "embassy" in m["content"] for m in llm.calls[0][0][1:])

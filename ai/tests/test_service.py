@@ -272,7 +272,7 @@ def test_every_tool_result_fits_its_card_model():
         ("recommend_hospitals", {"department": "피부과", "language": "en"}, "hospital_suggestions"),
         ("get_hospital", {"hospital_id": 9001}, "hospital_detail"),
         ("get_prices", {"item": "scar"}, "price_list"),
-        ("retrieve_docs", {"query": "visa", "topic": "visa"}, "sources"),
+        ("retrieve_docs", {"query": "rights", "topic": "rights"}, "sources"),
         ("check_availability", {"hospital_id": 9001, "date_from": "2026-12-01", "date_to": "2026-12-03"}, "time_slots"),
         ("get_my_bookings", {}, "booking_list"),
         ("open_aftercare_thread", {"booking_id": "demo-bk-002", "topic": "documents", "message": "receipt"}, "aftercare_thread"),

@@ -34,6 +34,7 @@ from ai.agent.tools.booking_store import (
     BookingError, BookingStore, parse_local_slot, required_consents, to_booking_create,
 )
 from ai.agent.tools.registry import JSON, Tool, ToolContext, ToolError, ToolRegistry
+from ai.llm.safety import _VISA_RE
 
 # 사용자 언어 코드 = 프론트·백엔드가 지원하는 5개 (backend `patients.preferred_lang`, 요청서 `lang`)
 LANGS = ["en", "zh-CN", "zh-TW", "vi", "ko"]
@@ -234,7 +235,11 @@ def get_prices(args: JSON, ctx: ToolContext) -> JSON:
 def retrieve_docs(args: JSON, ctx: ToolContext) -> JSON:
     q = args["query"].lower()
     topic = args.get("topic")
-    rows = [d for d in fd.DOCS if (topic in (None, "other") or d["topic"] == topic)]
+    # 비자는 안내하지 않는다 (2026-11-24 결정) — 비자 문서는 돌려주지 않고 대사관·영사관 안내만
+    if topic == "visa" or any(p.search(args["query"]) for p in _VISA_RE):
+        return {"documents": [], "note": "Visa questions are not answered here. Say you can't help with visas and ask the "
+                                         "user to contact the Korean embassy or consulate in their country."}
+    rows = [d for d in fd.DOCS if d["topic"] != "visa" and (topic in (None, "other") or d["topic"] == topic)]
     if topic in (None, "other"):
         rows = [d for d in rows if any(w in (d["title"] + d["text"]).lower() for w in q.split())] or []
     if not rows:
