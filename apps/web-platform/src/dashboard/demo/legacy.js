@@ -119,9 +119,12 @@ export function startDashboard(host, { onLeave }) {
         ] },
     ],
   };
+  // 환자 글 번역 표시: 서버는 원문이 이미 한국어면 번역하지 않음(modules/agent/translate.py) → "(번역 전)" 대신 번역 줄을 숨김 (null)
+  const isKo = (t) => { const l = [...String(t || '')].filter((c) => /\p{L}/u.test(c)); return l.length > 0 && l.filter((c) => c >= '가' && c <= '힣').length / l.length > 0.5; };
+  const patientTr = (tr, orig, missing = '(번역 전)') => tr || (isKo(orig) ? null : missing);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function msgHtml(m) {
-    const main = m.f === 'p' ? m.o : m.k, tr = m.f === 'p' ? '번역: ' + m.k : '환자에게 보이는 글: ' + m.o;
+    const main = m.f === 'p' ? m.o : m.k, tr = m.f === 'p' ? (m.k == null ? '' : '번역: ' + m.k) : '환자에게 보이는 글: ' + m.o;
     // 사진·영상: 서버가 준 1시간짜리 서명된 주소 (Supabase Storage 비공개 버킷). 주소가 없으면 "사진 있음"만
     const files = (m.files || []).filter((a) => /^https:\/\//.test(a.url || ''));
     const media = files.length
@@ -130,7 +133,7 @@ export function startDashboard(host, { onLeave }) {
         // 목록에는 썸네일(결정 29), 누르면 원본. 썸네일이 없으면(예전 사진) 원본
         : `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(/^https:\/\//.test(a.thumb_url || '') ? a.thumb_url : a.url)}" alt="${esc(a.name || '사진')}" loading="lazy"></a>`).join('')}</span>`
       : m.img ? '<span class="img">📷 사진 있음 (직원만 열람)</span>' : '';
-    return `<div class="msg ${m.f}">${m.o === '📷' && files.length ? '' : esc(main)}${media}<span class="tr">${esc(tr)}</span><span class="t">${esc(m.t)}</span></div>`;
+    return `<div class="msg ${m.f}">${m.o === '📷' && files.length ? '' : esc(main)}${media}${tr ? `<span class="tr">${esc(tr)}</span>` : ''}<span class="t">${esc(m.t)}</span></div>`;
   }
   // HOOKS[key]가 있으면(백엔드 연결) 버튼·전송·대화 선택을 API로 처리, 없으면 예시 데이터로 화면만 바뀜
   const HOOKS = {};
@@ -314,14 +317,14 @@ export function startDashboard(host, { onLeave }) {
       // 빨간 숫자: 대기 중인데 병원 답장이 아직 없으면 1 (답장은 서버에 저장 → 새로고침해도 유지)
       unread: (r.status === 'pending' && !(r.replies || []).length) || lastAsk(r) > lastReply(r) ? 1 : 0, title: TRT[r.treatment] || r.treatment || '상담',
       sub: (r.status === 'proposed' ? '시간 제안함 ' + kdate(r.confirmed_slot) : r.status === 'confirmed' ? '확정 ' + kdate(r.confirmed_slot) : '희망 ' + kdate(r.preferred_slots[0])) + (r.visa_needed ? ' · 예약확인서 필요' : ''),
-      slots: r.preferred_slots, sum: r.message_translated || '(번역 전)',
+      slots: r.preferred_slots, sum: patientTr(r.message_translated, r.message_original) ?? r.message_original,
       tags: [TRT[r.treatment] || r.treatment, '희망일 ' + r.preferred_slots.length + '개', r.visa_needed ? '비자 서류' : '비자 불필요'].filter(Boolean),
       msgs: [
-        ...(r.message_original ? [{ f: 'p', o: r.message_original, k: r.message_translated || '(번역 전)', t: kdate(r.created_at) }] : []),
+        ...(r.message_original ? [{ f: 'p', o: r.message_original, k: patientTr(r.message_translated, r.message_original), t: kdate(r.created_at) }] : []),
         // 답장과 방문 전 환자 질문(결정 32)을 시간 순으로
         ...[
           ...(r.replies || []).map((x) => ({ at: x.sent_at, m: { f: 's', k: x.text_ko, o: x.text_translated || '(번역 연결 전 — 환자에게 한국어 원문)', t: kdate(x.sent_at) } })),
-          ...(r.questions || []).map((x) => ({ at: x.created_at, m: { f: 'p', o: x.text_original, k: x.text_translated || '(번역 전 — 번역 동의 없음)', t: kdate(x.created_at) } })),
+          ...(r.questions || []).map((x) => ({ at: x.created_at, m: { f: 'p', o: x.text_original, k: patientTr(x.text_translated, x.text_original, '(번역 전 — 번역 동의 없음)'), t: kdate(x.created_at) } })),
         ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at)).map((x) => x.m),
       ],
     }));
@@ -332,7 +335,7 @@ export function startDashboard(host, { onLeave }) {
   async function openThread(c) {
     const th = await call('/tenant/aftercare/' + c.tid);
     c.msgs = th.messages.map((m) => m.sender === 'patient'
-      ? { f: 'p', o: m.text_original, k: m.text_translated || '(번역 전)', t: kdate(m.created_at), img: m.has_photo, files: m.attachments || [] }
+      ? { f: 'p', o: m.text_original, k: patientTr(m.text_translated, m.text_original), t: kdate(m.created_at), img: m.has_photo, files: m.attachments || [] }
       : { f: 's', k: m.text_original, o: m.text_translated || '(번역 연결 전)', t: kdate(m.created_at) });
     c.sub = AC_STATUS[th.status] + ' · 방문 ' + kdate(th.visited_slot);
     c.loaded = true;
