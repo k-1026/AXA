@@ -25,9 +25,9 @@
 | 코드 | 뜻 | 누가 바꾸나 |
 |---|---|---|
 | `pending` | 대기 (기본값) | 생성 시 |
-| `confirmed` | 확정 | 병원 직원 / 환자가 `proposed` 수락 |
+| `confirmed` | 확정 | 병원 직원(`pending`에서만 — 환자가 고른 시간) / 환자가 `proposed` 수락 (병원이 제안한 시간은 병원이 확정 X, 결정 33) |
 | `rejected` | 거절 | 병원 직원 |
-| `proposed` | 병원이 다른 시간 제안 | 병원 직원 |
+| `proposed` | 병원이 다른 시간 제안 | 병원 직원 — 제안 시간은 그 병원 진료시간 안(휴진일·진료 전후·점심이면 422 `validation`, `loc: ["slot"]`; 진료시간 데이터 없으면 막지 않음, 결정 33) |
 | `cancelled` | 환자 취소 | 환자 (`pending`·`proposed`에서만) |
 | `expired` | 희망 날짜가 모두 지남 | 시스템 |
 
@@ -234,6 +234,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |
 | 2026-11-23 | 6-3 | 사진 썸네일: 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb?`, 응답 첨부에 `thumb_url`(환자·병원, 없으면 null) — 칸 추가만 (결정 29) | A (**B 확인 필요** — aftercare는 B 모듈, `router_tenant` 응답 칸 추가) | `backend-A-media-thumbs` → `backend` |
 | 2026-11-23 | 6-1·6-2·7 | 방문 전 환자 질문 `POST /me/booking-requests/{id}/questions`, 환자·병원 예약 응답에 `questions`, 챗봇 `hospital_question` 카드(초안만) (결정 32, 마이그레이션 0013). 챗봇 조건 맞춤 제안·예약 = 입점 가상 병원만 (결정 31) | A (**B 확인 필요** — booking 응답 칸 추가, `router_tenant` 한 곳) | `backend-A-chatbot-demo-flow` → `backend` (`backend-A-web-push` 다음) |
 | 2026-11-23 | 4·5·6-5 | 웹 푸시: `/me/push/key`·`/me/push/subscriptions`, 에러 `push.unavailable`, `notify()`가 commit 뒤 푸시 (모양·호출 위치 그대로, 결정 30, 마이그레이션 0012) | A (**B 확인 필요**) | `backend-A-web-push` → `backend` (`backend-A-residency` 다음) |
