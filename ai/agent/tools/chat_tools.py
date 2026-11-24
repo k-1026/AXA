@@ -270,23 +270,23 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
     if ctx.residency == "resident":
         return {"status": "not_available",
                 "reason": "Consultation requests through MediDaegu are for short-term visitors. Please contact the hospital directly.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
     if not h["is_registered_facility"]:
         return {"status": "not_available",
                 "reason": "This hospital is not a registered foreign-patient facility, so requests can't be sent here.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
     if not h.get("accepts_requests", True):  # 등록 병원이지만 메디대구 입점 X (결정 31: 예약은 가상 입점 병원만)
         return {"status": "not_available",
                 "reason": "This hospital has not joined MediDaegu, so consultation requests can't be sent through us. "
                           "Use recommend_hospitals to suggest MediDaegu partner hospitals (demo), or share the hospital's phone.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
     # 백엔드 BookingCreate(docs/backend-contracts.md 6절)가 요구하는 칸. 연락 방법은 계정 이메일로 고정
     department = args.get("department") or (h["departments"][0] if len(h["departments"]) == 1 else None)
     if department and department not in DEPT_CODES:
         return {"status": "not_available",
                 "reason": f"Online consultation requests are currently available for {', '.join(DEPT_CODES)} only. "
                           f"Please contact the hospital directly for {department}.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
     # 비자 도움 여부는 사용자가 직접 답한 경우만 받는다 — 모델이 질문을 건너뛰고 False를 지어 넣은 사례 (2026-11-24)
     visa_unconfirmed = args.get("visa_needed") is not None and not _user_said(args.get("visa_statement"), ctx)
     if visa_unconfirmed:
@@ -336,6 +336,17 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
         "consents_required": required_consents(draft),  # 요청서마다 받음. 건강정보는 별도 동의 (개인정보보호법 제23조)
         "note": "Show the summary card. Do not say the request was sent until the user presses Submit.",
     }
+
+
+def daegu_tel(tel: str | None) -> str | None:
+    """지역번호가 빠진 시내 번호(예: 253-0707)에 대구 053을 붙인다. 병원 목록은 대구만이라 안전.
+    0으로 시작(053·010 등)하거나 15xx·16xx·18xx 대표번호는 그대로."""
+    if not tel:
+        return tel
+    digits = re.sub(r"\D", "", tel)
+    if tel.startswith("0") or re.fullmatch(r"1[5-8]\d{6}", digits) or len(digits) not in (7, 8):
+        return tel
+    return f"053-{tel}"
 
 
 def _user_said(statement: Any, ctx: ToolContext) -> bool:

@@ -175,3 +175,17 @@ def test_visa_documents_are_not_returned():
     for args in ({"query": "medical visa", "topic": "visa"}, {"query": "C-3-3 visa documents"}, {"query": "비자", "topic": "other"}):
         res = R.run("retrieve_docs", args, SHORT)
         assert res["documents"] == [] and "embassy" in res["note"], args
+
+
+def test_daegu_tel_gets_area_code():
+    # 공공데이터 전화번호에 지역번호가 빠진 병원이 있음 (11/24 배포본: 고운미피부과 "253-0707"). 병원 목록은 대구만
+    from ai.agent.tools.chat_tools import daegu_tel
+    assert daegu_tel("253-0707") == "053-253-0707"
+    assert daegu_tel("2530707") == "053-2530707"
+    for same in ("053-741-7575", "1588-1234", "1661-1234", "010-1234-5678", "", None):
+        assert daegu_tel(same) == same
+
+
+def test_prompt_checks_hospital_before_collecting_details():
+    from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
+    assert "before asking for any other details" in SYSTEM_PROMPT
