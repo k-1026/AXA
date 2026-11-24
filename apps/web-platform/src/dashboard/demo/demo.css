@@ -9,7 +9,8 @@
 .md-dashboard * { box-sizing:border-box; }
 .md-dashboard { min-height:100vh; background:var(--bg); color:var(--fg); font-family:var(--font-ko); font-size:14px; line-height:1.55; word-break:keep-all; }
 .md-dashboard header { min-height:var(--header-h); background:var(--card); border-bottom:1px solid var(--line); padding:8px 24px; display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
-.md-dashboard .logo { font-weight:700; color:var(--brand); font-size:1.5rem; text-decoration:none; }
+.md-dashboard .logo { font-weight:700; color:var(--brand); font-size:1.5rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+.md-dashboard .logo-mark { height:28px; width:auto; }
 .md-dashboard .logo-tag { font-size:12px; font-weight:600; color:var(--brand); background:var(--brand-soft); border-radius:999px; padding:2px 8px; margin-left:6px; vertical-align:4px; }
 .md-dashboard .hbtn { height:40px; padding:0 12px; border:1px solid var(--line); border-radius:10px; background:var(--card); font:inherit; font-size:0.9rem; color:var(--fg); cursor:pointer; }
 .md-dashboard .hbtn:hover { border-color:var(--brand); color:var(--brand); }
