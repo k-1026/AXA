@@ -572,6 +572,7 @@
     "home": "Về trang chủ"
   },
   "reserve": {
+    "exampleNotice": "Lịch mẫu · Không phải đặt lịch thật — đây là bản trình diễn. Không có lịch hẹn nào được gửi đến bệnh viện thật.",
     "title": "Đặt lịch khám",
     "back": "Quay lại thông tin bệnh viện",
     "pickDate": "Chọn ngày",
