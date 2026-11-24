@@ -188,7 +188,7 @@
           <div class="row"><span>그중 회원 등급 포함분</span><span id="acIncluded">15건</span></div>
           <div class="row"><span>추가 과금 건</span><b id="acExtra">4건</b></div>
           <div class="row"><span>현재 등급</span><span id="acPlanName">프리미엄 회원</span></div>
-          <p class="note">과금 단위 예시: 환자 1명 · 방문 1회당 대화 1건. 사후관리는 프리미엄 회원 기능 — 등급은 <a href="#billing">요금·정산</a>에서 선택</p>
+          <p class="note">과금 단위 예시: 환자 1명 · 방문 1회당 대화 1건. 사후관리는 기본·프리미엄 모두 써요 — 등급(회원비·수수료율)은 <a href="#billing">요금·정산</a>에서 선택</p>
           <h4>재방문으로 이어진 사후관리</h4>
           <div class="kpi"><div class="v" style="font-size:20px">3건</div><div class="l">사후관리 대화 후 재예약</div></div>
         </div>
@@ -214,7 +214,7 @@
         <p class="note">문의 원문·사진은 이 병원 직원만 보고 열람 기록이 남아요. 같은 주제가 3건 미만이면 통계에 대표 사례를 보여주지 않아요.</p>
       </div>
     </div>
-    <div id="acOff" class="card hidden"><h3>사후관리를 지원하지 않는 병원</h3><p>환자에게 "이 병원은 플랫폼 사후관리를 지원하지 않아요. 병원에 직접 연락해 주세요"라고 보여요. 회원 등급·요금은 그대로예요 (사후관리는 프리미엄 회원 기능). 언제든 다시 켤 수 있어요.</p></div>
+    <div id="acOff" class="card hidden"><h3>사후관리를 지원하지 않는 병원</h3><p>환자에게 "이 병원은 플랫폼 사후관리를 지원하지 않아요. 병원에 직접 연락해 주세요"라고 보여요. 회원 등급·요금은 그대로예요. 언제든 다시 켤 수 있어요.</p></div>
   </section>
 
   <!-- 통계 -->
@@ -380,8 +380,8 @@
     <div class="grid g2">
       <div class="card"><h3>1. 회원 등급 (요금 v4)</h3>
         <div class="grid g2" id="subPlans" style="gap:10px">
-          <div class="plan" data-tier="basic"><b>기본 회원</b><div class="p">월 ₩0 + 수수료 13%</div><span>병원 정보 관리 · 요청함·캘린더 · 예약 확정·제안·거절</span></div>
-          <div class="plan" data-tier="premium"><b>프리미엄 회원</b><div class="p">연 ₩1,800,000 + 수수료 8%</div><span>+ AI 번역·요약·답장 초안 · 사후관리 채팅 · 분석 탭 (월 환산 ₩150,000)</span></div>
+          <div class="plan" data-tier="basic"><b>기본 회원</b><div class="p">월 ₩0 + 수수료 13%</div><span>모든 기능 (프리미엄과 같음)</span></div>
+          <div class="plan" data-tier="premium"><b>프리미엄 회원</b><div class="p">연 ₩1,800,000 + 수수료 8%</div><span>모든 기능 (기본과 같음) · 수수료 8% (월 환산 ₩150,000)</span></div>
         </div>
         <p class="note">결제 확인된 진료비가 월 300만 원(약 3건)을 넘으면 프리미엄이 이득 · 등급은 환자 화면 노출·정렬과 무관</p>
       </div>
@@ -442,7 +442,7 @@
       </div>
       <div class="card"><h3>사후관리 이용료 비교</h3>
         <div class="row"><span>기업용 CRM·메시지 솔루션 (Standard)</span><b>월 ₩1,000,000</b></div><div class="bar"><i style="width:100%;background:#cfd5dd"></i></div>
-        <div class="row"><span><b>메디대구 프리미엄 회원비 (사후관리·AI·분석 포함, 연 ₩1,800,000)</b></span><b>월 환산 ₩150,000</b></div><div class="bar"><i style="width:15%"></i></div>
+        <div class="row"><span><b>메디대구 프리미엄 회원비 (수수료 8% 적용, 연 ₩1,800,000)</b></span><b>월 환산 ₩150,000</b></div><div class="bar"><i style="width:15%"></i></div>
         <h4>원가</h4>
         <div class="row"><span>AI 요약·번역 1건 (Gemini 2.5 Flash 기준 [가정])</span><b>약 ₩30</b></div>
         <p class="note">입력 3만·출력 5천 토큰, 1달러 1,400원 가정. 큰 원가는 운영 인력·서버라 가격은 "다른 도구보다 훨씬 싸게"로 정함.</p>

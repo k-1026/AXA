@@ -43,7 +43,7 @@ export function startDashboard(host, { onLeave }) {
     set('sumTotal', won(total)); set('homeTotal', won(total));
     set('acIncluded', '19건 (기본 30건)');
     set('acExtra', '0건');
-    set('acPlanName', state.tier === 'basic' ? '기본 회원 (사후관리는 프리미엄 기능)' : '프리미엄 회원에 포함');
+    set('acPlanName', state.tier === 'basic' ? '기본 회원에 포함' : '프리미엄 회원에 포함');
     set('setAc', state.ac ? '지원' : '미지원');
     document.getElementById('acBody').classList.toggle('hidden', !state.ac);
     document.getElementById('acOff').classList.toggle('hidden', state.ac);
@@ -590,7 +590,7 @@ export function startDashboard(host, { onLeave }) {
     if (on === state.ac) return;
     const out = await dialog({
       title: on ? '사후관리 지원을 켤까요?' : '사후관리 지원을 끌까요?', ok: on ? '켜기' : '끄기', danger: !on,
-      body: on ? '<p>환자 사이트 “사후관리 지원” 필터에 이 병원이 나오고, 방문 완료 환자가 사후관리 대화를 열 수 있어요.</p><p class="note">사후관리는 프리미엄 회원 기능이에요 (요금 v4).</p>'
+      body: on ? '<p>환자 사이트 “사후관리 지원” 필터에 이 병원이 나오고, 방문 완료 환자가 사후관리 대화를 열 수 있어요.</p><p class="note">사후관리는 기본·프리미엄 모두 쓸 수 있어요 (요금 v4).</p>'
         : '<p>“사후관리 지원” 필터에서 빠지고, 환자가 <b>새</b> 사후관리 대화를 열 수 없어요. 이미 열린 대화는 그대로 볼 수 있어요.</p><p class="note">회원 등급·요금은 바뀌지 않아요.</p>',
       onOk: async () => {
         if (!API.ready) return { demo: true };
