@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-24 (2) · backend-A-vercel-cron · Claude (결정 33 — 제안 시간은 환자 수락만, 진료시간 안만)
+- 한 일: **B 파일 `booking/service.py` 수정 (사용자 지시: "B한테 넘기지 말고")** — TRANSITIONS에서 `("proposed", "confirm")` 제거, `staff_act`의 propose에 `_check_open`(그 병원 `hospital_hours`, 한국 시간, 휴진·진료 전후·점심이면 422 validation, 데이터 없으면 통과). 알림 테스트를 "제안 → 환자 수락"으로 바꿈
+- 바뀐 계약: contracts 2절 (상태 표), 변경 이력 1줄, 결정 33
+- 테스트: 백엔드·AI 516개 통과 (새 8개)
+- 다음 할 일: 제안 기한(환자가 수락 안 하면 만료) — 추후. 대시보드 "제안 보기"에서 병원 확정 버튼 제거·제안 창 진료시간 필터 (`frontend-dashboard-district`)
+- B에게 요청: 결정 33·`booking/service.py` 수정분 확인 (A가 고친 B 파일)
+- 막힌 것·질문: 없음
+
 ### 2026-11-24 · backend-A-visa-quote · backend-A-llm-log · backend-A-chatbot-early-check · backend-A-vercel-cron · Claude (Vercel 첫 배포·챗봇 점검)
 - 한 일: Vercel 첫 배포(백엔드 `axa` sin1 · 환자 웹 `axa-tqse`, `docs/deploy-vercel.md` 0절). 배포본 시연 흐름·금지 요청 11개 확인 (로컬 `docs/시나리오.md`).
   #95 LLM 호출마다 `llm ok|fail … model ms tokens fallback_from` 로그. #94 요청서 `visa_needed`는 사용자 말(`visa_statement`)이 대화에 있을 때만 + 비자 자격·절차 질문은 "계신 나라의 한국 대사관·영사관" 안내(의료 고지 X, 비자 문서 미반환).
