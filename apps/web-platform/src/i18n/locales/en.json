@@ -570,6 +570,7 @@
     "home": "Go to home"
   },
   "reserve": {
+    "exampleNotice": "Example schedule · Not a real booking — this is a demo. No booking is sent to a real hospital.",
     "title": "Book a visit",
     "back": "Back to hospitals",
     "pickDate": "Choose a date",

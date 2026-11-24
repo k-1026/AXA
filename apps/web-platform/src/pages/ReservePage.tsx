@@ -11,6 +11,10 @@ import { useHospitals } from '../features/hospital/useHospitals';
 import { hospitalNames, useHospitalName } from '../features/hospital/name';
 import { addDays, DAYS_AHEAD, isBookable, slotsFor } from '../features/reserve/availability';
 
+// 공개 URL로 배포된 화면인지 (localhost·127.0.0.1이 아니면 공개 배포로 봄) — "예시 일정 · 실제 예약 아님" 문구용
+const IS_PUBLIC_DEPLOY = typeof window !== 'undefined'
+  && !['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+
 // 병원 목록의 "예약하기": 달력에서 날짜 → 그날 예약 가능한 시간 → 예약 신청
 // 신청하면 그 병원 상담에 예약 요청(확인 대기)으로 남고, 확정은 병원이 한다
 export function ReservePage() {
@@ -119,6 +123,10 @@ export function ReservePage() {
         <p className="hospital-type">{t('reserve.title')}</p>
         <h1>{nameOf(h)}</h1>
       </header>
+      {IS_PUBLIC_DEPLOY && (
+        // 공개 배포(Vercel 등)에서만: 예시 예약 시간이 실제 예약처럼 보이지 않게 (로컬 시연은 표시 안 함)
+        <p className="reserve-example-notice" role="note">{t('reserve.exampleNotice')}</p>
+      )}
       {member && residency === 'resident' && (
         // 국내 거주로 답한 계정은 날짜를 고르기 전에 먼저 알림 (결정 28)
         <p className="residency-blocked" role="alert">

@@ -5342,6 +5342,17 @@ body.chat-open {
   color: var(--accent);
 }
 
+/* 공개 배포에서만 보이는 예약 화면 안내 — 예시 일정 · 실제 예약 아님 */
+.reserve-example-notice {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff6e5;
+  color: #8a5a00;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 .mp-residency {
   display: inline-flex;
   align-items: center;
