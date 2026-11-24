@@ -7,15 +7,28 @@ export function AdSlot({
   className = '',
   image,
   alt = '',
+  href,
 }: {
   className?: string;
   image?: string;
   alt?: string;
+  /** 누르면 새 탭으로 여는 광고주 사이트 */
+  href?: string;
 }) {
   const { t } = useTranslation();
   return (
     <aside className={`ad-slot ${image ? 'has-image' : ''} ${className}`} aria-label={t('ad.label')}>
-      {image ? <img src={image} alt={alt} /> : t('ad.label')}
+      {image ? (
+        href ? (
+          <a href={href} target="_blank" rel="noopener noreferrer sponsored">
+            <img src={image} alt={alt} />
+          </a>
+        ) : (
+          <img src={image} alt={alt} />
+        )
+      ) : (
+        t('ad.label')
+      )}
     </aside>
   );
 }

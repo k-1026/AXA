@@ -12,8 +12,8 @@ import { onMap } from '../features/hospital/filters';
 const ADS: Ad[] = [
   { image: '/ads/hanbang-skincare.webp', alt: 'Yakryeongsi — Hanbang skincare. Rooted in Daegu.' },
   { image: '/ads/biseulsan-ice-festival.webp', alt: 'Biseulsan Ice Festival — Daegu, on ice. Dalseong, Daegu' },
-  { image: '/ads/eworld-daegu.webp', alt: "E-World Daegu — Your Daegu play date. Let's play" },
-  { image: '/ads/daegu-chimac-festival.webp', alt: 'Daegu Chimac Festival — Chicken. Beer. Daegu. Taste the fun' },
+  { image: '/ads/eworld-daegu.webp', alt: "E-World Daegu — Your Daegu play date. Let's play", href: 'https://eworld.kr/#' },
+  { image: '/ads/daegu-chimac-festival.webp', alt: 'Daegu Chimac Festival — Chicken. Beer. Daegu. Taste the fun', href: 'https://www.chimacfestival.com' },
 ];
 
 export function MainPage() {
