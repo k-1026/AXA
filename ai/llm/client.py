@@ -14,6 +14,8 @@
 from __future__ import annotations
 
 import json
+import logging
+import time
 import uuid
 from dataclasses import dataclass, field
 from typing import Any
@@ -33,6 +35,15 @@ from ai.llm.retry import (
 from ai.llm.usage_tracker import UsageRecord, UsageTracker
 
 Message = dict[str, Any]  # OpenAI 형식: {"role": ..., "content": ..., "tool_calls"?: ..., "tool_call_id"?: ...}
+
+# 호출마다 한 줄: 어느 모델이 답했고 몇 ms 걸렸는지 (배포 로그에서 느린 원인 찾기용).
+# 대화 내용·키는 남기지 않음. 서버(uvicorn·Vercel)는 앱 로거를 따로 설정하지 않아 INFO가 버려지므로 여기서 직접 출력
+log = logging.getLogger("ai.llm")
+if not log.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(logging.Formatter("%(message)s"))
+    log.addHandler(_h)
+    log.setLevel(logging.INFO)
 
 
 @dataclass
@@ -175,6 +186,7 @@ class LLMClient:
         errors: list[LLMError] = []
         prev_failed: str | None = None
         for provider in self.providers:
+            t0 = time.perf_counter()
             try:
                 res = with_retry(
                     lambda p=provider: self._call(p, messages, tools, tool_choice, temperature),
@@ -183,13 +195,16 @@ class LLMClient:
                 )
             except RequestError as e:
                 self._record(service, tenant_id, provider, ok=False, fallback_from=prev_failed)
+                self._log(service, provider, t0, fallback_from=prev_failed, error=e)
                 raise e  # 요청 자체 오류는 다른 제공자도 같을 가능성이 커서 넘기지 않음
             except (RateLimitError, TransientError) as e:
                 self._record(service, tenant_id, provider, ok=False, fallback_from=prev_failed)
+                self._log(service, provider, t0, fallback_from=prev_failed, error=e)
                 errors.append(e)
                 prev_failed = provider.name
                 continue
             self._record(service, tenant_id, provider, ok=True, fallback_from=prev_failed, res=res)
+            self._log(service, provider, t0, fallback_from=prev_failed, res=res, tools=len(tools or []))
             return res
         raise AllProvidersFailed(errors)
 
@@ -227,6 +242,23 @@ class LLMClient:
         except ValueError as e:
             raise TransientError("JSON 아닌 응답", provider.name) from e
         return _parse_response(provider, data)
+
+    @staticmethod
+    def _log(service, provider: ProviderConfig, t0: float, *, fallback_from, res=None, error=None, tools: int = 0):
+        """예: `llm ok service=chatbot provider=gemini model=gemini-3.5-flash ms=8123 tokens=1200/80 tools=5 fallback_from=-`
+        ms는 그 제공자에서 쓴 시간 (재시도 포함)."""
+        ms = round((time.perf_counter() - t0) * 1000)
+        base = f"service={service} provider={provider.name}"
+        if res is not None:
+            log.info(
+                "llm ok %s model=%s ms=%d tokens=%d/%d tools=%d finish=%s fallback_from=%s",
+                base, res.model, ms, res.prompt_tokens, res.completion_tokens, tools, res.finish_reason, fallback_from or "-",
+            )
+        else:
+            log.warning(
+                "llm fail %s model=%s ms=%d error=%s fallback_from=%s",
+                base, provider.model, ms, type(error).__name__, fallback_from or "-",
+            )
 
     def _record(self, service, tenant_id, provider: ProviderConfig, *, ok: bool, fallback_from, res=None):
         self.tracker.record(

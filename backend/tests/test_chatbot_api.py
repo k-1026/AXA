@@ -132,10 +132,10 @@ def test_draft_saved_without_health_info_or_inquiry(client, llm, db_engine):
     llm.script = [
         call("prepare_booking_request", {"hospital_id": 9002, "preferred_slots": ["2026-12-04 10:00"], "language": "en",
                                          "inquiry": "scar laser options", "nationality": "TW", "visa_needed": False,
-                                         "health_info": secret}),
+                                         "visa_statement": "no visa help", "health_info": secret}),
         say("Check the card."),
     ]
-    r = ask(client, token, "book clinic B", session_id=sid, language="en")
+    r = ask(client, token, "book clinic B, no visa help", session_id=sid, language="en")
     assert r.status_code == 200, r.json()
     card = next(c for c in r.json()["cards"] if c["type"] == "booking_draft")["data"]
     assert card["request"]["health_info"] == secret  # 제출용 값은 화면 카드로만 나감

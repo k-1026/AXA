@@ -130,7 +130,7 @@ def call(name, args):
 
 def test_chat_to_pending_end_to_end_with_hospital_confirm():
     full = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "scar laser options",
-            "nationality": "TW", "visa_needed": False}
+            "nationality": "TW", "visa_needed": False, "visa_statement": "no visa help needed"}
     llm = ScriptLLM([
         call("prepare_booking_request", full), say("Check the card, tick the consents and press Submit."),
         call("get_my_bookings", {}), say("Your request to Clinic A is pending."),
