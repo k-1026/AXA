@@ -192,18 +192,14 @@ export function startDashboard(host, { onLeave }) {
       toast('보냈어요 (예시 — 저장 안 됨)');
     };
     const note = '환자 언어 번역은 연결 전이라 한국어 원문으로 저장돼요.';
-    const send = async (k, o, title) => {
-      const ok = await dialog({ title: title || '환자에게 보낼까요?', ok: '보내기',
-        body: `<div class="dlg-sum"><b>보낼 내용</b><p>${esc(k)}</p>${o && !o.startsWith('(') ? `<small>환자에게 보이는 글: ${esc(o)}</small>` : ''}</div><p class="note">${note}</p>` });
-      if (!ok) return false;
-      await deliver(k, o); return true;
-    };
+    // 전송(번역 포함 수십 초 걸릴 수 있음)이 끝날 때까지 확인 창을 열어 두고 버튼을 잠근다 — 창이 먼저 닫히면 다시 눌러 중복 발송됨
+    const send = async (k, o, title) => !!(await dialog({ title: title || '환자에게 보낼까요?', ok: '보내기',
+      body: `<div class="dlg-sum"><b>보낼 내용</b><p>${esc(k)}</p>${o && !o.startsWith('(') ? `<small>환자에게 보이는 글: ${esc(o)}</small>` : ''}</div><p class="note">${note}</p>`,
+      onOk: async () => { await deliver(k, o); return true; } }));
     const d = root.querySelector('[data-act=send]'); if (d) d.onclick = () => send(c.draft.k, c.draft.o, 'AI 초안을 승인하고 보낼까요?');
-    const e = root.querySelector('[data-act=edit]'); if (e) e.onclick = async () => {
-      const k = await dialog({ title: '고쳐서 보내기', ok: '보내기', body: field('보낼 내용 (한국어)', `<textarea name="k" rows="4">${esc(c.draft.k)}</textarea>`) + `<p class="note">${note}</p>`,
-        onOk: (f) => f.k.value.trim() || fail('내용을 입력해 주세요') });
-      if (k) await deliver(k, '(AI 번역되어 전송됨)');
-    };
+    const e = root.querySelector('[data-act=edit]'); if (e) e.onclick = () => dialog({ title: '고쳐서 보내기', ok: '보내기',
+      body: field('보낼 내용 (한국어)', `<textarea name="k" rows="4">${esc(c.draft.k)}</textarea>`) + `<p class="note">${note}</p>`,
+      onOk: async (f) => { const k = f.k.value.trim() || fail('내용을 입력해 주세요'); await deliver(k, '(AI 번역되어 전송됨)'); return true; } });
     root.querySelector('.cinput').onsubmit = async (ev) => {
       ev.preventDefault();
       const inp = root.querySelector('.cinput input'), v = inp.value.trim();
@@ -421,7 +417,8 @@ export function startDashboard(host, { onLeave }) {
         ${cancel ? `<button type="button" class="btn" data-x="cancel">${esc(cancel)}</button>` : ''}
         <button type="submit" class="btn ${danger ? 'danger' : 'primary'}">${esc(ok)}</button></div></form>`;
       const form = wrap.querySelector('form'), err = wrap.querySelector('.dlg-err'), back = document.activeElement;
-      const close = (v) => { wrap.remove(); document.removeEventListener('keydown', onKey); if (back && back.focus) back.focus(); resolve(v); };
+      let busy = false; // 처리 중에는 Esc·바깥 클릭·취소로 닫히지 않게 (닫히면 처리가 끝나기 전에 다시 누를 수 있음)
+      const close = (v) => { if (busy) return; wrap.remove(); document.removeEventListener('keydown', onKey); if (back && back.focus) back.focus(); resolve(v); };
       const onKey = (e) => { if (e.key === 'Escape') close(null); };
       document.addEventListener('keydown', onKey);
       cleanups.push(() => document.removeEventListener('keydown', onKey));
@@ -430,10 +427,17 @@ export function startDashboard(host, { onLeave }) {
       wrap.querySelectorAll('[data-x=extra]').forEach((b) => b.addEventListener('click', () => { close(null); (extras || [extra])[+b.dataset.i].onClick(); }));
       form.onsubmit = async (e) => {
         e.preventDefault();
-        const sub = form.querySelector('[type=submit]');
-        err.hidden = true; sub.disabled = true;
-        try { const v = onOk ? await onOk(form) : true; close(v === undefined ? true : v); }
-        catch (x) { err.textContent = x.message; err.hidden = false; sub.disabled = false; }
+        const sub = form.querySelector('[type=submit]'), label = sub.textContent;
+        if (busy) return;
+        busy = true; err.hidden = true; sub.disabled = true; sub.textContent = '처리 중…';
+        form.querySelectorAll('[data-x]').forEach((b) => { b.disabled = true; });
+        let v, ok = false;
+        try { v = onOk ? await onOk(form) : true; ok = true; }
+        catch (x) { err.textContent = x.message; err.hidden = false; }
+        busy = false;
+        if (ok) { close(v === undefined ? true : v); return; }
+        sub.disabled = false; sub.textContent = label;
+        form.querySelectorAll('[data-x]').forEach((b) => { b.disabled = false; });
       };
       host.append(wrap);
       (form.querySelector('.dlg-body input:not([type=radio]), .dlg-body select, .dlg-body textarea, .dlg-body input:checked') || form.querySelector('[type=submit]')).focus();
