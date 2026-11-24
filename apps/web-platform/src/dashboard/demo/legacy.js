@@ -25,14 +25,14 @@ export function startDashboard(host, { onLeave }) {
     return { cost: 150000, label: '프리미엄 회원비 (연 ₩1,800,000의 월 환산)' };
   }
   function render() {
-    const revenue = 21000000, rate = state.tier === 'basic' ? 0.13 : 0.08, pct = Math.round(rate * 100);
+    const revenue = 15330000, rate = state.tier === 'basic' ? 0.13 : 0.08, pct = Math.round(rate * 100);
     const commission = Math.round(revenue * rate), sub = subCost(), total = commission + sub.cost;
     const tierName = state.tier === 'basic' ? '기본' : '프리미엄';
     const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
     const ratio = (total / revenue * 100).toFixed(1) + '%';
     set('homeRatio', ratio); set('ratioAll', ratio);
     set('homeCom', won(commission)); set('homeComLabel', `체결 진료 수수료 (${tierName} ${pct}%)`);
-    set('sumCom', won(commission)); set('sumComLabel', `체결 진료 수수료 (확인 완료 21건 · 진료비 ₩21,000,000 × ${pct}%)`);
+    set('sumCom', won(commission)); set('sumComLabel', `체결 진료 수수료 (확인 완료 21건 · 진료비 ₩15,330,000 × ${pct}%)`);
     set('rcCom', won(commission)); set('rateNow', `${pct}% (${tierName})`);
     document.getElementById('ratioBar').style.width = (total / revenue * 100 / 30 * 100).toFixed(0) + '%';
     set('homeCost', won(total)); set('homeCost2', won(total)); set('homePer', won(Math.round(total / 24)));
