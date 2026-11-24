@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Logo } from '../components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import './analytics.css';
 import { clearStaffToken } from '../features/staff/staffSession';
@@ -44,7 +45,7 @@ export default function App() {
     // 최상위 .hd 아래로만 이 화면 스타일이 적용됨 (analytics.css) — 환자 화면과 클래스 이름이 겹쳐도 섞이지 않게
     <div className="hd app">
       <header className="top">
-        <Link to="/dashboard" className="brand">MediDaegu <span>병원</span></Link>
+        <Link to="/dashboard" className="brand" aria-label="MediDaegu 병원"><Logo /><span className="brand-tag">병원</span></Link>
         <div className="hospital">
           <b>예시 {DEPT_LABEL[dept]}의원</b>
           <span>대구 {SAMPLE_DISTRICT} · 가상 병원</span>
@@ -82,7 +83,7 @@ export default function App() {
         <current.C data={data} mode={mode} dept={dept} setup={setup} toggleSetup={toggleSetup} />
       </main>
 
-      <footer className="foot">프로토타입 · 병원 이름과 운영 숫자는 가상 · 공공 카드는 출처의 실제 값 · 통계(분석 탭)는 프리미엄 회원 기능</footer>
+      <footer className="foot">프로토타입 · 병원 이름과 운영 숫자는 가상 · 공공 카드는 출처의 실제 값 · 통계(분석 탭)는 기본·프리미엄 모두 사용</footer>
     </div>
   );
 }
