@@ -368,11 +368,22 @@ export function startDashboard(host, { onLeave }) {
     try { await loadAudit(); toast('열람 기록을 새로 불러왔어요'); } catch (e) { toast(why(e), true); }
   };
 
+  // 머리말 지역: 환자 웹과 같은 병원 목록(/data/hospitals.json)에서 읽는다 — 고정 글자였을 때 9001이 "수성구"로 틀리게 보였음.
+  // 시연 가상 병원은 목록 id가 "DEMO-9001" 형식. 못 찾으면 "대구"만
+  function showDistrict(hospitalId) {
+    const sub = document.querySelector('.hosp small');
+    fetch('/data/hospitals.json').then((r) => r.json()).then((d) => {
+      const h = (d.items || []).find((x) => x.id === `DEMO-${hospitalId}` || String(x.id) === String(hospitalId));
+      if (h && sub) sub.textContent = `대구 ${h.district} · 가상 병원 · 직원: 국제 코디네이터`;
+    }).catch(() => {});
+  }
+
   async function setupApi() {
     try {
       loadAudit().catch(() => {});
       const me = await call('/tenant/me');
       document.querySelector('.hosp b').textContent = me.display_name;
+      showDistrict(me.hospital_id);
       state.ac = me.aftercare_enabled;
       document.querySelectorAll('#acSwitch button').forEach((b) => b.classList.toggle('on', (b.dataset.v === 'on') === state.ac));
       render();
