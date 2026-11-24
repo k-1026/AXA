@@ -2879,21 +2879,6 @@ body.chat-open {
   flex-shrink: 0;
 }
 
-.chat-settings {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--c-ink);
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.chat-settings svg {
-  width: 20px;
-  height: 20px;
-}
-
 .chat-scrim {
   display: none;
 }
