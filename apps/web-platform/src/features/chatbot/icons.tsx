@@ -39,11 +39,6 @@ export const ThumbIcon = icon([
   'M7 11l4-7c1.3 0 2.2 1 2 2.3L12.6 10H18a2 2 0 0 1 2 2.3l-1.1 6A2 2 0 0 1 17 20H7',
 ]);
 export const InfoIcon = icon(['M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z', 'M12 11v5M12 8h.01']);
-export const GearIcon = icon([
-  'M12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z',
-  'M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.3 3h-4l-.3 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5.6 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.3 2.6h4l.3-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z',
-]);
-
 // 하단 빠른 메뉴
 export const HospitalIcon = icon(['M5 20V6h14v14', 'M3 20h18', 'M12 9v5M9.5 11.5h5', 'M10 20v-3h4v3']);
 export const CoinsIcon = icon([
