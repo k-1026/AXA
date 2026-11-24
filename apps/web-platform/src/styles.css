@@ -1192,6 +1192,10 @@ a {
   border: 1px solid var(--border);
 }
 
+.ad-slot.has-image a {
+  display: block;
+}
+
 .ad-slot.has-image img {
   width: 100%;
   aspect-ratio: 2000 / 716;

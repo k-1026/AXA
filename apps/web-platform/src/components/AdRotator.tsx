@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdSlot } from './AdSlot';
 
-export type Ad = { image: string; alt: string };
+export type Ad = { image: string; alt: string; href?: string };
 
 const INTERVAL_MS = 5000;
 
@@ -30,9 +30,9 @@ export function AdRotator({ ads }: { ads: Ad[] }) {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <AdSlot key={`a-${first.image}`} className="ad-fade" image={first.image} alt={first.alt} />
+      <AdSlot key={`a-${first.image}`} className="ad-fade" image={first.image} alt={first.alt} href={first.href} />
       {ads.length > 1 && (
-        <AdSlot key={`b-${second.image}`} className="ad-fade ad-second" image={second.image} alt={second.alt} />
+        <AdSlot key={`b-${second.image}`} className="ad-fade ad-second" image={second.image} alt={second.alt} href={second.href} />
       )}
     </div>
   );
