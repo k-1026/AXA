@@ -17,6 +17,17 @@
 
 ## 기록
 
+### 2026-11-24 · backend-A-visa-quote · backend-A-llm-log · backend-A-chatbot-early-check · backend-A-vercel-cron · Claude (Vercel 첫 배포·챗봇 점검)
+- 한 일: Vercel 첫 배포(백엔드 `axa` sin1 · 환자 웹 `axa-tqse`, `docs/deploy-vercel.md` 0절). 배포본 시연 흐름·금지 요청 11개 확인 (로컬 `docs/시나리오.md`).
+  #95 LLM 호출마다 `llm ok|fail … model ms tokens fallback_from` 로그. #94 요청서 `visa_needed`는 사용자 말(`visa_statement`)이 대화에 있을 때만 + 비자 자격·절차 질문은 "계신 나라의 한국 대사관·영사관" 안내(의료 고지 X, 비자 문서 미반환).
+  `backend-A-chatbot-early-check`: 병원을 고르면 `prepare_booking_request` 먼저(요청 불가면 첫 턴에 안내), not_available 전화번호에 053, DB 연결 시 가짜 가격 대신 가격 가이드 안내, 병원 id 숨김·상담 언어 묻기.
+  루트 `vercel.json` Cron (`/api/v1/internal/purge` 매일 UTC 18시)
+- 바뀐 계약: 없음 (챗봇 도구 입력에 `visa_statement` 추가 — 챗봇 내부)
+- 테스트: 백엔드·AI 511개 통과 (early-check 기준)
+- 다음 할 일: #97(backend→main) 승인·머지 뒤 배포본에서 비자·요청 흐름 재확인. 시연 때 `LLM_PROVIDER_ORDER`(지금 nemotron,gemini) 결정. 챗봇 가격을 가격 가이드 데이터에 연결
+- B에게 요청: 없음 (대시보드 머리말 지역·번역 줄은 프론트 `legacy.js`에서 처리)
+- 막힌 것·질문: ⚠ 규칙 위반 2건 — ① `backend`를 main으로 **직접 fast-forward push**(111커밋 뒤처져 PR에 무관한 커밋이 섞여서, 사용자 승인 후). 지운 커밋 없음. ② #94·#95·#97 PR 본문이 8절 양식이 아님. 다음부터 지킴
+
 ### 2026-11-23 (2) · backend-A-media-thumbs · Claude (사진 썸네일)
 - 한 일: 결정 29. `media.thumb_path`·`with_thumbs`, 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb`, `attachments_out`에 `thumb_url`. 탈퇴 삭제·정기 정리에 썸네일 포함
 - 바뀐 계약: contracts 6-3 (칸 추가만)

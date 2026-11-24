@@ -1,14 +1,28 @@
-# deploy-vercel.md — Vercel 배포 준비 (2026-11-20 초안)
+# deploy-vercel.md — Vercel 배포 (2026-11-20 초안 → 2026-11-24 첫 배포)
 
-> 상태: **배포해 본 적 없음**. 아래 백엔드 설정 파일은 제안이고, 실제 배포로 확인한 뒤 저장소에 넣는다 (확인 안 된 설정을 커밋하지 않음)
+> 상태: **2026-11-24 배포됨** (아래 0절). Cron `vercel.json`은 배포 확인 뒤 커밋 (`backend-A-vercel-cron`)
 > 관련: 결정 12(Supabase + Vercel), [dashboard-integration.md](dashboard-integration.md), contracts 7-1(정기 정리)
+
+## 0. 지금 배포 상태 (2026-11-24)
+
+| 프로젝트 | 주소 | Root | 설정 |
+|---|---|---|---|
+| 백엔드 `axa` | https://axa-seven.vercel.app | 저장소 루트 (`index.py`) | FastAPI, 리전 **sin1**(Supabase 싱가포르), Ignored Build Step = **Only build production** |
+| 환자 웹 `axa-tqse` | https://axa-tqse.vercel.app | `apps/web-platform` | Vite, Include files outside root **켜짐**, Ignored Build Step = **Only build production**, `apps/web-platform/vercel.json`(모든 주소 → index.html) |
+
+- 두 프로젝트 모두 **main에 머지될 때만** 배포 (다른 브랜치 push는 건너뜀 → research-data 등 실패 메일 없음)
+- 백엔드 `CORS_ORIGINS` = `["https://axa-tqse.vercel.app","http://localhost:5173"]`
+- 백엔드 `LLM_PROVIDER_ORDER` = `nemotron,gemini` (11/24 연습용, 비용 X). 시연 전 Gemini로 되돌릴지 결정 — Nemotron은 약 2배 빠르지만 질문을 건너뛴 적 있음 (`docs/시나리오.md` 8-2, 로컬 문서)
+- 환경변수를 바꾸면 **Redeploy** 필요. Redeploy 때 Vercel 계정 2단계 인증 코드를 물음 (사람이 입력)
+- 공개 배포에서만 예약 화면에 "예시 일정 · 실제 예약 아님" (#92)
+- 확인: `/api/v1/health` 200, 병원 목록 DB 조회, 시연 흐름(로그인 → 챗봇 → 9001 요청 → 대시보드 확정 → 사후관리 답장) 통과
 
 ## 1. 프로젝트 2개
 
 | Vercel 프로젝트 | Root Directory | 내용 | 상태 |
 |---|---|---|---|
 | 환자 웹 | `apps/web-platform` | Vite 정적 빌드 (병원 대시보드도 이 안의 `/dashboard`). **"Include files outside the root directory" 켜기** (빌드 때 `data/`에서 병원 JSON을 만듦, 꺼지면 병원 0곳) | 설정 있음 |
-| 백엔드 | 저장소 루트 | FastAPI (`backend/src/main.py`) + `ai/` 패키지 | **새로 만들어야 함** |
+| 백엔드 | 저장소 루트 | FastAPI (`backend/src/main.py`) + `ai/` 패키지 | 배포됨 (11/24) |
 
 ## 2. 환경변수
 
@@ -34,7 +48,7 @@
 
 `GET /api/v1/internal/purge` 하루 1번 — 30일 지난 챗봇 대화, 끝난 로그인 세션, **DB에 없는 사진·영상 파일**(결정 23). Vercel Cron은 `CRON_SECRET`이 있으면 `Authorization: Bearer`를 자동으로 붙임
 
-백엔드 프로젝트 루트 `vercel.json` (제안):
+백엔드 프로젝트 루트 `vercel.json` (11/24 커밋):
 
 ```json
 {
