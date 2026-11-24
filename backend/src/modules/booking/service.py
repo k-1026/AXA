@@ -9,6 +9,7 @@
 
 import uuid
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,12 +19,13 @@ from core.errors import AppError
 from modules.agent import translate
 from modules.notification import service as notification
 from modules.booking.models import CANCEL_REASONS, REJECT_REASONS, BookingEvent, BookingRequest, Reply
+from modules.hospital.models import HospitalHours
 from modules.tenant.models import StaffUser, Tenant
 
 # (현재 상태, 행동) → 다음 상태. 여기 없는 조합은 409 booking.invalid_transition
 TRANSITIONS: dict[tuple[str, str], str] = {
     ("pending", "confirm"): "confirmed",
-    ("proposed", "confirm"): "confirmed",
+    # ("proposed", "confirm") 없음: 병원이 제안한 시간은 환자가 수락해야 확정 (patient_accept). 병원은 다시 제안·거절만 (11/24 사용자 결정, A 수정)
     ("pending", "reject"): "rejected",
     ("proposed", "reject"): "rejected",
     ("pending", "propose"): "proposed",
@@ -181,7 +183,29 @@ def staff_act(
     if reason is not None and (action != "reject" or reason not in REJECT_REASONS):  # 거절 사유는 거절에만, 정해진 코드만
         raise AppError(422, "validation", "거절 사유 코드가 올바르지 않습니다", {"errors": [{"loc": ["reason"], "type": "enum"}]})
     req = staff_get(db, tenant_id, request_id)
+    if action == "propose" and slot is not None:
+        _check_open(db, req.hospital_id, slot)
     return _move(db, req, action, "staff", staff_id, slot=slot, reason=reason)
+
+
+KST = ZoneInfo("Asia/Seoul")
+DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+
+
+def _check_open(db: Session, hospital_id: int, slot: datetime) -> None:
+    """제안 시간이 그 병원 진료시간 안인지 (한국 시간). 휴진일·진료 전후·점심이면 422 validation.
+    그날 진료시간 데이터가 없거나 unknown이면 막지 않음 (모르는 것을 휴진으로 보지 않음)."""
+    local = slot.astimezone(KST)
+    h = db.get(HospitalHours, (hospital_id, DAYS[local.weekday()]))
+    if h is None or h.state not in ("open", "closed"):
+        return
+    t = local.time()
+    closed = (h.state == "closed" or h.open_time is None or h.close_time is None
+              or not (h.open_time <= t < h.close_time)
+              or (h.lunch_start is not None and h.lunch_end is not None and h.lunch_start <= t < h.lunch_end))
+    if closed:
+        raise AppError(422, "validation", "병원 진료시간이 아닙니다 (휴진일·진료 전후·점심)",
+                       {"errors": [{"loc": ["slot"], "type": "closed"}]})
 
 
 # ---------- 상담 답장 (병원 직원) ----------
