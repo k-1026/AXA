@@ -538,7 +538,10 @@
     "cancelMsg": "已取消{{when}}的預約。",
     "footnote": "預約時間以韓國時間（KST）為準。",
     "sampleNote": "範例醫院與預約資訊。",
-    "proposedNote": "醫院提議了其他時間，請在諮詢中確認。",
+    "proposedNote": "醫院建議了其他時間。如果合適請接受，不合適可以變更或取消。",
+    "accept": "接受這個時間",
+    "proposedTime": "建議時間",
+    "acceptMsg": "我已接受醫院建議的時間（{{when}}）。",
     "expiredNote": "所有希望日期皆已過去，此申請已過期。",
     "noShowNote": "醫院已將此預約標示為未到診。如需就診，請重新提出預約申請。"
   },

@@ -538,7 +538,10 @@
     "cancelMsg": "Tôi đã hủy lịch hẹn {{when}}.",
     "footnote": "Giờ hẹn theo giờ Hàn Quốc (KST).",
     "sampleNote": "Bệnh viện và lịch hẹn mẫu.",
-    "proposedNote": "Bệnh viện đã đề xuất giờ khác. Vui lòng kiểm tra trong phần tư vấn.",
+    "proposedNote": "Bệnh viện đã đề xuất thời gian khác. Nếu phù hợp, hãy chấp nhận; nếu không, bạn có thể đổi hoặc hủy yêu cầu.",
+    "accept": "Chấp nhận thời gian này",
+    "proposedTime": "Thời gian đề xuất",
+    "acceptMsg": "Tôi đã chấp nhận thời gian bệnh viện đề xuất ({{when}}).",
     "expiredNote": "Tất cả ngày mong muốn đã qua nên yêu cầu này đã hết hạn.",
     "noShowNote": "Bệnh viện đã đánh dấu lịch hẹn này là không đến. Nếu muốn khám, vui lòng gửi yêu cầu đặt lịch mới."
   },
