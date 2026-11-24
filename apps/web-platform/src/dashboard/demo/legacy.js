@@ -290,6 +290,7 @@ export function startDashboard(host, { onLeave }) {
   // ---------- 상담 확정·사후관리를 백엔드에 연결 ----------
   // loaded: 서버 목록(상담·사후관리·요청)을 다 불러왔는지. 로그인 상태에서 그 전에는 예시 숫자를 보이지 않음 (예시 2·1·5가 보였다가 0으로 바뀌던 것)
   const API = { base: '', token: '', ready: false, loaded: false };
+  const HOSP = { hours: null, lunch: null }; // 로그인한 병원의 진료시간 (/data/hospitals.json, showDistrict가 채움)
   async function call(path, opts = {}) {
     const res = await fetch(API.base + path, {
       ...opts,
@@ -380,6 +381,11 @@ export function startDashboard(host, { onLeave }) {
     fetch('/data/hospitals.json').then((r) => r.json()).then((d) => {
       const h = (d.items || []).find((x) => x.id === `DEMO-${hospitalId}` || String(x.id) === String(hospitalId));
       if (h && sub) sub.textContent = `대구 ${h.district} · 가상 병원 · 직원: 국제 코디네이터`;
+      if (h && Array.isArray(h.hours)) { // 시간 제안 창에서 휴진일·진료시간 밖을 못 고르게 (결정 33). 서버도 같은 기준으로 422
+        HOSP.hours = h.hours;
+        const m = /(\d{2}:\d{2})~(\d{2}:\d{2})/.exec(h.lunchWeek || '');
+        HOSP.lunch = m ? [m[1], m[2]] : null;
+      }
     }).catch(() => {});
   }
 
@@ -496,17 +502,47 @@ export function startDashboard(host, { onLeave }) {
   function reqSummary(r) {
     return `<div class="dlg-sum"><b>${esc(r.id)} · ${esc(r.title)}</b><small>${esc(r.who)}${r.visa ? ' · 예약확인서 필요' : ''}</small>${r.msg_k ? `<p>“${esc(r.msg_k)}”</p>` : ''}</div>`;
   }
-  function slotOptions(opts, custom) {
-    const times = [];
-    for (let h = 9; h < 19; h++) for (const m of ['00', '30']) times.push(`${String(h).padStart(2, '0')}:${m}`);
-    return `<div class="opts">${opts.map((o, i) => `<label class="opt"><input type="radio" name="slot" value="${esc(o.iso)}"${i === 0 ? ' checked' : ''}><span><b>${esc(kdate(o.iso))}</b> <small>${esc(o.label)}</small></span></label>`).join('')}
-      ${custom ? `<label class="opt"><input type="radio" name="slot" value="custom"${opts.length ? '' : ' checked'}><span><b>다른 시간 직접 입력</b></span></label>
-      <div class="pick"><input type="date" name="d" min="${todayKst()}" value="${plusDays(1)}" aria-label="날짜"><select name="t" aria-label="시간">${times.map((t) => `<option${t === '10:00' ? ' selected' : ''}>${t}</option>`).join('')}</select><small>한국 시간 · 30분 단위</small></div>` : ''}</div>`;
+  // 그 날짜(한국)의 진료 가능 시각 30분 단위 (점심 제외). 진료시간 데이터가 없으면 09:00~18:30 전부
+  function openTimes(dateStr) {
+    const all = [];
+    for (let h = 9; h < 21; h++) for (const m of ['00', '30']) all.push(`${String(h).padStart(2, '0')}:${m}`);
+    if (!HOSP.hours) return all.filter((t) => t < '19:00');
+    const day = (new Date(`${dateStr}T12:00:00+09:00`).getUTCDay() + 6) % 7; // 월=0 … 일=6
+    const open = HOSP.hours[day];
+    if (!open) return []; // 휴진일
+    return all.filter((t) => t >= open[0] && t < open[1] && !(HOSP.lunch && t >= HOSP.lunch[0] && t < HOSP.lunch[1]));
   }
-  function pickedSlot(f) {
+  const kstParts = (iso) => { const d = new Date(Date.parse(iso) + 9 * 3600e3).toISOString(); return [d.slice(0, 10), d.slice(11, 16)]; };
+  const isOpenSlot = (iso) => { const [d, t] = kstParts(iso); return openTimes(d).includes(t); };
+  const nextOpenDay = (from) => { for (let i = from; i < from + 14; i++) if (openTimes(plusDays(i)).length) return plusDays(i); return plusDays(from); };
+  const timeOptions = (dateStr) => {
+    const ts = openTimes(dateStr);
+    return ts.length ? ts.map((t, i) => `<option${i === 0 ? ' selected' : ''}>${t}</option>`).join('') : '<option value="" selected disabled>휴진일</option>';
+  };
+  function slotOptions(opts, custom) {
+    // 환자 희망 시간 중 진료시간이 아닌 것은 고를 수 없게 (시간 제안 창, 결정 33)
+    const ok = (o) => !custom || isOpenSlot(o.iso);
+    const first = opts.findIndex(ok);
+    const day0 = nextOpenDay(1);
+    return `<div class="opts">${opts.map((o, i) => `<label class="opt"><input type="radio" name="slot" value="${esc(o.iso)}"${i === first ? ' checked' : ''}${ok(o) ? '' : ' disabled'}><span><b>${esc(kdate(o.iso))}</b> <small>${esc(o.label)}${ok(o) ? '' : ' · 진료시간 아님'}</small></span></label>`).join('')}
+      ${custom ? `<label class="opt"><input type="radio" name="slot" value="custom"${first >= 0 ? '' : ' checked'}><span><b>다른 시간 직접 입력</b></span></label>
+      <div class="pick"><input type="date" name="d" min="${todayKst()}" value="${day0}" aria-label="날짜"><select name="t" aria-label="시간">${timeOptions(day0)}</select><small data-hours-note>한국 시간 · 30분 단위${HOSP.hours ? ' · 이 병원 진료시간만' : ''}</small></div>` : ''}</div>`;
+  }
+  // 날짜를 바꾸면 그날 진료시간으로 시간 목록을 다시 (휴진일이면 "휴진일"만, 고를 수 없음)
+  const onDateChange = (e) => {
+    if (!(e.target instanceof HTMLInputElement) || e.target.name !== 'd' || !e.target.closest('.dlg')) return;
+    const sel = e.target.closest('.pick')?.querySelector('select[name=t]');
+    if (sel) sel.innerHTML = timeOptions(e.target.value);
+    const custom = e.target.closest('.dlg').querySelector('input[name=slot][value=custom]');
+    if (custom) custom.checked = true;
+  };
+  document.addEventListener('change', onDateChange);
+  cleanups.push(() => document.removeEventListener('change', onDateChange));
+  function pickedSlot(f, needOpen = false) {
     const v = f.querySelector('input[name=slot]:checked')?.value || fail('시간을 골라 주세요');
-    const iso = v === 'custom' ? kst(f.d.value || fail('날짜를 골라 주세요'), f.t.value) : v;
+    const iso = v === 'custom' ? kst(f.d.value || fail('날짜를 골라 주세요'), f.t.value || fail('휴진일이에요. 다른 날짜를 골라 주세요')) : v;
     if (new Date(iso) <= new Date()) fail('지난 시간은 고를 수 없어요');
+    if (needOpen && HOSP.hours && !isOpenSlot(iso)) fail('병원 진료시간이 아니에요 (휴진일·점심·진료 전후)');
     return iso;
   }
   async function bookingAct(r, act) {
@@ -531,7 +567,7 @@ export function startDashboard(host, { onLeave }) {
     }[act]();
     const out = await dialog({ ...cfg, onOk: async (f) => {
       const body = {};
-      if (cfg.slot) body.slot = pickedSlot(f);
+      if (cfg.slot) body.slot = pickedSlot(f, act === 'propose');
       if (cfg.reason) body.reason = f.reason.value || fail('거절 사유를 골라 주세요');
       if (!API.ready) return { demo: true, slot: body.slot };
       try { return await call(`/tenant/booking-requests/${r.rid}/${act === 'no_show' ? 'no-show' : act}`, { method: 'POST', body: JSON.stringify(body) }); }
@@ -550,16 +586,15 @@ export function startDashboard(host, { onLeave }) {
     return true;
   }
   function viewProposal(r) {
-    // 창 안에서 바로 확정·거절·다시 제안 (닫고 목록에서 다시 누르지 않게). 환자가 채팅·전화로 수락했으면 병원이 확정할 수 있음 (booking: proposed → confirm)
+    // 창 안에서 바로 다시 제안·거절 (닫고 목록에서 다시 누르지 않게). 병원이 제안한 시간은 환자가 수락해야 확정 — 병원 확정 X (결정 33)
     return dialog({ title: '제안한 시간', ok: '닫기', cancel: '', extras: [
-      { label: '이 시간으로 확정', primary: true, onClick: () => bookingAct(r, 'confirm') },
       { label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') },
       { label: '거절', danger: true, onClick: () => bookingAct(r, 'reject') },
     ],
       body: reqSummary(r) + `<div class="row"><span>제안한 시간</span><b>${esc(kdate(r.confirmed_slot))}</b></div>
         <div class="row"><span>환자 희망</span><span>${r.slots.map((s) => esc(kdate(s))).join('<br>')}</span></div>
         <div class="row"><span>환자 응답</span><span class="badge warn">수락 대기 중</span></div>
-        <p class="note">환자가 수락하면 자동으로 확정돼요. 환자가 채팅·전화로 수락했다면 [이 시간으로 확정]을 눌러 주세요.</p>` });
+        <p class="note">환자가 수락하면 자동으로 확정돼요. 이 시간이 어려워졌다면 다른 시간을 다시 제안하거나 거절해 주세요.</p>` });
   }
   function rowActs(r) {
     return r.status === 'pending' ? '<button class="btn primary" data-a="confirm">확정</button> <button class="btn" data-a="propose">시간 제안</button> <button class="btn" data-a="reject">거절</button>'
