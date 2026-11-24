@@ -283,11 +283,13 @@ export function startDashboard(host, { onLeave }) {
       if (!API.ready) { API.base = api; API.token = token; API.ready = true; await setupApi(); }
     } catch (e) {
       src.textContent = 'DB 연결 실패 (' + e.message + ') · 예시 데이터'; src.className = 'badge bad';
+      API.loaded = true; updateNav(); // 실패하면 예시 숫자라도 보이게
     }
   }
 
   // ---------- 상담 확정·사후관리를 백엔드에 연결 ----------
-  const API = { base: '', token: '', ready: false };
+  // loaded: 서버 목록(상담·사후관리·요청)을 다 불러왔는지. 로그인 상태에서 그 전에는 예시 숫자를 보이지 않음 (예시 2·1·5가 보였다가 0으로 바뀌던 것)
+  const API = { base: '', token: '', ready: false, loaded: false };
   async function call(path, opts = {}) {
     const res = await fetch(API.base + path, {
       ...opts,
@@ -406,8 +408,10 @@ export function startDashboard(host, { onLeave }) {
         },
       };
       await Promise.all([loadBooking(), loadAftercare(), loadRequests()]);
+      API.loaded = true; updateNav();
     } catch (e) {
       toast('API 연결 실패: ' + e.message, true);
+      API.loaded = true; updateNav();
     }
   }
 
@@ -546,11 +550,16 @@ export function startDashboard(host, { onLeave }) {
     return true;
   }
   function viewProposal(r) {
-    return dialog({ title: '제안한 시간', ok: '닫기', cancel: '', extra: { label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') },
+    // 창 안에서 바로 확정·거절·다시 제안 (닫고 목록에서 다시 누르지 않게). 환자가 채팅·전화로 수락했으면 병원이 확정할 수 있음 (booking: proposed → confirm)
+    return dialog({ title: '제안한 시간', ok: '닫기', cancel: '', extras: [
+      { label: '이 시간으로 확정', primary: true, onClick: () => bookingAct(r, 'confirm') },
+      { label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') },
+      { label: '거절', danger: true, onClick: () => bookingAct(r, 'reject') },
+    ],
       body: reqSummary(r) + `<div class="row"><span>제안한 시간</span><b>${esc(kdate(r.confirmed_slot))}</b></div>
         <div class="row"><span>환자 희망</span><span>${r.slots.map((s) => esc(kdate(s))).join('<br>')}</span></div>
         <div class="row"><span>환자 응답</span><span class="badge warn">수락 대기 중</span></div>
-        <p class="note">환자가 수락하면 자동으로 확정돼요. 상담 답장 기록은 답장 API가 생기면 여기에 함께 보여요.</p>` });
+        <p class="note">환자가 수락하면 자동으로 확정돼요. 환자가 채팅·전화로 수락했다면 [이 시간으로 확정]을 눌러 주세요.</p>` });
   }
   function rowActs(r) {
     return r.status === 'pending' ? '<button class="btn primary" data-a="confirm">확정</button> <button class="btn" data-a="propose">시간 제안</button> <button class="btn" data-a="reject">거절</button>'
@@ -765,12 +774,21 @@ export function startDashboard(host, { onLeave }) {
   };
   function updateNav() {
     const set = (t, n, show = true) => { const el = document.querySelector(`#tabs button[data-t=${t}] .cnt`); if (el) { el.textContent = n; el.hidden = !show || !n; } };
+    if (readStaffToken() && !API.loaded) { // 로그인했지만 서버 데이터 전 → 숫자 숨기고 홈 타일은 "…"
+      for (const t of ['booking', 'aftercare', 'receipt']) set(t, 0, false);
+      // tNew는 요약 API(connectApi)가 먼저 채우므로 그 뒤에는 덮지 않음
+      for (const id of [...(API.ready ? [] : ['tNew']), 'tAc', 'kAcUn']) { const e = document.getElementById(id); if (e) e.textContent = '…'; }
+      const hint = document.getElementById('tAc')?.nextElementSibling; if (hint) hint.textContent = '불러오는 중…';
+      return;
+    }
     const ac = CHATS.aftercare.filter((c) => c.unread).length;
     const unseen = (t) => NAV_ITEMS[t]().filter((k) => !(SEEN[t] || []).includes(k)).length;
     set('booking', unseen('booking'));
     set('aftercare', unseen('aftercare'));
     set('receipt', document.querySelectorAll('#receipt .badge.bad').length, !API.ready);
     for (const id of ['tAc', 'kAcUn']) { const e = document.getElementById(id); if (e) e.textContent = ac; }
+    const acHint = document.getElementById('tAc')?.nextElementSibling; // 예시 화면의 고정 문구 "7시간 지난 문의 있음" 대신 실제 수
+    if (acHint && API.loaded) acHint.textContent = ac ? `답하지 않은 대화 ${ac}개 →` : '미답변 없음 →';
   }
   function bindDlg() { document.querySelectorAll('[data-dlg]').forEach((b) => b.onclick = () => DLG[b.dataset.dlg](b)); }
   bindDlg();
