@@ -12,6 +12,10 @@
   3년차 병원 경로는 2년차 속도를 이어 67곳(프리미엄 10곳)으로 둠 (새 가정). 그 밖의 가정은 v1과 같음.
 - v3 (2026-11-20): 팀 인건비를 4명 × 주 4일 × 하루 4시간(월 345.1만 원)으로 변경. 그 밖은 v2와 같음.
 - v3.1 (2026-11-23): 요금 확인 — 기본 13%, 프리미엄 연 180만 원 + 8%(둘 다 진료비 기준). 계산값은 v3와 같음 (연 180만 = 월 15만으로 나눠 받는 것으로 계산).
+- v4 (2026-11-24): 기본·프리미엄 기능이 같음(차이는 회원비·수수료율뿐)을 반영.
+  · '프리미엄 병원당 월 추가 서비스비'(기준 월 1만 원) 삭제 — 기능이 같으니 프리미엄만 비용이 더 들 이유 없음
+  · 레버 '프리미엄 전환 2배' → '활발한 병원(월 4건) 2배' (계산은 그대로, 이름·설명만). 민감도 '유료 전환' → '활발한 병원(프리미엄) 수'
+  · 프리미엄 월 4건 근거: 월 약 4.1건을 넘으면 프리미엄이 병원에 유리 → 거래 많은 병원이 프리미엄 선택
 """
 import json
 from copy import copy
@@ -64,7 +68,7 @@ SECTIONS = [
         ("fee_prem", "프리미엄 수수료율", "%", (0.08, 0.08, 0.08), "팀 확정", "진료비 기준. 연 180만 원을 내는 대신 낮은 수수료 (2026-11-23 사용자 확인)", "0%"),
         ("sub_fee", "프리미엄 월 이용료", "원", (150000, 150000, 150000), "팀 확정", "프리미엄 연 180만 원을 월 15만 원으로 나눠 계산 (2026-11-23 사용자 확인). 부가세 제외 가정", "#,##0"),
         ("deals_basic", "기본 병원당 월 진료 완료", "건", (0.4, 0.5, 0.6), "팀 가정", "기준 0.5 (시장규모 문서). 보수·낙관 ±20%", "0.00"),
-        ("deals_prem", "프리미엄 병원당 월 진료 완료", "건", (3.2, 4, 4.8), "팀 가정", "기준 4 (시장규모 문서). 보수·낙관 ±20%", "0.00"),
+        ("deals_prem", "프리미엄 병원당 월 진료 완료", "건", (3.2, 4, 4.8), "팀 가정", "기준 4 (시장규모 문서). 보수·낙관 ±20%. 기능은 기본과 같고, 월 약 4.1건(73만 원 기준)을 넘으면 프리미엄이 병원에 유리해서 거래 많은 병원이 프리미엄을 고른다고 봄", "0.00"),
         ("ad_rev", "웹사이트 하단 광고 배너 월 수익", "원", (150000, 150000, 150000), "팀 제공값", "사용자 제공(2026-11-20). 운영 1개월차부터 매월 같고 직접비 없음으로 가정. 의료광고 규제·광고주 확보는 미확인", "#,##0"),
     ]),
     ("환자 전환 (Day15 단위경제: 문의 → 예약 → 진료 완료)", [
@@ -77,7 +81,6 @@ SECTIONS = [
         ("ai_cost", "문의 1건 AI·번역 직접비", "원", (150, 100, 80), "새 가정", "기존 근거: 사후관리 AI 대화 1건 약 30원(bm 가격산정 노트). 다국어·여러 턴 상담이라 3배 이상으로 둠", "#,##0"),
         ("support", "진료 완료 1건 외주 통역·지원비", "원", (20000, 0, 0), "새 가정", "기준: 병원 코디네이터가 통역(외주 없음). 보수: 일부 외주", "#,##0"),
         ("payment", "진료 완료 1건 결제·정산·CS비", "원", (5000, 4000, 3000), "팀 가정", "기존 건당 변동비 5,000원(LLM·정산·CS) 중 LLM을 위 AI비로 분리한 나머지", "#,##0"),
-        ("prem_addl", "프리미엄 병원당 월 추가 서비스비", "원", (15000, 10000, 5000), "새 가정", "대시보드 API·지원 사용량. 거래 직접비와 중복 아님", "#,##0"),
     ]),
     ("고정비·확보비", [
         ("other_fixed", "기타 월 고정비 (인건비·마케팅 제외)", "원", (210000, 210000, 210000), "팀 가정", "기존 271만 원 = 운영 인력 250만 + 호스팅 6만(확인값) + 보증보험 10만(가정) + 수작업 5만(가정). 인력 250만은 아래 L로 대체", "#,##0"),
@@ -142,8 +145,7 @@ def simulate(p, L):
         ad = p["ad_rev"] * m
         rev = fee_b + fee_p + sub + ad
         var_deal = inq * p["ai_cost"] + d * (p["support"] + p["payment"])
-        var_prem = ap * p["prem_addl"] * m
-        contrib = rev - var_deal - var_prem
+        contrib = rev - var_deal
         fixed, mkt, onb = p["other_fixed"] * m, p["mkt"] * m, new * p["onboard"]
         pre = contrib - fixed - mkt - onb
         labor = L * m
@@ -151,13 +153,13 @@ def simulate(p, L):
         cum += op
         fee = fee_b + fee_p
         cin = fee * max(0, 1 - lag / 3) + prev_fee * lag / 3 + sub + ad
-        cout = var_deal + var_prem + fixed + mkt + onb + labor + (p["initial_out"] if i == 0 else 0)
+        cout = var_deal + fixed + mkt + onb + labor + (p["initial_out"] if i == 0 else 0)
         cash += cin - cout
         out.append(dict(q=QN[i], year=i // 4, basic_avg=ab, prem_avg=ap, basic_end=eb, prem_end=ep, new=new,
                         deals_basic=db, deals_prem=dp, deals=d, inquiries=inq, gmv=gmv, fee_basic=fee_b, fee_prem=fee_p,
-                        sub=sub, ad=ad, revenue=rev, var_deal=var_deal, var_cost=var_deal + var_prem, contrib=contrib,
+                        sub=sub, ad=ad, revenue=rev, var_deal=var_deal, var_cost=var_deal, contrib=contrib,
                         fixed=fixed, mkt=mkt, onboard=onb, pre_labor=pre, labor=labor,
-                        total_cost=var_deal + var_prem + fixed + mkt + onb + labor,
+                        total_cost=var_deal + fixed + mkt + onb + labor,
                         op=op, op_cum=cum, cash_in=cin, cash_out=cout, cash_cum=cash))
         pb, pp, prev_fee = eb, ep, fee
     return out
@@ -204,7 +206,7 @@ def y3_op(p, L, mods=None):
     op = sum(q["op"] for q in qs)
     if "prem_share" in mods:
         c = p["inq_per_deal"] * p["ai_cost"] + p["support"] + p["payment"]
-        prem_unit = p["deals_prem"] * 3 * (p["deal_value"] * p["fee_prem"] - c) + 3 * (p["sub_fee"] - p["prem_addl"])
+        prem_unit = p["deals_prem"] * 3 * (p["deal_value"] * p["fee_prem"] - c) + 3 * p["sub_fee"]
         basic_unit = p["deals_basic"] * 3 * (p["deal_value"] * p["fee_basic"] - c)
         op += sum(q["prem_avg"] for q in qs) * (mods["prem_share"] - 1) * (prem_unit - basic_unit)
     return op
@@ -215,8 +217,8 @@ P2X = [v * 2 if i else 0 for i, v in enumerate([0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 
 P2X = [int(v) for v in P2X]
 FAST = PATH_TOTAL[1:] + [PATH_TOTAL[-1] + 5]   # 한 분기 앞당김: 12,18,…,67,72
 LEVERS = [
-    dict(key="prem", name="프리미엄 전환 2배", change="프리미엄 병원 3년차 말 10곳 → 20곳 (전체 병원 수는 그대로)",
-         how="월 4건 이상 병원에 대시보드·사후관리 가치를 보여 유료 전환. 프리미엄 1곳 공헌이익이 기본의 약 8배",
+    dict(key="prem", name="활발한 병원(월 4건) 2배", change="월 4건 하는 병원 3년차 말 10곳 → 20곳 (전체 병원 수는 그대로)",
+         how="입점 병원이 실제로 환자를 받게 만들기 (진료과 맞춤 유입·병원 페이지 정비). 거래가 많은 병원은 수수료가 싼 프리미엄을 고른다고 봄",
          mod={"path_prem": P2X}, cells="가정 프리미엄(기말) 경로 B~M = " + ",".join(map(str, P2X)), group="영업·운영"),
     dict(key="basic", name="기본 병원 거래 늘리기", change="기본 병원당 월 진료 완료 0.5건 → 0.75건",
          how="챗봇·다국어 페이지로 기본 병원에도 환자를 더 연결 (병원 활동률 관리)",
@@ -238,13 +240,13 @@ LEVERS = [
          mod={"conv_book": 0.30}, cells="가정 문의→상담 예약 전환율 D열 = 30%", group="비용"),
 ]
 REF_LEVERS = [  # 요금안은 팀 확정이라 참고만
-    dict(key="sub20", name="(참고) 프리미엄 구독료 20만 원", change="월 15만 → 20만 원", how="요금안 v4 변경이 필요하다. 이번 분석에서는 참고로만 본다",
+    dict(key="sub20", name="(참고) 프리미엄 회원비 연 240만 원", change="연 180만 → 240만 원 (월 15만 → 20만)", how="요금안 v4 변경이 필요하다. 이번 분석에서는 참고로만 본다",
          mod={"sub_fee": 200_000}, cells="가정 프리미엄 월 이용료 D열 = 200,000", group="요금 (참고)"),
     dict(key="fee15", name="(참고) 기본 수수료 15%", change="13% → 15%", how="요금안 v4 변경이 필요하다. 이번 분석에서는 참고로만 본다",
          mod={"fee_basic": 0.15}, cells="가정 기본 수수료율 D열 = 15%", group="요금 (참고)"),
 ]
 COMBOS = [
-    dict(key="comboA", name="묶음 A: 영업·운영으로 바꿀 수 있는 것", change="프리미엄 2배 + 기본 0.75건 + 마케팅 30만",
+    dict(key="comboA", name="묶음 A: 영업·운영으로 바꿀 수 있는 것", change="활발한 병원 2배 + 기본 0.75건 + 마케팅 30만",
          how="요금은 그대로, 팀 실행으로 바꿀 수 있는 세 가지", mod={"path_prem": P2X, "deals_basic": 0.75, "mkt": 300_000},
          cells="위 세 칸을 함께 변경", group="묶음"),
     dict(key="comboB", name="묶음 B: A + 고단가 진료과", change="묶음 A + 건당 진료비 100만 원",
@@ -276,7 +278,7 @@ def lever_result(lv):
 
 SENS = [
     ("L", "팀 인건비 L"), ("deal_value", "건당 진료비"), ("deals_basic", "기본 병원당 월 완료"),
-    ("deals_prem", "프리미엄 병원당 월 완료"), ("prem_share", "유료 전환 (프리미엄 병원 수)"), ("mkt", "환자 마케팅비"),
+    ("deals_prem", "프리미엄 병원당 월 완료"), ("prem_share", "활발한 병원(프리미엄) 수"), ("mkt", "환자 마케팅비"),
     ("ad_rev", "광고 배너 수익"), ("conv_book", "문의→예약 전환율"), ("ai_cost", "문의당 AI·번역비"),
     ("payment", "건당 결제·정산·CS비"), ("onboard", "병원 온보딩비"),
 ]
@@ -400,7 +402,7 @@ PNL_ROWS = [
     ("gmv", "진료 거래액 (병원 매출, 플랫폼 매출 아님)", "#,##0"),
     ("fee_b", "기본 수수료 매출 (13%)", "#,##0"), ("fee_p", "프리미엄 수수료 매출 (8%)", "#,##0"),
     ("sub", "구독료 매출", "#,##0"), ("ad", "광고 배너 수익", "#,##0"), ("rev", "플랫폼 매출", "#,##0"),
-    ("var_deal", "거래 연동 직접비 (문의 AI·지원·결제)", "#,##0"), ("var_prem", "프리미엄 병원 추가 서비스비", "#,##0"),
+    ("var_deal", "거래 연동 직접비 (문의 AI·지원·결제)", "#,##0"),
     ("contrib", "공헌이익", "#,##0"),
     ("fixed", "기타 고정비", "#,##0"), ("mkt", "환자 마케팅비", "#,##0"), ("onb", "병원 영업·온보딩비", "#,##0"),
     ("pre", "인건비 차감 전 손익", "#,##0"), ("labor", "팀 인건비 (적용 L × 개월)", "#,##0"),
@@ -454,8 +456,7 @@ def build_quarterly(wb):
                     "ad": f"={A('ad_rev', sc)}*{c}{R('months')}",
                     "rev": f"={c}{R('fee_b')}+{c}{R('fee_p')}+{c}{R('sub')}+{c}{R('ad')}",
                     "var_deal": f"={c}{R('inq')}*{A('ai_cost', sc)}+{c}{R('d')}*({A('support', sc)}+{A('payment', sc)})",
-                    "var_prem": f"={c}{R('p_avg')}*{A('prem_addl', sc)}*{c}{R('months')}",
-                    "contrib": f"={c}{R('rev')}-{c}{R('var_deal')}-{c}{R('var_prem')}",
+                    "contrib": f"={c}{R('rev')}-{c}{R('var_deal')}",
                     "fixed": f"={A('other_fixed', sc)}*{c}{R('months')}",
                     "mkt": f"={A('mkt', sc)}*{c}{R('months')}",
                     "onb": f"={c}{R('new')}*{A('onboard', sc)}",
@@ -536,7 +537,7 @@ def build_cashflow(wb):
                     "cin_sub": f"={q('sub')}",
                     "cin_ad": f"={q('ad')}",
                     "cin": f"={c}{R('cin_now')}+{c}{R('cin_prev')}+{c}{R('cin_sub')}+{c}{R('cin_ad')}",
-                    "cout": (f"={q('var_deal')}+{q('var_prem')}+{q('fixed')}+{q('mkt')}+{q('onb')}+{q('labor')}"
+                    "cout": (f"={q('var_deal')}+{q('fixed')}+{q('mkt')}+{q('onb')}+{q('labor')}"
                              + (f"+{A('initial_out', sc)}" if j == 0 else "")),
                     "net": f"={c}{R('cin')}-{c}{R('cout')}",
                     "net_pre": f"={c}{R('net')}+{q('labor')}",
@@ -598,7 +599,7 @@ def build_annual(wb):
                 if key == "hosp_end":
                     f = f"='{QS}'!{col}{P('b_end')}+'{QS}'!{col}{P('p_end')}"
                 elif key == "var":
-                    f = f"='{QS}'!{col}{P('var_deal')}+'{QS}'!{col}{P('var_prem')}"
+                    f = f"='{QS}'!{col}{P('var_deal')}"
                 elif key == "cash":
                     f = f"='현금흐름'!{b}{CF[(sc, 'cash')]}"
                 else:
@@ -711,7 +712,7 @@ def build_unit(wb):
         ("cp1", "프리미엄 건당 공헌이익", lambda sc: "={c}{fee_p1}-{c}{cost1}", "#,##0"),
         ("■ 병원 1곳 · 월", None, None, None),
         ("hb", "기본 병원 월 공헌이익", lambda sc: f"={{c}}{{cb1}}*{A('deals_basic', sc)}", "#,##0"),
-        ("hp", "프리미엄 병원 월 공헌이익 (구독 포함)", lambda sc: f"={{c}}{{cp1}}*{A('deals_prem', sc)}+{A('sub_fee', sc)}-{A('prem_addl', sc)}", "#,##0"),
+        ("hp", "프리미엄 병원 월 공헌이익 (구독 포함)", lambda sc: f"={{c}}{{cp1}}*{A('deals_prem', sc)}+{A('sub_fee', sc)}", "#,##0"),
         ("hcac", "병원 CAC (신규 1곳 온보딩 현금지출)", lambda sc: f"={A('onboard', sc)}", "#,##0"),
         ("hpay_b", "기본 병원 CAC 회수기간 (개월)", lambda sc: '=IF({c}{hb}>0,{c}{hcac}/{c}{hb},"회수 불가")', "0.0"),
         ("hpay_p", "프리미엄 병원 CAC 회수기간 (개월)", lambda sc: '=IF({c}{hp}>0,{c}{hcac}/{c}{hp},"회수 불가")', "0.0"),
@@ -770,8 +771,8 @@ def build_steps(wb):
     items = [
         ("D", "Q12 기대 월 진료 완료", f"={P('d')}/3", "0.0"),
         ("V", "거래량 배수 1당 월 거래 공헌 (수수료 − 거래 직접비)", f"=({P('fee_b')}+{P('fee_p')}-{P('var_deal')})/3", "#,##0"),
-        ("F0", "월 고정 부분 (인건비 제외: 구독 + 광고 − 추가비 − 기타고정 − 마케팅 − 온보딩)",
-         f"=({P('sub')}+{P('ad')}-{P('var_prem')}-{P('fixed')}-{P('mkt')}-{P('onb')})/3", "#,##0"),
+        ("F0", "월 고정 부분 (인건비 제외: 구독 + 광고 − 기타고정 − 마케팅 − 온보딩)",
+         f"=({P('sub')}+{P('ad')}-{P('fixed')}-{P('mkt')}-{P('onb')})/3", "#,##0"),
         ("Lsel", "적용 L (월)", f"='가정'!$C${REF['L_sel']}", "#,##0"),
     ]
     for key, name, f, fmt in items:
@@ -842,7 +843,7 @@ def sens_formula(key, m):
     if key == "onboard":
         return f"={base}-{P('onb')}*({m}-1)"
     if key == "prem_share":
-        prem_unit = f"({a('deals_prem')}*3*({a('deal_value')}*{a('fee_prem')}-{c_deal})+3*({a('sub_fee')}-{a('prem_addl')}))"
+        prem_unit = f"({a('deals_prem')}*3*({a('deal_value')}*{a('fee_prem')}-{c_deal})+3*{a('sub_fee')})"
         basic_unit = f"({a('deals_basic')}*3*({a('deal_value')}*{a('fee_basic')}-{c_deal}))"
         return f"={base}+4*{P('p_avg')}*({m}-1)*({prem_unit}-{basic_unit})"
     raise KeyError(key)
@@ -851,7 +852,7 @@ def sens_formula(key, m):
 def build_sensitivity(wb, order):
     ws = wb.create_sheet("민감도")
     title(ws, "민감도 — 기준 3년차 연간 운영손익, 한 변수씩 ±20%",
-          "적용 L 기준. 수수료율은 고정(별도 참고). 유료 전환 = 전체 병원 수는 그대로 두고 프리미엄 병원 수만 ±20%.")
+          "적용 L 기준. 수수료율은 고정(별도 참고). 활발한 병원(프리미엄) 수 = 전체 병원 수는 그대로 두고 월 4건 하는 프리미엄 병원 수만 ±20%.")
     s = "기준"
     ws["A4"] = "기준 3년차 연간 운영손익"
     ws["B4"] = f"='{QS}'!$P${PNL[(s, 'op')]}"
@@ -1070,16 +1071,15 @@ def build_results():
     # 손익분기 (Q12)
     q12 = simulate(pb, Lsel)[-1]
     D = q12["deals"] / 3
-    var_prem = q12["prem_avg"] * pb["prem_addl"] * 3
     V = (q12["fee_basic"] + q12["fee_prem"] - q12["var_deal"]) / 3
-    F0 = (q12["sub"] + q12["ad"] - var_prem - q12["fixed"] - q12["mkt"] - q12["onboard"]) / 3
+    F0 = (q12["sub"] + q12["ad"] - q12["fixed"] - q12["mkt"] - q12["onboard"]) / 3
     be = [dict(label=lab, L=L, need=max(0, (L - F0) / V) * D, have=D,
                hospitals=max(0, (L - F0) / V) * (q12["basic_avg"] + q12["prem_avg"])) for L, lab, _ in L_LEVELS]
     # 단위경제 (기준)
     c_deal = pb["inq_per_deal"] * pb["ai_cost"] + pb["support"] + pb["payment"]
     cb = pb["deal_value"] * pb["fee_basic"] - c_deal
     cp = pb["deal_value"] * pb["fee_prem"] - c_deal
-    hb, hp = cb * pb["deals_basic"], cp * pb["deals_prem"] + pb["sub_fee"] - pb["prem_addl"]
+    hb, hp = cb * pb["deals_basic"], cp * pb["deals_prem"] + pb["sub_fee"]
     rb = next(r for r in runs if r["scenario"] == "기준" and r["L_index"] == L_SELECTED - 1)
     qs, ys = rb["quarters"], rb["years"]
     cacs = [pb["mkt"] * 12 / y["deals"] for y in ys]
