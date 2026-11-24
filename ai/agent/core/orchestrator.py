@@ -182,8 +182,11 @@ class Orchestrator:
         guard_note = verdict.note if verdict and verdict.action == "guard" else None
         categories = verdict.categories if verdict else []
 
+        base = _trim(state.history, self.max_history)
+        said = [m["content"] for m in base if m.get("role") == "user" and isinstance(m.get("content"), str)] + [user_text]
         ctx = ToolContext(
             patient_id=state.patient_id, language=state.language, residency=state.residency, last_user_text=user_text,
+            user_texts=said,
             residency_locked=state.residency_locked, timezone=state.timezone, store=self.store, today=self._today(), hospitals=self.hospitals,
         )
         system = {
@@ -197,7 +200,6 @@ class Orchestrator:
             ),
         }
         turn: list[Message] = [{"role": "user", "content": user_text}]
-        base = _trim(state.history, self.max_history)
         specs = self.registry.openai_specs()
         cards: list[JSON] = []
         trace: list[ToolTrace] = []

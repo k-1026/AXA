@@ -110,9 +110,9 @@ def test_실제_등록_병원은_예약_초안을_만들지_않음(client, db_en
     seed(db_engine, files)
     token = _visitor(client)
     llm.script += [call("prepare_booking_request", {"hospital_id": 1, "department": "피부과", "preferred_slots": ["2026-12-04 10:00"],
-                                                    "language": "en", "nationality": "TW", "visa_needed": False, "inquiry": "price?"}),
+                                                    "language": "en", "nationality": "TW", "visa_needed": False, "visa_statement": "no visa help", "inquiry": "price?"}),
                    say("Sorry.")]
-    r = client.post(ASK, headers=auth(token), json={"message": "book Y1"})
+    r = client.post(ASK, headers=auth(token), json={"message": "book Y1, no visa help"})
     assert "booking_draft" not in cards(r)
     out = _tool_result(llm, "prepare_booking_request")
     assert out["status"] == "not_available" and "not joined" in out["reason"]
@@ -143,9 +143,9 @@ def test_챗봇_요청서_카드는_그대로_예약_API로_보낼_수_있다(cl
         demo_partner(s, 9002)
     token = _visitor(client)
     llm.script += [call("prepare_booking_request", {"hospital_id": 9002, "department": "피부과", "preferred_slots": ["2030-12-05 10:00"],
-                                                    "language": "ko", "nationality": "TW", "visa_needed": False,
+                                                    "language": "ko", "nationality": "TW", "visa_needed": False, "visa_statement": "no visa help",
                                                     "inquiry": "레이저 몇 번?"}), say("Check the card.")]
-    card = cards(client.post(ASK, headers=auth(token), json={"message": "book 9002"}))["booking_draft"]
+    card = cards(client.post(ASK, headers=auth(token), json={"message": "book 9002, no visa help"}))["booking_draft"]
     consents = [{"kind": k, "version": "2026-11-03" if k == "privacy" else "2026-11-18"} for k in card["consents_required"]]
     r = client.post(f"/api/v1/hospitals/{card['hospital_id']}/booking-requests", headers=auth(token),
                     json={**card["request"], "consents": consents})

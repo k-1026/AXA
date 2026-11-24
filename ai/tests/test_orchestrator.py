@@ -66,7 +66,7 @@ def test_tool_chain_builds_cards_from_tool_results():
 
 def test_residency_then_draft_is_stored_but_not_submitted():
     args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "en", "inquiry": "acne scars",
-            "nationality": "TW", "visa_needed": False}
+            "nationality": "TW", "visa_needed": False, "visa_statement": "no visa help"}
     orch, _ = make([
         call(("prepare_booking_request", args)),
         say("Are you visiting short-term or living in Korea?"),
@@ -75,13 +75,29 @@ def test_residency_then_draft_is_stored_but_not_submitted():
         say("Please check the summary and press Submit."),
     ])
     state = ConversationState(patient_id="demo-patient-1")
-    first = orch.handle(state, "Book clinic 9001 on Dec 1 10:00 about acne scars")
+    first = orch.handle(state, "Book clinic 9001 on Dec 1 10:00 about acne scars, no visa help")
     assert first.cards == [] and state.booking_draft is None and state.residency is None
     second = orch.handle(state, "Short-term visit")
     assert state.residency == "short_term"
     assert [c["type"] for c in second.cards] == ["booking_draft"]
     assert state.booking_draft["hospital_id"] == 9001
     assert second.cards[0]["data"]["requires_patient_confirmation"] is True
+
+
+def test_made_up_visa_answer_gets_no_draft_card():
+    # 2026-11-24 배포본: 국적만 듣고 비자 질문 없이 visa_needed=False로 초안을 만든 사례
+    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-02 14:00"], "language": "ko", "inquiry": "여드름 흉터 상담",
+            "nationality": "VN", "visa_needed": False, "visa_statement": "비자는 필요 없어요"}
+    orch, llm = make([call(("prepare_booking_request", args)), say("비자 서류 안내가 필요하신가요?"),
+                      call(("prepare_booking_request", {**args, "visa_statement": "아니요 필요 없어요"})), say("카드를 확인해 주세요.")])
+    state = ConversationState(patient_id="demo-patient-1", residency="short_term")
+    state.history = [{"role": "user", "content": "예시 피부과의원에 12월 2일 오후 2시 여드름 흉터 상담 요청"},
+                     {"role": "assistant", "content": "국적이 어디세요?"}]
+    first = orch.handle(state, "베트남이에요")
+    assert first.cards == [] and state.booking_draft is None
+    assert '"missing": ["visa_needed"]' in llm.calls[1][0][-1]["content"]
+    second = orch.handle(state, "아니요 필요 없어요")  # 사용자가 실제로 답한 뒤에는 초안이 생김
+    assert [c["type"] for c in second.cards] == ["booking_draft"] and state.booking_draft["visa_needed"] is False
 
 
 def test_resident_gets_no_draft_card():
