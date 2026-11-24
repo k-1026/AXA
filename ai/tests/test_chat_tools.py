@@ -66,6 +66,26 @@ def test_booking_draft_rules():
     assert ko["consents_required"] == ["privacy", "overseas_transfer"]  # 글이 있으면 백엔드가 요구 (언어 무관)
 
 
+def test_visa_answer_must_come_from_user_words():
+    # 배포본 Nemotron이 비자 질문을 건너뛰고 visa_needed=False를 지어 넣은 사례 (2026-11-24, docs/시나리오.md 8-2)
+    args = {"hospital_id": 9001, "preferred_slots": ["2026-12-01 10:00"], "language": "ko", "inquiry": "여드름 흉터 상담",
+            "nationality": "VN", "visa_needed": False}
+    said = ["예시 피부과의원에 12월 1일 10시 상담 요청하고 싶어요", "베트남이에요"]
+    ctx = ToolContext(residency="short_term", user_texts=said)
+    made_up = R.run("prepare_booking_request", args, ctx)
+    assert made_up["status"] == "needs_info" and made_up["missing"] == ["visa_needed"] and "visa_statement" in made_up["note"]
+    quoted_wrong = R.run("prepare_booking_request", {**args, "visa_statement": "비자 필요 없어요"}, ctx)
+    assert quoted_wrong["missing"] == ["visa_needed"]  # 사용자가 하지 않은 말
+    too_short = R.run("prepare_booking_request", {**args, "visa_statement": "요"}, ctx)
+    assert too_short["missing"] == ["visa_needed"]
+    # 앞 턴에서 답한 것도 인정 (한 번에 하나씩 묻기 때문), 공백·대소문자 차이는 무시
+    answered = ToolContext(residency="short_term", user_texts=[*said, "아니요  필요 없어요"])
+    ok = R.run("prepare_booking_request", {**args, "visa_statement": "아니요 필요 없어요"}, answered)
+    assert ok["status"] == "draft" and ok["draft"]["visa_needed"] is False
+    en = ToolContext(residency="short_term", user_texts=["No, I don't need Visa help."])
+    assert R.run("prepare_booking_request", {**args, "visa_statement": "i don't need visa help"}, en)["status"] == "draft"
+
+
 def test_booking_draft_input_checks():
     base = {"hospital_id": 9001, "language": "en", "inquiry": "x", "nationality": "US", "visa_needed": True}
     assert "error" in R.run("prepare_booking_request", {**base, "preferred_slots": ["12/01 10am"]}, SHORT)
@@ -96,7 +116,7 @@ def test_my_bookings_and_aftercare():
 def test_prices_and_docs():
     p = R.run("get_prices", {"item": "scar"}, SHORT)
     assert len(p["prices"]) == 2 and "Korean patients" in p["note"]
-    assert R.run("retrieve_docs", {"query": "visa", "topic": "visa"}, SHORT)["documents"][0]["source"]
+    assert R.run("retrieve_docs", {"query": "rights", "topic": "rights"}, SHORT)["documents"][0]["source"]
     assert R.run("retrieve_docs", {"query": "zzz unknown"}, SHORT)["documents"] == []
 
 
@@ -148,3 +168,10 @@ def test_past_slots_are_rejected_when_the_draft_is_made():
     assert "error" in R.run("prepare_booking_request", args, late)
     early = ToolContext(patient_id="demo-patient-1", residency="short_term", today=date(2026, 11, 12))
     assert R.run("prepare_booking_request", args, early)["status"] == "draft"
+
+
+def test_visa_documents_are_not_returned():
+    # 비자는 답하지 않고 대사관·영사관 안내 (2026-11-24). 문서 검색이 비자 안내문을 돌려주면 모델이 그대로 설명함
+    for args in ({"query": "medical visa", "topic": "visa"}, {"query": "C-3-3 visa documents"}, {"query": "비자", "topic": "other"}):
+        res = R.run("retrieve_docs", args, SHORT)
+        assert res["documents"] == [] and "embassy" in res["note"], args

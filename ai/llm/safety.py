@@ -128,6 +128,17 @@ GUARD_NOTES = {
 }
 GUARD_SUFFIX = " Then help with whatever else they asked that you are allowed to do (department info, hospital search or suggestion, prices, booking)."
 
+# ------------------------------------------------------------------ 4. 비자 (의료 판단 아님 → 화면 의료 고지 X)
+# 비자 종류·자격·서류·절차·대행은 답하지 않고 그 나라의 한국 대사관·영사관 안내 (2026-11-24 팀 결정).
+# 요청서의 "병원에서 비자 서류 안내가 필요한가"(예/아니요)는 병원에 전하는 칸이라 그대로 받는다.
+VISA_PATTERNS = [r"비자", r"사증", r"\bvisas?\b", r"签证", r"簽證", r"thị thực", r"ビザ", r"査証", r"วีซ่า", r"\bviz[aуы]\b|виз[аыу]\b"]
+_VISA_RE = [re.compile(p, re.IGNORECASE) for p in VISA_PATTERNS]
+VISA_NOTE = ("The user mentions a visa. Do not explain visa types, eligibility, required documents, procedures or fees, "
+             "and do not offer to apply for or arrange a visa. Say briefly that you can't answer visa questions and ask them "
+             "to contact the Korean embassy or consulate in their own country (in Korean: \"계신 나라의 한국 대사관·영사관\", never \"주한\"). If they are only answering whether they want the "
+             "hospital's help with visa paperwork for a consultation request, just use that answer.")
+NON_MEDICAL_CATEGORIES = {"visa"}
+
 
 # ------------------------------------------------------------------ 결과
 @dataclass
@@ -151,7 +162,9 @@ def check(text: str, language: str = "en") -> SafetyResult:
 
     masked, pii = mask_pii(text)
     cats = [cat for cat, pats in _GUARD_RE.items() if any(p.search(masked) for p in pats)]
+    if any(p.search(masked) for p in _VISA_RE):
+        cats.append("visa")
     if cats:
-        note = " ".join(GUARD_NOTES[c] for c in cats) + GUARD_SUFFIX
+        note = " ".join(VISA_NOTE if c == "visa" else GUARD_NOTES[c] for c in cats) + GUARD_SUFFIX
         return SafetyResult("guard", masked, cats, note=note, pii=pii)
     return SafetyResult("pass", masked, [], pii=pii)
