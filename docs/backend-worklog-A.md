@@ -29,7 +29,7 @@
 - 한 일: Vercel 첫 배포(백엔드 `axa` sin1 · 환자 웹 `axa-tqse`, `docs/deploy-vercel.md` 0절). 배포본 시연 흐름·금지 요청 11개 확인 (로컬 `docs/시나리오.md`).
   #95 LLM 호출마다 `llm ok|fail … model ms tokens fallback_from` 로그. #94 요청서 `visa_needed`는 사용자 말(`visa_statement`)이 대화에 있을 때만 + 비자 자격·절차 질문은 "계신 나라의 한국 대사관·영사관" 안내(의료 고지 X, 비자 문서 미반환).
   `backend-A-chatbot-early-check`: 병원을 고르면 `prepare_booking_request` 먼저(요청 불가면 첫 턴에 안내), not_available 전화번호에 053, DB 연결 시 가짜 가격 대신 가격 가이드 안내, 병원 id 숨김·상담 언어 묻기.
-  루트 `vercel.json` Cron (`/api/v1/internal/purge` 매일 UTC 18시)
+  루트 `vercel.json` Cron 2개 — 환율 미리 받기(`/api/v1/exchange-rates`)·정기 정리(`/api/v1/internal/purge`) 둘 다 매일 한국 10시(UTC 01시)
 - 바뀐 계약: 없음 (챗봇 도구 입력에 `visa_statement` 추가 — 챗봇 내부)
 - 테스트: 백엔드·AI 511개 통과 (early-check 기준)
 - 다음 할 일: #97(backend→main) 승인·머지 뒤 배포본에서 비자·요청 흐름 재확인. 시연 때 `LLM_PROVIDER_ORDER`(지금 nemotron,gemini) 결정. 챗봇 가격을 가격 가이드 데이터에 연결
