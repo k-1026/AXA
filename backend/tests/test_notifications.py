@@ -42,6 +42,23 @@ def test_병원이_확정_답장하면_알림_환자가_취소하면_알림_없�
     assert len(_mine(client, me)) == 2  # 내가 한 취소는 알리지 않음
 
 
+def test_병원이_시간_제안_거절하면_알림_제안은_환자가_수락(client, db):
+    # 확정·거절·시간 제안은 병원이 하고 결과는 환자에게 알림 → 환자가 예약 관리에서 다시 확인 (11/24 사용자 확인)
+    # 병원이 제안한 시간은 병원이 확정할 수 없고 환자가 수락 (환자 본인 행동이라 알림 없음)
+    h, me = make_hospital(db), patient(client)
+    sh = staff(db, h)
+    rid = post(client, h, me).json()["id"]
+    assert client.post(f"/api/v1/tenant/booking-requests/{rid}/propose", json={"slot": slot(4)}, headers=sh).status_code == 200
+    assert client.post(f"/api/v1/tenant/booking-requests/{rid}/confirm", json={}, headers=sh).status_code == 409
+    assert client.post(f"/api/v1/me/booking-requests/{rid}/accept", json={}, headers=me).status_code == 200
+    h2 = make_hospital(db)
+    rid2 = post(client, h2, me).json()["id"]
+    sh2 = staff(db, h2)
+    assert client.post(f"/api/v1/tenant/booking-requests/{rid2}/reject", json={"reason": "fully_booked"}, headers=sh2).status_code == 200
+    got = [(n["request_id"], n["status"]) for n in _mine(client, me)]
+    assert got == [(rid2, "rejected"), (rid, "proposed")]  # 최근 순, 환자 수락은 알림 X
+
+
 def test_사후관리_답장도_알림(client, db):
     from modules.aftercare import service as aftercare
     from modules.patient.models import Patient

@@ -102,4 +102,8 @@ export const listMine = (token: string) => api<ServerBooking[]>('/me/booking-req
 export const cancelMine = (token: string, serverId: string) =>
   api<ServerBooking>(`/me/booking-requests/${serverId}/cancel`, { method: 'POST', token, body: {} });
 
+// 병원이 제안한 시간(proposed)을 환자가 수락 → confirmed (백엔드 patient_accept, AGENTS.md 6절의 유일한 예외)
+export const acceptMine = (token: string, serverId: string) =>
+  api<ServerBooking>(`/me/booking-requests/${serverId}/accept`, { method: 'POST', token, body: {} });
+
 export type { ServerBooking };

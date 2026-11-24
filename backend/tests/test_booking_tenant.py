@@ -244,3 +244,56 @@ def test_summary_api_requires_staff_and_returns_shape(client, db):
     assert client.get("/api/v1/tenant/analytics/summary").status_code == 401
     bad = client.get("/api/v1/tenant/analytics/summary?from=2026-11-20&to=2026-11-01", headers=_staff_headers(t))
     assert bad.status_code == 422
+
+
+def _hours(db: Session, hospital_id: int) -> None:
+    """월~금 10:00~18:00 (점심 13~14), 토·일 휴진."""
+    from datetime import time
+
+    from modules.hospital.models import HospitalHours
+    for i, day in enumerate(("mon", "tue", "wed", "thu", "fri", "sat", "sun")):
+        open_ = i < 5
+        db.add(HospitalHours(hospital_id=hospital_id, day=day, day_order=i, state="open" if open_ else "closed",
+                             open_time=time(10) if open_ else None, close_time=time(18) if open_ else None,
+                             lunch_start=time(13) if open_ else None, lunch_end=time(14) if open_ else None,
+                             source="test", checked_at=NOW))
+    db.commit()
+
+
+def test_hospital_cannot_confirm_its_own_proposal_patient_accepts(db):
+    # 확정은 양쪽이 동의한 시간만: 환자가 고른 시간(pending)은 병원이 확정, 병원이 제안한 시간은 환자가 수락 (11/24 사용자 결정)
+    p, t = _patient(db), _tenant(db)
+    req = service.create_request(db, p.id, t.id, _data())
+    service.staff_act(db, t.id, "staff-1", req.id, "propose", datetime(2026, 11, 20, 1, 0, tzinfo=timezone.utc))
+    with pytest.raises(Exception) as e:
+        service.staff_act(db, t.id, "staff-1", req.id, "confirm")
+    assert e.value.code == "booking.invalid_transition"
+    assert service.patient_accept(db, p.id, req.id).status == "confirmed"
+
+
+@pytest.mark.parametrize("kst_slot,ok", [
+    ((2026, 11, 20, 11, 0), True),    # 금 11:00
+    ((2026, 11, 21, 11, 0), False),   # 토 — 휴진
+    ((2026, 11, 22, 11, 0), False),   # 일 — 휴진
+    ((2026, 11, 20, 9, 0), False),    # 금 09:00 — 진료 전
+    ((2026, 11, 20, 18, 0), False),   # 금 18:00 — 진료 끝 (끝 시각은 X)
+    ((2026, 11, 20, 13, 30), False),  # 점심
+])
+def test_proposal_must_be_within_hospital_hours(db, kst_slot, ok):
+    from zoneinfo import ZoneInfo
+    p, t = _patient(db), _tenant(db)
+    _hours(db, t.hospital_id)
+    req = service.create_request(db, p.id, t.id, _data())
+    at = datetime(*kst_slot, tzinfo=ZoneInfo("Asia/Seoul"))
+    if ok:
+        assert service.staff_act(db, t.id, "staff-1", req.id, "propose", at).status == "proposed"
+    else:
+        with pytest.raises(Exception) as e:
+            service.staff_act(db, t.id, "staff-1", req.id, "propose", at)
+        assert e.value.code == "validation" and e.value.detail["errors"][0]["loc"] == ["slot"]
+
+
+def test_proposal_without_hours_data_is_not_blocked(db):
+    p, t = _patient(db), _tenant(db)  # 진료시간 데이터가 없는 병원 → 막지 않음 (모르는 것을 휴진으로 보지 않음)
+    req = service.create_request(db, p.id, t.id, _data())
+    assert service.staff_act(db, t.id, "staff-1", req.id, "propose", datetime(2026, 11, 22, 2, 0, tzinfo=timezone.utc)).status == "proposed"

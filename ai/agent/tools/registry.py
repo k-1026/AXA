@@ -30,6 +30,9 @@ class ToolContext:
     residency: str | None = None
     residency_locked: bool = False  # 계정에 답이 있으면 True → record_residency가 바꾸지 않음
     last_user_text: str = ""  # 이번 턴 사용자 메시지 원문 (record_residency가 실제 발화인지 확인하는 데 씀)
+    # 이 대화의 사용자 메시지들 (앞 턴 + 이번 턴). prepare_booking_request가 visa_needed 근거 문구가 실제 발화인지 확인.
+    # 오케스트레이터가 항상 채운다. None = 도구만 따로 부르는 단위 테스트 (검사 생략)
+    user_texts: list[str] | None = None
     timezone: str = "UTC"  # 환자 프로필의 IANA 시간대 (프론트가 넣음). 요청서 patient_timezone으로 쓰임
     today: date | None = None  # 오늘 날짜(서버 시계). 있으면 초안 단계에서 지난 희망 일시를 거른다
     store: Any = None  # BookingStore (ai/agent/tools/booking_store.py). 없으면 도구가 처음 쓸 때 기본 저장소를 만든다

@@ -41,6 +41,7 @@ export function BookingsPage() {
   const [sort, setSort] = useState<Sort>('visit');
   const [editing, setEditing] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [accepting, setAccepting] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   const all = consult.bookings;
@@ -127,7 +128,7 @@ export function BookingsPage() {
                 <div className="bk-when">
                   <CalendarIcon />
                   <p>
-                    {editable && <span className="bk-wish">{t('bookings.wish')} </span>}
+                    {editable && <span className="bk-wish">{t(status === 'proposed' ? 'bookings.proposedTime' : 'bookings.wish')} </span>}
                     {bookingDateFull(booking.date, booking.time, i18n.language)}
                   </p>
                   <span className={`consult-status is-${status}`}>{t(`consult.status.${status}`)}</span>
@@ -192,9 +193,28 @@ export function BookingsPage() {
                         {t('aftercare.aftercareButton')}
                       </button>
                     )}
+                    {status === 'proposed' && (
+                      <button
+                        type="button"
+                        className="is-primary"
+                        disabled={accepting === key}
+                        onClick={async () => {
+                          setAccepting(key);
+                          try {
+                            await consult.acceptBooking(thread.hospitalId, message.id, t('bookings.acceptMsg', { when: bookingDateFull(booking.date, booking.time, i18n.language) }));
+                            setCancelError(null);
+                          } catch (err) {
+                            setCancelError(t(bookingErrorKey(err)));
+                          }
+                          setAccepting(null);
+                        }}
+                      >
+                        {t('bookings.accept')}
+                      </button>
+                    )}
                     {editable && (
                       <>
-                        <button type="button" className="is-primary" onClick={() => setEditing(key)}>
+                        <button type="button" className={status === 'proposed' ? undefined : 'is-primary'} onClick={() => setEditing(key)}>
                           <PencilIcon />
                           {t('bookings.change')}
                         </button>

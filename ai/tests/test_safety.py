@@ -49,7 +49,6 @@ def test_guard_categories(text, cat):
     "수성구에 영어 되는 피부과 찾아줘",
     "Can I go on December 1st at 10:00?",
     "How much is scar laser treatment?",
-    "C-3-3 비자는 어떻게 받나요?",
     "我的预约状态怎么样了？",
     "I need a receipt document from the hospital",
     "I am just visiting Korea for two weeks.",
@@ -78,6 +77,24 @@ def test_guard_categories(text, cat):
 def test_normal_requests_pass(text):
     r = check(text)
     assert r.action == "pass" and r.categories == [] and r.text == text
+
+
+@pytest.mark.parametrize("text", [
+    "C-3-3 비자는 어떻게 받나요?",
+    "의료비자 받을 수 있을까요? 신청 대신 해 줘요?",
+    "베트남 사람인데 사증 발급 서류가 뭐예요?",
+    "How do I get a medical tourism visa?",
+    "Can you apply for my visa?",
+    "医疗签证怎么办？",
+    "醫療簽證要準備什麼？",
+    "Tôi cần thị thực y tế không?",
+    "医療ビザは必要ですか？",
+])
+def test_visa_questions_are_guarded_without_medical_notice(text):
+    # 비자 자격·절차·대행은 답하지 않고 대사관·영사관 안내 (2026-11-24 사용자 결정). 의료 판단이 아니라 별도 분류
+    r = check(text)
+    assert r.action == "guard" and r.categories == ["visa"] and "embassy" in r.note
+    assert "hospital's help with visa paperwork" in r.note  # 요청서의 예/아니요 답은 그대로 쓰게
 
 
 def test_mixed_request_is_guarded_not_blocked():

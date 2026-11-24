@@ -16,7 +16,7 @@ T0 = datetime(2026, 11, 10, 9, 0, tzinfo=timezone.utc)
 ME = PatientInfo("demo-patient-2", "Asia/Taipei")
 OTHER = PatientInfo("demo-patient-3", "UTC")
 FULL = {"hospital_id": 9002, "preferred_slots": ["2026-12-04 10:00"], "language": "en", "inquiry": "scar laser options",
-        "nationality": "TW", "visa_needed": False}
+        "nationality": "TW", "visa_needed": False, "visa_statement": "no visa help"}
 
 
 class Clock:
@@ -216,7 +216,7 @@ def test_health_info_reaches_the_client_card_but_is_never_stored_on_the_server()
     secret = "scars on both cheeks since 2024"
     service, _, sessions, *_ = make([call("prepare_booking_request", {**FULL, "health_info": secret}), say("Check the card.")])
     s = sessions.create(ME.patient_id, "en", "t", {"residency": "short_term"})
-    r = service.ask(ME, s.id, "book clinic B", "en")
+    r = service.ask(ME, s.id, "book clinic B, no visa help", "en")
     card = next(c for c in r.cards if c.type == "booking_draft").data
     assert card.request["health_info"] == secret and card.consents_required == ["privacy", "health", "overseas_transfer"]
     stored = sessions.get(ME.patient_id, s.id).state
@@ -232,7 +232,7 @@ def test_existing_open_request_before_the_draft_is_not_mistaken_for_a_submission
         call("prepare_booking_request", {**FULL, "hospital_id": 9001}), say("Check the card."), say("Still a draft."),
     ])
     s = sessions.create(one.patient_id, "en", "t", {"residency": "short_term"})
-    service.ask(one, s.id, "book clinic A", "en")
+    service.ask(one, s.id, "book clinic A, no visa help", "en")
     state = sessions.get(one.patient_id, s.id).state
     assert state["draft_known_booking_ids"] == ["demo-bk-001", "demo-bk-002"]  # 환자의 기존 요청 전부(가상 2건)
     service.ask(one, s.id, "ok", "en")
@@ -246,7 +246,7 @@ def test_changing_to_another_hospital_replaces_the_draft_and_snapshot():
         call("prepare_booking_request", {**FULL, "hospital_id": 9001}), say("draft A"),
     ])
     s = sessions.create(ME.patient_id, "en", "t", {"residency": "short_term"})
-    service.ask(ME, s.id, "clinic B", "en")
+    service.ask(ME, s.id, "clinic B, no visa help", "en")
     service.ask(ME, s.id, "actually clinic A", "en")
     assert sessions.get(ME.patient_id, s.id).state["draft"]["hospital_id"] == 9001
 
@@ -272,7 +272,7 @@ def test_every_tool_result_fits_its_card_model():
         ("recommend_hospitals", {"department": "피부과", "language": "en"}, "hospital_suggestions"),
         ("get_hospital", {"hospital_id": 9001}, "hospital_detail"),
         ("get_prices", {"item": "scar"}, "price_list"),
-        ("retrieve_docs", {"query": "visa", "topic": "visa"}, "sources"),
+        ("retrieve_docs", {"query": "rights", "topic": "rights"}, "sources"),
         ("check_availability", {"hospital_id": 9001, "date_from": "2026-12-01", "date_to": "2026-12-03"}, "time_slots"),
         ("get_my_bookings", {}, "booking_list"),
         ("open_aftercare_thread", {"booking_id": "demo-bk-002", "topic": "documents", "message": "receipt"}, "aftercare_thread"),
@@ -283,7 +283,7 @@ def test_every_tool_result_fits_its_card_model():
         s = sessions.create("demo-patient-1" if tool in ("get_my_bookings", "open_aftercare_thread") else ME.patient_id, "en", "t",
                             {"residency": "short_term"})
         who = PatientInfo(s.patient_id, "UTC")
-        r = service.ask(who, s.id, "go", "en")
+        r = service.ask(who, s.id, "go, no visa help", "en")
         assert [c.type for c in r.cards] == [card_type], tool
 
 
@@ -315,7 +315,7 @@ def test_newest_submission_is_picked_even_if_the_gateway_lists_newest_first():
     service, llm, sessions, *_ = make([call("prepare_booking_request", FULL), say("Check the card."), say("Sent.")],
                                       bookings=NewestFirst(inner))
     s = sessions.create(ME.patient_id, "en", "t", {"residency": "short_term"})
-    r1 = service.ask(ME, s.id, "book clinic B", "en")
+    r1 = service.ask(ME, s.id, "book clinic B, no visa help", "en")
     card = next(c for c in r1.cards if c.type == "booking_draft").data
     consents = [{"kind": k, "version": "v1"} for k in card.consents_required]
     older = inner.create_from_payload(ME.patient_id, card.hospital_id, card.request, consents, today=T0)
@@ -330,7 +330,7 @@ def test_known_booking_ids_are_saved_when_the_draft_changes_even_if_its_card_is_
     service, _, sessions, *_ = make([call("prepare_booking_request", {**FULL, "hospital_id": 9001}), say("Check the card.")])
     monkeypatch.setattr(ChatService, "_validated_cards", staticmethod(lambda reply: []))  # 카드가 검증에서 빠진 상황
     s = sessions.create(one.patient_id, "en", "t", {"residency": "short_term"})
-    service.ask(one, s.id, "book clinic A", "en")
+    service.ask(one, s.id, "book clinic A, no visa help", "en")
     assert sessions.get(one.patient_id, s.id).state["draft_known_booking_ids"] == ["demo-bk-001", "demo-bk-002"]
 
 

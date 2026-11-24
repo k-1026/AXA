@@ -27,12 +27,14 @@ from __future__ import annotations
 
 import re
 from datetime import date, datetime, time, timedelta, timezone
+from typing import Any
 
 from ai.agent.tools import fake_data as fd
 from ai.agent.tools.booking_store import (
     BookingError, BookingStore, parse_local_slot, required_consents, to_booking_create,
 )
 from ai.agent.tools.registry import JSON, Tool, ToolContext, ToolError, ToolRegistry
+from ai.llm.safety import _VISA_RE
 
 # 사용자 언어 코드 = 프론트·백엔드가 지원하는 5개 (backend `patients.preferred_lang`, 요청서 `lang`)
 LANGS = ["en", "zh-CN", "zh-TW", "vi", "ko"]
@@ -221,6 +223,11 @@ def get_hospital(args: JSON, ctx: ToolContext) -> JSON:
 
 
 def get_prices(args: JSON, ctx: ToolContext) -> JSON:
+    if _uses_db(ctx):
+        # 챗봇 가격은 아직 실제 데이터에 연결 전. 가짜 행(fake_data.PRICES)은 id가 시연 병원과 겹쳐 엉뚱한 값이 됨 (11/24)
+        return {"prices": [], "note": "The chatbot can't look up prices yet. Tell the user to open the Price Guide page "
+                                      "(menu '가격 가이드') for public non-covered fee ranges in Daegu, and that the hospital "
+                                      "gives the final estimate. Do not quote any numbers."}
     rows = fd.PRICES
     if hid := args.get("hospital_id"):
         rows = [p for p in rows if p["hospital_id"] == hid]
@@ -233,7 +240,11 @@ def get_prices(args: JSON, ctx: ToolContext) -> JSON:
 def retrieve_docs(args: JSON, ctx: ToolContext) -> JSON:
     q = args["query"].lower()
     topic = args.get("topic")
-    rows = [d for d in fd.DOCS if (topic in (None, "other") or d["topic"] == topic)]
+    # 비자는 안내하지 않는다 (2026-11-24 결정) — 비자 문서는 돌려주지 않고 대사관·영사관 안내만
+    if topic == "visa" or any(p.search(args["query"]) for p in _VISA_RE):
+        return {"documents": [], "note": "Visa questions are not answered here. Say you can't help with visas and ask the "
+                                         "user to contact the Korean embassy or consulate in their country."}
+    rows = [d for d in fd.DOCS if d["topic"] != "visa" and (topic in (None, "other") or d["topic"] == topic)]
     if topic in (None, "other"):
         rows = [d for d in rows if any(w in (d["title"] + d["text"]).lower() for w in q.split())] or []
     if not rows:
@@ -264,27 +275,35 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
     if ctx.residency == "resident":
         return {"status": "not_available",
                 "reason": "Consultation requests through MediDaegu are for short-term visitors. Please contact the hospital directly.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
     if not h["is_registered_facility"]:
         return {"status": "not_available",
                 "reason": "This hospital is not a registered foreign-patient facility, so requests can't be sent here.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
     if not h.get("accepts_requests", True):  # 등록 병원이지만 메디대구 입점 X (결정 31: 예약은 가상 입점 병원만)
         return {"status": "not_available",
                 "reason": "This hospital has not joined MediDaegu, so consultation requests can't be sent through us. "
                           "Use recommend_hospitals to suggest MediDaegu partner hospitals (demo), or share the hospital's phone.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
     # 백엔드 BookingCreate(docs/backend-contracts.md 6절)가 요구하는 칸. 연락 방법은 계정 이메일로 고정
     department = args.get("department") or (h["departments"][0] if len(h["departments"]) == 1 else None)
     if department and department not in DEPT_CODES:
         return {"status": "not_available",
                 "reason": f"Online consultation requests are currently available for {', '.join(DEPT_CODES)} only. "
                           f"Please contact the hospital directly for {department}.",
-                "hospital_tel": h["tel"]}
+                "hospital_tel": daegu_tel(h["tel"])}
+    # 비자 도움 여부는 사용자가 직접 답한 경우만 받는다 — 모델이 질문을 건너뛰고 False를 지어 넣은 사례 (2026-11-24)
+    visa_unconfirmed = args.get("visa_needed") is not None and not _user_said(args.get("visa_statement"), ctx)
+    if visa_unconfirmed:
+        args = {**args, "visa_needed": None}
     missing = [k for k in ("department", "preferred_slots", "language", "nationality", "visa_needed", "inquiry")
                if (department if k == "department" else args.get(k)) in (None, "", [])]
     if missing:
-        return {"status": "needs_info", "missing": missing, "hospital_departments": h["departments"]}
+        out = {"status": "needs_info", "missing": missing, "hospital_departments": h["departments"]}
+        if "visa_needed" in missing:
+            out["note"] = ("Ask the user whether they want the hospital's help with visa paperwork and wait for their answer. "
+                           "Then pass visa_needed with visa_statement copied from their own words. Never assume it.")
+        return out
     if department not in h["departments"]:
         raise ToolError(f"이 병원의 진료과가 아닙니다: {department} (가능: {h['departments']})")
     slots = args["preferred_slots"]
@@ -322,6 +341,27 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
         "consents_required": required_consents(draft),  # 요청서마다 받음. 건강정보는 별도 동의 (개인정보보호법 제23조)
         "note": "Show the summary card. Do not say the request was sent until the user presses Submit.",
     }
+
+
+def daegu_tel(tel: str | None) -> str | None:
+    """지역번호가 빠진 시내 번호(예: 253-0707)에 대구 053을 붙인다. 병원 목록은 대구만이라 안전.
+    0으로 시작(053·010 등)하거나 15xx·16xx·18xx 대표번호는 그대로."""
+    if not tel:
+        return tel
+    digits = re.sub(r"\D", "", tel)
+    if tel.startswith("0") or re.fullmatch(r"1[5-8]\d{6}", digits) or len(digits) not in (7, 8):
+        return tel
+    return f"053-{tel}"
+
+
+def _user_said(statement: Any, ctx: ToolContext) -> bool:
+    """근거 문구가 이 대화의 사용자 메시지 안에 그대로 있는지 (공백·대소문자 무시). user_texts가 None이면 검사 생략."""
+    if ctx.user_texts is None:
+        return True
+    quote = " ".join(str(statement or "").split()).lower()
+    if len(quote) < 2:
+        return False
+    return any(quote in " ".join(t.split()).lower() for t in ctx.user_texts)
 
 
 def record_residency(args: JSON, ctx: ToolContext) -> JSON:
@@ -484,7 +524,9 @@ def build_registry() -> ToolRegistry:
                                 "description": "희망 일시 후보 1~3개, 병원 현지(한국) 시간 'YYYY-MM-DD HH:MM'"},
             "language": {"type": "string", "enum": LANGS},
             "nationality": {"type": "string", "description": "국적 ISO 3166-1 alpha-2 코드 (TW, VN, US, CN, JP, TH ...). 사용자가 말한 국가명을 코드로 바꿔 넣는다"},
-            "visa_needed": {"type": "boolean", "description": "병원에서 비자 관련 서류 안내가 필요하다고 사용자가 말했는지"},
+            "visa_needed": {"type": "boolean", "description": "병원에서 비자 관련 서류 안내가 필요하다고 사용자가 말했는지. 사용자가 답하기 전에는 넣지 않는다"},
+            "visa_statement": {"type": "string",
+                               "description": "visa_needed의 근거: 사용자 메시지에서 **그대로 복사한** 답 (번역·요약 X, 예: \"아니요 필요 없어요\"). 없으면 visa_needed도 넣지 않는다"},
             "inquiry": {"type": "string", "description": "상담하고 싶은 내용 (사용자 표현 그대로)"},
             "health_info": {"type": "string", "description": "사용자가 **스스로 말한** 증상·병력 원문. 먼저 묻지 않는다. 없으면 생략"},
             "needs_interpreter": {"type": "boolean"}},

@@ -538,7 +538,10 @@
     "cancelMsg": "I cancelled my booking for {{when}}.",
     "footnote": "Booking times are in Korea Standard Time (KST).",
     "sampleNote": "Sample hospitals and bookings.",
-    "proposedNote": "The hospital proposed a different time. Please check it in the consultation chat.",
+    "proposedNote": "The hospital proposed a different time. Accept it if it works for you, or change or cancel the request.",
+    "accept": "Accept this time",
+    "proposedTime": "Proposed time",
+    "acceptMsg": "I accepted the time the hospital proposed ({{when}}).",
     "expiredNote": "All preferred dates have passed, so this request has expired.",
     "noShowNote": "The clinic marked this booking as not attended. To visit, please send a new booking request."
   },

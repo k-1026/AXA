@@ -4,7 +4,7 @@ import { useAuth } from '../../components/auth';
 import { searchText, uid } from '../../lib/common';
 import { useHospitals } from '../hospital/useHospitals';
 import { hospitalNames } from '../hospital/name';
-import { cancelMine, createBooking, listMine, toLocal, ykihoOf, type BookingExtra } from './bookingApi';
+import { acceptMine, cancelMine, createBooking, listMine, toLocal, ykihoOf, type BookingExtra } from './bookingApi';
 import { SAMPLE_THREADS } from './sampleThreads';
 import type { BookingRequest, ConsultThread } from './types';
 
@@ -164,6 +164,18 @@ export function useConsultThreads() {
     append(id, { text: notice });
   };
 
+  // 병원이 제안한 시간을 수락 → 확정 (서버가 준 상태로 카드를 바꿈)
+  const acceptBooking = async (id: string, messageId: string, notice: string) => {
+    const old = bookingOf(id, messageId);
+    if (mode === 'member' && token && old?.serverId) {
+      const next = toLocal(await acceptMine(token, old.serverId));
+      editBooking(id, messageId, (o) => ({ ...o, ...next }));
+    } else {
+      editBooking(id, messageId, (o) => ({ ...o, status: 'confirmed' }));
+    }
+    append(id, { text: notice });
+  };
+
   const send = (text: string) => active && text.trim() && append(active.hospitalId, { text: text.trim() });
 
   // 실제 회원은 서버에 예약 요청을 보내고(실패하면 거부된 Promise → 폼이 오류 표시), 서버가 준 상태로 남긴다
@@ -197,5 +209,5 @@ export function useConsultThreads() {
 
   const bookings = threads.flatMap((t) => t.messages.filter((m) => m.booking).map((m) => ({ thread: t, message: m, booking: m.booking! })));
 
-  return { mode, threads, active, select, open, send, requestBooking, requestBookingFor, changeBooking, cancelBooking, search, bookings };
+  return { mode, threads, active, select, open, send, requestBooking, requestBookingFor, changeBooking, cancelBooking, acceptBooking, search, bookings };
 }
