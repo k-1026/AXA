@@ -4,6 +4,7 @@ import { LANGUAGES } from '../i18n';
 import { CURRENCIES, useCurrency, type Currency } from '../components/currency';
 import { useAuth } from '../components/auth';
 import { NotificationBell } from '../features/notifications/NotificationBell';
+import { Logo } from '../components/Logo';
 
 export function Header() {
   const { t, i18n } = useTranslation();
@@ -14,8 +15,8 @@ export function Header() {
 
   return (
     <header className="site-header">
-      <Link to="/" className="brand">
-        MediDaegu
+      <Link to="/" className="brand" aria-label="MediDaegu">
+        <Logo />
       </Link>
       <div className="header-actions">
         <label className="header-select">

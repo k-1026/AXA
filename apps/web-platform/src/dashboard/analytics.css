@@ -33,8 +33,8 @@
 
 /* 상단 */
 .hd .top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
-.hd .brand { text-decoration: none; font-weight: 800; font-size: 1.15rem; color: var(--accent); }
-.hd .brand span { font-size: .8rem; font-weight: 700; color: var(--surface); background: var(--accent); border-radius: 6px; padding: 2px 7px; margin-left: 4px; vertical-align: 2px; }
+.hd .brand { text-decoration: none; font-weight: 800; font-size: 1.15rem; color: var(--accent); display: inline-flex; align-items: center; }
+.hd .brand .brand-tag { font-size: .8rem; font-weight: 700; color: var(--surface); background: var(--accent); border-radius: 6px; padding: 2px 7px; margin-left: 4px; vertical-align: 2px; }
 .hd .hospital { display: flex; flex-direction: column; line-height: 1.3; margin-right: auto; }
 .hd .hospital span { font-size: .8rem; color: var(--text-muted); }
 .hd .select { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--text-muted); }
