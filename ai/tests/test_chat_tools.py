@@ -189,3 +189,19 @@ def test_daegu_tel_gets_area_code():
 def test_prompt_checks_hospital_before_collecting_details():
     from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
     assert "before asking for any other details" in SYSTEM_PROMPT
+
+
+def test_db_mode_prices_point_to_price_guide_not_fake_rows():
+    # 배포본(DB 연결)에서 가짜 가격(fake_data.PRICES, id가 시연 병원과 겹침)이 "병원 A·B"로 나가던 것 (11/24)
+    class Db:
+        def booking_info(self, hospital_id):
+            return None
+    res = R.run("get_prices", {"item": "scar"}, ToolContext(residency="short_term", hospitals=Db()))
+    assert res["prices"] == [] and "Price Guide" in res["note"]
+    assert R.run("get_prices", {"item": "scar"}, SHORT)["prices"]  # DB 없는 단위 테스트·eval은 그대로
+
+
+def test_prompt_hides_ids_and_asks_language():
+    from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
+    assert "Never show hospital ids" in SYSTEM_PROMPT
+    assert "ask which language" in SYSTEM_PROMPT

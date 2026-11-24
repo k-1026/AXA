@@ -223,6 +223,11 @@ def get_hospital(args: JSON, ctx: ToolContext) -> JSON:
 
 
 def get_prices(args: JSON, ctx: ToolContext) -> JSON:
+    if _uses_db(ctx):
+        # 챗봇 가격은 아직 실제 데이터에 연결 전. 가짜 행(fake_data.PRICES)은 id가 시연 병원과 겹쳐 엉뚱한 값이 됨 (11/24)
+        return {"prices": [], "note": "The chatbot can't look up prices yet. Tell the user to open the Price Guide page "
+                                      "(menu '가격 가이드') for public non-covered fee ranges in Daegu, and that the hospital "
+                                      "gives the final estimate. Do not quote any numbers."}
     rows = fd.PRICES
     if hid := args.get("hospital_id"):
         rows = [p for p in rows if p["hospital_id"] == hid]
