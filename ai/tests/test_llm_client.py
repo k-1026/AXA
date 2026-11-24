@@ -208,3 +208,40 @@ def test_nvidia_model_names_get_vendor_prefix():
     other = LLMSettings(_env_file=None, gemini_api_key="", nemotron_api_key="k", nemotron_base_url="https://other.test/v1",
                         nemotron_model="nemotron-x")
     assert [p.model for p in other.providers()] == ["nemotron-x"]  # NVIDIA 주소가 아니면 건드리지 않음
+
+
+# --- 모델·소요 시간 로그 (응답이 느린 이유를 배포 로그에서 보려고) ---------------------------
+
+
+def test_success_logs_model_and_duration(caplog):
+    caplog.set_level("INFO", logger="ai.llm")
+    make_client(lambda req: ok_text("안녕", model="gemini-3.5-flash")).chat(
+        [{"role": "user", "content": "hi"}], service="chatbot"
+    )
+    lines = [r.getMessage() for r in caplog.records if r.name == "ai.llm"]
+    assert len(lines) == 1
+    line = lines[0]
+    assert line.startswith("llm ok ")
+    assert "service=chatbot" in line and "provider=gemini" in line and "model=gemini-3.5-flash" in line
+    assert "ms=" in line and "tokens=10/3" in line and "fallback_from=-" in line
+
+
+def test_fallback_logs_failure_then_success(caplog):
+    caplog.set_level("INFO", logger="ai.llm")
+
+    def handler(req):
+        if "gemini" in str(req.url):
+            return httpx.Response(429, json={"error": "rate"})
+        return ok_text(model="nemo-model")
+
+    make_client(handler).chat([{"role": "user", "content": "hi"}])
+    lines = [r.getMessage() for r in caplog.records if r.name == "ai.llm"]
+    assert lines[0].startswith("llm fail ") and "provider=gemini" in lines[0] and "error=RateLimitError" in lines[0]
+    assert lines[1].startswith("llm ok ") and "provider=nemotron" in lines[1] and "fallback_from=gemini" in lines[1]
+
+
+def test_log_has_no_message_content_or_key(caplog):
+    caplog.set_level("INFO", logger="ai.llm")
+    make_client(lambda req: ok_text("비밀 답변")).chat([{"role": "user", "content": "개인 증상 내용"}])
+    text = " ".join(r.getMessage() for r in caplog.records if r.name == "ai.llm")
+    assert "개인 증상" not in text and "비밀 답변" not in text and "k1" not in text.split()
