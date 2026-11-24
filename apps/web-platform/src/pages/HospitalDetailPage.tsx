@@ -64,24 +64,32 @@ export function HospitalDetailPage() {
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
             <dd><HospitalAddress addr={h.addr} /></dd>
-            <dt>{t('popup.tel')}</dt>
-            <dd>{h.tel && <a href={`tel:${h.tel}`}>{h.tel}</a>}</dd>
-            <dt>{t('hospital.homepage')}</dt>
-            <dd>
-              {h.url && (
-                <a href={h.url} target="_blank" rel="noopener noreferrer">
-                  {h.url}
-                </a>
-              )}
-            </dd>
-            <dt>{t('hospital.instagram')}</dt>
-            <dd>
-              {h.instagram && (
-                <a href={h.instagram} target="_blank" rel="noopener noreferrer">
-                  {instagramHandle(h.instagram)}
-                </a>
-              )}
-            </dd>
+            {h.tel && (
+              <>
+                <dt>{t('popup.tel')}</dt>
+                <dd><a href={`tel:${h.tel}`}>{h.tel}</a></dd>
+              </>
+            )}
+            {h.url && (
+              <>
+                <dt>{t('hospital.homepage')}</dt>
+                <dd>
+                  <a href={h.url} target="_blank" rel="noopener noreferrer">
+                    {h.url}
+                  </a>
+                </dd>
+              </>
+            )}
+            {h.instagram && (
+              <>
+                <dt>{t('hospital.instagram')}</dt>
+                <dd>
+                  <a href={h.instagram} target="_blank" rel="noopener noreferrer">
+                    {instagramHandle(h.instagram)}
+                  </a>
+                </dd>
+              </>
+            )}
           </dl>
         </div>
       </header>

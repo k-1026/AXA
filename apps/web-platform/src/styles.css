@@ -358,7 +358,7 @@ a {
 
 /* 아래쪽은 찜 하트 자리: 긴 홈페이지 주소가 하트에 가려지지 않게 */
 .hospital-card-body {
-  padding: 14px 16px 50px;
+  padding: 14px 16px 66px;
 }
 
 /* 찜 하트: 카드 오른쪽 아래. 카드 전체 링크보다 위에 둔다 */
@@ -507,13 +507,21 @@ a {
 .hospital-facts {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 4px 10px;
+  gap: 10px 14px;
   margin: 0;
   font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* 카드: 병원 이름과 정보 사이 구분선 */
+.hospital-card .hospital-facts {
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-muted);
 }
 
 .hospital-facts dt {
-  color: var(--text-muted);
+  color: #6b7682;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
