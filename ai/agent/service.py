@@ -70,6 +70,8 @@ class PatientInfo:
 
     patient_id: str
     timezone: str = "UTC"  # patients.timezone
+    # patients.residency (가입 때 3문항). 있으면 대화에서 말한 값보다 우선 — 국내 거주로 답한 계정은 대화로 바꿀 수 없음
+    residency: str | None = None
 
 
 class RateLimiter:
@@ -205,7 +207,8 @@ class ChatService:
                 saved.pop("draft_known_booking_ids", None)
 
         state = ConversationState(
-            language=language, patient_id=patient.patient_id, residency=saved.get("residency"),
+            language=language, patient_id=patient.patient_id, residency=patient.residency or saved.get("residency"),
+            residency_locked=bool(patient.residency),
             history=history, booking_draft=draft, timezone=patient.timezone,
         )
         try:

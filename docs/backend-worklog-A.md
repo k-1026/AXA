@@ -17,6 +17,37 @@
 
 ## 기록
 
+### 2026-11-23 (2) · backend-A-media-thumbs · Claude (사진 썸네일)
+- 한 일: 결정 29. `media.thumb_path`·`with_thumbs`, 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb`, `attachments_out`에 `thumb_url`. 탈퇴 삭제·정기 정리에 썸네일 포함
+- 바뀐 계약: contracts 6-3 (칸 추가만)
+- 테스트: 전체 456개 통과 (새 4개)
+- 다음 할 일: 환자 웹 업로드 전 줄이기·썸네일 (`frontend-media-thumbs`), 대시보드 썸네일 표시
+- B에게 요청: 결정 29 확인 — `router_tenant` 응답 첨부에 `thumb_url`이 생김 (B 파일은 안 고침, `media.attachments_out`이 같이 줌)
+- 막힌 것·질문: 없음
+### 2026-11-23 (4) · backend-A-chatbot-demo-flow · Claude (챗봇 가상 병원 흐름 + 방문 전 질문, `backend-A-web-push` 위)
+- 한 일: 결정 31·32. 가상 병원 4곳 `demo_hospitals.json`(예전 `demo_hospital.json` 대신), 시드가 4곳·병원별 직원 계정. 챗봇 게이트웨이 `demo_candidates`·`booking_info`(입점 가상 병원만), `recommend_hospitals`·`check_availability`·`prepare_booking_request`가 서버에서는 DB 사용(테스트는 가상 데이터 그대로). 새 모듈 `question`(마이그레이션 **0013**), `POST /me/booking-requests/{id}/questions`, 응답 `questions`, 챗봇 도구 `draft_hospital_question` + 카드 `hospital_question`
+- 바뀐 계약: contracts 6-1·6-2·7
+- 테스트: 전체 484개 통과 (새 `test_questions.py` 5개, `test_chatbot_hospitals.py` 3개, 도구 12개)
+- 다음 할 일: 공용 DB 0013 + 시드 다시, 환자 웹 카드·상담 화면, 대시보드에 질문 표시
+- B에게 요청: `booking/router_tenant.py`·`schemas.py`에 `questions` 칸 (A 작성, 확인 부탁)
+- 막힌 것·질문: AI 담당 확인 — 도구 1개·프롬프트 한 절("Questions before the visit")·서버에서 DB 쓰는 분기
+
+### 2026-11-23 (3) · backend-A-web-push · Claude (웹 푸시, `backend-A-residency` 위)
+- 한 일: 결정 30. `pywebpush` 의존성, 설정 `VAPID_*`, 모델 `PushSubscription`(마이그레이션 **0012**), `notification/push.py`(구독·해제·commit 뒤 보내기·410 정리), API `/me/push/key`·`/me/push/subscriptions`, 키 생성 `scripts/make_vapid_keys.py`. `notify()`에 한 줄(`push.queue`)
+- 바뀐 계약: contracts 4·6-5
+- 테스트: 전체 통과 (새 `test_push.py` 8개 — 실제 pywebpush 암호화·서명 포함, 네트워크는 가짜)
+- 다음 할 일: 환자 웹 서비스 워커·구독 버튼 (`frontend-web-push`), 공용 DB 0012, 배포 때 Vercel에 `VAPID_*`
+- B에게 요청: 결정 30 확인 — B 코드는 안 고침 (notify 호출 그대로, commit 뒤 푸시)
+- 막힌 것·질문: `VAPID_SUBJECT` 운영 연락 주소는 팀이 정함
+
+### 2026-11-23 · backend-A-residency · Claude (체류 형태 가입 때 묻기)
+- 한 일: 결정 28. `patients`에 `residency`·`residence_country`·`residency_answered_at` (마이그레이션 **0011**, 칸 추가만), 가입 `residency?`(3문항 + 거주국), `PUT /me/residency`, `PatientOut` 칸 추가. 예약 요청 전 `patient.service.require_short_term()` (없으면 422 `residency.required`, 국내 거주 403 `residency.not_eligible`). 챗봇 `PatientInfo.residency` → 계정 값 우선·`record_residency`가 못 바꿈 (`ai/agent` 3줄: `residency_locked`)
+- 바뀐 계약: contracts 4·6·6-1·6-6
+- 테스트: 전체 467개 통과 (새 `test_residency.py` 13개, `ai/tests/test_service.py` 2개, `test_booking_patient` 가입에 3문항 추가)
+- 다음 할 일: 공용 DB 0011 적용, 시연 환자 계정 `short_term`으로, 프론트 가입·예약 화면 (`frontend-residency`)
+- B에게 요청: 결정 28·contracts 6-6 확인 (예약 요청 앞에서 막음 — booking 서비스는 안 고침)
+- 막힌 것·질문: AI 담당 확인 — `ai/agent` `residency_locked` (ToolContext·ConversationState 칸 1개씩, `record_residency` 첫 줄)
+
 ### 2026-11-20 (5) · backend-A-notifications · Claude (사이트 안 알림)
 - 브랜치: `backend-A-audit-translate` 위 → 그것이 먼저 머지돼야 함
 - 한 일: 결정 27. 새 모듈 `modules/notification/`(A) — 모델·`notify`·목록·읽음·Realtime 토큰(PyJWT HS256, `SUPABASE_JWT_SECRET`), 마이그레이션 **0010** (표 + Supabase에서만 RLS 정책·authenticated SELECT·Realtime 발행). `booking/service._move`·`staff_reply`, `aftercare/service.tenant_reply`에 `notify` 한 줄 (B 모듈). `core/config.py`에 `supabase_jwt_secret` (공통 파일). `.env.example` 정리 (CORS·Supabase 묶음)

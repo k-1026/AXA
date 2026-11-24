@@ -1,0 +1,17 @@
+# 백엔드 Vercel 배포(저장소 루트 프로젝트)에 필요 없는 큰 자료 — 서버리스 함수 용량 제한(250MB) 대비
+# 남기는 것: backend/ · ai/ · data/processed/(가상 병원 목록 등) · 환자 웹 빌드가 읽는 data/*/영업정보
+data/raw/*
+!data/raw/영업정보/
+data/interim/*
+!data/interim/영업정보/
+research/
+painpoint/
+발표/
+marketing/
+market/
+bm/
+valuechain/
+spec/
+subject/
+design/
+docs/

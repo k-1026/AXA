@@ -1,4 +1,6 @@
-"""환자 계정 (docs/backend-db-schema.md 3절). 건강정보·국적·연락처는 두지 않음 → 요청서에서만."""
+"""환자 계정 (docs/backend-db-schema.md 3절). 건강정보·국적·연락처는 두지 않음 → 요청서에서만.
+
+체류 형태(residency)는 가입 때 거주국 + 3문항으로 판단해 둠 (compliance 2-1, 결정 28). 답만 두고 근거 서류는 받지 않음 (자기 신고)."""
 
 import uuid
 from datetime import datetime
@@ -9,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from core.db import Base, utcnow
 
 LANGS = ("ko", "en", "zh-TW", "zh-CN", "vi")
+RESIDENCIES = ("short_term", "resident")
 
 
 class Patient(Base):
@@ -22,6 +25,10 @@ class Patient(Base):
     preferred_lang: Mapped[str] = mapped_column(String(8), default="en")
     timezone: Mapped[str] = mapped_column(String(64), default="Asia/Seoul")
     age14_confirmed_at: Mapped[datetime]
+    # 체류 형태: short_term(단기 방문) | resident(국내 거주 → 정보 열람만) | None(아직 안 물음, 예약 전에 물음)
+    residency: Mapped[str | None] = mapped_column(String(16))
+    residence_country: Mapped[str | None] = mapped_column(String(2))  # 거주국 ISO 3166-1 alpha-2
+    residency_answered_at: Mapped[datetime | None]
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=utcnow, onupdate=utcnow)
     # 탈퇴하면 행을 바로 삭제 (결정 15) → deleted_at 없음
@@ -29,6 +36,9 @@ class Patient(Base):
     __table_args__ = (
         CheckConstraint(
             "preferred_lang IN (" + ", ".join(f"'{x}'" for x in LANGS) + ")", name="lang"
+        ),
+        CheckConstraint(
+            "residency IS NULL OR residency IN (" + ", ".join(f"'{x}'" for x in RESIDENCIES) + ")", name="residency"
         ),
         # 이메일 중복 X. 탈퇴하면 행이 지워지므로 같은 메일로 바로 재가입 가능
         Index("uq_patients_email", "email", unique=True),

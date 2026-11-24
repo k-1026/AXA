@@ -15,7 +15,18 @@
       "expired": "您向{{hospital}}申請的希望日期均已過去。"
     },
     "reply": "{{hospital}}傳來{{count}}則諮詢回覆。",
-    "aftercare": "{{hospital}}醫護人員傳來{{count}}則術後管理訊息。"
+    "aftercare": "{{hospital}}醫護人員傳來{{count}}則術後管理訊息。",
+    "push": {
+      "enable": "在此裝置接收通知",
+      "disable": "關閉此裝置的通知",
+      "onNote": "即使關閉網站，也會在此裝置收到醫院的消息。",
+      "offNote": "即使關閉網站，也能以通知接收醫院的消息。",
+      "denied": "瀏覽器已封鎖此網站的通知，請在瀏覽器設定中允許。",
+      "unsupported": "此瀏覽器不支援通知。",
+      "ios": "iPhone・iPad 請點分享 →「加入主畫面」，從主畫面開啟後即可接收通知。",
+      "serverOff": "目前無法使用裝置通知，網站內通知仍會正常顯示。",
+      "failed": "無法變更通知設定，請稍後再試。"
+    }
   },
   "header": {
     "language": "語言",
@@ -608,6 +619,31 @@
       "hospitalTaken": "這家醫院已經入駐，請聯絡醫院代表帳號。",
       "notRegistered": "不是已登記機構或未營業，無法入駐。",
       "tooMany": "嘗試次數過多，請稍後再試。"
+    }
+  },
+  "residency": {
+    "title": "在韓居留狀態確認",
+    "country": "目前居住的國家",
+    "intro": "如有符合以下任一項，請全部勾選；都不符合請留空。",
+    "q": {
+      "alien_registration": "我已在韓國辦理外國人登錄（短期訪問 G-1 除外）",
+      "domestic_residence": "我已在韓國辦理國內居所申報（外國國籍同胞）",
+      "health_insurance": "我是韓國國民健康保險的加保人或受扶養人"
+    },
+    "residentNote": "您屬於居住在韓國的外國人。您仍可查看醫院資訊，但依法無法申請諮詢・預約，也無法使用醫院推薦。",
+    "bookingBlocked": "依法，居住在韓國的外國人無法申請諮詢・預約（仍可查看醫院資訊）。如居留狀態有變，請到我的頁面重新回答。",
+    "editLink": "前往我的頁面",
+    "status": "在韓居留",
+    "statusValue": {
+      "shortTerm": "短期訪問",
+      "resident": "居住在韓國（僅能查看資訊）",
+      "none": "尚未回答"
+    },
+    "edit": "重新回答",
+    "save": "儲存",
+    "err": {
+      "required": "請先回答居留狀態問題。",
+      "notEligible": "居住在韓國的外國人無法申請諮詢・預約。如居留狀態有變，請到我的頁面重新回答。"
     }
   }
 }

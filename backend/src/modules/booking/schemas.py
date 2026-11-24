@@ -53,3 +53,5 @@ class TenantBookingOut(BookingOut):
     """병원용 응답: 요청서 + 보낸 답장 (대시보드 상담 채팅·안 읽음 표시용)"""
 
     replies: list[ReplyOut] = []
+    # 방문 전 환자 질문 [{text_original, text_translated(한국어), created_at}] — A 추가 (결정 32, B 확인)
+    questions: list[dict] = []

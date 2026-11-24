@@ -15,7 +15,18 @@
       "expired": "您向{{hospital}}申请的希望日期均已过去。"
     },
     "reply": "{{hospital}}发来{{count}}条咨询回复。",
-    "aftercare": "{{hospital}}医护人员发来{{count}}条术后管理消息。"
+    "aftercare": "{{hospital}}医护人员发来{{count}}条术后管理消息。",
+    "push": {
+      "enable": "在此设备接收通知",
+      "disable": "关闭此设备的通知",
+      "onNote": "即使关闭网站，也会在此设备收到医院的消息。",
+      "offNote": "即使关闭网站，也能以通知接收医院的消息。",
+      "denied": "浏览器已屏蔽此网站的通知，请在浏览器设置中允许。",
+      "unsupported": "此浏览器不支持通知。",
+      "ios": "iPhone・iPad 请点击分享 →“添加到主屏幕”，从主屏幕打开后即可接收通知。",
+      "serverOff": "目前无法使用设备通知，网站内通知仍会正常显示。",
+      "failed": "无法更改通知设置，请稍后再试。"
+    }
   },
   "header": {
     "language": "语言",
@@ -608,6 +619,31 @@
       "hospitalTaken": "这家医院已经入驻，请联系医院代表账号。",
       "notRegistered": "不是已登记机构或未营业，无法入驻。",
       "tooMany": "尝试次数过多，请稍后再试。"
+    }
+  },
+  "residency": {
+    "title": "在韩居留状态确认",
+    "country": "目前居住的国家",
+    "intro": "如符合以下任一项，请全部勾选；都不符合请留空。",
+    "q": {
+      "alien_registration": "我已在韩国办理外国人登录（短期访问 G-1 除外）",
+      "domestic_residence": "我已在韩国办理国内居所申报（外国国籍同胞）",
+      "health_insurance": "我是韩国国民健康保险的参保人或被扶养人"
+    },
+    "residentNote": "您属于居住在韩国的外国人。您仍可查看医院信息，但依法无法申请咨询・预约，也无法使用医院推荐。",
+    "bookingBlocked": "依法，居住在韩国的外国人无法申请咨询・预约（仍可查看医院信息）。如居留状态有变，请到我的页面重新回答。",
+    "editLink": "前往我的页面",
+    "status": "在韩居留",
+    "statusValue": {
+      "shortTerm": "短期访问",
+      "resident": "居住在韩国（仅可查看信息）",
+      "none": "尚未回答"
+    },
+    "edit": "重新回答",
+    "save": "保存",
+    "err": {
+      "required": "请先回答居留状态问题。",
+      "notEligible": "居住在韩国的外国人无法申请咨询・预约。如居留状态有变，请到我的页面重新回答。"
     }
   }
 }

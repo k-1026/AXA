@@ -15,7 +15,18 @@
       "expired": "All preferred dates for your request to {{hospital}} have passed."
     },
     "reply": "{{hospital}} sent {{count}} consultation reply(s).",
-    "aftercare": "Staff at {{hospital}} sent {{count}} follow-up message(s)."
+    "aftercare": "Staff at {{hospital}} sent {{count}} follow-up message(s).",
+    "push": {
+      "enable": "Get notifications on this device",
+      "disable": "Turn off on this device",
+      "onNote": "You will get hospital updates on this device even when the site is closed.",
+      "offNote": "Get hospital updates as notifications even when the site is closed.",
+      "denied": "Notifications for this site are blocked in your browser. Allow them in your browser settings.",
+      "unsupported": "This browser does not support notifications.",
+      "ios": "On iPhone/iPad, tap Share → \"Add to Home Screen\" and open it from there to get notifications.",
+      "serverOff": "Device notifications are not available right now. In-site notifications still work.",
+      "failed": "Could not change the notification setting. Please try again later."
+    }
   },
   "header": {
     "language": "Language",
@@ -608,6 +619,31 @@
       "hospitalTaken": "This hospital has already joined. Contact its owner account.",
       "notRegistered": "Not a registered institution or not operating, so it cannot join.",
       "tooMany": "Too many attempts. Please try again later."
+    }
+  },
+  "residency": {
+    "title": "Your stay in Korea",
+    "country": "Country you live in",
+    "intro": "Check every item that applies to you. Leave them blank if none apply.",
+    "q": {
+      "alien_registration": "I have registered as a foreign resident in Korea (not short-term G-1)",
+      "domestic_residence": "I have reported domestic residence in Korea (overseas Korean)",
+      "health_insurance": "I am enrolled in (or a dependent under) Korea's National Health Insurance"
+    },
+    "residentNote": "You count as a foreign resident of Korea. You can still browse hospital information, but by law you cannot request consultations or bookings or get hospital suggestions.",
+    "bookingBlocked": "By law, foreign residents of Korea cannot request consultations or bookings (you can still browse hospital information). If your status has changed, answer again in My Page.",
+    "editLink": "Go to My Page",
+    "status": "Stay in Korea",
+    "statusValue": {
+      "shortTerm": "Short-term visit",
+      "resident": "Resident (browse only)",
+      "none": "Not answered yet"
+    },
+    "edit": "Answer again",
+    "save": "Save",
+    "err": {
+      "required": "Please answer the questions about your stay first.",
+      "notEligible": "Foreign residents of Korea cannot request consultations or bookings. If your status has changed, answer again in My Page."
     }
   }
 }

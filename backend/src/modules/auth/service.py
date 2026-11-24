@@ -48,6 +48,7 @@ def signup(db: Session, data: SignupRequest) -> TokenOut:
             preferred_lang=data.preferred_lang,
             timezone=data.timezone,
             age14_confirmed_at=utcnow(),
+            residency=data.residency,
         )
         latest = {c.kind: c for c in data.consents}  # 같은 종류를 두 번 보내면 마지막 것만
         for c in latest.values():
@@ -104,7 +105,7 @@ def withdraw(db: Session, patient_id: uuid.UUID, password: str, client_ip: str |
     media_paths = aftercare_service.detach_patient_media(db, patient.id)
     db.delete(patient)
     db.commit()
-    media.remove(media_paths)
+    media.remove(media.with_thumbs(media_paths))  # 썸네일도 (결정 29)
 
 
 def logout(db: Session, session_id: str) -> None:

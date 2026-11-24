@@ -3,6 +3,8 @@ import i18n from '../i18n';
 import { api, ApiError, setUnauthorizedHandler } from './api';
 import { accountKeyOf, removeAccountData, resetAccountMemory, setCurrentAccount, type AccountKey } from './account';
 import { readSessionSetting, readSetting, removeSetting, writeSessionSetting, writeSetting } from './storage';
+import { disablePush } from '../features/notifications/webPush';
+import type { Residency, ResidencyAnswers } from '../features/residency/ResidencyQuestions';
 
 // 로그인 상태
 // - 실제 회원: 백엔드 회원가입·로그인. 토큰은 이 브라우저(localStorage)에 두고, 로그아웃하면 서버 세션도 끝냄
@@ -12,6 +14,8 @@ export interface User {
   name: string;
   demo: boolean; // true면 예시 데이터를 보여준다
   email?: string;
+  // 체류 형태 (결정 28): null이면 아직 안 답함 → 첫 예약 요청 때 물음. resident면 정보 열람만
+  residency?: Residency | null;
 }
 
 export interface SignupInput {
@@ -22,6 +26,7 @@ export interface SignupInput {
   timezone: string;
   age14_confirmed: boolean;
   consents: { kind: 'terms' | 'privacy'; version: string }[];
+  residency: ResidencyAnswers;
 }
 
 interface Me {
@@ -29,6 +34,7 @@ interface Me {
   email: string;
   display_name: string | null;
   preferred_lang: string;
+  residency?: Residency | null;
 }
 
 const DEMO_KEY = 'demoLogin';
@@ -36,7 +42,7 @@ const TOKEN_KEY = 'token';
 const DEMO_USER: User = { name: 'Emma', demo: true };
 
 function toUser(me: Me): User {
-  return { id: me.id, name: me.display_name || me.email.split('@')[0], demo: false, email: me.email };
+  return { id: me.id, name: me.display_name || me.email.split('@')[0], demo: false, email: me.email, residency: me.residency ?? null };
 }
 
 const AuthContext = createContext<{
@@ -48,6 +54,7 @@ const AuthContext = createContext<{
   login: (email: string, password: string) => Promise<void>;
   signup: (input: SignupInput) => Promise<void>;
   withdraw: (password: string) => Promise<void>;
+  setResidency: (answers: ResidencyAnswers) => Promise<Residency>;
   logout: () => void;
 }>({
   user: null,
@@ -58,6 +65,7 @@ const AuthContext = createContext<{
   login: async () => {},
   signup: async () => {},
   withdraw: async () => {},
+  setResidency: async () => 'short_term',
   logout: () => {},
 });
 
@@ -130,6 +138,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await startSession(r.access_token);
   };
 
+  // 체류 형태 다시 답하기 (PUT /me/residency). 판단은 서버가 하고 결과를 돌려줌
+  const setResidency = async (answers: ResidencyAnswers) => {
+    const me = await api<Me>('/me/residency', { method: 'PUT', token, body: answers });
+    setUser(toUser(me));
+    return me.residency ?? 'short_term';
+  };
+
   const loginDemo = () => {
     resetAccountMemory();
     writeSessionSetting(DEMO_KEY, '1');
@@ -137,7 +152,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    if (token) api('/auth/patient/logout', { method: 'POST', token }).catch(() => {});
+    // 이 브라우저의 웹 푸시 구독도 풀기 (같은 기기의 다음 사용자에게 앞 사람 알림이 가지 않게, 결정 30)
+    disablePush(token).finally(() => token && api('/auth/patient/logout', { method: 'POST', token }).catch(() => {}));
     clearToken();
     writeSessionSetting(DEMO_KEY, null);
     resetAccountMemory(); // 같은 탭에서 다음에 로그인한 사람에게 대화·상담이 보이지 않게
@@ -147,13 +163,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 탈퇴: 비밀번호 확인 후 서버에서 계정 삭제 표시 + 모든 기기 로그아웃 → 이 브라우저도 로그아웃
   const withdraw = async (password: string) => {
     await api('/me', { method: 'DELETE', token, body: { password } });
+    disablePush(null); // 서버 구독은 탈퇴와 함께 지워짐 → 브라우저 구독만 풀기
     clearToken();
     removeAccountData(account); // 이 브라우저에 남은 이 계정의 찜·방문 기록 + 메모리 데이터
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, account, token: user && !user.demo ? token : null, ready, loginDemo, login, signup, withdraw, logout }}>
+    <AuthContext.Provider value={{ user, account, token: user && !user.demo ? token : null, ready, loginDemo, login, signup, withdraw, setResidency, logout }}>
       {children}
     </AuthContext.Provider>
   );

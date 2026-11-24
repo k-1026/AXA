@@ -160,7 +160,8 @@ def test_사진을_올리고_보내면_환자와_병원_모두_서명된_주소�
     assert out.status_code == 201, out.json()
     m = out.json()["messages"][0]
     assert m["has_photo"] is True
-    assert m["attachments"] == [{"kind": "image", "name": "내 얼굴.JPG", "url": f"https://storage.example.test/view/{u['path']}?token=v"}]
+    assert m["attachments"] == [{"kind": "image", "name": "내 얼굴.JPG", "url": f"https://storage.example.test/view/{u['path']}?token=v",
+                                 "thumb_url": None}]
     assert "path" not in m["attachments"][0]
 
     staff = demo_staff(db, t.id)
@@ -219,7 +220,7 @@ def test_탈퇴하면_내_사진은_Storage에서_지우고_메시지는_사진_
 
     r = client.request("DELETE", "/api/v1/me", headers=me, json={"password": SIGNUP["password"]})
     assert r.status_code == 204
-    assert removed == [mine]  # 남의 파일은 그대로
+    assert removed == [mine, media.thumb_path(mine)]  # 썸네일도 같이, 남의 파일은 그대로
     db.expire_all()
     rows = db.query(AftercareMessage).all()
     gone = [m for m in rows if m.attachments == []]
@@ -252,3 +253,45 @@ def test_정기_정리는_Storage_오류에도_멈추지_않는다(db, monkeypat
     monkeypatch.setattr(media, "enabled", lambda: True)
     monkeypatch.setattr(media, "list_objects", lambda: (_ for _ in ()).throw(RuntimeError("down")))
     assert maintenance.purge_media(db) == 0
+
+
+# ---------- 사진 썸네일 (결정 29) ----------
+
+
+def test_사진은_썸네일_업로드_주소도_받고_보낼_때_썸네일_주소가_붙는다(client, db, storage):
+    from modules.media import service as media
+
+    (p, me), t = _me(client, db), _tenant(db)
+    r = _req(db, p, t)
+    u = client.post(_url(r) + "/uploads", json={"name": "a.jpg", "content_type": "image/jpeg", "size": 10, "thumb": True}, headers=me).json()
+    thumb = media.thumb_path(u["path"])
+    assert thumb.endswith(".thumb.jpg") and thumb.startswith(f"{t.id}/{r.id}/")
+    assert u["thumb_upload_url"] == f"https://storage.example.test/upload/{thumb}?token=t"
+    out = client.post(_url(r) + "/messages", json={"text": "📷", "attachments": [{"path": u["path"], "kind": "image", "thumb": True}]}, headers=me)
+    a = out.json()["messages"][0]["attachments"][0]
+    assert a["thumb_url"] == f"https://storage.example.test/view/{thumb}?token=v" and a["url"].endswith(f"{u['path']}?token=v")
+
+
+def test_영상이나_썸네일을_안_올린_사진은_썸네일_없음(client, db, storage):
+    (p, me), t = _me(client, db), _tenant(db)
+    r = _req(db, p, t)
+    v = client.post(_url(r) + "/uploads", json={"content_type": "video/mp4", "size": 10, "thumb": True}, headers=me).json()
+    assert v["thumb_upload_url"] is None and len(storage["upload"]) == 1
+    out = client.post(_url(r) + "/messages", json={"text": "x", "attachments": [{"path": v["path"], "kind": "video", "thumb": True}]}, headers=me)
+    assert out.json()["messages"][0]["attachments"][0]["thumb_url"] is None
+
+
+def test_정기_정리는_쓰는_사진의_썸네일을_남긴다(client, db, storage, monkeypatch):
+    from datetime import timedelta
+
+    from core.db import utcnow
+    from modules.maintenance import service as maintenance
+    from modules.media import service as media
+
+    (p, me), t = _me(client, db), _tenant(db)
+    used = _send_photo(client, me, _req(db, p, t))
+    old = utcnow() - timedelta(days=2)
+    monkeypatch.setattr(media, "list_objects", lambda: [(used, old), (media.thumb_path(used), old), ("x/y/z.thumb.jpg", old)])
+    removed = []
+    monkeypatch.setattr(media, "remove", lambda paths: removed.extend(paths) or len(paths))
+    assert maintenance.purge_media(db) == 1 and removed == ["x/y/z.thumb.jpg"]

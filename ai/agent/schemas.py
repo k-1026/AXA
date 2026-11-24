@@ -127,6 +127,17 @@ class AftercareThreadData(_Model):
     notice: str
 
 
+class HospitalQuestionData(_Model):
+    """방문 전 병원에 보낼 질문 초안 (결정 32). 환자가 카드에서 고치고 [보내기]를 눌러야 보냄."""
+
+    status: Literal["draft"]
+    booking_id: str
+    hospital_id: int
+    hospital_name_en: str | None = None
+    draft: str
+    notice: str
+
+
 # ------------------------------------------------------------------ 카드 (type으로 구분)
 class HospitalListCard(_Model):
     type: Literal["hospital_list"]
@@ -173,10 +184,15 @@ class AftercareThreadCard(_Model):
     data: AftercareThreadData
 
 
+class HospitalQuestionCard(_Model):
+    type: Literal["hospital_question"]
+    data: HospitalQuestionData
+
+
 Card = Annotated[
     Union[
         HospitalListCard, HospitalSuggestionsCard, HospitalDetailCard, PriceListCard, SourcesCard,
-        TimeSlotsCard, BookingDraftCard, BookingListCard, AftercareThreadCard,
+        TimeSlotsCard, BookingDraftCard, BookingListCard, AftercareThreadCard, HospitalQuestionCard,
     ],
     Field(discriminator="type"),
 ]
