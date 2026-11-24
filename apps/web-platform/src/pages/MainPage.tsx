@@ -1,12 +1,20 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AdSlot } from '../components/AdSlot';
+import { AdRotator, type Ad } from '../components/AdRotator';
 import { DepartmentFilter } from '../features/map/DepartmentFilter';
 import { HospitalMap } from '../features/map/HospitalMap';
 import { HospitalSearch } from '../features/map/HospitalSearch';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { DepartmentKey, Hospital } from '../features/hospital/types';
 import { onMap } from '../features/hospital/filters';
+
+// 메인 하단 광고 배너 (비의료 일반 광고주만 · 5초마다 돌아감)
+const ADS: Ad[] = [
+  { image: '/ads/hanbang-skincare.webp', alt: 'Yakryeongsi — Hanbang skincare. Rooted in Daegu.' },
+  { image: '/ads/biseulsan-ice-festival.webp', alt: 'Biseulsan Ice Festival — Daegu, on ice. Dalseong, Daegu' },
+  { image: '/ads/eworld-daegu.webp', alt: "E-World Daegu — Your Daegu play date. Let's play" },
+  { image: '/ads/daegu-chimac-festival.webp', alt: 'Daegu Chimac Festival — Chicken. Beer. Daegu. Taste the fun' },
+];
 
 export function MainPage() {
   const { t } = useTranslation();
@@ -53,25 +61,20 @@ export function MainPage() {
             <HospitalSearch key={searchKey} hospitals={mapItems} onSearch={search} />
           )}
         </div>
-        {state.status === 'loading' && <p className="map-status">{t('map.loading')}</p>}
-        {state.status === 'error' && <p className="map-status">{t('map.error')}</p>}
-        {state.status === 'ready' && (
-          <HospitalMap hospitals={visible} fetchedAt={state.data.meta.fetchedAt} selectedDept={dept} focus={found} />
-        )}
+        {/* 지도 왼쪽 · 진료과 선택 오른쪽 (태블릿 이하는 지도 아래) */}
+        <div className="map-body">
+          <div className="map-area">
+            {state.status === 'loading' && <p className="map-status">{t('map.loading')}</p>}
+            {state.status === 'error' && <p className="map-status">{t('map.error')}</p>}
+            {state.status === 'ready' && (
+              <HospitalMap hospitals={visible} fetchedAt={state.data.meta.fetchedAt} selectedDept={dept} focus={found} />
+            )}
+          </div>
+          <DepartmentFilter selected={dept} onSelect={selectDept} />
+        </div>
       </section>
 
-      <DepartmentFilter selected={dept} onSelect={selectDept} />
-
-      <div className="ad-row">
-        <AdSlot
-          image="/ads/hanbang-skincare.webp"
-          alt="Yakryeongsi — Hanbang skincare. Rooted in Daegu."
-        />
-        <AdSlot
-          image="/ads/biseulsan-ice-festival.webp"
-          alt="Biseulsan Ice Festival — Daegu, on ice. Dalseong, Daegu"
-        />
-      </div>
+      <AdRotator ads={ADS} />
     </div>
   );
 }

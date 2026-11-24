@@ -17,6 +17,9 @@ export function Footer() {
           <p className="footer-contact">
             {t('footer.contact')}: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           </p>
+          <p className="footer-address">
+            {t('footer.addressLabel')}: {t('footer.address')}
+          </p>
           <p className="footer-notice">{t('footer.disclaimer')}</p>
           <p>{t('footer.source')}</p>
           <p>{t('footer.emergency')}</p>

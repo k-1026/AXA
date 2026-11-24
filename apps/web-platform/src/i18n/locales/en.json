@@ -93,6 +93,8 @@
     "about": "AXA is a team that helps international visitors experience medical care and travel in Daegu more easily and safely.",
     "service": "MediDaegu is a medical tourism information platform that uses public data and AI to provide hospital and procedure information, as well as visa and travel information, in multiple languages.",
     "contact": "Advertising & banner inquiries",
+    "addressLabel": "Address",
+    "address": "502, 109-2 Namil-dong, Jung-gu, Daegu, Republic of Korea",
     "disclaimer": "This platform provides information based on public data and does not recommend specific hospitals or provide medical consultation. Please confirm treatments, procedures and reservations directly with the hospital.",
     "source": "Data: Health Insurance Review & Assessment Service (HIRA) hospital information APIs, via data.go.kr",
     "emergency": "In an emergency, call 119."
@@ -366,7 +368,7 @@
     "quickMenu": "Show or hide quick menu",
     "placeholder": "Type your question",
     "send": "Send",
-    "disclaimer": "AI answers are for information only. Please confirm treatment and bookings with the hospital.",
+    "disclaimer": "AI answers are for information only and do not diagnose, judge results or recommend treatments. Please confirm treatment and bookings with the hospital, and call 119 in an emergency.",
     "cancel": "Cancel",
     "api": {
       "thinking": "Preparing an answer…",

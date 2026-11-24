@@ -358,7 +358,7 @@ a {
 
 /* 아래쪽은 찜 하트 자리: 긴 홈페이지 주소가 하트에 가려지지 않게 */
 .hospital-card-body {
-  padding: 14px 16px 50px;
+  padding: 14px 16px 66px;
 }
 
 /* 찜 하트: 카드 오른쪽 아래. 카드 전체 링크보다 위에 둔다 */
@@ -507,13 +507,21 @@ a {
 .hospital-facts {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 4px 10px;
+  gap: 10px 14px;
   margin: 0;
   font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* 카드: 병원 이름과 정보 사이 구분선 */
+.hospital-card .hospital-facts {
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-muted);
 }
 
 .hospital-facts dt {
-  color: var(--text-muted);
+  color: #6b7682;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
@@ -1104,6 +1112,60 @@ a {
   color: var(--text-muted);
 }
 
+/* 메인: 지도 오른쪽에 진료과 선택 (세로 버튼) */
+.map-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.map-area {
+  min-width: 0;
+}
+
+.map-body .dept-filter {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+/* 좁은 화면과 같은 작은 알약 버튼 */
+.map-body .dept-chip {
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+@media (max-width: 860px) {
+  .map-body {
+    grid-template-columns: 1fr;
+  }
+
+  .map-body .dept-filter {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .map-body .dept-chip {
+    width: auto;
+    flex: 0 0 auto;
+    min-height: 44px;
+    border-radius: 999px;
+    padding: 8px 16px;
+  }
+}
+
 /* 광고 자리 */
 .ad-row {
   display: grid;
@@ -1137,22 +1199,22 @@ a {
   display: block;
 }
 
-/* 태블릿 이하: 배너 2개를 한 자리에 겹쳐 5초마다 번갈아 보여줌 */
-@media (max-width: 860px) and (prefers-reduced-motion: no-preference) {
-  .ad-row:has(> .ad-slot.has-image:nth-child(2):last-child) > .ad-slot {
-    grid-area: 1 / 1;
-    animation: ad-rotate 10s infinite;
-  }
-
-  .ad-row:has(> .ad-slot.has-image:nth-child(2):last-child) > .ad-slot:nth-child(2) {
-    animation-delay: -5s;
+/* 배너는 AdRotator가 5초마다 돌림. 태블릿 이하는 한 자리만 */
+@media (max-width: 860px) {
+  .ad-rotator > .ad-second {
+    display: none;
   }
 }
 
-@keyframes ad-rotate {
-  0%, 45% { opacity: 1; visibility: visible; }
-  50%, 95% { opacity: 0; visibility: hidden; }
-  100% { opacity: 1; visibility: visible; }
+@media (prefers-reduced-motion: no-preference) {
+  .ad-rotator > .ad-fade {
+    animation: ad-fade-in 0.6s ease;
+  }
+}
+
+@keyframes ad-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .placeholder-page {
