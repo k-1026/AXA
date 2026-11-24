@@ -1,4 +1,33 @@
 {
+  "notify": {
+    "title": "通知",
+    "open": "{{count}}則通知",
+    "empty": "沒有新通知。",
+    "markAll": "全部已讀",
+    "hospital": "醫院",
+    "newCount": "{{count}}則新通知",
+    "status": {
+      "confirmed": "{{hospital}}已確認您的預約。",
+      "rejected": "{{hospital}}表示無法接受此次預約。",
+      "proposed": "{{hospital}}提議了其他時間。",
+      "visited": "您在{{hospital}}的就診已記錄為完成，現在可以使用術後管理對話。",
+      "no_show": "您在{{hospital}}的預約被記錄為未到診。",
+      "expired": "您向{{hospital}}申請的希望日期均已過去。"
+    },
+    "reply": "{{hospital}}傳來{{count}}則諮詢回覆。",
+    "aftercare": "{{hospital}}醫護人員傳來{{count}}則術後管理訊息。",
+    "push": {
+      "enable": "在此裝置接收通知",
+      "disable": "關閉此裝置的通知",
+      "onNote": "即使關閉網站，也會在此裝置收到醫院的消息。",
+      "offNote": "即使關閉網站，也能以通知接收醫院的消息。",
+      "denied": "瀏覽器已封鎖此網站的通知，請在瀏覽器設定中允許。",
+      "unsupported": "此瀏覽器不支援通知。",
+      "ios": "iPhone・iPad 請點分享 →「加入主畫面」，從主畫面開啟後即可接收通知。",
+      "serverOff": "目前無法使用裝置通知，網站內通知仍會正常顯示。",
+      "failed": "無法變更通知設定，請稍後再試。"
+    }
+  },
   "header": {
     "language": "語言",
     "currency": "貨幣",
@@ -33,6 +62,7 @@
     "plastic": "整形外科",
     "internal": "內科",
     "ophthalmology": "眼科",
+    "korean_medicine": "韓醫",
     "other": "其他",
     "notReady": "資料準備中"
   },
@@ -121,6 +151,7 @@
     "reserveBtn": "預約"
   },
   "prices": {
+    "more": "顯示更多（還有 {{count}} 項）",
     "pending": "價格確認中",
     "range": "{{min}}–{{max}} 韓元",
     "notice": "所示金額為市場價格範圍，實際費用因醫院和診療內容而異，各醫院提供的項目也可能不同。本頁面不構成廣告、推薦或醫療諮詢。您可以向醫院書面申請預估診療費用。",
@@ -128,7 +159,8 @@
     "krwNote": "{{min}}~{{max}} 韓元",
     "fxNotice": "換算金額僅供參考，實際費用以醫院告知的韓元金額為準。{{applied}} 適用匯率（韓國銀行 {{base}} 資料，每天韓國時間 {{hour}}:00 更新）·",
     "fxProvider": "韓國銀行經濟統計系統",
-    "fxFallback": "無法取得匯率，以韓元顯示。"
+    "fxFallback": "無法取得匯率，以韓元顯示。",
+    "fxReference": "此幣別以歐洲中央銀行參考匯率（{{date}}）換算，實際付款金額可能不同。"
   },
   "mypage": {
     "home": "首頁",
@@ -137,7 +169,8 @@
     "subtitle": "在一個地方管理收藏的醫院、就診行程和旅行準備。",
     "stats": {
       "saved": "收藏的醫院",
-      "visits": "就診紀錄"
+      "visits": "就診紀錄",
+      "bookings": "預約管理"
     },
     "schedule": {
       "title": "我的大邱行程",
@@ -148,6 +181,16 @@
         "userAdded": "自行登錄",
         "experience": "體驗",
         "tour": "觀光"
+      },
+      "remove": "刪除",
+      "form": {
+        "date": "日期",
+        "time": "時間（選填）",
+        "text": "要做的事",
+        "placeholder": "例：去西門市場夜市",
+        "save": "新增",
+        "cancel": "取消",
+        "noTime": "不指定"
       }
     },
     "checklist": {
@@ -355,13 +398,25 @@
       "listNote": "依名稱排序，並非推薦或排名。",
       "suggestBasis": "僅依各醫院與您所說條件（應對語言、看診日、可預約時間）的符合程度提出，並非對醫療水準、技術或結果的評價。皆為已登記的外國患者招攬醫療機構。MediDaegu 為登記的患者招攬業者，可能向醫院收取仲介費，但仲介費不影響排序。",
       "priceNote": "以韓國患者為準公開的非給付價格（示範數值）。實際費用可能不同，請向醫院確認。",
+      "aftercare": "要傳給醫院的術後諮詢",
+      "aftercareOpen": "開啟術後管理對話傳送",
+      "aftercareNote": "尚未傳送。請在術後管理頁面確認內容後自行傳送。症狀或治療問題請直接聯絡醫院。",
       "reasons": {
         "staffLang": "有會說{{lang}}的員工",
         "aiTranslation": "可使用 AI 翻譯聊天",
         "openOn": "{{day}}看診（{{hours}}）",
         "slotsOn": "{{date}}有可諮詢時段",
         "inDistrict": "位於{{district}}"
-      }
+      },
+      "submitted": "已送出申請。醫院確認後會通知您。",
+      "goBookings": "查看預約管理",
+      "submitNote": "請勾選同意後由您親自送出。預約由醫院確認。",
+      "question": "要傳給{{hospital}}的問題",
+      "questionEdit": "修改問題",
+      "questionSend": "直接送出",
+      "questionSent": "已將問題傳給醫院。可在諮詢頁面查看回覆。",
+      "goConsult": "前往諮詢頁面",
+      "questionNote": "尚未送出。需要修改的話請修改後再送出。由醫院人員回覆。"
     },
     "consent": {
       "privacy": "個人資料蒐集與使用",
@@ -415,7 +470,8 @@
       "cancelled": "已取消",
       "visited": "已就診",
       "proposed": "醫院提議其他時間",
-      "expired": "已過期"
+      "expired": "已過期",
+      "no_show": "未到診"
     },
     "quick": {
       "booking": "預約諮詢",
@@ -466,6 +522,12 @@
     "number": "預約編號 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
     "rejectedNote": "醫院告知此時間無法預約。",
+    "rejectReason": {
+      "fully_booked": "醫院表示該時段已額滿，請改選其他日期再申請。",
+      "not_offered": "醫院表示不提供您申請的診療項目，請尋找其他醫院。",
+      "needs_consult": "醫院表示需要先進行面診，請在諮詢頁面查看醫院的說明。",
+      "other": "醫院表示無法接受此次申請，請在諮詢頁面查看醫院的說明。"
+    },
     "change": "變更預約",
     "cancel": "取消預約",
     "chat": "諮詢",
@@ -476,7 +538,8 @@
     "footnote": "預約時間以韓國時間（KST）為準。",
     "sampleNote": "範例醫院與預約資訊。",
     "proposedNote": "醫院提議了其他時間，請在諮詢中確認。",
-    "expiredNote": "所有希望日期皆已過去，此申請已過期。"
+    "expiredNote": "所有希望日期皆已過去，此申請已過期。",
+    "noShowNote": "醫院已將此預約標示為未到診。如需就診，請重新提出預約申請。"
   },
   "aftercare": {
     "list": "術後管理紀錄",
@@ -497,6 +560,8 @@
     "errType": "只能傳送照片或影片。",
     "errSize": "每個檔案最大50MB。",
     "errCount": "一次最多傳送{{max}}個。",
+    "errClosed": "這家醫院不在MediDaegu接收術後管理訊息。請直接聯絡醫院。",
+    "errSend": "傳送失敗，請稍後再試。",
     "aftercareButton": "術後管理"
   },
   "notFoundPage": {
@@ -548,11 +613,35 @@
     "pickHospital": "請選擇醫院",
     "regNo": "外國患者招攬醫療機構登記號碼",
     "regNoHint": "格式：M-2009-03-01-0013",
-    "doneNoDashboard": "已登入。尚未設定管理頁面網址（VITE_DASHBOARD_URL）。",
     "err": {
       "hospitalTaken": "這家醫院已經入駐，請聯絡醫院代表帳號。",
       "notRegistered": "不是已登記機構或未營業，無法入駐。",
       "tooMany": "嘗試次數過多，請稍後再試。"
+    }
+  },
+  "residency": {
+    "title": "在韓居留狀態確認",
+    "country": "目前居住的國家",
+    "intro": "如有符合以下任一項，請全部勾選；都不符合請留空。",
+    "q": {
+      "alien_registration": "我已在韓國辦理外國人登錄（短期訪問 G-1 除外）",
+      "domestic_residence": "我已在韓國辦理國內居所申報（外國國籍同胞）",
+      "health_insurance": "我是韓國國民健康保險的加保人或受扶養人"
+    },
+    "residentNote": "您屬於居住在韓國的外國人。您仍可查看醫院資訊，但依法無法申請諮詢・預約，也無法使用醫院推薦。",
+    "bookingBlocked": "依法，居住在韓國的外國人無法申請諮詢・預約（仍可查看醫院資訊）。如居留狀態有變，請到我的頁面重新回答。",
+    "editLink": "前往我的頁面",
+    "status": "在韓居留",
+    "statusValue": {
+      "shortTerm": "短期訪問",
+      "resident": "居住在韓國（僅能查看資訊）",
+      "none": "尚未回答"
+    },
+    "edit": "重新回答",
+    "save": "儲存",
+    "err": {
+      "required": "請先回答居留狀態問題。",
+      "notEligible": "居住在韓國的外國人無法申請諮詢・預約。如居留狀態有變，請到我的頁面重新回答。"
     }
   }
 }

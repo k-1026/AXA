@@ -53,5 +53,27 @@ class ReplyOut(BaseModel):
     sent_at: datetime
 
 
+class QuestionOut(BaseModel):
+    """방문 전 환자 질문 (결정 32). 환자 화면은 원문, 병원 화면은 번역(없으면 원문)."""
+
+    text_original: str
+    text_translated: str | None = None
+    created_at: datetime
+
+
+class QuestionIn(BaseModel):
+    text: str = Field(min_length=1, max_length=1000)
+
+    @field_validator("text")
+    @classmethod
+    def _not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("빈 질문은 보낼 수 없습니다")
+        return v.strip()
+
+
 class PatientBookingOut(BookingOut):
     replies: list[ReplyOut] = []
+    # 거절됐으면 병원이 고른 사유 코드 (fully_booked·not_offered·needs_consult·other, 없으면 None). 문장은 프론트 i18n
+    reject_reason: str | None = None
+    questions: list[QuestionOut] = []  # 방문 전 내가 보낸 질문 (보낸 순, 결정 32)

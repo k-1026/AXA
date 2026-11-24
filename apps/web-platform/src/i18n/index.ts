@@ -5,15 +5,17 @@ import en from './locales/en.json';
 import zhCN from './locales/zh-CN.json';
 import zhTW from './locales/zh-TW.json';
 import vi from './locales/vi.json';
+import ja from './locales/ja.json';
 import { readSetting, writeSetting } from '../components/storage';
 
-// UI 언어: 한국어 + plan.md 9절 제안 4개 (영어·간체·번체·베트남어)
+// UI 언어: 한국어 + plan.md 9절 제안 4개 (영어·간체·번체·베트남어) + 일본어 (유입 마케팅 대상, 2026-11-19)
 export const LANGUAGES = [
   { code: 'ko', label: '한국어' },
   { code: 'en', label: 'English' },
   { code: 'zh-CN', label: '简体中文' },
   { code: 'zh-TW', label: '繁體中文' },
   { code: 'vi', label: 'Tiếng Việt' },
+  { code: 'ja', label: '日本語' },
 ] as const;
 
 const resources = {
@@ -22,6 +24,7 @@ const resources = {
   'zh-CN': { translation: zhCN },
   'zh-TW': { translation: zhTW },
   vi: { translation: vi },
+  ja: { translation: ja },
 };
 
 // 저장된 선택 → 브라우저 언어 → 영어 순서

@@ -30,6 +30,10 @@ const lastAt = (t: ConsultThread) => t.messages[t.messages.length - 1]?.at ?? ''
 
 type NewThread = Omit<ConsultThread, 'messages' | 'unread'>;
 
+// 서버 답장을 상담 메시지로 붙일 때 쓰는 id (같은 답장이 두 번 붙지 않게)
+const replyId = (requestId: string, sentAt: string) => `reply-${requestId}-${sentAt}`;
+const questionId = (requestId: string, at: string) => `question-${requestId}-${at}`;
+
 export function useConsultThreads() {
   const { user, account, token } = useAuth();
   const mode: Mode = user?.demo ? 'demo' : 'member';
@@ -66,10 +70,19 @@ export function useConsultThreads() {
           next = next.map((t) => {
             if (t.hospitalId !== ykiho) return t;
             const has = t.messages.some((m) => m.booking?.serverId === s.id);
-            const messages = has
+            let messages = has
               ? t.messages.map((m) => (m.booking?.serverId === s.id ? { ...m, booking: { ...m.booking, ...local } } : m))
               : [...t.messages, { id: uid(), from: 'user' as const, at: s.created_at, booking: local }];
-            return { ...t, messages };
+            // 병원 답장 (서버 저장). 아직 없던 것만 붙이고 안 읽은 수에 더함. 번역 전이면 한국어 원문
+            const fresh = (s.replies ?? []).filter((r) => !messages.some((m) => m.id === replyId(s.id, r.sent_at)));
+            // 방문 전 내가 보낸 질문 (챗봇 카드·상담 화면, 결정 32). 내 글은 원문 그대로, 안 읽은 수에는 넣지 않음
+            const asked = (s.questions ?? []).filter((q) => !messages.some((m) => m.id === questionId(s.id, q.created_at)));
+            messages = [
+              ...messages,
+              ...fresh.map((r) => ({ id: replyId(s.id, r.sent_at), from: 'staff' as const, at: r.sent_at, text: r.text_translated || r.text_ko })),
+              ...asked.map((q) => ({ id: questionId(s.id, q.created_at), from: 'user' as const, at: q.created_at, text: q.text_original })),
+            ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+            return { ...t, messages, unread: t.unread + fresh.length };
           });
         }
         save(key, next);

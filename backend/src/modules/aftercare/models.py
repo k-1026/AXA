@@ -8,7 +8,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, BigInteger, Boolean, CheckConstraint, ForeignKey, Identity, Index, Integer, String, Text
+from sqlalchemy import JSON, BigInteger, Boolean, CheckConstraint, ForeignKey, Identity, Index, Integer, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -55,6 +55,8 @@ class AftercareMessage(Base):
     text_original: Mapped[str] = mapped_column(Text)  # 보낸 사람 언어
     text_translated: Mapped[str | None] = mapped_column(Text)  # 상대 언어 (번역은 ai/llm 연결 뒤)
     has_photo: Mapped[bool] = mapped_column(Boolean, default=False)
+    # 사진·영상 [{path, kind(image/video), name}] — 파일은 Supabase Storage 비공개 버킷 (0008, A 추가 · B 확인)
+    attachments: Mapped[list] = mapped_column(JsonType, default=list, server_default=text("'[]'"))
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     __table_args__ = (

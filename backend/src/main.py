@@ -9,7 +9,9 @@ from fastapi.responses import RedirectResponse
 
 from core.config import get_settings
 from core.errors import register_error_handlers
+from modules.aftercare.router_patient import router as aftercare_patient_router
 from modules.aftercare.router_tenant import router as aftercare_tenant_router
+from modules.audit.router import router as audit_router
 from modules.auth.router import router as auth_router
 from modules.booking.router_patient import router as booking_patient_router
 from modules.booking.router_tenant import router as booking_tenant_router
@@ -17,6 +19,8 @@ from modules.chatbot.router import router as chatbot_router
 from modules.fx.router import router as fx_router
 from modules.hospital.router import router as hospital_router
 from modules.maintenance.router import router as maintenance_router
+from modules.notification.router import push_router
+from modules.notification.router import router as notification_router
 from modules.patient.router import router as patient_router
 from modules.tenant.router import router as tenant_router
 
@@ -26,7 +30,7 @@ register_error_handlers(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().cors_origins,
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -48,6 +52,10 @@ api.include_router(booking_patient_router)
 api.include_router(booking_tenant_router)
 api.include_router(tenant_router)
 api.include_router(aftercare_tenant_router)
+api.include_router(aftercare_patient_router)
+api.include_router(audit_router)
+api.include_router(notification_router)
+api.include_router(push_router)
 
 app.include_router(api)
 

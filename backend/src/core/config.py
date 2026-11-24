@@ -37,6 +37,23 @@ class Settings(BaseSettings):
     def _empty_is_none(cls, v: str | None) -> str | None:
         return v or None  # .env의 `CRON_SECRET=`(빈 값) = 없음
 
+    # Supabase Storage (사후관리 사진·영상, 비공개 버킷). 둘 중 하나라도 없으면 업로드 API는 503 storage.unavailable
+    # 서비스 키는 서버 전용 — 프론트·커밋에 넣지 않음 (Supabase 대시보드 → Project Settings → API)
+    supabase_url: str | None = None
+    supabase_service_role_key: str | None = None
+    # Realtime 알림 토큰 서명 (Supabase JWT Keys > Legacy JWT Secret, 결정 27). 없으면 알림은 주기 확인만
+    supabase_jwt_secret: str | None = None
+    # 웹 푸시 (결정 30). VAPID 키 한 쌍(base64url, `backend/scripts/make_vapid_keys.py`로 만듦). 없으면 푸시 끔
+    vapid_public_key: str | None = None
+    vapid_private_key: str | None = None
+    vapid_subject: str = "mailto:noreply@example.com"  # 푸시 서비스가 문제 있을 때 연락할 주소 (운영 때 팀 주소로)
+
+    @field_validator("supabase_url", "supabase_service_role_key", "supabase_jwt_secret", "vapid_public_key",
+                     "vapid_private_key", mode="before")
+    @classmethod
+    def _empty_str_is_none(cls, v: str | None) -> str | None:
+        return v or None
+
     # 프론트 주소 (CORS). 배포 시 .env에 CORS_ORIGINS=["https://…vercel.app"] 처럼 JSON 목록
     cors_origins: list[str] = ["http://localhost:5403", "http://localhost:5173"]
 

@@ -56,6 +56,8 @@ html:lang(zh-TW) {
 /* 지도 팝업도 Leaflet 기본 글꼴(Helvetica) 대신 언어별 글꼴 (leaflet.css가 나중에 불러와져도 이기게 html 붙임) */
 html .leaflet-container {
   font-family: inherit;
+  /* 지도 안 층(타일 400 · 조작 버튼 1000)을 지도 안에 가둠 → 머리말 알림 창·메뉴가 지도 아래로 깔리지 않게 */
+  isolation: isolate;
 }
 
 * {
@@ -133,6 +135,115 @@ a {
 .header-button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* 사이트 안 알림 (헤더 종 · 메뉴 숫자) */
+.notify {
+  position: relative;
+}
+
+.notify-button {
+  position: relative;
+  justify-content: center;
+  width: 40px;
+  padding: 0;
+}
+
+.notify-count,
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #e5484d;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.notify-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+.nav-badge {
+  margin-left: 6px;
+}
+
+.notify-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  width: min(340px, calc(100vw - 32px));
+  max-height: 60vh;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.notify-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notify-head button {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.notify-panel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notify-panel li + li {
+  border-top: 1px solid var(--border);
+}
+
+.notify-panel li button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.notify-panel li button:hover {
+  background: var(--surface-muted);
+}
+
+.notify-panel time {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.notify-empty {
+  margin: 0;
+  padding: 16px 14px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 /* 병원 정보 페이지 */
@@ -496,6 +607,11 @@ a {
   padding-top: 8px;
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+.procedure-price,
+.procedure-price-krw {
+  word-break: keep-all;
 }
 
 .procedure-price.is-pending {
@@ -1133,7 +1249,7 @@ a {
 /* 요약 카드 3개 */
 .mp-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
@@ -1387,6 +1503,129 @@ a {
 .mp-add svg {
   width: 22px;
   height: 22px;
+}
+
+/* 일정 추가 버튼은 <button> → 링크처럼 보이게 */
+button.mp-add {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* 내가 넣은 일정: 날짜 · 시간(선택) · 할 일 */
+.mp-plan-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #dfe5ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.mp-plan-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #5d6875;
+}
+
+/* 일정 목록: 타워 그림 아래에서 시작, 카드(옆 체크리스트와 같은 높이)를 넘으면 이 안에서만 스크롤 */
+.mp-schedule {
+  display: flex;
+  flex-direction: column;
+}
+
+.mp-timeline-scroll {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 140px;
+  margin-top: 24px; /* 타워 그림(위 18px + 높이 100px) 아래로 */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-right: -10px;
+  padding-right: 10px;
+}
+
+.mp-schedule > .mp-add {
+  align-self: flex-start;
+}
+
+/* 한 줄 배치(태블릿 이하)에서는 옆 카드가 없으니 목록 높이를 정해 둠 */
+@media (max-width: 860px) {
+  .mp-timeline-scroll {
+    flex: none;
+    max-height: 300px;
+  }
+}
+
+.mp-plan-form input,
+.mp-plan-form select {
+  padding: 8px 10px;
+  border: 1px solid #cfd7e0;
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+}
+
+.mp-plan-form .mp-plan-text {
+  grid-column: 1 / -1;
+}
+
+.mp-plan-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.mp-plan-actions button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mp-plan-cancel {
+  border: 1px solid #cfd7e0;
+  background: #fff;
+}
+
+.mp-plan-save {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+}
+
+.mp-plan-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mp-entry-remove {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.85rem;
+  color: #8a94a1;
+  cursor: pointer;
+}
+
+.mp-entry-remove:hover {
+  color: #c0392b;
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .mp-plan-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mp-checklist {
@@ -4203,7 +4442,8 @@ body.chat-open {
 }
 
 .consult-status.is-cancelled,
-.consult-status.is-expired {
+.consult-status.is-expired,
+.consult-status.is-no_show {
   background: #eceff3;
   color: #5d6875;
 }
@@ -4639,6 +4879,15 @@ body.chat-open {
   margin: 8px 0 0;
 }
 
+.chat-card-quote {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-muted);
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
+
 .chat-card dl {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -4659,6 +4908,15 @@ body.chat-open {
   border: 1px solid var(--c-blue-25);
   border-radius: 8px;
   font-size: 0.88rem;
+}
+
+.chat-card button:not(:disabled) {
+  padding: 6px 18px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--c-white);
+  cursor: pointer;
 }
 
 .chat-card button:disabled {
@@ -5014,4 +5272,119 @@ body.chat-open {
 
 .booking-consents .auth-field select {
   max-width: 260px;
+}
+
+/* 무한 스크롤: 목록 맨 아래 보이지 않는 표시 (보이면 다음 묶음을 불러옴) */
+.load-more-sentinel {
+  height: 1px;
+}
+
+/* 이 기기에서 알림 받기 (웹 푸시, 결정 30) */
+.notify-push {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.notify-push p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.notify-push button {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* 체류 형태 3문항 (결정 28) — 가입·예약·마이페이지 */
+.residency-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #e4e8ee;
+  border-radius: 10px;
+}
+
+.residency-questions legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.residency-intro {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.residency-note,
+.residency-blocked {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff6e5;
+  color: #8a5a00;
+  font-size: 0.85rem;
+}
+
+.residency-blocked a {
+  color: var(--accent);
+}
+
+.mp-residency {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.mp-residency strong {
+  color: var(--text);
+}
+
+.mp-residency-edit {
+  padding: 4px 10px;
+  border: 1px solid #d5dbe3;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* 챗봇 카드: 환자가 직접 보내는 요청서·질문 (결정 32) */
+.chat-card-edit {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-blue-25);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.chat-card-error {
+  margin: 0 0 8px;
+  color: #b3261e;
+  font-size: 0.85rem;
+}
+
+.chat-card-done {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.chat-card-done a {
+  color: var(--accent);
 }

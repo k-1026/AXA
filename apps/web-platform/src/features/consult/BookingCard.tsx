@@ -13,6 +13,7 @@ const NOTE: Partial<Record<DisplayStatus, string>> = {
   rejected: 'bookings.rejectedNote',
   expired: 'bookings.expiredNote',
   visited: 'consult.visitedNote',
+  no_show: 'bookings.noShowNote',
 };
 
 // 대화 속 예약 신청 카드. 병원이 확인하기 전까지는 "확인 대기"
@@ -50,7 +51,9 @@ export function BookingCard({ booking, sentAt }: { booking: BookingRequest; sent
       <footer>
         <span>
           <InfoIcon />
-          {t(NOTE[status] ?? 'consult.decidedNote')}
+          {status === 'rejected' && booking.rejectReason
+            ? t(`bookings.rejectReason.${booking.rejectReason}`)
+            : t(NOTE[status] ?? 'consult.decidedNote')}
         </span>
         <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
           {t(open ? 'consult.hideDetail' : 'consult.showDetail')}

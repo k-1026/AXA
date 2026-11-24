@@ -17,10 +17,12 @@ from sqlalchemy.orm import Session
 from core.db import utcnow
 from core.errors import AppError
 from core.security import create_access_token, token_expires_at
+from modules.aftercare import service as aftercare_service
 from modules.auth import attempts, sessions
 from modules.auth.schemas import LoginRequest, SignupRequest, TokenOut
 from modules.chatbot import sessions as chat_sessions
 from modules.consent import service as consent_service
+from modules.media import service as media
 from modules.patient import service as patient_service
 
 SIGNUP_CONSENTS = ("terms", "privacy")
@@ -46,6 +48,7 @@ def signup(db: Session, data: SignupRequest) -> TokenOut:
             preferred_lang=data.preferred_lang,
             timezone=data.timezone,
             age14_confirmed_at=utcnow(),
+            residency=data.residency,
         )
         latest = {c.kind: c for c in data.consents}  # 같은 종류를 두 번 보내면 마지막 것만
         for c in latest.values():
@@ -88,6 +91,8 @@ def withdraw(db: Session, patient_id: uuid.UUID, password: str, client_ip: str |
     - DB의 FK(CASCADE·SET NULL)에 기대지 않고 직접 지움 (SQLite 테스트에서도 같게)
     - 같은 메일로 바로 다시 가입 가능
     - 비밀번호 실패는 로그인과 같은 시도 제한 (같은 이메일 기록) → 토큰을 가진 사람이 비밀번호를 맞춰 보지 못하게
+    - 사후관리에 보낸 사진·영상은 Storage에서 바로 삭제 (결정 23). 메시지 글은 병원 쪽 기록으로 남고 "사진 있음"만 표시
+      Storage 삭제가 실패해도 탈퇴는 끝남 → DB에서 빠진 파일은 정기 정리(/internal/purge)가 지움
     """
     patient = patient_service.get(db, patient_id)
     attempts.check(patient.email, client_ip)
@@ -97,8 +102,10 @@ def withdraw(db: Session, patient_id: uuid.UUID, password: str, client_ip: str |
     sessions.delete_all(db, patient.id)
     chat_sessions.delete_all(db, patient.id)  # 챗봇 대화도 즉시 삭제
     consent_service.detach_patient(db, patient.id)
+    media_paths = aftercare_service.detach_patient_media(db, patient.id)
     db.delete(patient)
     db.commit()
+    media.remove(media.with_thumbs(media_paths))  # 썸네일도 (결정 29)
 
 
 def logout(db: Session, session_id: str) -> None:

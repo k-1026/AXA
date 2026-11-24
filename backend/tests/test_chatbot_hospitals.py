@@ -72,3 +72,82 @@ def test_병원_상세는_실제_진료시간_미등록_병원은_없는_병원�
     assert d1["hours_source"] != "demo"
     assert d2 == {}  # 미등록 병원 = 없는 병원과 같게 (카드 없음)
     assert missing == {}  # 없는 병원은 도구 오류 → 카드 없음
+
+
+# ---------- 조건 맞춤 제안·예약 = 메디대구 입점 가상 병원만 (결정 31) ----------
+
+VISITOR = {"country": "TW", "alien_registration": False, "domestic_residence": False, "health_insurance": False}
+
+
+def _visitor(client):
+    token = signup(client)
+    assert client.put("/api/v1/me/residency", json=VISITOR, headers=auth(token)).status_code == 200
+    return token
+
+
+def _tool_result(llm, name):
+    import json
+
+    msgs = [m for m in llm.calls[-1] if m["role"] == "tool"]
+    return json.loads(msgs[-1]["content"])
+
+
+def test_조건_맞춤_제안은_입점_가상_병원만_실제_병원은_안_나옴(client, db_engine, files, llm):
+    from sqlalchemy.orm import Session
+
+    from db_rows import demo_partner
+
+    seed(db_engine, files)  # 실제(등록) 피부과 Y1
+    with Session(db_engine) as s:
+        demo_partner(s, 9002)
+    token = _visitor(client)
+    llm.script += [call("recommend_hospitals", {"department": "피부과", "open_on": "mon"}), say("Here are options.")]
+    data = cards(client.post(ASK, headers=auth(token), json={"message": "where for acne scars?"}))["hospital_suggestions"]
+    assert [h["hospital_id"] for h in data["suggestions"]] == [9002]
+
+
+def test_실제_등록_병원은_예약_초안을_만들지_않음(client, db_engine, files, llm):
+    seed(db_engine, files)
+    token = _visitor(client)
+    llm.script += [call("prepare_booking_request", {"hospital_id": 1, "department": "피부과", "preferred_slots": ["2026-12-04 10:00"],
+                                                    "language": "en", "nationality": "TW", "visa_needed": False, "inquiry": "price?"}),
+                   say("Sorry.")]
+    r = client.post(ASK, headers=auth(token), json={"message": "book Y1"})
+    assert "booking_draft" not in cards(r)
+    out = _tool_result(llm, "prepare_booking_request")
+    assert out["status"] == "not_available" and "not joined" in out["reason"]
+
+
+def test_가상_병원_예약_가능_시간은_진료_시간에서(client, db_engine, llm):
+    from sqlalchemy.orm import Session
+
+    from db_rows import demo_partner
+
+    with Session(db_engine) as s:
+        demo_partner(s, 9002)
+    token = _visitor(client)
+    llm.script += [call("check_availability", {"hospital_id": 9002, "date_from": "2026-12-05", "date_to": "2026-12-06"}),
+                   say("Saturday works.")]
+    client.post(ASK, headers=auth(token), json={"message": "when can I go?"})
+    slots = _tool_result(llm, "check_availability")["slots"]
+    assert slots == {"2026-12-05": ["10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"]}  # 일요일(12-06) 휴진
+
+
+def test_챗봇_요청서_카드는_그대로_예약_API로_보낼_수_있다(client, db_engine, llm):
+    """카드의 request + 환자가 체크한 동의 = 사람이 쓰는 요청서와 같은 API (결정 3). 계약 필수 칸이 빠지면 422가 나던 것."""
+    from sqlalchemy.orm import Session
+
+    from db_rows import demo_partner
+
+    with Session(db_engine) as s:
+        demo_partner(s, 9002)
+    token = _visitor(client)
+    llm.script += [call("prepare_booking_request", {"hospital_id": 9002, "department": "피부과", "preferred_slots": ["2030-12-05 10:00"],
+                                                    "language": "ko", "nationality": "TW", "visa_needed": False,
+                                                    "inquiry": "레이저 몇 번?"}), say("Check the card.")]
+    card = cards(client.post(ASK, headers=auth(token), json={"message": "book 9002"}))["booking_draft"]
+    consents = [{"kind": k, "version": "2026-11-03" if k == "privacy" else "2026-11-18"} for k in card["consents_required"]]
+    r = client.post(f"/api/v1/hospitals/{card['hospital_id']}/booking-requests", headers=auth(token),
+                    json={**card["request"], "consents": consents})
+    assert r.status_code == 201, r.json()
+    assert r.json()["status"] == "pending" and r.json()["hospital_id"] == 9002

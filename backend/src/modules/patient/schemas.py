@@ -25,6 +25,22 @@ def blank_to_none(v: str | None) -> str | None:
     return (v.strip() or None) if v is not None else None
 
 
+class ResidencyIn(BaseModel):
+    """체류 형태 3문항 (compliance 2-1). 하나라도 "예"이거나 거주국이 한국이면 국내 거주 → 정보 열람만.
+
+    ① 외국인등록 (단기 체류 G-1 제외) ② 국내거소신고 (외국국적동포) ③ 국민건강보험 가입자·피부양자
+    """
+
+    country: str = Field(pattern=r"^[A-Z]{2}$")  # 거주국 ISO 3166-1 alpha-2
+    alien_registration: bool
+    domestic_residence: bool
+    health_insurance: bool
+
+    def residency(self) -> str:
+        resident = self.country == "KR" or self.alien_registration or self.domestic_residence or self.health_insurance
+        return "resident" if resident else "short_term"
+
+
 class PatientOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -34,6 +50,8 @@ class PatientOut(BaseModel):
     preferred_lang: Lang
     timezone: str
     created_at: datetime
+    residency: Literal["short_term", "resident"] | None = None  # None이면 예약 전에 3문항을 물음
+    residence_country: str | None = None
 
 
 class PatientUpdate(BaseModel):

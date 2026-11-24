@@ -1,4 +1,33 @@
 {
+  "notify": {
+    "title": "Thông báo",
+    "open": "{{count}} thông báo",
+    "empty": "Không có thông báo mới.",
+    "markAll": "Đánh dấu đã đọc tất cả",
+    "hospital": "Bệnh viện",
+    "newCount": "{{count}} mới",
+    "status": {
+      "confirmed": "{{hospital}} đã xác nhận lịch hẹn của bạn.",
+      "rejected": "{{hospital}} cho biết không thể nhận yêu cầu đặt lịch.",
+      "proposed": "{{hospital}} đã đề xuất thời gian khác.",
+      "visited": "Lần khám tại {{hospital}} đã được ghi nhận hoàn tất. Bạn có thể trò chuyện sau điều trị.",
+      "no_show": "Lịch hẹn tại {{hospital}} được ghi nhận là không đến.",
+      "expired": "Các ngày mong muốn trong yêu cầu gửi {{hospital}} đều đã qua."
+    },
+    "reply": "{{hospital}} đã gửi {{count}} phản hồi tư vấn.",
+    "aftercare": "Nhân viên y tế {{hospital}} đã gửi {{count}} tin nhắn sau điều trị.",
+    "push": {
+      "enable": "Nhận thông báo trên thiết bị này",
+      "disable": "Tắt thông báo trên thiết bị này",
+      "onNote": "Bạn sẽ nhận tin từ bệnh viện trên thiết bị này kể cả khi đã đóng trang.",
+      "offNote": "Nhận tin từ bệnh viện dưới dạng thông báo kể cả khi đã đóng trang.",
+      "denied": "Trình duyệt đang chặn thông báo của trang này. Hãy cho phép trong cài đặt trình duyệt.",
+      "unsupported": "Trình duyệt này không hỗ trợ thông báo.",
+      "ios": "Trên iPhone/iPad, nhấn Chia sẻ → \"Thêm vào Màn hình chính\" rồi mở từ đó để nhận thông báo.",
+      "serverOff": "Hiện chưa dùng được thông báo trên thiết bị. Thông báo trong trang vẫn hoạt động.",
+      "failed": "Không đổi được cài đặt thông báo. Vui lòng thử lại sau."
+    }
+  },
   "header": {
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",
@@ -33,6 +62,7 @@
     "plastic": "Phẫu thuật thẩm mỹ",
     "internal": "Nội khoa",
     "ophthalmology": "Nhãn khoa",
+    "korean_medicine": "Đông y Hàn Quốc",
     "other": "Khác",
     "notReady": "Đang chuẩn bị dữ liệu"
   },
@@ -121,6 +151,7 @@
     "reserveBtn": "Đặt lịch"
   },
   "prices": {
+    "more": "Xem thêm (còn {{count}} mục)",
     "pending": "Đang xác nhận giá",
     "range": "{{min}}–{{max}} KRW",
     "notice": "Số tiền hiển thị là khoảng giá thị trường. Chi phí thực tế khác nhau tùy bệnh viện và nội dung điều trị, các dịch vụ cung cấp cũng có thể khác nhau. Đây không phải là quảng cáo, khuyến nghị hay tư vấn y tế. Bạn có thể yêu cầu bệnh viện cung cấp dự toán chi phí bằng văn bản.",
@@ -128,7 +159,8 @@
     "krwNote": "{{min}}–{{max}} KRW",
     "fxNotice": "Số tiền quy đổi chỉ để tham khảo. Chi phí thực tế tính bằng won Hàn Quốc theo báo giá của bệnh viện. Tỷ giá áp dụng ngày {{applied}} (Ngân hàng Trung ương Hàn Quốc, số liệu ngày {{base}}; cập nhật lúc {{hour}}:00 giờ Hàn Quốc mỗi ngày) ·",
     "fxProvider": "Bank of Korea ECOS",
-    "fxFallback": "Không tải được tỷ giá, giá được hiển thị bằng won Hàn Quốc."
+    "fxFallback": "Không tải được tỷ giá, giá được hiển thị bằng won Hàn Quốc.",
+    "fxReference": "Quy đổi theo tỷ giá tham khảo của Ngân hàng Trung ương châu Âu ({{date}}). Số tiền thực tế có thể khác."
   },
   "mypage": {
     "home": "Trang chủ",
@@ -137,7 +169,8 @@
     "subtitle": "Quản lý bệnh viện đã lưu, lịch khám và chuẩn bị chuyến đi tại một nơi.",
     "stats": {
       "saved": "Bệnh viện đã lưu",
-      "visits": "Lịch sử khám"
+      "visits": "Lịch sử khám",
+      "bookings": "Quản lý lịch hẹn"
     },
     "schedule": {
       "title": "Lịch trình Daegu của tôi",
@@ -148,6 +181,16 @@
         "userAdded": "Bạn tự thêm",
         "experience": "Trải nghiệm",
         "tour": "Tham quan"
+      },
+      "remove": "Xóa",
+      "form": {
+        "date": "Ngày",
+        "time": "Giờ (không bắt buộc)",
+        "text": "Việc cần làm",
+        "placeholder": "VD: Đi chợ đêm Seomun",
+        "save": "Thêm",
+        "cancel": "Hủy",
+        "noTime": "Không chọn giờ"
       }
     },
     "checklist": {
@@ -355,13 +398,25 @@
       "listNote": "Sắp xếp theo tên. Đây không phải là gợi ý hay xếp hạng.",
       "suggestBasis": "Chỉ được gợi ý dựa trên mức độ phù hợp với điều kiện bạn đưa ra (ngôn ngữ hỗ trợ, ngày khám, giờ trống). Đây không phải là đánh giá về chất lượng y tế, tay nghề hay kết quả. Tất cả đều là cơ sở y tế đã đăng ký thu hút bệnh nhân nước ngoài. MediDaegu là đơn vị thu hút bệnh nhân đã đăng ký và có thể nhận phí môi giới từ bệnh viện; phí này không ảnh hưởng đến thứ tự.",
       "priceNote": "Giá ngoài bảo hiểm công bố cho bệnh nhân Hàn Quốc (giá trị minh họa). Chi phí thực tế có thể khác, vui lòng hỏi bệnh viện.",
+      "aftercare": "Tin nhắn hỏi sau điều trị gửi bệnh viện",
+      "aftercareOpen": "Mở trò chuyện sau điều trị để gửi",
+      "aftercareNote": "Chưa gửi. Hãy kiểm tra nội dung trong trò chuyện sau điều trị và tự gửi. Câu hỏi về triệu chứng hay điều trị, vui lòng liên hệ trực tiếp bệnh viện.",
       "reasons": {
         "staffLang": "Nhân viên nói {{lang}}",
         "aiTranslation": "Có trò chuyện dịch AI",
         "openOn": "Mở cửa {{day}} ({{hours}})",
         "slotsOn": "Có lịch tư vấn ngày {{date}}",
         "inDistrict": "Tại {{district}}"
-      }
+      },
+      "submitted": "Đã gửi yêu cầu. Chúng tôi sẽ báo khi bệnh viện phản hồi.",
+      "goBookings": "Xem quản lý đặt lịch",
+      "submitNote": "Hãy đánh dấu đồng ý và tự gửi. Bệnh viện sẽ xác nhận lịch hẹn.",
+      "question": "Câu hỏi gửi {{hospital}}",
+      "questionEdit": "Sửa câu hỏi",
+      "questionSend": "Gửi như vậy",
+      "questionSent": "Đã gửi câu hỏi tới bệnh viện. Xem trả lời ở trang Tư vấn.",
+      "goConsult": "Mở trang Tư vấn",
+      "questionNote": "Chưa gửi. Bạn có thể sửa rồi gửi. Nhân viên bệnh viện sẽ trả lời."
     },
     "consent": {
       "privacy": "Thu thập và sử dụng thông tin cá nhân",
@@ -415,7 +470,8 @@
       "cancelled": "Đã hủy",
       "visited": "Đã khám",
       "proposed": "Đề xuất giờ khác",
-      "expired": "Đã hết hạn"
+      "expired": "Đã hết hạn",
+      "no_show": "Không đến"
     },
     "quick": {
       "booking": "Hỏi đặt lịch",
@@ -466,6 +522,12 @@
     "number": "Mã đặt lịch {{no}}",
     "cancelledOn": "Ngày hủy {{date}}",
     "rejectedNote": "Bệnh viện cho biết không thể đặt vào thời gian này.",
+    "rejectReason": {
+      "fully_booked": "Bệnh viện cho biết khung giờ đó đã kín lịch. Vui lòng yêu cầu ngày khác.",
+      "not_offered": "Bệnh viện cho biết không thực hiện dịch vụ bạn yêu cầu. Vui lòng tìm bệnh viện khác.",
+      "needs_consult": "Bệnh viện cho biết cần tư vấn trực tiếp trước. Hãy xem thông báo của bệnh viện trong mục tư vấn.",
+      "other": "Bệnh viện cho biết không thể nhận yêu cầu này. Hãy xem thông báo của bệnh viện trong mục tư vấn."
+    },
     "change": "Đổi lịch",
     "cancel": "Hủy lịch",
     "chat": "Tư vấn",
@@ -476,7 +538,8 @@
     "footnote": "Giờ hẹn theo giờ Hàn Quốc (KST).",
     "sampleNote": "Bệnh viện và lịch hẹn mẫu.",
     "proposedNote": "Bệnh viện đã đề xuất giờ khác. Vui lòng kiểm tra trong phần tư vấn.",
-    "expiredNote": "Tất cả ngày mong muốn đã qua nên yêu cầu này đã hết hạn."
+    "expiredNote": "Tất cả ngày mong muốn đã qua nên yêu cầu này đã hết hạn.",
+    "noShowNote": "Bệnh viện đã đánh dấu lịch hẹn này là không đến. Nếu muốn khám, vui lòng gửi yêu cầu đặt lịch mới."
   },
   "aftercare": {
     "list": "Lịch sử chăm sóc sau khám",
@@ -497,6 +560,8 @@
     "errType": "Chỉ có thể gửi ảnh hoặc video.",
     "errSize": "Mỗi tệp tối đa 50MB.",
     "errCount": "Mỗi lần gửi tối đa {{max}} tệp.",
+    "errClosed": "Bệnh viện này không nhận tin nhắn chăm sóc sau điều trị trên MediDaegu. Vui lòng liên hệ trực tiếp với bệnh viện.",
+    "errSend": "Không gửi được. Vui lòng thử lại sau ít phút.",
     "aftercareButton": "Chăm sóc sau khám"
   },
   "notFoundPage": {
@@ -548,11 +613,35 @@
     "pickHospital": "Chọn bệnh viện",
     "regNo": "Số đăng ký cơ sở thu hút bệnh nhân nước ngoài",
     "regNoHint": "Định dạng: M-2009-03-01-0013",
-    "doneNoDashboard": "Đã đăng nhập. Chưa đặt địa chỉ trang quản lý (VITE_DASHBOARD_URL).",
     "err": {
       "hospitalTaken": "Bệnh viện này đã tham gia. Liên hệ tài khoản đại diện.",
       "notRegistered": "Không phải cơ sở đã đăng ký hoặc không hoạt động nên không thể tham gia.",
       "tooMany": "Thử quá nhiều lần. Vui lòng thử lại sau."
+    }
+  },
+  "residency": {
+    "title": "Xác nhận tình trạng lưu trú tại Hàn Quốc",
+    "country": "Quốc gia bạn đang sống",
+    "intro": "Hãy đánh dấu tất cả các mục đúng với bạn. Nếu không có mục nào, hãy để trống.",
+    "q": {
+      "alien_registration": "Tôi đã đăng ký người nước ngoài tại Hàn Quốc (trừ visa ngắn hạn G-1)",
+      "domestic_residence": "Tôi đã khai báo cư trú trong nước tại Hàn Quốc (kiều bào)",
+      "health_insurance": "Tôi tham gia (hoặc là người phụ thuộc) Bảo hiểm Y tế Quốc dân Hàn Quốc"
+    },
+    "residentNote": "Bạn được xem là người nước ngoài cư trú tại Hàn Quốc. Bạn vẫn xem được thông tin bệnh viện, nhưng theo luật không thể gửi yêu cầu tư vấn, đặt lịch hoặc nhận gợi ý bệnh viện.",
+    "bookingBlocked": "Theo luật, người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch (vẫn xem được thông tin bệnh viện). Nếu tình trạng của bạn đã thay đổi, hãy trả lời lại ở Trang của tôi.",
+    "editLink": "Đến Trang của tôi",
+    "status": "Lưu trú tại Hàn Quốc",
+    "statusValue": {
+      "shortTerm": "Thăm ngắn hạn",
+      "resident": "Cư trú (chỉ xem thông tin)",
+      "none": "Chưa trả lời"
+    },
+    "edit": "Trả lời lại",
+    "save": "Lưu",
+    "err": {
+      "required": "Vui lòng trả lời câu hỏi về tình trạng lưu trú trước.",
+      "notEligible": "Người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch. Nếu tình trạng đã thay đổi, hãy trả lời lại ở Trang của tôi."
     }
   }
 }

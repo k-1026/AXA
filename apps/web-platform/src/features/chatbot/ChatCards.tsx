@@ -1,14 +1,16 @@
 import { Fragment, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { LANGUAGES } from '../../i18n';
 import type { DepartmentKey } from '../hospital/types';
 import type { ChatCard, HospitalBrief } from './chatApi';
 import { localHospitalName } from '../hospital/localize';
+import { BookingDraftActions, QuestionCard } from './ActionCards';
 
 // 카드의 진료과는 한국어 이름(피부과 등)으로 온다 (ai/agent/tools/chat_tools.py DEPT_CODES와 같은 표)
 // 화면 진료과 키가 있는 것만 번역하고, 나머지(치과·한방 등)는 받은 그대로 보여 준다
-const DEPT_KEYS: Record<string, DepartmentKey> = { 피부과: 'dermatology', 성형외과: 'plastic', 내과: 'internal', 안과: 'ophthalmology' };
+const DEPT_KEYS: Record<string, DepartmentKey> = { 피부과: 'dermatology', 성형외과: 'plastic', 내과: 'internal', 안과: 'ophthalmology', 한방: 'korean_medicine', 한의원: 'korean_medicine' };
 const deptLabel = (t: TFunction, d: string) => {
   const key = DEPT_KEYS[d] ?? (Object.values(DEPT_KEYS).includes(d as DepartmentKey) ? d : null);
   return key ? t(`dept.${key}`) : d;
@@ -74,6 +76,28 @@ function HospitalRow({ h, reasons }: { h: HospitalBrief; reasons?: string[] }) {
         <span className="chat-card-reasons">{reasons.map((r) => reasonLabel(t, i18n.language, r)).join(' · ')}</span>
       )}
     </li>
+  );
+}
+
+// 사후관리 화면으로 넘길 값 (주소에 글을 넣지 않고 화면 이동 state로 — 기록·공유 주소에 남지 않게)
+export interface AftercareHandoff {
+  booking?: string | null;
+  draft?: string;
+}
+
+function AftercareCard({ data }: { data: Extract<ChatCard, { type: 'aftercare_thread' }>['data'] }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const state: AftercareHandoff = { booking: data.booking_id, draft: data.first_message };
+  return (
+    <section className="chat-card">
+      <h3>{t('chat.card.aftercare')}</h3>
+      <blockquote className="chat-card-quote">{data.first_message}</blockquote>
+      <button type="button" onClick={() => navigate('/aftercare', { state })}>
+        {t('chat.card.aftercareOpen')}
+      </button>
+      <p className="chat-card-note">{t('chat.card.aftercareNote')}</p>
+    </section>
   );
 }
 
@@ -144,24 +168,17 @@ function Card({ card }: { card: ChatCard }) {
             <dt>{t('chat.card.slots')}</dt>
             <dd>{slots.join(', ') || '-'}</dd>
           </dl>
-          <fieldset>
-            <legend>{t('chat.card.consents')}</legend>
-            {card.data.consents_required.map((k) => (
-              <label key={k}>
-                <input type="checkbox" disabled /> {t(`chat.consent.${k}`, { defaultValue: k })}
-              </label>
-            ))}
-          </fieldset>
-          {/* 제출 = 사람이 쓰는 요청서와 같은 API. 예약 요청 API(B)가 생기면 연결 */}
-          <button type="button" disabled>
-            {t('chat.card.submit')}
-          </button>
-          <p className="chat-card-note">{t('chat.card.submitLater')}</p>
+          {/* 제출 = 사람이 쓰는 요청서와 같은 API (결정 3). 동의를 체크하고 환자가 누름 */}
+          <BookingDraftActions data={card.data} />
         </section>
       );
     }
+    case 'aftercare_thread':
+      return <AftercareCard data={card.data} />;
+    case 'hospital_question':
+      return <QuestionCard data={card.data} />;
     default:
-      return null; // 나머지 카드(출처·시간 후보·내 요청·사후 문의)는 다음 단계에서
+      return null; // 나머지 카드(출처·시간 후보·내 요청)는 다음 단계에서
   }
 }
 

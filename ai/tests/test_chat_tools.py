@@ -9,13 +9,13 @@ SHORT = ToolContext(patient_id="demo-patient-1", language="en", residency="short
 
 def test_tools_have_valid_specs():
     specs = R.openai_specs()
-    assert len(specs) == 11
+    assert len(specs) == 12
     for s in specs:
         fn = s["function"]
         assert s["type"] == "function" and fn["name"] and fn["description"]
         assert fn["parameters"]["type"] == "object"
     intents = {t.intent for t in R.tools.values()}
-    assert intents == {"진료과안내", "병원찾기", "병원추천", "가격", "정보질문", "예약", "예약상태", "사후문의"}
+    assert intents == {"진료과안내", "병원찾기", "병원추천", "가격", "정보질문", "예약", "예약상태", "예약문의", "사후문의"}
 
 
 def test_validation_errors_are_returned_not_raised():
@@ -63,7 +63,7 @@ def test_booking_draft_rules():
     with_health = R.run("prepare_booking_request", {**args, "health_info": "scars on cheeks since 2024"}, SHORT)
     assert with_health["consents_required"] == ["privacy", "health", "overseas_transfer"]
     ko = R.run("prepare_booking_request", {**args, "language": "ko"}, SHORT)
-    assert ko["consents_required"] == ["privacy"]
+    assert ko["consents_required"] == ["privacy", "overseas_transfer"]  # 글이 있으면 백엔드가 요구 (언어 무관)
 
 
 def test_booking_draft_input_checks():

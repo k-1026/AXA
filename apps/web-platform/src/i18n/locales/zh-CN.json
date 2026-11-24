@@ -1,4 +1,33 @@
 {
+  "notify": {
+    "title": "通知",
+    "open": "{{count}}条通知",
+    "empty": "没有新通知。",
+    "markAll": "全部已读",
+    "hospital": "医院",
+    "newCount": "{{count}}条新通知",
+    "status": {
+      "confirmed": "{{hospital}}已确认您的预约。",
+      "rejected": "{{hospital}}表示无法接受此次预约。",
+      "proposed": "{{hospital}}提议了其他时间。",
+      "visited": "您在{{hospital}}的就诊已记录为完成，现在可以使用术后管理对话。",
+      "no_show": "您在{{hospital}}的预约被记录为未到诊。",
+      "expired": "您向{{hospital}}申请的希望日期均已过去。"
+    },
+    "reply": "{{hospital}}发来{{count}}条咨询回复。",
+    "aftercare": "{{hospital}}医护人员发来{{count}}条术后管理消息。",
+    "push": {
+      "enable": "在此设备接收通知",
+      "disable": "关闭此设备的通知",
+      "onNote": "即使关闭网站，也会在此设备收到医院的消息。",
+      "offNote": "即使关闭网站，也能以通知接收医院的消息。",
+      "denied": "浏览器已屏蔽此网站的通知，请在浏览器设置中允许。",
+      "unsupported": "此浏览器不支持通知。",
+      "ios": "iPhone・iPad 请点击分享 →“添加到主屏幕”，从主屏幕打开后即可接收通知。",
+      "serverOff": "目前无法使用设备通知，网站内通知仍会正常显示。",
+      "failed": "无法更改通知设置，请稍后再试。"
+    }
+  },
   "header": {
     "language": "语言",
     "currency": "货币",
@@ -33,6 +62,7 @@
     "plastic": "整形外科",
     "internal": "内科",
     "ophthalmology": "眼科",
+    "korean_medicine": "韩医",
     "other": "其他",
     "notReady": "数据准备中"
   },
@@ -121,6 +151,7 @@
     "reserveBtn": "预约"
   },
   "prices": {
+    "more": "显示更多（还有 {{count}} 项）",
     "pending": "价格确认中",
     "range": "{{min}}–{{max}} 韩元",
     "notice": "所示金额为市场价格范围，实际费用因医院和诊疗内容而异，各医院提供的项目也可能不同。本页面不构成广告、推荐或医疗咨询。您可以向医院书面申请预估诊疗费用。",
@@ -128,7 +159,8 @@
     "krwNote": "{{min}}~{{max}} 韩元",
     "fxNotice": "换算金额仅供参考，实际费用以医院告知的韩元金额为准。{{applied}} 适用汇率（韩国银行 {{base}} 数据，每天韩国时间 {{hour}}:00 更新）·",
     "fxProvider": "韩国银行经济统计系统",
-    "fxFallback": "无法获取汇率，以韩元显示。"
+    "fxFallback": "无法获取汇率，以韩元显示。",
+    "fxReference": "此币种按欧洲中央银行参考汇率（{{date}}）换算，实际付款金额可能不同。"
   },
   "mypage": {
     "home": "首页",
@@ -137,7 +169,8 @@
     "subtitle": "在一个地方管理收藏的医院、就诊日程和旅行准备。",
     "stats": {
       "saved": "收藏的医院",
-      "visits": "就诊记录"
+      "visits": "就诊记录",
+      "bookings": "预约管理"
     },
     "schedule": {
       "title": "我的大邱日程",
@@ -148,6 +181,16 @@
         "userAdded": "自行登记",
         "experience": "体验",
         "tour": "观光"
+      },
+      "remove": "删除",
+      "form": {
+        "date": "日期",
+        "time": "时间（选填）",
+        "text": "要做的事",
+        "placeholder": "例：去西门市场夜市",
+        "save": "添加",
+        "cancel": "取消",
+        "noTime": "不指定"
       }
     },
     "checklist": {
@@ -355,13 +398,25 @@
       "listNote": "按名称排序，并非推荐或排名。",
       "suggestBasis": "仅根据各医院与您所说条件（接待语言、就诊日、可预约时间）的符合程度提出，并非对医疗水平、技术或结果的评价。均为已登记的外国患者招揽医疗机构。MediDaegu 为登记的患者招揽机构，可能向医院收取中介费，但中介费不影响排序。",
       "priceNote": "以韩国患者为准公开的非医保价格（演示数值）。实际费用可能不同，请向医院确认。",
+      "aftercare": "要发给医院的术后咨询",
+      "aftercareOpen": "打开术后管理对话发送",
+      "aftercareNote": "尚未发送。请在术后管理页面确认内容后自行发送。症状或治疗问题请直接联系医院。",
       "reasons": {
         "staffLang": "有会说{{lang}}的员工",
         "aiTranslation": "可使用 AI 翻译聊天",
         "openOn": "{{day}}就诊（{{hours}}）",
         "slotsOn": "{{date}}有可咨询时段",
         "inDistrict": "位于{{district}}"
-      }
+      },
+      "submitted": "已提交申请。医院确认后会通知您。",
+      "goBookings": "查看预约管理",
+      "submitNote": "请勾选同意后由您亲自提交。预约由医院确认。",
+      "question": "要发给{{hospital}}的问题",
+      "questionEdit": "修改问题",
+      "questionSend": "直接发送",
+      "questionSent": "已将问题发给医院。可在咨询页面查看回复。",
+      "goConsult": "前往咨询页面",
+      "questionNote": "尚未发送。需要修改的话请修改后再发送。由医院人员回复。"
     },
     "consent": {
       "privacy": "个人信息收集与使用",
@@ -415,7 +470,8 @@
       "cancelled": "已取消",
       "visited": "已就诊",
       "proposed": "医院提议其他时间",
-      "expired": "已过期"
+      "expired": "已过期",
+      "no_show": "未到诊"
     },
     "quick": {
       "booking": "预约咨询",
@@ -466,6 +522,12 @@
     "number": "预约编号 {{no}}",
     "cancelledOn": "取消日期 {{date}}",
     "rejectedNote": "医院告知该时间无法预约。",
+    "rejectReason": {
+      "fully_booked": "医院表示该时段已约满，请改选其他日期再申请。",
+      "not_offered": "医院表示不提供您申请的诊疗项目，请寻找其他医院。",
+      "needs_consult": "医院表示需要先进行面诊，请在咨询页面查看医院的说明。",
+      "other": "医院表示无法接受此次申请，请在咨询页面查看医院的说明。"
+    },
     "change": "更改预约",
     "cancel": "取消预约",
     "chat": "咨询",
@@ -476,7 +538,8 @@
     "footnote": "预约时间以韩国时间（KST）为准。",
     "sampleNote": "示例医院和预约信息。",
     "proposedNote": "医院提议了其他时间，请在咨询中确认。",
-    "expiredNote": "所有希望日期均已过去，此申请已过期。"
+    "expiredNote": "所有希望日期均已过去，此申请已过期。",
+    "noShowNote": "医院已将此预约标记为未到诊。如需就诊，请重新提交预约申请。"
   },
   "aftercare": {
     "list": "术后管理记录",
@@ -497,6 +560,8 @@
     "errType": "只能发送照片或视频。",
     "errSize": "每个文件最大50MB。",
     "errCount": "一次最多发送{{max}}个。",
+    "errClosed": "这家医院不在MediDaegu接收术后管理消息。请直接联系医院。",
+    "errSend": "发送失败，请稍后再试。",
     "aftercareButton": "术后管理"
   },
   "notFoundPage": {
@@ -548,11 +613,35 @@
     "pickHospital": "请选择医院",
     "regNo": "外国患者招揽医疗机构登记号",
     "regNoHint": "格式：M-2009-03-01-0013",
-    "doneNoDashboard": "已登录。尚未设置管理页面地址（VITE_DASHBOARD_URL）。",
     "err": {
       "hospitalTaken": "这家医院已经入驻，请联系医院代表账号。",
       "notRegistered": "不是已登记机构或未营业，无法入驻。",
       "tooMany": "尝试次数过多，请稍后再试。"
+    }
+  },
+  "residency": {
+    "title": "在韩居留状态确认",
+    "country": "目前居住的国家",
+    "intro": "如符合以下任一项，请全部勾选；都不符合请留空。",
+    "q": {
+      "alien_registration": "我已在韩国办理外国人登录（短期访问 G-1 除外）",
+      "domestic_residence": "我已在韩国办理国内居所申报（外国国籍同胞）",
+      "health_insurance": "我是韩国国民健康保险的参保人或被扶养人"
+    },
+    "residentNote": "您属于居住在韩国的外国人。您仍可查看医院信息，但依法无法申请咨询・预约，也无法使用医院推荐。",
+    "bookingBlocked": "依法，居住在韩国的外国人无法申请咨询・预约（仍可查看医院信息）。如居留状态有变，请到我的页面重新回答。",
+    "editLink": "前往我的页面",
+    "status": "在韩居留",
+    "statusValue": {
+      "shortTerm": "短期访问",
+      "resident": "居住在韩国（仅可查看信息）",
+      "none": "尚未回答"
+    },
+    "edit": "重新回答",
+    "save": "保存",
+    "err": {
+      "required": "请先回答居留状态问题。",
+      "notEligible": "居住在韩国的外国人无法申请咨询・预约。如居留状态有变，请到我的页面重新回答。"
     }
   }
 }

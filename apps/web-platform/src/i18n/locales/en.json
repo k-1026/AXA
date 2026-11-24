@@ -1,4 +1,33 @@
 {
+  "notify": {
+    "title": "Notifications",
+    "open": "{{count}} notifications",
+    "empty": "No new notifications.",
+    "markAll": "Mark all as read",
+    "hospital": "The hospital",
+    "newCount": "{{count}} new",
+    "status": {
+      "confirmed": "{{hospital}} confirmed your booking.",
+      "rejected": "{{hospital}} can't accept your booking request.",
+      "proposed": "{{hospital}} proposed another time.",
+      "visited": "Your visit to {{hospital}} is marked complete. You can now use follow-up chat.",
+      "no_show": "Your booking at {{hospital}} was marked as not visited.",
+      "expired": "All preferred dates for your request to {{hospital}} have passed."
+    },
+    "reply": "{{hospital}} sent {{count}} consultation reply(s).",
+    "aftercare": "Staff at {{hospital}} sent {{count}} follow-up message(s).",
+    "push": {
+      "enable": "Get notifications on this device",
+      "disable": "Turn off on this device",
+      "onNote": "You will get hospital updates on this device even when the site is closed.",
+      "offNote": "Get hospital updates as notifications even when the site is closed.",
+      "denied": "Notifications for this site are blocked in your browser. Allow them in your browser settings.",
+      "unsupported": "This browser does not support notifications.",
+      "ios": "On iPhone/iPad, tap Share → \"Add to Home Screen\" and open it from there to get notifications.",
+      "serverOff": "Device notifications are not available right now. In-site notifications still work.",
+      "failed": "Could not change the notification setting. Please try again later."
+    }
+  },
   "header": {
     "language": "Language",
     "currency": "Currency",
@@ -33,6 +62,7 @@
     "plastic": "Plastic surgery",
     "internal": "Internal medicine",
     "ophthalmology": "Ophthalmology",
+    "korean_medicine": "Korean Medicine",
     "other": "Other",
     "notReady": "Data coming soon"
   },
@@ -121,6 +151,7 @@
     "reserveBtn": "Book"
   },
   "prices": {
+    "more": "Show more ({{count}} left)",
     "pending": "Price being checked",
     "range": "KRW {{min}}–{{max}}",
     "notice": "Amounts shown are market price ranges. Actual costs vary by hospital and treatment, and procedures offered differ by hospital. This is not advertising, a recommendation, or medical advice. You can ask a hospital for a written cost estimate.",
@@ -128,7 +159,8 @@
     "krwNote": "KRW {{min}}–{{max}}",
     "fxNotice": "Converted amounts are for reference only. Actual costs are in Korean won as quoted by the hospital. Rates applied on {{applied}} (Bank of Korea, as of {{base}}; updated daily at {{hour}}:00 KST) ·",
     "fxProvider": "Bank of Korea ECOS",
-    "fxFallback": "Could not load exchange rates, so prices are shown in Korean won."
+    "fxFallback": "Could not load exchange rates, so prices are shown in Korean won.",
+    "fxReference": "Converted with the European Central Bank reference rate ({{date}}). Actual charges may differ."
   },
   "mypage": {
     "home": "Home",
@@ -137,7 +169,8 @@
     "subtitle": "Manage saved hospitals, visit plans and trip prep in one place.",
     "stats": {
       "saved": "Saved hospitals",
-      "visits": "Visit history"
+      "visits": "Visit history",
+      "bookings": "My bookings"
     },
     "schedule": {
       "title": "My Daegu schedule",
@@ -148,6 +181,16 @@
         "userAdded": "Added by you",
         "experience": "Experience",
         "tour": "Sightseeing"
+      },
+      "remove": "Delete",
+      "form": {
+        "date": "Date",
+        "time": "Time (optional)",
+        "text": "Plan",
+        "placeholder": "e.g. Seomun Market night market",
+        "save": "Add",
+        "cancel": "Cancel",
+        "noTime": "No time"
       }
     },
     "checklist": {
@@ -355,13 +398,25 @@
       "listNote": "Listed in name order. This is not a recommendation or ranking.",
       "suggestBasis": "Suggested only by how well each clinic matches the conditions you gave (language support, opening day, available time). This is not a judgment of medical quality, skill or results. All are registered foreign-patient facilities. MediDaegu is a registered patient facilitator and may receive a referral fee from hospitals; the fee does not affect the order.",
       "priceNote": "Public non-covered prices for Korean patients (demo values). The final cost may differ, so please check with the clinic.",
+      "aftercare": "Follow-up message for the hospital",
+      "aftercareOpen": "Open follow-up chat to send",
+      "aftercareNote": "Not sent yet. Check the message in the follow-up chat and send it yourself. For symptoms or treatment questions, contact the hospital directly.",
       "reasons": {
         "staffLang": "Staff speak {{lang}}",
         "aiTranslation": "AI translation chat available",
         "openOn": "Open on {{day}} ({{hours}})",
         "slotsOn": "Consultation slots on {{date}}",
         "inDistrict": "In {{district}}"
-      }
+      },
+      "submitted": "Request sent. We will let you know when the hospital responds.",
+      "goBookings": "View my bookings",
+      "submitNote": "Tick the consents and send it yourself. The hospital confirms the booking.",
+      "question": "Question for {{hospital}}",
+      "questionEdit": "Edit question",
+      "questionSend": "Send as is",
+      "questionSent": "Your question was sent to the hospital. See replies in Consultations.",
+      "goConsult": "Open Consultations",
+      "questionNote": "Not sent yet. Edit it if you like, then send. Hospital staff will answer."
     },
     "consent": {
       "privacy": "Collection and use of personal data",
@@ -415,7 +470,8 @@
       "cancelled": "Cancelled",
       "visited": "Visited",
       "proposed": "New time proposed",
-      "expired": "Expired"
+      "expired": "Expired",
+      "no_show": "No-show"
     },
     "quick": {
       "booking": "Booking",
@@ -466,6 +522,12 @@
     "number": "Booking no. {{no}}",
     "cancelledOn": "Cancelled on {{date}}",
     "rejectedNote": "The hospital said this time is not available.",
+    "rejectReason": {
+      "fully_booked": "The hospital says that time is fully booked. Please request another date.",
+      "not_offered": "The hospital says it does not offer the treatment you asked for. Please look for another hospital.",
+      "needs_consult": "The hospital says an in-person consultation is needed first. Check the hospital's message in the consultation chat.",
+      "other": "The hospital says it can't accept this request. Check the hospital's message in the consultation chat."
+    },
     "change": "Change booking",
     "cancel": "Cancel booking",
     "chat": "Chat",
@@ -476,7 +538,8 @@
     "footnote": "Booking times are in Korea Standard Time (KST).",
     "sampleNote": "Sample hospitals and bookings.",
     "proposedNote": "The hospital proposed a different time. Please check it in the consultation chat.",
-    "expiredNote": "All preferred dates have passed, so this request has expired."
+    "expiredNote": "All preferred dates have passed, so this request has expired.",
+    "noShowNote": "The clinic marked this booking as not attended. To visit, please send a new booking request."
   },
   "aftercare": {
     "list": "Aftercare visits",
@@ -497,6 +560,8 @@
     "errType": "You can only send photos or videos.",
     "errSize": "Each file can be up to 50MB.",
     "errCount": "You can send up to {{max}} files at once.",
+    "errClosed": "This hospital doesn't take aftercare messages on MediDaegu. Please contact the hospital directly.",
+    "errSend": "Couldn't send. Please try again in a moment.",
     "aftercareButton": "Aftercare"
   },
   "notFoundPage": {
@@ -548,11 +613,35 @@
     "pickHospital": "Choose a hospital",
     "regNo": "Foreign patient institution registration no.",
     "regNoHint": "Format: M-2009-03-01-0013",
-    "doneNoDashboard": "Logged in. The dashboard address (VITE_DASHBOARD_URL) is not set.",
     "err": {
       "hospitalTaken": "This hospital has already joined. Contact its owner account.",
       "notRegistered": "Not a registered institution or not operating, so it cannot join.",
       "tooMany": "Too many attempts. Please try again later."
+    }
+  },
+  "residency": {
+    "title": "Your stay in Korea",
+    "country": "Country you live in",
+    "intro": "Check every item that applies to you. Leave them blank if none apply.",
+    "q": {
+      "alien_registration": "I have registered as a foreign resident in Korea (not short-term G-1)",
+      "domestic_residence": "I have reported domestic residence in Korea (overseas Korean)",
+      "health_insurance": "I am enrolled in (or a dependent under) Korea's National Health Insurance"
+    },
+    "residentNote": "You count as a foreign resident of Korea. You can still browse hospital information, but by law you cannot request consultations or bookings or get hospital suggestions.",
+    "bookingBlocked": "By law, foreign residents of Korea cannot request consultations or bookings (you can still browse hospital information). If your status has changed, answer again in My Page.",
+    "editLink": "Go to My Page",
+    "status": "Stay in Korea",
+    "statusValue": {
+      "shortTerm": "Short-term visit",
+      "resident": "Resident (browse only)",
+      "none": "Not answered yet"
+    },
+    "edit": "Answer again",
+    "save": "Save",
+    "err": {
+      "required": "Please answer the questions about your stay first.",
+      "notEligible": "Foreign residents of Korea cannot request consultations or bookings. If your status has changed, answer again in My Page."
     }
   }
 }

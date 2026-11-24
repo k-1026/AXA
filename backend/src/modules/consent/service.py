@@ -65,6 +65,15 @@ def require(
         raise AppError(422, "consent.required", "필수 동의가 없습니다", {"missing": missing})
 
 
+def given_for_request(db: Session, request_id: uuid.UUID, kind: str) -> bool:
+    """그 요청서에 묶인 철회하지 않은 동의가 있는지 (탈퇴해 patient_id가 비어도 요청서 동의는 그대로 봄)."""
+    return db.scalar(
+        select(Consent.id).where(
+            Consent.booking_request_id == request_id, Consent.kind == kind, Consent.withdrawn_at.is_(None)
+        ).limit(1)
+    ) is not None
+
+
 def detach_patient(db: Session, patient_id: uuid.UUID) -> None:
     """탈퇴할 때: 동의 기록은 증명용으로 남기고 누구 것인지(patient_id)만 비움. commit하지 않음."""
     db.execute(update(Consent).where(Consent.patient_id == patient_id).values(patient_id=None))

@@ -4,6 +4,9 @@ import { formatConverted } from '../../components/exchangeRates';
 import { useLocalized } from '../../lib/common';
 import type { Procedure, ProcedureCategory } from './procedures';
 
+// 좁은 카드에서 금액이 숫자 중간이 아니라 '~' 뒤에서 줄바꿈되도록 (폭 없는 공백)
+const BREAK = '​';
+
 interface Props {
   procedure: Procedure;
   category: ProcedureCategory;
@@ -20,13 +23,13 @@ export function ProcedureCard({ procedure: p, category, currency, rate }: Props)
 
   const krw = p.price && {
     min: p.price.min.toLocaleString('en-US'),
-    max: p.price.max.toLocaleString('en-US'),
+    max: BREAK + p.price.max.toLocaleString('en-US'),
   };
   const converted =
     p.price && currency !== 'KRW' && rate
       ? {
           min: formatConverted(p.price.min, currency, rate, i18n.language),
-          max: formatConverted(p.price.max, currency, rate, i18n.language),
+          max: BREAK + formatConverted(p.price.max, currency, rate, i18n.language),
         }
       : null;
 

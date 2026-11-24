@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 
 from core.errors import AppError
 from modules.patient.models import Patient
-from modules.patient.schemas import PatientUpdate
+from core.db import utcnow
+from modules.patient.schemas import PatientUpdate, ResidencyIn
 
 
 def normalize_email(email: str) -> str:
@@ -34,6 +35,7 @@ def create(
     timezone: str,
     age14_confirmed_at: datetime,
     display_name: str | None = None,
+    residency: ResidencyIn | None = None,
 ) -> Patient:
     """commit하지 않음 (동의 기록과 한 번에)."""
     patient = Patient(
@@ -44,6 +46,8 @@ def create(
         timezone=timezone,
         age14_confirmed_at=age14_confirmed_at,
     )
+    if residency is not None:
+        _apply_residency(patient, residency)
     db.add(patient)
     db.flush()
     return patient
@@ -58,4 +62,28 @@ def update(db: Session, patient_id: uuid.UUID, data: PatientUpdate) -> Patient:
     for field, value in changes.items():
         setattr(patient, field, value)
     db.commit()
+    return patient
+
+
+def _apply_residency(patient: Patient, data: ResidencyIn) -> None:
+    patient.residency = data.residency()
+    patient.residence_country = data.country
+    patient.residency_answered_at = utcnow()
+
+
+def set_residency(db: Session, patient_id: uuid.UUID, data: ResidencyIn) -> Patient:
+    """PUT /me/residency — 가입 때 답하지 않았거나 체류 상태가 바뀌었을 때."""
+    patient = get(db, patient_id)
+    _apply_residency(patient, data)
+    db.commit()
+    return patient
+
+
+def require_short_term(db: Session, patient_id: uuid.UUID) -> Patient:
+    """예약 요청 전 확인. 답이 없으면 422 `residency.required`, 국내 거주면 403 `residency.not_eligible`."""
+    patient = get(db, patient_id)
+    if patient.residency is None:
+        raise AppError(422, "residency.required", "체류 형태를 먼저 알려 주세요")
+    if patient.residency != "short_term":
+        raise AppError(403, "residency.not_eligible", "국내 거주 외국인은 상담·예약 요청을 할 수 없습니다")
     return patient

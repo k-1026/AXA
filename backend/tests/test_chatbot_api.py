@@ -14,6 +14,7 @@ from modules.chatbot import service as chat_service
 from modules.chatbot.models import ChatMessage, ChatSession
 from modules.chatbot.store import DbSessionStore
 
+from db_rows import demo_partner
 from test_auth_patient import auth, signup, withdraw
 from test_hospitals import files, hosp, load  # noqa: F401 — files는 fixture
 
@@ -124,6 +125,7 @@ def test_draft_saved_without_health_info_or_inquiry(client, llm, db_engine):
     token = signup(client)
     me = client.get("/api/v1/me", headers=auth(token)).json()
     with db(db_engine) as s:
+        demo_partner(s, 9002)  # 예약은 메디대구 입점 가상 병원만 (결정 31)
         sid = DbSessionStore(s).create(me["id"], "en", "t", {"residency": "short_term"}).id
         s.commit()  # create는 commit하지 않음 (첫 append와 한 번에)
     secret = "scars on both cheeks since 2024"

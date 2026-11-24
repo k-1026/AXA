@@ -22,6 +22,7 @@ SIGNUP = {
     "preferred_lang": "zh-TW",
     "timezone": "Asia/Taipei",
     "consents": [{"kind": "terms", "version": "2026-11-03"}, {"kind": "privacy", "version": "2026-11-03"}],
+    "residency": {"country": "TW", "alien_registration": False, "domestic_residence": False, "health_insurance": False},
 }
 
 
@@ -199,3 +200,13 @@ def test_취소_사유_코드(client, db):
     assert r.json()["status"] == "cancelled"
     # 취소했으니 같은 병원에 다시 요청 가능
     assert post(client, h, me).status_code == 201
+
+
+def test_거절되면_내_예약에_거절_사유_코드(client, db):
+    h, me = make_hospital(db), patient(client)
+    rid = post(client, h, me).json()["id"]
+    assert client.get(f"/api/v1/me/booking-requests/{rid}", headers=me).json()["reject_reason"] is None
+    r = client.post(f"/api/v1/tenant/booking-requests/{rid}/reject", json={"reason": "needs_consult"}, headers=staff(db, h))
+    assert r.status_code == 200, r.json()
+    mine = client.get("/api/v1/me/booking-requests", headers=me).json()[0]
+    assert (mine["status"], mine["reject_reason"]) == ("rejected", "needs_consult")

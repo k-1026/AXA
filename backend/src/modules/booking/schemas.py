@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class BookingOut(BaseModel):
@@ -32,3 +32,26 @@ class StaffAction(BaseModel):
 
     slot: datetime | None = None
     reason: str | None = None
+
+
+class ReplyIn(BaseModel):
+    """병원 직원 상담 답장 (한국어). 확인 창에서 보내기 = 승인 → 바로 발송"""
+
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class ReplyOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    text_ko: str
+    text_translated: str | None  # 번역 연결 전이면 비어 있음
+    sent_at: datetime
+
+
+class TenantBookingOut(BookingOut):
+    """병원용 응답: 요청서 + 보낸 답장 (대시보드 상담 채팅·안 읽음 표시용)"""
+
+    replies: list[ReplyOut] = []
+    # 방문 전 환자 질문 [{text_original, text_translated(한국어), created_at}] — A 추가 (결정 32, B 확인)
+    questions: list[dict] = []

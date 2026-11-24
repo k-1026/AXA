@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FilterGrid } from '../features/hospital/FilterGrid';
@@ -6,6 +6,7 @@ import { HospitalCard } from '../features/hospital/HospitalCard';
 import { DEPARTMENTS, DISTRICTS } from '../features/hospital/filters';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { DepartmentKey } from '../features/hospital/types';
+import { useLoadMore } from '../components/useLoadMore';
 
 const PAGE_SIZE = 24;
 
@@ -18,7 +19,6 @@ export function HospitalsPage() {
   const rawDept = params.get('dept');
   const dept = DEPARTMENTS.includes(rawDept as DepartmentKey) ? (rawDept as DepartmentKey) : null;
   const district = params.get('district');
-  const [shown, setShown] = useState(PAGE_SIZE);
 
   // 데이터가 이미 한국어 가나다순이라 언어와 상관없이 순서 그대로
   const visible = useMemo(() => {
@@ -27,13 +27,14 @@ export function HospitalsPage() {
       (h) => (!dept || h.depts.includes(dept)) && (!district || h.district === district),
     );
   }, [state, dept, district]);
+  // 더 보기 한 번 누르면 그다음부터 무한 스크롤
+  const { shown, showButton, more, sentinelRef, autoLoading } = useLoadMore(visible.length, PAGE_SIZE, `${dept}|${district}`);
 
   const setFilter = (key: 'dept' | 'district') => (v: string | null) => {
     const next = new URLSearchParams(params);
     if (v) next.set(key, v);
     else next.delete(key);
     setParams(next, { replace: true });
-    setShown(PAGE_SIZE);
   };
   const changeDept = setFilter('dept');
   const changeDistrict = setFilter('district');
@@ -71,11 +72,12 @@ export function HospitalsPage() {
               ))}
             </div>
           )}
-          {shown < visible.length && (
-            <button type="button" className="more-button" onClick={() => setShown(shown + PAGE_SIZE)}>
+          {showButton && (
+            <button type="button" className="more-button" onClick={more}>
               {t('hospital.more', { count: visible.length - shown })}
             </button>
           )}
+          {autoLoading && <div ref={sentinelRef} className="load-more-sentinel" aria-hidden="true" />}
         </>
       )}
     </div>

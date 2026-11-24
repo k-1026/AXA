@@ -6,7 +6,7 @@ export interface Localized {
   en: string;
 }
 
-type ScheduleKind = 'hospital' | 'experience' | 'tour';
+type ScheduleKind = 'hospital' | 'experience' | 'tour' | 'plan'; // plan: 내가 직접 넣은 일정 (tripSchedule.ts)
 
 export interface ScheduleItem {
   id: string;
@@ -25,13 +25,14 @@ export interface ChecklistItem {
 }
 
 // 저장한 병원. 진료과는 마이페이지 필터용
-export type SavedDept = 'dermatology' | 'plastic' | 'internal' | 'ophthalmology' | 'other';
+export type SavedDept = 'dermatology' | 'plastic' | 'internal' | 'ophthalmology' | 'korean_medicine' | 'other';
 
 export const SAVED_DEPTS: { key: SavedDept; label: Localized }[] = [
   { key: 'dermatology', label: { ko: '피부과', en: 'Dermatology' } },
   { key: 'plastic', label: { ko: '성형외과', en: 'Plastic Surgery' } },
   { key: 'internal', label: { ko: '내과', en: 'Internal Medicine' } },
   { key: 'ophthalmology', label: { ko: '안과', en: 'Ophthalmology' } },
+  { key: 'korean_medicine', label: { ko: '한방', en: 'Korean Medicine' } },
   { key: 'other', label: { ko: '기타', en: 'Other' } },
 ];
 

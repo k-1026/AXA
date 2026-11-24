@@ -26,6 +26,12 @@ const update = (id: string, input: VisitInput) =>
   store.set(store.get().map((r) => (r.id === id ? { ...r, hospitalId: undefined, ...input } : r)));
 const remove = (id: string) => store.set(store.get().filter((r) => r.id !== id));
 
+/** 지금 계정의 방문 기록이 비어 있을 때만 채움 (시연 계정 예시용, demoPatientSeed.ts) */
+export function seedVisitsIfEmpty(items: VisitInput[]) {
+  if (store.get().length) return;
+  store.set(items.map((input, i) => ({ ...input, id: uid(), createdAt: new Date(Date.now() - i * 1000).toISOString() })));
+}
+
 export function useVisitLog() {
   const visits = useSyncExternalStore(store.subscribe, store.get);
   return { visits, add, update, remove };

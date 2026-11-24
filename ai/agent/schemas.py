@@ -119,10 +119,22 @@ class BookingListData(_Model):
 
 class AftercareThreadData(_Model):
     status: Literal["opened"]
-    thread_id: str
+    thread_id: str  # 아직 대화가 없으면 "" (첫 메시지를 사후관리 화면에서 보내면 생김)
+    booking_id: str | None = None  # 사후관리 화면에서 이 예약을 열기 위한 id
     hospital_id: int
     topic: str
     first_message: str
+    notice: str
+
+
+class HospitalQuestionData(_Model):
+    """방문 전 병원에 보낼 질문 초안 (결정 32). 환자가 카드에서 고치고 [보내기]를 눌러야 보냄."""
+
+    status: Literal["draft"]
+    booking_id: str
+    hospital_id: int
+    hospital_name_en: str | None = None
+    draft: str
     notice: str
 
 
@@ -172,10 +184,15 @@ class AftercareThreadCard(_Model):
     data: AftercareThreadData
 
 
+class HospitalQuestionCard(_Model):
+    type: Literal["hospital_question"]
+    data: HospitalQuestionData
+
+
 Card = Annotated[
     Union[
         HospitalListCard, HospitalSuggestionsCard, HospitalDetailCard, PriceListCard, SourcesCard,
-        TimeSlotsCard, BookingDraftCard, BookingListCard, AftercareThreadCard,
+        TimeSlotsCard, BookingDraftCard, BookingListCard, AftercareThreadCard, HospitalQuestionCard,
     ],
     Field(discriminator="type"),
 ]

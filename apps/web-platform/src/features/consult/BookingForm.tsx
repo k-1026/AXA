@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../../i18n';
 import { todayKst } from '../../lib/common';
 import type { BookingExtra } from './bookingApi';
-import { BookingConsentFields, consentReady, emptyConsent, toExtra } from './BookingConsentFields';
+import { useAuth } from '../../components/auth';
+import { BookingConsentFields, consentReady, emptyConsent, toExtra, useResidencyCheck } from './BookingConsentFields';
 import { bookingErrorKey } from './bookingErrors';
 import { nowKstTime } from './format';
 import type { BookingRequest } from './types';
@@ -30,6 +31,8 @@ export function BookingForm({ initial, member = false, onSubmit, onCancel }: Pro
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const hasNote = !!note.trim();
+  const residency = useAuth().user?.residency;
+  const checkResidency = useResidencyCheck();
 
   // 오늘(한국 시간)을 고르면 이미 지난 시간은 고를 수 없다
   const timesFor = (d: string) => (d === todayKst() ? TIMES.filter((x) => x > nowKstTime()) : TIMES);
@@ -46,10 +49,12 @@ export function BookingForm({ initial, member = false, onSubmit, onCancel }: Pro
     e.preventDefault();
     if (!date || date < todayKst()) return setError(t('consult.form.errDate'));
     if (!timesFor(date).includes(time)) return setError(t('consult.form.errTime'));
-    if (member && !consentReady(consent, hasNote)) return setError(t('booking.err.consentNeeded'));
+    if (member && residency === 'resident') return setError(t('residency.err.notEligible'));
+    if (member && !consentReady(consent, hasNote, residency)) return setError(t('booking.err.consentNeeded'));
     setError('');
     setBusy(true);
     try {
+      if (member) await checkResidency(consent);
       await onSubmit({ date, time, language, note: note.trim() || undefined }, member ? toExtra(consent, hasNote) : undefined);
     } catch (err) {
       setError(t(bookingErrorKey(err)));

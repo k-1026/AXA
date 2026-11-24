@@ -8,7 +8,7 @@ import type { AftercareMessage, Attachment } from './types';
 function AttachmentView({ a }: { a: Attachment }) {
   return a.kind === 'image' ? (
     <a href={a.url} target="_blank" rel="noopener noreferrer" className="aftercare-media">
-      <img src={a.url} alt={a.name} />
+      <img src={a.thumbUrl ?? a.url} alt={a.name} loading="lazy" />
     </a>
   ) : (
     <video className="aftercare-media" src={a.url} controls preload="metadata" aria-label={a.name} />

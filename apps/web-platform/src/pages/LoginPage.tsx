@@ -6,6 +6,7 @@ import { ApiError } from '../components/api';
 import { LANGUAGES } from '../i18n';
 import { TERMS } from '../features/legal/terms';
 import { PRIVACY } from '../features/legal/privacy';
+import { emptyResidency, ResidencyQuestions } from '../features/residency/ResidencyQuestions';
 import { StaffLoginForm, StaffSignupForm } from '../features/staff/StaffAuth';
 
 // 로그인·회원가입. 실제 계정은 백엔드에, 데모 계정은 발표·화면 확인용으로 아래에 남겨 둠
@@ -45,9 +46,11 @@ export function LoginPage() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [mode, setMode] = useState<Mode>('login');
-  const [who, setWho] = useState<'patient' | 'staff'>('patient');
+  // /dashboard에서 직원 토큰 없이 넘어오면 병원 관계자 쪽을 먼저 보여 줌 (RequireStaff)
+  const initialWho = (useLocation().state as { who?: string } | null)?.who === 'staff' ? 'staff' : 'patient';
+  const [who, setWho] = useState<'patient' | 'staff'>(initialWho);
 
-  if (user) {
+  if (user && who === 'patient') {
     return (
       <section className="mp-card mp-login-required">
         <h1>{t('header.login')}</h1>
@@ -100,10 +103,12 @@ export function LoginPage() {
   );
 }
 
+// 환자 로그인·가입 뒤: 로그인 버튼을 누른 페이지로 돌아감 (주소로 바로 들어왔으면 메인). 병원 관계자는 대시보드로 (StaffAuth)
 function useAfterLogin() {
   const navigate = useNavigate();
-  const from = (useLocation().state as { from?: string } | null)?.from ?? '/mypage';
-  return () => navigate(from, { replace: true });
+  const from = (useLocation().state as { from?: string } | null)?.from;
+  const to = from && from.startsWith('/') && !from.startsWith('/login') ? from : '/';
+  return () => navigate(to, { replace: true });
 }
 
 function errorKey(e: unknown): string {
@@ -187,6 +192,7 @@ function SignupForm() {
     privacy: false,
   });
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
+  const [residency, setResidency] = useState(emptyResidency);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -214,6 +220,7 @@ function SignupForm() {
           { kind: 'terms', version: TERMS.updated },
           { kind: 'privacy', version: PRIVACY.updated },
         ],
+        residency, // 체류 형태 3문항 (결정 28). 국내 거주여도 가입은 되고 정보 열람만
       });
       done();
     } catch (err) {
@@ -290,6 +297,8 @@ function SignupForm() {
           </select>
         </label>
       </div>
+
+      <ResidencyQuestions value={residency} onChange={setResidency} />
 
       <fieldset className="auth-consents">
         <legend>{t('auth.consentsTitle')}</legend>

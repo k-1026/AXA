@@ -5,7 +5,10 @@ import { DEPARTMENTS } from '../features/hospital/filters';
 import { ProcedureCard } from '../features/price-info/ProcedureCard';
 import { PROCEDURE_CATEGORIES } from '../features/price-info/procedures';
 import { useCurrency } from '../components/currency';
-import { useExchangeRates } from '../components/exchangeRates';
+import { useExchangeRates, useFallbackRate } from '../components/exchangeRates';
+import { useLoadMore } from '../components/useLoadMore';
+
+const PAGE_SIZE = 12;
 
 export function PriceGuidePage() {
   const { t, i18n } = useTranslation();
@@ -14,7 +17,12 @@ export function PriceGuidePage() {
   const { currency } = useCurrency();
   // 원화가 아닌 통화를 골랐을 때만 환율을 받는다
   const fx = useExchangeRates(currency !== 'KRW');
-  const rate = currency !== 'KRW' && fx.status === 'ready' ? fx.data.rates[currency] : undefined;
+  const backendRate = currency !== 'KRW' && fx.status === 'ready' ? fx.data.rates[currency] : undefined;
+  // 백엔드에 그 통화가 없으면(지금은 JPY) ECB 참고 환율로 임시 환산
+  const needFallback = currency !== 'KRW' && (fx.status === 'error' || (fx.status === 'ready' && !backendRate));
+  const fb = useFallbackRate(currency, needFallback);
+  const fallbackRate = needFallback && fb.status === 'ready' ? fb.data.rate : undefined;
+  const rate = backendRate ?? fallbackRate;
 
   // 'YYYY-MM-DD' → 화면 언어 날짜 (시간대 영향 없게 UTC 정오로). 형식이 다르면(예전 응답 캐시 등) 빈 값
   const day = (d: string | undefined) => {
@@ -24,6 +32,15 @@ export function PriceGuidePage() {
   const fxDate = fx.status === 'ready' ? day(fx.data.applied_on) : '';
 
   const selectDept = (v: string | null) => setParams(v ? { dept: v } : {}, { replace: true });
+
+  // 진료과 순서대로 카드를 한 줄로 세운 뒤 보여 줄 개수만큼 자르고, 다시 진료과별로 묶음
+  const sections = DEPARTMENTS.filter((d) => !dept || d === dept);
+  const cards = sections.flatMap((d) =>
+    PROCEDURE_CATEGORIES.filter((c) => c.dept === d).flatMap((c) => c.items.map((p) => ({ d, c, p }))),
+  );
+  // 더 보기 한 번 누르면 그다음부터 무한 스크롤
+  const { shown, showButton, more, sentinelRef, autoLoading } = useLoadMore(cards.length, PAGE_SIZE, dept ?? '');
+  const visibleCards = cards.slice(0, shown);
 
   return (
     <div className="hospitals-page">
@@ -36,21 +53,29 @@ export function PriceGuidePage() {
         onSelect={selectDept}
       />
 
-      {DEPARTMENTS.filter((d) => !dept || d === dept).map((d) => (
-        <section key={d} className="procedure-section">
-          <h2 className="procedure-dept">{t(`dept.${d}`)}</h2>
-          <div className="procedure-grid">
-            {PROCEDURE_CATEGORIES.filter((c) => c.dept === d).flatMap((c) =>
-              c.items.map((p) => (
-                <ProcedureCard key={p.ko} procedure={p} category={c} currency={currency} rate={rate} />
-              )),
-            )}
-          </div>
-        </section>
-      ))}
+      {sections
+        .filter((d) => visibleCards.some((v) => v.d === d))
+        .map((d) => (
+          <section key={d} className="procedure-section">
+            <h2 className="procedure-dept">{t(`dept.${d}`)}</h2>
+            <div className="procedure-grid">
+              {visibleCards
+                .filter((v) => v.d === d)
+                .map(({ c, p }) => (
+                  <ProcedureCard key={p.ko} procedure={p} category={c} currency={currency} rate={rate} />
+                ))}
+            </div>
+          </section>
+        ))}
+      {showButton && (
+        <button type="button" className="more-button" onClick={more}>
+          {t('prices.more', { count: cards.length - shown })}
+        </button>
+      )}
+      {autoLoading && <div ref={sentinelRef} className="load-more-sentinel" aria-hidden="true" />}
 
       <p className="detail-source">{t('prices.notice')}</p>
-      {currency !== 'KRW' && fx.status === 'ready' && rate && fxDate && (
+      {currency !== 'KRW' && fx.status === 'ready' && backendRate && fxDate && (
         <p className="detail-source">
           {t('prices.fxNotice', {
             applied: fxDate,
@@ -62,9 +87,15 @@ export function PriceGuidePage() {
           </a>
         </p>
       )}
-      {currency !== 'KRW' && (fx.status === 'error' || (fx.status === 'ready' && !rate)) && (
-        <p className="detail-source">{t('prices.fxFallback')}</p>
+      {fallbackRate && fb.status === 'ready' && (
+        <p className="detail-source">
+          {t('prices.fxReference', { date: day(fb.data.date) })}{' '}
+          <a href={fb.data.provider.url} target="_blank" rel="noopener noreferrer">
+            {fb.data.provider.name}
+          </a>
+        </p>
       )}
+      {needFallback && fb.status === 'error' && <p className="detail-source">{t('prices.fxFallback')}</p>}
     </div>
   );
 }
