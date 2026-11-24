@@ -119,9 +119,12 @@ export function startDashboard(host, { onLeave }) {
         ] },
     ],
   };
+  // 환자 글 번역 표시: 서버는 원문이 이미 한국어면 번역하지 않음(modules/agent/translate.py) → "(번역 전)" 대신 번역 줄을 숨김 (null)
+  const isKo = (t) => { const l = [...String(t || '')].filter((c) => /\p{L}/u.test(c)); return l.length > 0 && l.filter((c) => c >= '가' && c <= '힣').length / l.length > 0.5; };
+  const patientTr = (tr, orig, missing = '(번역 전)') => tr || (isKo(orig) ? null : missing);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function msgHtml(m) {
-    const main = m.f === 'p' ? m.o : m.k, tr = m.f === 'p' ? '번역: ' + m.k : '환자에게 보이는 글: ' + m.o;
+    const main = m.f === 'p' ? m.o : m.k, tr = m.f === 'p' ? (m.k == null ? '' : '번역: ' + m.k) : '환자에게 보이는 글: ' + m.o;
     // 사진·영상: 서버가 준 1시간짜리 서명된 주소 (Supabase Storage 비공개 버킷). 주소가 없으면 "사진 있음"만
     const files = (m.files || []).filter((a) => /^https:\/\//.test(a.url || ''));
     const media = files.length
@@ -130,7 +133,7 @@ export function startDashboard(host, { onLeave }) {
         // 목록에는 썸네일(결정 29), 누르면 원본. 썸네일이 없으면(예전 사진) 원본
         : `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(/^https:\/\//.test(a.thumb_url || '') ? a.thumb_url : a.url)}" alt="${esc(a.name || '사진')}" loading="lazy"></a>`).join('')}</span>`
       : m.img ? '<span class="img">📷 사진 있음 (직원만 열람)</span>' : '';
-    return `<div class="msg ${m.f}">${m.o === '📷' && files.length ? '' : esc(main)}${media}<span class="tr">${esc(tr)}</span><span class="t">${esc(m.t)}</span></div>`;
+    return `<div class="msg ${m.f}">${m.o === '📷' && files.length ? '' : esc(main)}${media}${tr ? `<span class="tr">${esc(tr)}</span>` : ''}<span class="t">${esc(m.t)}</span></div>`;
   }
   // HOOKS[key]가 있으면(백엔드 연결) 버튼·전송·대화 선택을 API로 처리, 없으면 예시 데이터로 화면만 바뀜
   const HOOKS = {};
@@ -280,11 +283,14 @@ export function startDashboard(host, { onLeave }) {
       if (!API.ready) { API.base = api; API.token = token; API.ready = true; await setupApi(); }
     } catch (e) {
       src.textContent = 'DB 연결 실패 (' + e.message + ') · 예시 데이터'; src.className = 'badge bad';
+      API.loaded = true; updateNav(); // 실패하면 예시 숫자라도 보이게
     }
   }
 
   // ---------- 상담 확정·사후관리를 백엔드에 연결 ----------
-  const API = { base: '', token: '', ready: false };
+  // loaded: 서버 목록(상담·사후관리·요청)을 다 불러왔는지. 로그인 상태에서 그 전에는 예시 숫자를 보이지 않음 (예시 2·1·5가 보였다가 0으로 바뀌던 것)
+  const API = { base: '', token: '', ready: false, loaded: false };
+  const HOSP = { hours: null, lunch: null }; // 로그인한 병원의 진료시간 (/data/hospitals.json, showDistrict가 채움)
   async function call(path, opts = {}) {
     const res = await fetch(API.base + path, {
       ...opts,
@@ -314,14 +320,14 @@ export function startDashboard(host, { onLeave }) {
       // 빨간 숫자: 대기 중인데 병원 답장이 아직 없으면 1 (답장은 서버에 저장 → 새로고침해도 유지)
       unread: (r.status === 'pending' && !(r.replies || []).length) || lastAsk(r) > lastReply(r) ? 1 : 0, title: TRT[r.treatment] || r.treatment || '상담',
       sub: (r.status === 'proposed' ? '시간 제안함 ' + kdate(r.confirmed_slot) : r.status === 'confirmed' ? '확정 ' + kdate(r.confirmed_slot) : '희망 ' + kdate(r.preferred_slots[0])) + (r.visa_needed ? ' · 예약확인서 필요' : ''),
-      slots: r.preferred_slots, sum: r.message_translated || '(번역 전)',
+      slots: r.preferred_slots, sum: patientTr(r.message_translated, r.message_original) ?? r.message_original,
       tags: [TRT[r.treatment] || r.treatment, '희망일 ' + r.preferred_slots.length + '개', r.visa_needed ? '비자 서류' : '비자 불필요'].filter(Boolean),
       msgs: [
-        ...(r.message_original ? [{ f: 'p', o: r.message_original, k: r.message_translated || '(번역 전)', t: kdate(r.created_at) }] : []),
+        ...(r.message_original ? [{ f: 'p', o: r.message_original, k: patientTr(r.message_translated, r.message_original), t: kdate(r.created_at) }] : []),
         // 답장과 방문 전 환자 질문(결정 32)을 시간 순으로
         ...[
           ...(r.replies || []).map((x) => ({ at: x.sent_at, m: { f: 's', k: x.text_ko, o: x.text_translated || '(번역 연결 전 — 환자에게 한국어 원문)', t: kdate(x.sent_at) } })),
-          ...(r.questions || []).map((x) => ({ at: x.created_at, m: { f: 'p', o: x.text_original, k: x.text_translated || '(번역 전 — 번역 동의 없음)', t: kdate(x.created_at) } })),
+          ...(r.questions || []).map((x) => ({ at: x.created_at, m: { f: 'p', o: x.text_original, k: patientTr(x.text_translated, x.text_original, '(번역 전 — 번역 동의 없음)'), t: kdate(x.created_at) } })),
         ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at)).map((x) => x.m),
       ],
     }));
@@ -332,7 +338,7 @@ export function startDashboard(host, { onLeave }) {
   async function openThread(c) {
     const th = await call('/tenant/aftercare/' + c.tid);
     c.msgs = th.messages.map((m) => m.sender === 'patient'
-      ? { f: 'p', o: m.text_original, k: m.text_translated || '(번역 전)', t: kdate(m.created_at), img: m.has_photo, files: m.attachments || [] }
+      ? { f: 'p', o: m.text_original, k: patientTr(m.text_translated, m.text_original), t: kdate(m.created_at), img: m.has_photo, files: m.attachments || [] }
       : { f: 's', k: m.text_original, o: m.text_translated || '(번역 연결 전)', t: kdate(m.created_at) });
     c.sub = AC_STATUS[th.status] + ' · 방문 ' + kdate(th.visited_slot);
     c.loaded = true;
@@ -368,11 +374,27 @@ export function startDashboard(host, { onLeave }) {
     try { await loadAudit(); toast('열람 기록을 새로 불러왔어요'); } catch (e) { toast(why(e), true); }
   };
 
+  // 머리말 지역: 환자 웹과 같은 병원 목록(/data/hospitals.json)에서 읽는다 — 고정 글자였을 때 9001이 "수성구"로 틀리게 보였음.
+  // 시연 가상 병원은 목록 id가 "DEMO-9001" 형식. 못 찾으면 "대구"만
+  function showDistrict(hospitalId) {
+    const sub = document.querySelector('.hosp small');
+    fetch('/data/hospitals.json').then((r) => r.json()).then((d) => {
+      const h = (d.items || []).find((x) => x.id === `DEMO-${hospitalId}` || String(x.id) === String(hospitalId));
+      if (h && sub) sub.textContent = `대구 ${h.district} · 가상 병원 · 직원: 국제 코디네이터`;
+      if (h && Array.isArray(h.hours)) { // 시간 제안 창에서 휴진일·진료시간 밖을 못 고르게 (결정 33). 서버도 같은 기준으로 422
+        HOSP.hours = h.hours;
+        const m = /(\d{2}:\d{2})~(\d{2}:\d{2})/.exec(h.lunchWeek || '');
+        HOSP.lunch = m ? [m[1], m[2]] : null;
+      }
+    }).catch(() => {});
+  }
+
   async function setupApi() {
     try {
       loadAudit().catch(() => {});
       const me = await call('/tenant/me');
       document.querySelector('.hosp b').textContent = me.display_name;
+      showDistrict(me.hospital_id);
       state.ac = me.aftercare_enabled;
       document.querySelectorAll('#acSwitch button').forEach((b) => b.classList.toggle('on', (b.dataset.v === 'on') === state.ac));
       render();
@@ -392,8 +414,10 @@ export function startDashboard(host, { onLeave }) {
         },
       };
       await Promise.all([loadBooking(), loadAftercare(), loadRequests()]);
+      API.loaded = true; updateNav();
     } catch (e) {
       toast('API 연결 실패: ' + e.message, true);
+      API.loaded = true; updateNav();
     }
   }
 
@@ -478,17 +502,47 @@ export function startDashboard(host, { onLeave }) {
   function reqSummary(r) {
     return `<div class="dlg-sum"><b>${esc(r.id)} · ${esc(r.title)}</b><small>${esc(r.who)}${r.visa ? ' · 예약확인서 필요' : ''}</small>${r.msg_k ? `<p>“${esc(r.msg_k)}”</p>` : ''}</div>`;
   }
-  function slotOptions(opts, custom) {
-    const times = [];
-    for (let h = 9; h < 19; h++) for (const m of ['00', '30']) times.push(`${String(h).padStart(2, '0')}:${m}`);
-    return `<div class="opts">${opts.map((o, i) => `<label class="opt"><input type="radio" name="slot" value="${esc(o.iso)}"${i === 0 ? ' checked' : ''}><span><b>${esc(kdate(o.iso))}</b> <small>${esc(o.label)}</small></span></label>`).join('')}
-      ${custom ? `<label class="opt"><input type="radio" name="slot" value="custom"${opts.length ? '' : ' checked'}><span><b>다른 시간 직접 입력</b></span></label>
-      <div class="pick"><input type="date" name="d" min="${todayKst()}" value="${plusDays(1)}" aria-label="날짜"><select name="t" aria-label="시간">${times.map((t) => `<option${t === '10:00' ? ' selected' : ''}>${t}</option>`).join('')}</select><small>한국 시간 · 30분 단위</small></div>` : ''}</div>`;
+  // 그 날짜(한국)의 진료 가능 시각 30분 단위 (점심 제외). 진료시간 데이터가 없으면 09:00~18:30 전부
+  function openTimes(dateStr) {
+    const all = [];
+    for (let h = 9; h < 21; h++) for (const m of ['00', '30']) all.push(`${String(h).padStart(2, '0')}:${m}`);
+    if (!HOSP.hours) return all.filter((t) => t < '19:00');
+    const day = (new Date(`${dateStr}T12:00:00+09:00`).getUTCDay() + 6) % 7; // 월=0 … 일=6
+    const open = HOSP.hours[day];
+    if (!open) return []; // 휴진일
+    return all.filter((t) => t >= open[0] && t < open[1] && !(HOSP.lunch && t >= HOSP.lunch[0] && t < HOSP.lunch[1]));
   }
-  function pickedSlot(f) {
+  const kstParts = (iso) => { const d = new Date(Date.parse(iso) + 9 * 3600e3).toISOString(); return [d.slice(0, 10), d.slice(11, 16)]; };
+  const isOpenSlot = (iso) => { const [d, t] = kstParts(iso); return openTimes(d).includes(t); };
+  const nextOpenDay = (from) => { for (let i = from; i < from + 14; i++) if (openTimes(plusDays(i)).length) return plusDays(i); return plusDays(from); };
+  const timeOptions = (dateStr) => {
+    const ts = openTimes(dateStr);
+    return ts.length ? ts.map((t, i) => `<option${i === 0 ? ' selected' : ''}>${t}</option>`).join('') : '<option value="" selected disabled>휴진일</option>';
+  };
+  function slotOptions(opts, custom) {
+    // 환자 희망 시간 중 진료시간이 아닌 것은 고를 수 없게 (시간 제안 창, 결정 33)
+    const ok = (o) => !custom || isOpenSlot(o.iso);
+    const first = opts.findIndex(ok);
+    const day0 = nextOpenDay(1);
+    return `<div class="opts">${opts.map((o, i) => `<label class="opt"><input type="radio" name="slot" value="${esc(o.iso)}"${i === first ? ' checked' : ''}${ok(o) ? '' : ' disabled'}><span><b>${esc(kdate(o.iso))}</b> <small>${esc(o.label)}${ok(o) ? '' : ' · 진료시간 아님'}</small></span></label>`).join('')}
+      ${custom ? `<label class="opt"><input type="radio" name="slot" value="custom"${first >= 0 ? '' : ' checked'}><span><b>다른 시간 직접 입력</b></span></label>
+      <div class="pick"><input type="date" name="d" min="${todayKst()}" value="${day0}" aria-label="날짜"><select name="t" aria-label="시간">${timeOptions(day0)}</select><small data-hours-note>한국 시간 · 30분 단위${HOSP.hours ? ' · 이 병원 진료시간만' : ''}</small></div>` : ''}</div>`;
+  }
+  // 날짜를 바꾸면 그날 진료시간으로 시간 목록을 다시 (휴진일이면 "휴진일"만, 고를 수 없음)
+  const onDateChange = (e) => {
+    if (!(e.target instanceof HTMLInputElement) || e.target.name !== 'd' || !e.target.closest('.dlg')) return;
+    const sel = e.target.closest('.pick')?.querySelector('select[name=t]');
+    if (sel) sel.innerHTML = timeOptions(e.target.value);
+    const custom = e.target.closest('.dlg').querySelector('input[name=slot][value=custom]');
+    if (custom) custom.checked = true;
+  };
+  document.addEventListener('change', onDateChange);
+  cleanups.push(() => document.removeEventListener('change', onDateChange));
+  function pickedSlot(f, needOpen = false) {
     const v = f.querySelector('input[name=slot]:checked')?.value || fail('시간을 골라 주세요');
-    const iso = v === 'custom' ? kst(f.d.value || fail('날짜를 골라 주세요'), f.t.value) : v;
+    const iso = v === 'custom' ? kst(f.d.value || fail('날짜를 골라 주세요'), f.t.value || fail('휴진일이에요. 다른 날짜를 골라 주세요')) : v;
     if (new Date(iso) <= new Date()) fail('지난 시간은 고를 수 없어요');
+    if (needOpen && HOSP.hours && !isOpenSlot(iso)) fail('병원 진료시간이 아니에요 (휴진일·점심·진료 전후)');
     return iso;
   }
   async function bookingAct(r, act) {
@@ -513,7 +567,7 @@ export function startDashboard(host, { onLeave }) {
     }[act]();
     const out = await dialog({ ...cfg, onOk: async (f) => {
       const body = {};
-      if (cfg.slot) body.slot = pickedSlot(f);
+      if (cfg.slot) body.slot = pickedSlot(f, act === 'propose');
       if (cfg.reason) body.reason = f.reason.value || fail('거절 사유를 골라 주세요');
       if (!API.ready) return { demo: true, slot: body.slot };
       try { return await call(`/tenant/booking-requests/${r.rid}/${act === 'no_show' ? 'no-show' : act}`, { method: 'POST', body: JSON.stringify(body) }); }
@@ -532,11 +586,15 @@ export function startDashboard(host, { onLeave }) {
     return true;
   }
   function viewProposal(r) {
-    return dialog({ title: '제안한 시간', ok: '닫기', cancel: '', extra: { label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') },
+    // 창 안에서 바로 다시 제안·거절 (닫고 목록에서 다시 누르지 않게). 병원이 제안한 시간은 환자가 수락해야 확정 — 병원 확정 X (결정 33)
+    return dialog({ title: '제안한 시간', ok: '닫기', cancel: '', extras: [
+      { label: '다른 시간 다시 제안', onClick: () => bookingAct(r, 'propose') },
+      { label: '거절', danger: true, onClick: () => bookingAct(r, 'reject') },
+    ],
       body: reqSummary(r) + `<div class="row"><span>제안한 시간</span><b>${esc(kdate(r.confirmed_slot))}</b></div>
         <div class="row"><span>환자 희망</span><span>${r.slots.map((s) => esc(kdate(s))).join('<br>')}</span></div>
         <div class="row"><span>환자 응답</span><span class="badge warn">수락 대기 중</span></div>
-        <p class="note">환자가 수락하면 자동으로 확정돼요. 상담 답장 기록은 답장 API가 생기면 여기에 함께 보여요.</p>` });
+        <p class="note">환자가 수락하면 자동으로 확정돼요. 이 시간이 어려워졌다면 다른 시간을 다시 제안하거나 거절해 주세요.</p>` });
   }
   function rowActs(r) {
     return r.status === 'pending' ? '<button class="btn primary" data-a="confirm">확정</button> <button class="btn" data-a="propose">시간 제안</button> <button class="btn" data-a="reject">거절</button>'
@@ -751,12 +809,21 @@ export function startDashboard(host, { onLeave }) {
   };
   function updateNav() {
     const set = (t, n, show = true) => { const el = document.querySelector(`#tabs button[data-t=${t}] .cnt`); if (el) { el.textContent = n; el.hidden = !show || !n; } };
+    if (readStaffToken() && !API.loaded) { // 로그인했지만 서버 데이터 전 → 숫자 숨기고 홈 타일은 "…"
+      for (const t of ['booking', 'aftercare', 'receipt']) set(t, 0, false);
+      // tNew는 요약 API(connectApi)가 먼저 채우므로 그 뒤에는 덮지 않음
+      for (const id of [...(API.ready ? [] : ['tNew']), 'tAc', 'kAcUn']) { const e = document.getElementById(id); if (e) e.textContent = '…'; }
+      const hint = document.getElementById('tAc')?.nextElementSibling; if (hint) hint.textContent = '불러오는 중…';
+      return;
+    }
     const ac = CHATS.aftercare.filter((c) => c.unread).length;
     const unseen = (t) => NAV_ITEMS[t]().filter((k) => !(SEEN[t] || []).includes(k)).length;
     set('booking', unseen('booking'));
     set('aftercare', unseen('aftercare'));
     set('receipt', document.querySelectorAll('#receipt .badge.bad').length, !API.ready);
     for (const id of ['tAc', 'kAcUn']) { const e = document.getElementById(id); if (e) e.textContent = ac; }
+    const acHint = document.getElementById('tAc')?.nextElementSibling; // 예시 화면의 고정 문구 "7시간 지난 문의 있음" 대신 실제 수
+    if (acHint && API.loaded) acHint.textContent = ac ? `답하지 않은 대화 ${ac}개 →` : '미답변 없음 →';
   }
   function bindDlg() { document.querySelectorAll('[data-dlg]').forEach((b) => b.onclick = () => DLG[b.dataset.dlg](b)); }
   bindDlg();
