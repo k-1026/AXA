@@ -37,6 +37,13 @@ export function startDashboard(host, { onLeave }) {
     if (!readStaffToken()) { document.getElementById('perfRange').textContent = md(p.from) + '~' + md(p.to) + ' · 예시 (로그인하면 DB 값)'; return; }
     connectApi();
   };
+  // 아직 서버에 안 붙은 탭: 로그인 뒤 탭 위에 "아직 예시" 안내 (demo.css section[data-sample-tab]::before)
+  const SAMPLE_TABS = {
+    stats: '이 탭의 병원 숫자는 아직 예시예요 (공공 표시 카드만 실제 통계)',
+    receipt: '이 탭의 숫자는 아직 예시예요 (DB 연결 전)',
+    billing: '이 탭의 숫자는 아직 예시예요 (DB 연결 전)',
+  };
+  for (const [id, text] of Object.entries(SAMPLE_TABS)) document.getElementById(id)?.setAttribute('data-sample-tab', text);
   function setLive(on) {
     host.classList.toggle('is-live', on);
     document.getElementById('dataBanner').innerHTML = on
