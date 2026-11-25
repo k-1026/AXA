@@ -5072,6 +5072,22 @@ body.chat-open {
   color: #ffffff;
 }
 
+.card-action-note,
+.detail-consult-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.card-action-note {
+  margin-top: 8px;
+}
+
+.detail-consult-note {
+  margin: 4px 0 12px;
+}
+
 /* 예약하기 페이지: 달력 → 시간 → 신청 */
 .reserve-page {
   max-width: 960px;

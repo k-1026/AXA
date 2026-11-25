@@ -150,7 +150,9 @@
     "rcvSat": "Reception (Sat)",
     "noPhoto": "No photo available",
     "consultBtn": "Consult",
-    "reserveBtn": "Book"
+    "reserveBtn": "Book",
+    "notJoined": "This hospital has not joined MediDaegu yet. Please contact the hospital directly.",
+    "callBtn": "Call"
   },
   "prices": {
     "more": "Show more ({{count}} left)",

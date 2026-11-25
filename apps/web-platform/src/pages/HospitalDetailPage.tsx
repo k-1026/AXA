@@ -58,9 +58,13 @@ export function HospitalDetailPage() {
               <li key={d}>{t(`dept.${d}`)}</li>
             ))}
           </ul>
-          <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult">
-            {t('consult.startWith')}
-          </Link>
+          {h.demo ? (
+            <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult">
+              {t('consult.startWith')}
+            </Link>
+          ) : (
+            <p className="detail-consult-note">{t('hospital.notJoined')}</p>
+          )}
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
             <dd><HospitalAddress addr={h.addr} /></dd>

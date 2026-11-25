@@ -47,7 +47,7 @@ export function ConsultPage() {
     }
     if (hospitals.status !== 'ready') return;
     const h = hospitals.data.items.find((x) => x.id === wanted);
-    if (h) {
+    if (h?.demo) { // 입점 안 한 실제 병원은 상담을 열지 않음 (요청을 보내도 not_joined 오류)
       consult.open({ hospitalId: h.id, name: hospitalNames(h), dept: h.depts[0], district: h.district, photo: h.photo });
     }
     setParams({}, { replace: true });
