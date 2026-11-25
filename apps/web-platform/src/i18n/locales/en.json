@@ -620,6 +620,7 @@
     "regNoHint": "Format: M-2009-03-01-0013",
     "err": {
       "hospitalTaken": "This hospital has already joined. Contact its owner account.",
+      "signupClosed": "We are not accepting sign-ups for real hospitals during the demo period. Please contact the operator to join.",
       "notRegistered": "Not a registered institution or not operating, so it cannot join.",
       "tooMany": "Too many attempts. Please try again later."
     }
