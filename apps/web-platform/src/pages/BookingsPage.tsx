@@ -8,6 +8,7 @@ import { BookingForm } from '../features/consult/BookingForm';
 import { HospitalThumb } from '../features/consult/HospitalThumb';
 import { bookingDateFull } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
+import { useHospitals } from '../features/hospital/useHospitals';
 import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { displayStatus, type BookingRequest, type DisplayStatus } from '../features/consult/types';
 import { LegalLinks } from '../features/legal/LegalLinks';
@@ -37,6 +38,7 @@ export function BookingsPage() {
   const text = useLocalized();
   const navigate = useNavigate();
   const consult = useConsultThreads();
+  const hospitals = useHospitals(); // 예약 변경 폼의 진료시간
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('visit');
   const [editing, setEditing] = useState<string | null>(null);
@@ -156,6 +158,7 @@ export function BookingsPage() {
                 {editing === key ? (
                   <BookingForm
                     initial={booking}
+                    hospital={hospitals.status === 'ready' ? hospitals.data.items.find((x) => x.id === thread.hospitalId) : undefined}
                     member={consult.mode === 'member'}
                     onSubmit={async (b, extra) => {
                       await consult.changeBooking(thread.hospitalId, message.id, b, t('bookings.changeMsg', { when: bookingDateFull(b.date, b.time, i18n.language) }), extra);

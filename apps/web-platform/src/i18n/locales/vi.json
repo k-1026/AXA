@@ -497,7 +497,9 @@
       "changeTitle": "Đổi lịch",
       "changeSubmit": "Gửi yêu cầu đổi",
       "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\".",
-      "errTime": "Vui lòng chọn thời gian sau hiện tại."
+      "errTime": "Vui lòng chọn thời gian sau hiện tại.",
+      "errClosed": "Bệnh viện không làm việc vào ngày hoặc giờ đó. Vui lòng chọn ngày và giờ trong giờ làm việc.",
+      "closedOption": "Nghỉ"
     },
     "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
   },

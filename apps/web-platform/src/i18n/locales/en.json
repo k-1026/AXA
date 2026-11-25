@@ -497,7 +497,9 @@
       "changeTitle": "Change booking",
       "changeSubmit": "Request change",
       "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then.",
-      "errTime": "Please choose a time later than now."
+      "errTime": "Please choose a time later than now.",
+      "errClosed": "The hospital is not open at that day or time. Please choose a date and time within its hours.",
+      "closedOption": "Closed"
     },
     "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare."
   },
