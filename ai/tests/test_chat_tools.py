@@ -205,3 +205,23 @@ def test_prompt_hides_ids_and_asks_language():
     from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
     assert "Never show hospital ids" in SYSTEM_PROMPT
     assert "ask which language" in SYSTEM_PROMPT
+
+
+def test_db_mode_draft_rejects_times_outside_hospital_hours():
+    # 11/24 사용자 제보: 동성로성형외과(가상, 평일 10~19시)에 21시 요청이 챗봇으로 들어감
+    class Db:
+        def booking_info(self, hospital_id):
+            return {"id": 9003, "name_ko": "예시 동성로성형외과의원 (가상)", "name_en": "Example Dongseongno", "district": "중구",
+                    "departments": ["성형외과", "피부과"], "is_registered_facility": True, "accepts_requests": True,
+                    "staff_languages": ["zh"], "ai_translation_chat": False, "address_en": "x", "tel": "053-000-0003",
+                    "hours": {"mon": "10:00-19:00", "tue": "10:00-19:00", "wed": "10:00-19:00", "thu": "10:00-19:00",
+                              "fri": "10:00-19:00", "sat": "10:00-16:00", "sun": None}}  # None = 휴진 (chatbot/hospitals._hours)
+    ctx = ToolContext(residency="short_term", hospitals=Db())
+    base = {"hospital_id": 9003, "department": "피부과", "language": "ko", "inquiry": "x", "nationality": "VN", "visa_needed": False}
+    late = R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-01 21:00"]}, ctx)   # 화 21시
+    sunday = R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-06 11:00"]}, ctx)  # 일
+    assert "error" in late and "21:00" in late["error"] and "10:00-19:00" in late["error"]
+    assert "error" in sunday and "closed" in sunday["error"]
+    assert R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-01 18:30"]}, ctx)["status"] == "draft"
+    no_info = ToolContext(residency="short_term", hospitals=type("D", (), {"booking_info": lambda self, i: {**Db().booking_info(i), "hours": {}}})())
+    assert R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-06 21:00"]}, no_info)["status"] == "draft"  # 모르면 막지 않음

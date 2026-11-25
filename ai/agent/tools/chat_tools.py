@@ -318,6 +318,18 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
             raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
         if now and slot <= now:
             raise ToolError(f"이미 지난 일시입니다: {s} (오늘 {ctx.today.isoformat()})")
+        if _uses_db(ctx):  # 진료시간 밖이면 서버가 422로 막으므로 초안 단계에서 미리 알림 (11/24 — 21시 요청)
+            # hours: 값 = "HH:MM-HH:MM", None = 휴진, 키 없음 = 모름(막지 않음 — 서버 _check_open과 같은 기준)
+            hours = h.get("hours") if isinstance(h.get("hours"), dict) else {}
+            day_key = WEEKDAYS[slot.weekday()]
+            span = hours.get(day_key)
+            hhmm = s.strip()[-5:]
+            if day_key in hours and span is None:
+                raise ToolError(f"The hospital is closed on that day: {s}. Ask the user for another day "
+                                f"(hours: {h['hours']}). Use check_availability for candidate times.")
+            if span and not (span.split("-")[0] <= hhmm < span.split("-")[1]):
+                raise ToolError(f"{hhmm} is outside the hospital's hours that day ({span}): {s}. Ask the user for a time "
+                                "within the hours. Use check_availability for candidate times.")
     # 국적은 초안에 저장돼 매 턴 "신뢰" 맥락에 들어가므로 자유 문장을 받지 않는다 (프롬프트 주입 경로 차단)
     nationality = str(args["nationality"]).strip().upper()
     if not re.fullmatch(r"[A-Z]{2}", nationality):
