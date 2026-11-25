@@ -9,6 +9,40 @@ export function startDashboard(host, { onLeave }) {
   const timers = [];
   const won = (n) => '₩' + n.toLocaleString('ko-KR');
   const state = { ac: true, tier: 'premium' };
+
+  // ---------- 오늘 날짜 · 기간 선택 (한국 시간). 기간을 바꾸면 요약 API를 from·to로 다시 부름 ----------
+  const kstToday = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  const ymd = (y, m, d) => new Date(Date.UTC(y, m, d)).toISOString().slice(0, 10);
+  const md = (s) => Number(s.slice(5, 7)) + '/' + Number(s.slice(8, 10));
+  function periods() {
+    const t = kstToday(), y = Number(t.slice(0, 4)), m = Number(t.slice(5, 7)) - 1;
+    return [
+      { key: 'month', from: ymd(y, m, 1), to: t, title: '이번 달 성과' },
+      { key: 'prev', from: ymd(y, m - 1, 1), to: ymd(y, m, 0), title: '지난달 성과' },
+      { key: 'q', from: ymd(y, m - 2, 1), to: t, title: '최근 3개월 성과' },
+    ].map((p) => ({ ...p, label: (p.key === 'month' ? '이번 달' : p.key === 'prev' ? '지난달' : '최근 3개월') + ' (' + md(p.from) + '~' + md(p.to) + ')' }));
+  }
+  const periodSel = document.getElementById('period');
+  periodSel.innerHTML = periods().map((p) => '<option value="' + p.key + '">' + p.label + '</option>').join('');
+  const curPeriod = () => periods().find((p) => p.key === periodSel.value) || periods()[0];
+  {
+    const t = kstToday();
+    const wd = '일월화수목금토'[new Date(t + 'T00:00:00Z').getUTCDay()];
+    document.getElementById('todayLabel').textContent = Number(t.slice(5, 7)) + '월 ' + Number(t.slice(8, 10)) + '일 (' + wd + ')';
+    document.getElementById('perfRange').textContent = md(curPeriod().from) + '~' + md(curPeriod().to) + ' · 예시';
+  }
+  periodSel.onchange = () => {
+    const p = curPeriod();
+    document.getElementById('perfTitle').textContent = p.title;
+    if (!readStaffToken()) { document.getElementById('perfRange').textContent = md(p.from) + '~' + md(p.to) + ' · 예시 (로그인하면 DB 값)'; return; }
+    connectApi();
+  };
+  function setLive(on) {
+    host.classList.toggle('is-live', on);
+    document.getElementById('dataBanner').innerHTML = on
+      ? '<b>DB 연결됨</b> — 홈의 요청·체결·방문·취소율, 오늘 할 일, 상담·예약·사후관리 목록은 실제 DB 값이에요. 흐리게 보이는 <span class="badge ex">예시</span> 카드와 통계·진료·결제 확인·요금 탭 숫자는 아직 예시예요.'
+      : '로그인 전이라 병원 운영 숫자는 전부 <b>가상 예시</b>예요. <span class="badge pub">공공</span> 표시 카드만 실제 공공 통계(출처 표기)예요.';
+  }
   function show(t) {
     document.querySelectorAll('main > section').forEach(s => s.classList.toggle('hidden', s.id !== t));
     document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
@@ -253,10 +287,11 @@ export function startDashboard(host, { onLeave }) {
   async function connectApi() {
     const token = readStaffToken(), api = apiBase();
     const src = document.getElementById('dataSrc');
-    if (!token) { src.textContent = '예시 데이터'; return; }
+    if (!token) { src.textContent = '예시 데이터'; setLive(false); return; }
     try {
       setLoggedIn(true);
-      const res = await fetch(api + '/tenant/analytics/summary', { headers: { Authorization: 'Bearer ' + token } });
+      const p = curPeriod();
+      const res = await fetch(api + '/tenant/analytics/summary?from=' + p.from + '&to=' + p.to, { headers: { Authorization: 'Bearer ' + token } });
       if (res.status === 401) return expired();
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).code || res.status);
       const s = await res.json();
@@ -267,7 +302,8 @@ export function startDashboard(host, { onLeave }) {
         if (v) v.textContent = text;
         if (f) f.textContent = k.now == null ? '—' : fmt(k.now);
         if (d) {
-          if (k.now == null || k.prev == null) { d.textContent = k.now == null ? '방문 기록 테이블 연결 전' : '비교 기간 데이터 없음'; d.className = 'note'; }
+          // 비교 기간 0건 = 데이터 없음 ("▲ 0%"로 보이지 않게)
+          if (k.now == null || k.prev == null || (k.unit !== 'percent' && k.prev === 0)) { d.textContent = k.now == null ? '방문자 집계 준비 중' : '비교 기간 데이터 없음'; d.className = 'note'; }
           else {
             const diff = k.unit === 'percent' ? k.now - k.prev : k.prev ? Math.round((k.now - k.prev) / k.prev * 100) : 0;
             const good = k.lowerIsBetter ? diff <= 0 : diff >= 0;
@@ -280,6 +316,9 @@ export function startDashboard(host, { onLeave }) {
       document.getElementById('tVisitG').textContent = '확정된 오늘 예약 →';
       document.getElementById('todoTotal').textContent = (s.today.newRequests + s.today.visitsToday) + '건 (예약 기준)';
       src.textContent = 'DB 연결됨 · ' + s.period.from + '~' + s.period.to; src.className = 'badge';
+      // 비교 = 바로 앞 같은 길이 기간 (서버 analytics.summary) — "지난달 같은 기간"이 아님
+      document.getElementById('perfRange').textContent = md(s.period.from) + '~' + md(s.period.to) + ' · 직전 ' + md(s.period.prevFrom) + '~' + md(s.period.prevTo) + ' 대비';
+      setLive(true);
       if (!API.ready) { API.base = api; API.token = token; API.ready = true; await setupApi(); }
     } catch (e) {
       src.textContent = 'DB 연결 실패 (' + e.message + ') · 예시 데이터'; src.className = 'badge bad';

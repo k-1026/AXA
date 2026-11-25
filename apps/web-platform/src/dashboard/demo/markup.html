@@ -8,7 +8,7 @@
       <span class="badge" id="hdrAftercare">사후관리 지원</span>
       <span class="badge gray">이벤트가·광고 없음</span>
     </div>
-    <select id="period" aria-label="기간"><option>이번 달 (11/1~11/16)</option><option>지난달 (10월)</option><option>최근 3개월</option></select>
+    <select id="period" aria-label="기간"></select>
     <button class="hbtn" id="loginBtn">직원 로그인</button>
     <button class="hbtn" id="logoutBtn" hidden>로그아웃</button>
   </div>
@@ -25,14 +25,14 @@
   <button data-t="settings">병원 설정</button>
 </nav>
 <main>
-  <div class="banner">팀 논의 반영 <b>시안</b>입니다 (요금: v4 등급형 회원, 11/18 팀 결정). 병원 운영 숫자는 전부 <b>가상 예시</b>, <span class="badge pub">공공</span> 표시 카드는 실제 공공 통계(출처 표기)예요. 요금 금액은 가정값이에요 (기본 회원 무료 + 13% / 프리미엄 연 ₩1,800,000 + 8%).</div>
+  <div class="banner" id="dataBanner">로그인 전이라 병원 운영 숫자는 전부 <b>가상 예시</b>예요. <span class="badge pub">공공</span> 표시 카드만 실제 공공 통계(출처 표기)예요.</div>
 
   <!-- 홈 -->
   <section id="home">
     <div class="hero">
       <div>
         <h2>안녕하세요, 예시 피부과의원</h2>
-        <p class="sub" style="margin:0">11월 16일 (월) · 오늘 처리할 일 <b style="color:var(--brand)" id="todoTotal">12건</b> <span class="badge gray" id="dataSrc">예시 데이터</span></p>
+        <p class="sub" style="margin:0"><span id="todayLabel"></span> · 오늘 처리할 일 <b style="color:var(--brand)" id="todoTotal">12건</b> <span class="badge gray" id="dataSrc">예시 데이터</span></p>
       </div>
       <a class="hbtn" href="#settings" style="display:inline-flex;align-items:center;text-decoration:none">병원 정보 5/7 등록됨 →</a>
     </div>
@@ -42,15 +42,15 @@
       <a class="tile" href="#booking"><span class="tl">새 상담 요청</span><span class="tv" id="tNew">5</span><span class="tg">답변하러 가기 →</span></a>
       <a class="tile hot" href="#aftercare"><span class="tl">미답변 사후관리</span><span class="tv" id="tAc">4</span><span class="tg">7시간 지난 문의 있음 →</span></a>
       <a class="tile" href="#booking"><span class="tl">오늘 방문 예정</span><span class="tv" id="tVisit">2</span><span class="tg" id="tVisitG">11:00 · 15:30 →</span></a>
-      <a class="tile" href="#receipt"><span class="tl">결제 금액 입력</span><span class="tv">1</span><span class="tg">방문 완료 R-1036 →</span></a>
+      <a class="tile" href="#receipt" data-sample><span class="tl">결제 금액 입력</span><span class="tv">1</span><span class="tg">방문 완료 R-1036 →</span></a>
     </div>
 
-    <h3 class="sec">이번 달 성과 <small>11/1~11/16 · 지난달 같은 기간 대비</small></h3>
+    <h3 class="sec"><span id="perfTitle">이번 달 성과</span> <small id="perfRange"></small></h3>
     <div class="grid g4">
-      <div class="card kpi big"><div class="l">병원 페이지 방문자</div><div class="v" id="k_views">1,240</div><span class="up" id="d_views">▲ 18%</span><div class="spark" data-s="52,61,48,70,66,90,95,58,63,72,69,84,101,97,76,88"></div></div>
-      <div class="card kpi big"><div class="l">상담 요청</div><div class="v" id="k_requests">86</div><span class="up" id="d_requests">▲ 9%</span><div class="spark" data-s="3,5,4,6,5,7,8,4,5,6,5,6,9,8,5,6"></div></div>
-      <div class="card kpi big"><div class="l">예약 체결</div><div class="v" id="k_confirmed">31</div><span class="down" id="d_confirmed">▼ 6%</span><div class="spark" data-s="1,2,2,3,1,3,3,1,2,2,1,3,3,2,1,1"></div></div>
-      <div class="card kpi big"><div class="l">방문 완료</div><div class="v" id="k_visited">24</div><span class="up" id="d_visited">▲ 4%</span><div class="spark" data-s="1,1,2,2,1,2,2,1,1,2,1,2,3,1,1,1"></div></div>
+      <div class="card kpi big"><div class="l">병원 페이지 방문자</div><div class="v" id="k_views">1,240</div><span class="up" id="d_views">▲ 18%</span><div class="spark" data-live-hide data-s="52,61,48,70,66,90,95,58,63,72,69,84,101,97,76,88"></div></div>
+      <div class="card kpi big"><div class="l">상담 요청</div><div class="v" id="k_requests">86</div><span class="up" id="d_requests">▲ 9%</span><div class="spark" data-live-hide data-s="3,5,4,6,5,7,8,4,5,6,5,6,9,8,5,6"></div></div>
+      <div class="card kpi big"><div class="l">예약 체결</div><div class="v" id="k_confirmed">31</div><span class="down" id="d_confirmed">▼ 6%</span><div class="spark" data-live-hide data-s="1,2,2,3,1,3,3,1,2,2,1,3,3,2,1,1"></div></div>
+      <div class="card kpi big"><div class="l">방문 완료</div><div class="v" id="k_visited">24</div><span class="up" id="d_visited">▲ 4%</span><div class="spark" data-live-hide data-s="1,1,2,2,1,2,2,1,1,2,1,2,3,1,1,1"></div></div>
     </div>
 
     <div class="grid g3 mt">
@@ -61,16 +61,16 @@
           <div><b id="f_confirmed">31</b><span>예약 체결</span></div><i>›</i>
           <div><b id="f_visited">24</b><span>방문 완료</span></div>
         </div>
-        <div class="row mt"><span>첫 답변 시간 (중앙값)</span><b>3시간 12분</b></div>
+        <div class="row mt" data-sample><span>첫 답변 시간 (중앙값)</span><b>3시간 12분</b></div>
         <div class="row"><span>취소율</span><b style="color:var(--bad)" id="k_cancelRate">12.9%</b></div>
-        <div class="row"><span>사후관리 만족도</span><b>4.6 / 5</b></div>
+        <div class="row" data-sample><span>사후관리 만족도</span><b>4.6 / 5</b></div>
       </div>
-      <div class="card"><h3>확인이 필요해요</h3>
+      <div class="card" data-sample><h3>확인이 필요해요</h3>
         <div class="alert">응답 6시간 넘은 상담 요청 <b>2건</b> — 환자 이탈 위험</div>
         <div class="alert">"붉은기" 사후관리 문의 <b>+3건</b> — 방문 후 안내문 점검</div>
         <div class="alert i">통역 언어·가격 안내 미입력 — <a href="#settings">병원 설정</a>에서 입력</div>
       </div>
-      <div class="card"><h3>이번 달 예상 청구</h3>
+      <div class="card" data-sample><h3>이번 달 예상 청구</h3>
         <div class="bigsum" id="homeTotal">₩1,376,400</div>
         <p class="note" style="margin:0 0 10px">부가세 별도 · 진료비의 <b id="homeRatio">9.0%</b> · 12/5 발행</p>
         <div class="row"><span id="homeComLabel">체결 진료 수수료 (프리미엄 8%)</span><span id="homeCom">₩1,226,400</span></div>
@@ -79,7 +79,7 @@
       </div>
     </div>
 
-    <div class="card mt"><h3>메디대구로 받은 환자 1명당 비용 <span class="badge info">추정</span></h3>
+    <div class="card mt" data-sample><h3>메디대구로 받은 환자 1명당 비용 <span class="badge info">추정</span></h3>
       <div class="cmp">
         <div><span>메디대구</span><b id="homePer">₩57,350</b><div class="bar"><i id="homeBar" style="width:29%"></i></div></div>
         <div><span>광고 (업체 자료)</span><b>약 ₩200,000</b><div class="bar"><i style="width:100%;background:#cfd5dd"></i></div></div>
@@ -96,7 +96,7 @@
       <div class="card kpi"><div class="l">대기</div><div class="v" id="kPend">5</div></div>
       <div class="card kpi"><div class="l">시간 제안함</div><div class="v" id="kProp">3</div></div>
       <div class="card kpi"><div class="l">이번 주 확정</div><div class="v" id="kWeek">9</div></div>
-      <div class="card kpi"><div class="l">반복 변경 (2회 이상)</div><div class="v">2</div></div>
+      <div class="card kpi" data-sample><div class="l">반복 변경 (2회 이상)</div><div class="v">2</div></div>
     </div>
     <div class="card mt">
       <div class="calhead"><h3>예약 캘린더</h3><small id="calRange" class="note" style="margin:0"></small>
@@ -218,7 +218,7 @@
   </section>
 
   <!-- 통계 -->
-  <section id="stats" class="hidden">
+  <section id="stats" class="hidden" data-sample-tab="이 탭의 병원 숫자는 아직 예시예요 (공공 표시 카드만 실제 통계)">
     <h2>통계</h2><p class="sub">우리 병원 숫자만 보여요. 다른 병원 숫자는 어떤 형태로도 나오지 않아요 · <a class="more" href="/dashboard/analytics">통계 상세 (유입·전환·사후관리) →</a></p>
     <div class="card" style="margin-bottom:14px"><h3>대구 외국인환자 흐름 <span class="badge pub">공공</span></h3>
       <div class="grid g4">
@@ -331,7 +331,7 @@
   </section>
 
   <!-- 진료·결제 확인 -->
-  <section id="receipt" class="hidden">
+  <section id="receipt" class="hidden" data-sample-tab="이 탭의 숫자는 아직 예시예요 (DB 연결 전)">
     <h2>진료·결제 확인</h2><p class="sub">방문 완료 후 병원이 실제 진료 금액·영수증을 등록 → 환자도 확인 → 메디대구가 체결 수수료 계산</p>
     <div class="grid g4">
       <div class="card kpi"><div class="l">확인 완료 매출</div><div class="v">₩15.3M</div><span class="note" style="margin:0">21건 · 수수료 <span id="rcCom">₩1,226,400</span></span></div>
@@ -375,7 +375,7 @@
   </section>
 
   <!-- 요금·정산 -->
-  <section id="billing" class="hidden">
+  <section id="billing" class="hidden" data-sample-tab="이 탭의 숫자는 아직 예시예요 (DB 연결 전)">
     <h2>요금·정산</h2><p class="sub">병원이 메디대구에 내는 돈 · 팀 논의안 (확정 전)</p>
     <div class="grid g2">
       <div class="card"><h3>1. 회원 등급 (요금 v4)</h3>
