@@ -552,7 +552,7 @@
     "none": "Chưa có lần khám nào hoàn tất.",
     "start": "Sau khi lần khám được ghi nhận hoàn tất, bạn có thể trao đổi với nhân viên y tế của bệnh viện tại đây.",
     "visitedOn": "Khám ngày {{date}}",
-    "doctorLabel": "{{name}} · Nhân viên y tế",
+    "doctorLabel": "{{name}} · Nhân viên bệnh viện",
     "notice": "Hãy hỏi nhân viên y tế của bệnh viện về tình trạng sau điều trị. Nếu triệu chứng nặng hoặc xấu đi đột ngột, hãy gọi ngay cho bệnh viện hoặc 119.",
     "empty": "Hãy để lại câu hỏi hoặc tình trạng hiện tại. Bạn cũng có thể gửi ảnh và video.",
     "sampleNote": "Bệnh viện và tin nhắn mẫu, không phải hồ sơ khám thật.",
