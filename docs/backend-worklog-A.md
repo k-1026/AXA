@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-25 · backend-A-contract-signup-closed · backend-A-signup-guard · Claude (입점 신청 막기, 전체 점검 N1)
+- 한 일: 직원 가입(`auth/staff.py` signup)이 등록번호 확인·운영자 승인 없이 실제 병원 owner를 만들고 `requests_enabled=True` → 누구나 실제 병원 160곳 중 아무 데나 먼저 가입해 그 병원 환자 요청서를 받을 수 있었음. 이제 가상 병원(`is_demo`)만 가입, 실제 병원은 403 `auth.signup_closed`(계정 안 만듦). 설정 `staff_signup_real_hospitals`(env `STAFF_SIGNUP_REAL_HOSPITALS`, 기본 false) — **`core/config.py` 공통 파일 변경**. 테스트 conftest에서 false 고정. 앞서 `backend-A-request-hours`(PR #106): 환자 희망 일시도 진료시간 안만(422 `closed`, loc `preferred_slots[i]`) + 챗봇 초안 단계 검사
+- 바뀐 계약: contracts 3·4절 (`auth.signup_closed` 403), 변경 이력 1줄, 결정 34
+- 테스트: 백엔드·AI 523개 통과 (새 3개, `backend` 기준 — #106 제외)
+- 다음 할 일: 프론트 가입 화면에 `auth.signup_closed` 문구(6개 언어, 지금은 "알 수 없는 오류"로 보임). 실제 병원 입점 절차(등록번호 확인·운영자 승인)는 12/4 뒤
+- B에게 요청: `core/config.py` 변경·contracts 4절 새 코드 확인
+- 막힌 것·질문: 없음
+
 ### 2026-11-24 (2) · backend-A-vercel-cron · Claude (결정 33 — 제안 시간은 환자 수락만, 진료시간 안만)
 - 한 일: **B 파일 `booking/service.py` 수정 (사용자 지시: "B한테 넘기지 말고")** — TRANSITIONS에서 `("proposed", "confirm")` 제거, `staff_act`의 propose에 `_check_open`(그 병원 `hospital_hours`, 한국 시간, 휴진·진료 전후·점심이면 422 validation, 데이터 없으면 통과). 알림 테스트를 "제안 → 환자 수락"으로 바꿈
 - 바뀐 계약: contracts 2절 (상태 표), 변경 이력 1줄, 결정 33
