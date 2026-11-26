@@ -154,7 +154,9 @@
     "rcvSat": "Giờ tiếp nhận (Thứ 7)",
     "noPhoto": "Chưa có ảnh đại diện",
     "consultBtn": "Tư vấn",
-    "reserveBtn": "Đặt lịch"
+    "reserveBtn": "Đặt lịch",
+    "notJoined": "Bệnh viện này chưa tham gia MediDaegu. Vui lòng liên hệ trực tiếp với bệnh viện.",
+    "callBtn": "Gọi điện"
   },
   "prices": {
     "more": "Xem thêm (còn {{count}} mục)",

@@ -123,7 +123,9 @@
     "rcvSat": "受付 (土曜)",
     "noPhoto": "写真がありません",
     "consultBtn": "相談",
-    "reserveBtn": "予約"
+    "reserveBtn": "予約",
+    "notJoined": "この病院はまだメディ大邱に参加していません。相談・予約は病院へ直接ご連絡ください。",
+    "callBtn": "電話で問い合わせ"
   },
   "prices": {
     "more": "もっと見る（残り{{count}}件）",

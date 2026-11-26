@@ -154,7 +154,9 @@
     "rcvSat": "접수시간 (토)",
     "noPhoto": "대표사진 없음",
     "consultBtn": "상담하기",
-    "reserveBtn": "예약하기"
+    "reserveBtn": "예약하기",
+    "notJoined": "메디대구에 아직 입점하지 않은 병원이에요. 상담·예약은 병원에 직접 연락해 주세요.",
+    "callBtn": "전화 문의"
   },
   "prices": {
     "more": "더 보기 ({{count}}개 남음)",

@@ -154,7 +154,9 @@
     "rcvSat": "掛號時間（週六）",
     "noPhoto": "暫無代表照片",
     "consultBtn": "諮詢",
-    "reserveBtn": "預約"
+    "reserveBtn": "預約",
+    "notJoined": "這家醫院尚未入駐 MediDaegu。諮詢、預約請直接聯絡醫院。",
+    "callBtn": "電話諮詢"
   },
   "prices": {
     "more": "顯示更多（還有 {{count}} 項）",

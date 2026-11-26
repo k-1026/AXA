@@ -154,7 +154,9 @@
     "rcvSat": "挂号时间（周六）",
     "noPhoto": "暂无代表照片",
     "consultBtn": "咨询",
-    "reserveBtn": "预约"
+    "reserveBtn": "预约",
+    "notJoined": "这家医院尚未入驻 MediDaegu。咨询、预约请直接联系医院。",
+    "callBtn": "电话咨询"
   },
   "prices": {
     "more": "显示更多（还有 {{count}} 项）",
