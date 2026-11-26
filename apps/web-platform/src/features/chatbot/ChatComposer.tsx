@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CoinsIcon, HospitalIcon, PinIcon, PlusIcon, SendIcon, TranslateIcon } from './icons';
 import type { Topic } from './types';
@@ -21,12 +21,32 @@ export function ChatComposer({ onSend, onTopic, busy }: Props) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
   const [quickOpen, setQuickOpen] = useState(true);
+  const box = useRef<HTMLTextAreaElement>(null);
+
+  // 입력한 줄 수만큼 높이를 늘린다 (최대 높이는 CSS max-height, 넘으면 스크롤)
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [text]);
+
+  const send = () => {
+    if (!text.trim() || busy) return;
+    onSend(text.trim());
+    setText('');
+  };
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!text.trim() || busy) return;
-    onSend(text);
-    setText('');
+    send();
+  };
+
+  // Enter = 보내기, Shift+Enter = 줄바꿈 (2026-11-26). 한글 등 조합 중의 Enter는 글자 확정이라 보내지 않는다
+  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing || e.keyCode === 229) return;
+    e.preventDefault();
+    send();
   };
 
   return (
@@ -52,9 +72,12 @@ export function ChatComposer({ onSend, onTopic, busy }: Props) {
         >
           <PlusIcon />
         </button>
-        <input
+        <textarea
+          ref={box}
+          rows={1}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={onKeyDown}
           placeholder={t('chat.placeholder')}
           aria-label={t('chat.placeholder')}
           enterKeyHint="send"

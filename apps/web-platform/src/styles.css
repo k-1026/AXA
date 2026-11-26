@@ -3197,10 +3197,10 @@ body.chat-open {
 
 .chat-input {
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* 여러 줄이 되면 + 버튼·보내기 버튼은 아래에 붙음 */
   gap: 8px;
-  height: 64px;
-  padding: 0 8px 0 10px;
+  min-height: 64px;
+  padding: 9px 8px 9px 10px;
   border: 1.5px solid var(--c-blue);
   border-radius: 14px;
   background: var(--c-white);
@@ -3228,18 +3228,28 @@ body.chat-open {
   height: 24px;
 }
 
-.chat-input input {
+.chat-input textarea {
   flex: 1;
   min-width: 0;
-  height: 100%;
-  padding: 0 8px;
+  max-height: calc(1.5em * 5 + 20px); /* 5줄까지 늘어나고 그 뒤는 스크롤 */
+  padding: 10px 8px;
   border: 0;
   background: none;
+  color: inherit;
+  font: inherit;
   font-size: 1rem;
+  line-height: 1.5;
+  overflow-y: auto;
+  resize: none;
   outline: none;
 }
 
-.chat-input input::placeholder {
+/* 포커스 표시는 바깥 입력 상자(.chat-input:focus-within)가 하므로 안쪽 선은 겹치지 않게 뺀다 */
+.chat-input textarea:focus-visible {
+  outline: none;
+}
+
+.chat-input textarea::placeholder {
   color: var(--c-ink-55);
 }
 
@@ -3447,8 +3457,8 @@ body.chat-open {
   }
 
   .chat-input {
-    height: 52px;
-    padding: 0 6px;
+    min-height: 52px;
+    padding: 6px;
   }
 
   .chat-input-plus {
@@ -3457,7 +3467,8 @@ body.chat-open {
   }
 
   /* iOS는 16px보다 작은 입력창을 누르면 화면을 확대하므로 16px 유지 */
-  .chat-input input {
+  .chat-input textarea {
+    padding: 7px 6px;
     font-size: 16px;
   }
 
