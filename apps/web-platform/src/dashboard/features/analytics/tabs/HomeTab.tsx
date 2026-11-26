@@ -30,26 +30,29 @@ export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
         />
       )}
 
-      <Card
-        title={`병원 정보 등록 ${done}/${setup.length}`}
-        kind="setup"
-        action={<span className="progress"><span style={{ width: `${(done / setup.length) * 100}%` }} /></span>}
-      >
-        <ul className="setup">
-          {setup.map((s) => (
-            <li key={s.key} className={s.done ? 'is-done' : undefined}>
-              <span className="setup-mark" aria-hidden>{s.done ? '✓' : ''}</span>
-              <span className="setup-text">
-                <b>{s.label}</b>{s.from && <em> · {s.from}에서 불러옴</em>}
-                <span>{s.hint}</span>
-              </span>
-              <button type="button" className={s.done ? 'btn-ghost' : 'btn'} onClick={() => toggleSetup(s.key)}>
-                {s.done ? '수정' : '입력하기'}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      {/* 병원 정보 등록: 초기 모드에서만 (운영 후 모드에서는 뺌) */}
+      {!operating && (
+        <Card
+          title={`병원 정보 등록 ${done}/${setup.length}`}
+          kind="setup"
+          action={<span className="progress"><span style={{ width: `${(done / setup.length) * 100}%` }} /></span>}
+        >
+          <ul className="setup">
+            {setup.map((s) => (
+              <li key={s.key} className={s.done ? 'is-done' : undefined}>
+                <span className="setup-mark" aria-hidden>{s.done ? '✓' : ''}</span>
+                <span className="setup-text">
+                  <b>{s.label}</b>{s.from && <em> · {s.from}에서 불러옴</em>}
+                  <span>{s.hint}</span>
+                </span>
+                <button type="button" className={s.done ? 'btn-ghost' : 'btn'} onClick={() => toggleSetup(s.key)}>
+                  {s.done ? '수정' : '입력하기'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {!operating && <Locked title="오늘 할 일 (새 상담·예약 요청·오늘 방문·미답변)" when="첫 상담이 들어오면 여기에 모여요" />}
 
