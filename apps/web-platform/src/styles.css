@@ -323,9 +323,11 @@ a {
   gap: 12px;
 }
 
+/* 가격 가이드 진료과 선택 — 표 한 줄 (칸 구분선만, 선택은 연한 파랑 + 파란 글씨 + 체크)
+   칸이 줄마다 늘어나 꽉 채움 → 좁은 화면에서 두 줄이 돼도 끝에 빈칸이 남지 않음 */
 .filter-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -333,7 +335,12 @@ a {
 }
 
 .filter-grid button {
-  /* 긴 이름(영어·베트남어)은 칸 밖으로 잘리지 않고 다음 줄로 */
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  /* 긴 이름(영어·베트남어)은 잘리지 않고 다음 줄로 */
   min-width: 0;
   min-height: 48px;
   padding: 0 16px;
@@ -342,19 +349,34 @@ a {
   /* 칸 구분선 (바깥쪽 선은 overflow: hidden 으로 잘림) */
   box-shadow: 1px 0 0 var(--border), 0 1px 0 var(--border);
   font: inherit;
-  text-align: left;
   color: var(--text);
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
 .filter-grid button:hover {
   background: var(--surface-muted);
 }
 
+.filter-grid button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
 .filter-grid button[aria-pressed='true'] {
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* 선택된 항목 앞에 체크 표시 */
+.filter-grid button[aria-pressed='true']::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .list-count {
