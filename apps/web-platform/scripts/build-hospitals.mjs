@@ -51,6 +51,15 @@ const excluded = new Set(
 const registeredPath = resolve(repo, 'data/processed/daegu_registered_institutions.csv');
 const registeredRows = existsSync(registeredPath) ? readCsv('daegu_registered_institutions.csv', resolve(repo, 'data/processed')) : [];
 const registered = existsSync(registeredPath) ? new Set(registeredRows.map((r) => r.ykiho).filter(Boolean)) : null;
+const registeredTel = new Map(registeredRows.filter((r) => r.ykiho).map((r) => [r.ykiho, r.tel]));
+// 심평원 번호가 대구 지역번호(053)가 아닌데 등록 명단 번호와 지역번호만 다르면 등록 명단 값 (백엔드 hospital/loader.py _tel과 같은 규칙)
+// 예: 빌리브피부과의원(수성구) 심평원 063-745-1190 ↔ 등록 명단 053-745-1190 (063은 전북 — 오기로 판단, 2026-11-26)
+function fixTel(hira, reg) {
+  if (!hira || !reg) return hira || undefined;
+  const [area, ...rest] = hira.split('-');
+  const [regArea, ...regRest] = reg.trim().split('-');
+  return area !== '053' && area.startsWith('0') && regArea === '053' && rest.length && rest.join('-') === regRest.join('-') ? reg.trim() : hira;
+}
 if (!registered) {
   console.warn(
     '⚠ data/processed/daegu_registered_institutions.csv 없음 → 병원 0곳으로 저장 (미등록 병원 노출 방지).\n' +
@@ -207,7 +216,7 @@ const items = registeredRows
       type: r.clCdNm,
       district: r.sgguCdNm.replace(/^대구/, ''),
       addr: r.addr,
-      tel: r.telno || undefined,
+      tel: fixTel(r.telno, registeredTel.get(r.ykiho)) || undefined,
       url: link?.homepage || url(b.hospUrl ?? ''),
       instagram: link?.instagram || undefined,
       photo: photos.get(r.ykiho),
