@@ -20,7 +20,8 @@ def test_tools_have_valid_specs():
 
 def test_validation_errors_are_returned_not_raised():
     assert "problems" in R.run("search_hospitals", {}, SHORT)
-    assert "problems" in R.run("search_hospitals", {"department": "피부과", "district": "강남구"}, SHORT)
+    # 대구에 없는 지역: 별칭 표(DISTRICT_ALIASES)에 없으면 대구 구·군 목록과 함께 오류 (2026-11-26, 전에는 enum 검사 problems)
+    assert "수성구" in R.run("search_hospitals", {"department": "피부과", "district": "강남구"}, SHORT)["error"]
     assert "problems" in R.run("get_hospital", {"hospital_id": "9001"}, SHORT)
     assert "problems" in R.run("search_hospitals", {"department": "피부과", "foo": 1}, SHORT)
     assert "available" in R.run("no_such_tool", {}, SHORT)
@@ -37,12 +38,14 @@ def test_scar_flow_department_then_neutral_list():
     assert "not a recommendation" in res["note"] and res["_demo"] is True
 
 
-def test_translation_badge_filter():
+def test_language_filter_uses_staff_languages_only():
     zh = R.run("search_hospitals", {"department": "피부과", "language": "zh-CN"}, SHORT)["hospitals"]
-    # B는 직원 중국어, A는 AI 번역 채팅으로 포함
-    assert {h["hospital_id"] for h in zh} == {9001, 9002}
-    dental_vi = R.run("search_hospitals", {"department": "치과", "language": "vi"}, SHORT)["hospitals"]
-    assert dental_vi and dental_vi[0]["staff_languages"] == [] and dental_vi[0]["ai_translation_chat"] is True
+    # B만 직원 중국어. A(직원 영어)는 AI 번역 채팅이 있어도 빠짐
+    assert {h["hospital_id"] for h in zh} == {9002}
+    assert R.run("search_hospitals", {"department": "치과", "language": "vi"}, SHORT)["hospitals"] == []
+    # 한국어는 거르지 않고, 카드에는 AI 번역 배지 정보가 그대로 남음
+    ko = R.run("search_hospitals", {"department": "치과", "language": "ko"}, SHORT)["hospitals"]
+    assert ko and ko[0]["staff_languages"] == [] and ko[0]["ai_translation_chat"] is True
 
 
 def test_booking_draft_rules():
@@ -125,17 +128,20 @@ def test_recommend_by_match_only_for_short_term_visitors():
     assert R.run("recommend_hospitals", args, ToolContext())["ask"] == "residency"
     assert R.run("recommend_hospitals", args, ToolContext(residency="resident"))["status"] == "not_available"
     res = R.run("recommend_hospitals", args, SHORT)
-    first, second = res["suggestions"]
-    # B: 직원 중국어(+2) + 12/4 시간(+1) → A(AI 번역 +1)보다 앞. 미등록 C는 제외
-    assert [first["hospital_id"], second["hospital_id"]] == [9002, 9001]
-    assert "staff speak zh" in first["match_reasons"] and "consultation slots on 2026-12-04" in first["match_reasons"]
-    assert second["match_reasons"][0] == "AI translation chat available"
+    # 직원 중국어가 되는 B만. A(직원 영어만)는 AI 번역이 있어도 추천하지 않음. 미등록 C는 제외
+    assert [s["hospital_id"] for s in res["suggestions"]] == [9002]
+    reasons = res["suggestions"][0]["match_reasons"]
+    assert "staff speak zh" in reasons and "consultation slots on 2026-12-04" in reasons
     assert "not a judgment of medical quality" in res["basis"] and "referral fee" in res["basis"]
 
 
-def test_recommend_skips_hospitals_without_language_support():
-    res = R.run("recommend_hospitals", {"department": "성형외과", "language": "en"}, SHORT)
-    assert res["suggestions"] == []  # 가상성형외과: 직원 zh·vi, AI 번역 없음
+def test_recommend_matches_language_by_staff_only():
+    # 가상성형외과: 직원 zh·vi. AI 번역 채팅은 있지만 언어 추천 기준은 직원 언어
+    assert R.run("recommend_hospitals", {"department": "성형외과", "language": "en"}, SHORT)["suggestions"] == []
+    vi = R.run("recommend_hospitals", {"department": "성형외과", "language": "vi"}, SHORT)["suggestions"]
+    assert [s["hospital_id"] for s in vi] == [9003] and vi[0]["match_reasons"][0] == "staff speak vi"
+    # 한국어는 언어 조건으로 거르지 않음
+    assert [s["hospital_id"] for s in R.run("recommend_hospitals", {"department": "성형외과", "language": "ko"}, SHORT)["suggestions"]] == [9003]
     assert "error" in R.run("recommend_hospitals", {"department": "피부과", "preferred_date": "12/04"}, SHORT)
 
 
@@ -205,6 +211,78 @@ def test_prompt_hides_ids_and_asks_language():
     from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
     assert "Never show hospital ids" in SYSTEM_PROMPT
     assert "ask which language" in SYSTEM_PROMPT
+
+
+def test_search_hospitals_tells_model_no_requests_for_residents():
+    args = {"department": "피부과"}
+    resident = R.run("search_hospitals", args, ToolContext(residency="resident"))
+    short = R.run("search_hospitals", args, SHORT)
+    assert resident["hospitals"] == short["hospitals"]  # 열람은 같음
+    assert "not available" in resident["note"] and "not available" not in short["note"]
+
+
+def test_search_results_carry_phone_numbers():
+    res = R.run("search_hospitals", {"department": "피부과"}, SHORT)
+    assert res["hospitals"] and all(h.get("tel") for h in res["hospitals"])
+
+
+def test_db_mode_prices_give_a_price_guide_button_with_item_and_department():
+    # 11/26: 숫자 대신 가격 가이드 버튼 카드. 시술 이름(q)·진료과(dept)로 걸러서 열림
+    from ai.agent.core.orchestrator import _card
+    from ai.agent.schemas import CARD_ADAPTER
+
+    class Db:
+        def booking_info(self, hospital_id):
+            return None
+    ctx = ToolContext(residency="short_term", hospitals=Db())
+    res = R.run("get_prices", {"item": " 필러 ", "department": "피부과"}, ctx)
+    assert res["guide_link"] == {"q": "필러", "dept": "dermatology"} and "button" in res["note"]
+    card = _card("get_prices", res)
+    assert card == {"type": "price_guide", "data": {"q": "필러", "dept": "dermatology"}}
+    CARD_ADAPTER.validate_python(card)  # 응답 카드 모델과 맞음
+    plain = _card("get_prices", R.run("get_prices", {}, ctx))  # "가격 정보" 버튼만 누른 경우 → 필터 없이
+    assert plain == {"type": "price_guide", "data": {}}
+    CARD_ADAPTER.validate_python(plain)
+
+
+def test_prompt_keeps_price_answers_to_price_only():
+    from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
+    assert "don't append booking questions" in SYSTEM_PROMPT
+
+
+# --- 2026-11-26 화면 점검에서 나온 것 ---
+def test_district_aliases_in_other_languages_map_to_korean():
+    # 일본어 寿城区를 모델이 달성군으로 옮긴 사례 → 코드에서 한국어 이름으로
+    for alias in ("寿城区", "壽城區", "Suseong-gu", "suseong", "대구 수성구"):
+        res = R.run("search_hospitals", {"department": "피부과", "district": alias}, SHORT)
+        assert "error" not in res and res["hospitals"] and all(h["district"] == "수성구" for h in res["hospitals"]), alias
+    bad = R.run("search_hospitals", {"department": "피부과", "district": "Busan"}, SHORT)
+    assert "error" in bad and "수성구" in bad["error"]
+    rec = R.run("recommend_hospitals", {"department": "피부과", "district": "Suseong-gu"}, SHORT)
+    assert rec["status"] == "ok" and all(s["district"] == "수성구" for s in rec["suggestions"])
+
+
+def test_list_reports_shown_and_total_and_demo_hospitals_without_phone():
+    class Db:
+        def search(self, **kw):
+            assert kw["limit"] == 10  # 기본 10곳 (예전 5곳 → 답 "5곳" vs 카드 "7곳")
+            rows = [{"hospital_id": i, "name_ko": f"병원{i}", "name_en": f"H{i}", "district": "수성구", "departments": ["피부과"],
+                     "is_registered_facility": True, "tel": "" if i == 9002 else "053-000-1234",
+                     "staff_languages": [], "ai_translation_chat": False} for i in (1, 9002)]
+            return {"count": 12, "hospitals": rows}
+    res = R.run("search_hospitals", {"department": "피부과"}, ToolContext(residency="short_term", hospitals=Db()))
+    assert res["shown"] == 2 and "Showing 2 of 12" in res["note"]
+    assert res["hospitals"][1]["tel"] is None and "demo hospitals" in res["note"]
+
+
+def test_not_joined_reason_says_registered_but_not_partner():
+    class Db:
+        def booking_info(self, hospital_id):
+            return {"id": 1, "name_en": "Real", "departments": ["피부과"], "is_registered_facility": True,
+                    "accepts_requests": False, "tel": "053-000-0000", "hours": {}}
+    res = R.run("prepare_booking_request", {"hospital_id": 1}, ToolContext(residency="short_term", hospitals=Db()))
+    assert res["status"] == "not_available" and "registered foreign-patient facility" in res["reason"]
+    assert "not a MediDaegu partner" in res["reason"]
 
 
 def test_db_mode_draft_rejects_times_outside_hospital_hours():

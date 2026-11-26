@@ -9,7 +9,7 @@ from modules.booking.models import CANCEL_REASONS
 from modules.booking.schemas import BookingOut
 from modules.consent.schemas import ConsentIn
 
-Lang = Literal["ko", "en", "zh-TW", "zh-CN", "vi"]
+Lang = Literal["ko", "en", "zh-TW", "zh-CN", "vi", "ja"]
 
 
 class BookingCreate(BaseModel):

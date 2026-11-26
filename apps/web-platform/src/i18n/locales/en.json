@@ -169,7 +169,10 @@
     "fxNotice": "Converted amounts are for reference only. Actual costs are in Korean won as quoted by the hospital. Rates applied on {{applied}} (Bank of Korea, as of {{base}}; updated daily at {{hour}}:00 KST) ·",
     "fxProvider": "Bank of Korea ECOS",
     "fxFallback": "Could not load exchange rates, so prices are shown in Korean won.",
-    "fxReference": "Converted with the European Central Bank reference rate ({{date}}). Actual charges may differ."
+    "fxReference": "Converted with the European Central Bank reference rate ({{date}}). Actual charges may differ.",
+    "searchResult": "{{count}} treatments related to “{{q}}”",
+    "noResult": "No treatments matched “{{q}}”, so all are shown.",
+    "clearSearch": "Show all"
   },
   "mypage": {
     "home": "Home",
@@ -364,7 +367,7 @@
       "askDept": "Which department are you looking for?",
       "askRegion": "Which area should we look in?\nPick an area and I'll show hospital information and official contact channels.",
       "hospitals": "In Hospital Info you can see matching hospitals sorted by distance or name. Please check each hospital’s official contacts and opening hours.",
-      "price": "You can see price ranges by treatment in the Price Guide. Actual costs vary, so please confirm with the hospital.",
+      "price": "Go to the Price Guide to see the treatments we cover and their price ranges. Actual costs vary by hospital, so please confirm with the hospital.",
       "interpret": "Interpreter support varies by hospital. Please check supported languages through the hospital’s official contact before visiting. For travel interpretation, you can call the 1330 Korea Travel Hotline.",
       "tour": "Daegu travel information is coming soon. Avoid a heavy schedule right after treatment, and check recovery advice with your hospital.",
       "emergency": "This may be an emergency. Call 119 now or go to the nearest emergency room. 119 offers foreign-language interpretation.",

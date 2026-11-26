@@ -31,6 +31,7 @@ export interface ChatMessage {
   medicalNotice?: boolean; // "의료 상담이 아닙니다" 고지
   pending?: boolean; // 답을 기다리는 중
   failed?: boolean; // 서버 오류로 답을 못 받음
+  elapsedMs?: number; // 질문 → 답(또는 오류)까지 걸린 시간. 테스트용 표시 (개발 서버·VITE_SHOW_CHAT_TIMING=true에서만 보임)
 }
 
 export interface Conversation {
@@ -43,5 +44,6 @@ export interface Conversation {
   serverId?: string; // 회원: 서버 대화 id (POST /chatbot/ask의 session_id)
   remote?: boolean; // 회원: 서버 목록에서만 받았고 메시지는 아직 안 불러옴 (열 때 불러옴)
   lastMessageAt?: string; // 회원: 서버 목록의 마지막 메시지 시각 (메시지를 불러오기 전 정렬용)
+  title?: string; // 회원: 서버 목록의 대화 제목 (첫 질문, 개인정보 가림). 목록 글자로 씀
   loadFailed?: boolean; // 회원: 메시지 불러오기 실패 (네트워크 등). 다시 시도 버튼을 보여 줌
 }

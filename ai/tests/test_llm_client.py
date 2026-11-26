@@ -210,6 +210,38 @@ def test_nvidia_model_names_get_vendor_prefix():
     assert [p.model for p in other.providers()] == ["nemotron-x"]  # NVIDIA 주소가 아니면 건드리지 않음
 
 
+# --- nemotron 숨은 생각(reasoning) 끄기 (2026-11-25, 응답 속도) ---------------------------
+
+
+def test_nemotron_thinking_switch_is_sent_in_body():
+    on = LLMSettings(_env_file=None, gemini_api_key="", nemotron_api_key="k2", nemotron_model="n")
+    assert on.providers()[0].extra_body == {}  # 기본은 켬 (정확도 유지)
+    s = LLMSettings(_env_file=None, gemini_api_key="k", gemini_model="g", nemotron_api_key="k2", nemotron_model="n",
+                    nemotron_thinking=False)
+    gem, nemo = s.providers()
+    assert gem.extra_body == {}
+    assert nemo.extra_body == {"chat_template_kwargs": {"enable_thinking": False}}
+
+    seen = {}
+
+    def handler(req):
+        seen["body"] = json.loads(req.content)
+        return ok_text()
+
+    make_client(handler, providers=(nemo,)).chat([{"role": "user", "content": "x"}], tools=TOOLS)
+    assert seen["body"]["chat_template_kwargs"] == {"enable_thinking": False} and seen["body"]["tools"] == TOOLS
+
+
+def test_reasoning_content_is_not_echoed_back():
+    def handler(req):
+        return httpx.Response(200, json={"model": "m", "choices": [{"finish_reason": "tool_calls", "message": {
+            "role": "assistant", "content": "", "reasoning_content": "긴 생각...",
+            "tool_calls": [{"id": "c1", "type": "function", "function": {"name": "search_hospitals", "arguments": "{}"}}]}}]})
+
+    res = make_client(handler).chat([{"role": "user", "content": "x"}], tools=TOOLS)
+    assert "reasoning_content" not in res.as_assistant_message()
+
+
 # --- 모델·소요 시간 로그 (응답이 느린 이유를 배포 로그에서 보려고) ---------------------------
 
 
@@ -245,3 +277,63 @@ def test_log_has_no_message_content_or_key(caplog):
     make_client(lambda req: ok_text("비밀 답변")).chat([{"role": "user", "content": "개인 증상 내용"}])
     text = " ".join(r.getMessage() for r in caplog.records if r.name == "ai.llm")
     assert "개인 증상" not in text and "비밀 답변" not in text and "k1" not in text.split()
+
+
+# --- 429 받은 모델은 잠시 뒤로 (2026-11-26, 막힌 모델을 매번 먼저 시도해 한 턴 75.8초) ---------------------------
+
+
+def _counting_handler(statuses):
+    """모델 이름별로 정해 둔 상태 코드를 돌려주고, 어느 모델을 몇 번째로 불렀는지 기록."""
+    calls = []
+
+    def handler(req):
+        model = json.loads(req.content)["model"]
+        calls.append(model)
+        code = statuses.get(model, 200)
+        return httpx.Response(429, text="quota") if code == 429 else ok_text(model=model)
+
+    return handler, calls
+
+
+def test_rate_limited_model_goes_to_the_back_until_cooldown_ends():
+    now = [0.0]
+    flash = ProviderConfig("gemini", "https://gemini.test/v1", "k1", "flash")
+    lite = ProviderConfig("gemini", "https://gemini.test/v1", "k1", "lite")
+    handler, calls = _counting_handler({"flash": 429})
+    client = LLMClient([flash, lite], http=httpx.Client(transport=httpx.MockTransport(handler)), max_retries=0,
+                       sleep=lambda s: None, rate_limit_cooldown=600, clock=lambda: now[0])
+
+    assert client.chat([{"role": "user", "content": "1"}]).model == "lite"
+    assert calls == ["flash", "lite"]  # 처음에는 순서대로
+    calls.clear()
+    assert client.chat([{"role": "user", "content": "2"}]).model == "lite"
+    assert calls == ["lite"]  # 막힌 flash는 건너뜀 (lite가 성공해서 flash까지 안 감)
+
+    now[0] = 601  # 쉬는 시간이 끝나면 다시 원래 순서
+    calls.clear()
+    client.chat([{"role": "user", "content": "3"}])
+    assert calls[0] == "flash"
+
+
+def test_when_every_model_is_cooling_they_are_still_tried():
+    now = [0.0]
+    a = ProviderConfig("gemini", "https://gemini.test/v1", "k1", "a")
+    b = ProviderConfig("nemotron", "https://nim.test/v1", "k2", "b")
+    statuses = {"a": 429, "b": 429}
+    handler, calls = _counting_handler(statuses)
+    client = LLMClient([a, b], http=httpx.Client(transport=httpx.MockTransport(handler)), max_retries=0,
+                       sleep=lambda s: None, rate_limit_cooldown=600, clock=lambda: now[0])
+    with pytest.raises(AllProvidersFailed):
+        client.chat([{"role": "user", "content": "1"}])
+    statuses["b"] = 200  # 한도가 풀림
+    calls.clear()
+    assert client.chat([{"role": "user", "content": "2"}]).model == "b"  # 둘 다 쉬는 중이어도 시도는 함
+    assert calls == ["a", "b"]
+    calls.clear()
+    client.chat([{"role": "user", "content": "3"}])
+    assert calls == ["b"]  # 성공한 b는 쉬는 목록에서 빠짐, a만 뒤로
+
+
+def test_cooldown_comes_from_settings():
+    s = LLMSettings(_env_file=None, gemini_api_key="k", llm_rate_limit_cooldown_seconds=30)
+    assert LLMClient.from_settings(s).rate_limit_cooldown == 30

@@ -3216,10 +3216,10 @@ body.chat-open {
 
 .chat-input {
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* 여러 줄이 되면 + 버튼·보내기 버튼은 아래에 붙음 */
   gap: 8px;
-  height: 64px;
-  padding: 0 8px 0 10px;
+  min-height: 64px;
+  padding: 9px 8px 9px 10px;
   border: 1.5px solid var(--c-blue);
   border-radius: 14px;
   background: var(--c-white);
@@ -3247,18 +3247,28 @@ body.chat-open {
   height: 24px;
 }
 
-.chat-input input {
+.chat-input textarea {
   flex: 1;
   min-width: 0;
-  height: 100%;
-  padding: 0 8px;
+  max-height: calc(1.5em * 5 + 20px); /* 5줄까지 늘어나고 그 뒤는 스크롤 */
+  padding: 10px 8px;
   border: 0;
   background: none;
+  color: inherit;
+  font: inherit;
   font-size: 1rem;
+  line-height: 1.5;
+  overflow-y: auto;
+  resize: none;
   outline: none;
 }
 
-.chat-input input::placeholder {
+/* 포커스 표시는 바깥 입력 상자(.chat-input:focus-within)가 하므로 안쪽 선은 겹치지 않게 뺀다 */
+.chat-input textarea:focus-visible {
+  outline: none;
+}
+
+.chat-input textarea::placeholder {
   color: var(--c-ink-55);
 }
 
@@ -3493,8 +3503,8 @@ body.chat-open {
   }
 
   .chat-input {
-    height: 52px;
-    padding: 0 6px;
+    min-height: 52px;
+    padding: 6px;
   }
 
   .chat-input-plus {
@@ -3503,7 +3513,8 @@ body.chat-open {
   }
 
   /* iOS는 16px보다 작은 입력창을 누르면 화면을 확대하므로 16px 유지 */
-  .chat-input input {
+  .chat-input textarea {
+    padding: 7px 6px;
     font-size: 16px;
   }
 
@@ -5594,6 +5605,33 @@ body.chat-open {
 
 .chat-card-done a {
   color: var(--accent);
+}
+
+/* 테스트용 챗봇 응답 시간 (개발 서버에서만 보임) */
+.chat-timing {
+  margin: 6px 0 0;
+  font-size: 0.75rem !important;
+  color: var(--c-ink-70);
+  font-variant-numeric: tabular-nums;
+}
+.chat-pending .chat-timing { margin: 0 0 0 6px; }
+
+/* 가격 가이드: 시술 이름으로 찾은 결과 안내 (챗봇 가격 버튼 ?q=) */
+.price-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: var(--c-ink-70);
+}
+.price-search-clear {
+  border: 1px solid var(--c-line, #d8dee8);
+  border-radius: 999px;
+  background: #fff;
+  padding: 2px 12px;
+  font: inherit;
+  cursor: pointer;
 }
 
 /* ---------- 병원 찾기 필터 바 (HospitalFilterBar.tsx) — 색은 사이트 공통 --accent / --accent-soft ---------- */

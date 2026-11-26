@@ -112,7 +112,7 @@
 | `department_code` | str | O | 진료과 코드 = `departments.code` (`dermatology`, `plastic`, `internal`, `ophthalmology` …) |
 | `preferred_slots` | list[datetime] | O | 1~3개, 시간대 포함, 지금 이후만 → UTC로 저장 |
 | `patient_timezone` | str (IANA, 예 `Asia/Taipei`) | O | 화면 표시용 |
-| `lang` | str (`ko`/`en`/`zh-TW`/`zh-CN`/`vi`) | O | 요청 언어 (`patients.preferred_lang`·프론트 번역과 같은 5개) |
+| `lang` | str (`ko`/`en`/`zh-TW`/`zh-CN`/`vi`/`ja`) | O | 요청 언어 (`patients.preferred_lang`·프론트 번역과 같은 6개, `ja`는 2026-11-26 추가) |
 | `nationality` | str (국가 코드) | O | |
 | `contact_method` | str (`email`/…) | O | |
 | `visa_needed` | bool | O | |
@@ -218,7 +218,7 @@
 | `GET /chatbot/sessions/{id}` | 한 대화 + `messages[{role, content, refused, created_at}]` (개인정보를 가린 글만) | 404 `not_found` |
 | `DELETE /chatbot/sessions/{id}` | 대화 삭제 → 204 | 404 `not_found` |
 
-- **언어**: `ko`, `en`, `zh-TW`, `zh-CN`, `vi`. 별칭 `zh`·`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`. 그 밖은 422
+- **언어**: `ko`, `en`, `zh-TW`, `zh-CN`, `vi`, `ja`(2026-11-26 추가). 별칭 `zh`·`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`. 그 밖은 422
 - **카드** `{type, data}` 9종: `hospital_list`, `hospital_suggestions`, `hospital_detail`, `price_list`, `sources`, `time_slots`, `booking_draft`, `booking_list`, `aftercare_thread`. 숫자·병원 정보는 도구 결과에서 코드가 넣음
 - `aftercare_thread` 카드(결정 26): `{status: "opened", thread_id(없으면 ""), booking_id, hospital_id, topic, first_message, notice}` — 메시지는 **보내지 않음**. 화면은 버튼으로 사후관리 화면을 열고 `first_message`를 입력창에 채움, 환자가 보냄
 - **요청서 카드**(`booking_draft`)의 `data.request`는 6절 `BookingCreate` 모양(희망 일시 UTC). 프론트 [제출] = `POST /hospitals/{hospital_id}/booking-requests`에 `request` + 환자가 체크한 `consents`(`data.consents_required` 목록)를 그대로. **챗봇 전용 제출 경로 없음**
@@ -239,6 +239,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
 | 2026-11-25 | 3·4 | 직원 가입은 가상 병원(`is_demo`)만, 실제 병원은 403 `auth.signup_closed` (설정 `STAFF_SIGNUP_REAL_HOSPITALS`로만 엶, 결정 34) | A (**B 확인 필요**) | `backend-A-contract-signup-closed` → `backend` |
 | 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |
 | 2026-11-23 | 6-3 | 사진 썸네일: 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb?`, 응답 첨부에 `thumb_url`(환자·병원, 없으면 null) — 칸 추가만 (결정 29) | A (**B 확인 필요** — aftercare는 B 모듈, `router_tenant` 응답 칸 추가) | `backend-A-media-thumbs` → `backend` |

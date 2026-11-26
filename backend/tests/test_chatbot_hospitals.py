@@ -68,7 +68,8 @@ def test_병원_상세는_실제_진료시간_미등록_병원은_없는_병원�
     assert d1["hours"]["mon"] == "09:30-18:30" and d1["hours"]["sat"] == "09:30-14:00"
     assert d1["hours"]["sun"] is None  # 일요일 휴무가 확인된 경우만 None
     assert "tue" not in d1["hours"]  # 시간 정보 없음 → 휴진(None)으로 보이지 않게 뺌
-    assert d1["can_request_consultation"] is True and d1["tel"] == "053-000-0000"
+    # 등록·영업 중이어도 메디대구에 입점하지 않은 실제 병원은 챗봇으로 요청 불가 (결정 31, 2026-11-26 수정)
+    assert d1["can_request_consultation"] is False and d1["tel"] == "053-000-0000"
     assert d1["hours_source"] != "demo"
     assert d2 == {}  # 미등록 병원 = 없는 병원과 같게 (카드 없음)
     assert missing == {}  # 없는 병원은 도구 오류 → 카드 없음
@@ -115,7 +116,7 @@ def test_실제_등록_병원은_예약_초안을_만들지_않음(client, db_en
     r = client.post(ASK, headers=auth(token), json={"message": "book Y1, no visa help"})
     assert "booking_draft" not in cards(r)
     out = _tool_result(llm, "prepare_booking_request")
-    assert out["status"] == "not_available" and "not joined" in out["reason"]
+    assert out["status"] == "not_available" and "not a MediDaegu partner" in out["reason"]
 
 
 def test_가상_병원_예약_가능_시간은_진료_시간에서(client, db_engine, llm):
@@ -151,6 +152,26 @@ def test_챗봇_요청서_카드는_그대로_예약_API로_보낼_수_있다(cl
                     json={**card["request"], "consents": consents})
     assert r.status_code == 201, r.json()
     assert r.json()["status"] == "pending" and r.json()["hospital_id"] == 9002
+
+
+def test_입점_가상_병원만_상세에_요청_가능_목록에도_응대_언어(client, db_engine, llm):
+    from sqlalchemy.orm import Session
+
+    from db_rows import demo_partner
+    from modules.chatbot.hospitals import _demo_extra
+
+    with Session(db_engine) as s:
+        demo_partner(s, 9002)
+    token = _visitor(client)
+    llm.script += [call("get_hospital", {"hospital_id": 9002}), say("Details."),
+                   call("search_hospitals", {"department": "피부과"}), say("List.")]
+    d = cards(client.post(ASK, headers=auth(token), json={"message": "9002"}))["hospital_detail"]
+    assert d["can_request_consultation"] is True
+    listed = _tool_result(llm, "get_hospital")  # noqa: F841 — 상세 확인용
+    client.post(ASK, headers=auth(token), json={"message": "dermatology"})
+    h = next(x for x in _tool_result(llm, "search_hospitals")["hospitals"] if x["hospital_id"] == 9002)
+    extra = _demo_extra().get(9002, {})
+    assert h["staff_languages"] == extra.get("staff_languages", []) and h["ai_translation_chat"] == extra.get("ai_translation_chat", False)
 
 
 def test_가상_병원_점심시간은_초안_전에_알리고_후보에서도_뺀다(client, db_engine, llm):

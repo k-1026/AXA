@@ -89,7 +89,7 @@ def test_stored_conversation_is_text_only_and_state_restores_shown_hospitals():
     third_call = llm.calls[2]  # 두 번째 ask의 첫 LLM 호출
     ctx = third_call[0]["content"]
     assert "1. Demo Dermatology Clinic A (id 9001)" in ctx and "2. Demo Dermatology Clinic B (id 9002)" in ctx
-    assert [m["role"] for m in third_call[1:]] == ["user", "assistant", "user"]  # 이전 대화는 텍스트만 다시 들어감
+    assert [m["role"] for m in third_call[1:] if m["role"] != "system"] == ["user", "assistant", "user"]  # 이전 대화는 텍스트만 다시 들어감 (답 언어 지시 제외)
     assert not any(m["role"] == "tool" for m in third_call)
 
 
@@ -116,7 +116,7 @@ def test_input_validation_and_language_aliases():
             service.ask(ME, None, bad, "en")
         assert (e.value.status, e.value.code) == (422, "validation")
     with pytest.raises(ChatServiceError) as e:
-        service.ask(ME, None, "hi", "ja")  # 프론트·백엔드가 지원하지 않는 언어
+        service.ask(ME, None, "hi", "th")  # 프론트·백엔드가 지원하지 않는 언어 (ja는 11-26 추가)
     assert e.value.code == "validation" and "zh-CN" in e.value.detail["supported"]
     service.ask(ME, None, "你好", "zh")  # 옛 코드는 zh-CN으로
     assert "language=zh-CN" in system_prompt(llm)
@@ -367,3 +367,24 @@ def test_account_without_an_answer_still_uses_what_the_chat_recorded():
     ])
     r = service.ask(ME, None, "I am visiting for a week", "en")
     assert sessions.get(ME.patient_id, r.session_id).state["residency"] == "short_term"
+
+
+def test_detail_of_a_listed_hospital_keeps_the_list_order():
+    """목록 속 병원 상세를 봐도 "첫 번째 병원"이 바뀌지 않는다 (2026-11-26)."""
+    from ai.agent.service import _shown_from_cards
+
+    prev = [{"id": 9001, "name": "A"}, {"id": 9002, "name": "B"}]
+    detail = {"type": "hospital_detail", "data": {"hospital_id": 9002, "name_en": "B"}}
+    assert _shown_from_cards([detail], prev) is None  # 그대로 둠
+    other = {"type": "hospital_detail", "data": {"hospital_id": 9003, "name_en": "C"}}
+    assert _shown_from_cards([other], prev) == [{"id": 9003, "name": "C"}]  # 목록에 없던 병원이면 바꿈
+    listing = {"type": "hospital_list", "data": {"hospitals": [{"hospital_id": 9004, "name_en": "D"}]}}
+    assert _shown_from_cards([listing, detail], prev) == [{"id": 9002, "name": "B"}]  # 새 목록이 있으면 기존 규칙
+
+
+def test_same_turn_list_plus_detail_keeps_the_list():
+    from ai.agent.service import _shown_from_cards
+
+    listing = {"type": "hospital_list", "data": {"hospitals": [{"hospital_id": 9001, "name_en": "A"}, {"hospital_id": 9002, "name_en": "B"}]}}
+    detail = {"type": "hospital_detail", "data": {"hospital_id": 9002, "name_en": "B"}}
+    assert _shown_from_cards([listing, detail]) == [{"id": 9001, "name": "A"}, {"id": 9002, "name": "B"}]

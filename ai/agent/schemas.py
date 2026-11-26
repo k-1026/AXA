@@ -11,8 +11,8 @@ from typing import Annotated, Any, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
-UI_LANGUAGES = ("ko", "en", "zh-TW", "zh-CN", "vi")  # 백엔드 patients.preferred_lang · 프론트 번역 파일과 같음
-Language = Literal["ko", "en", "zh-TW", "zh-CN", "vi"]
+UI_LANGUAGES = ("ko", "en", "zh-TW", "zh-CN", "vi", "ja")  # 백엔드 patients.preferred_lang · 프론트 번역 파일과 같음
+Language = Literal["ko", "en", "zh-TW", "zh-CN", "vi", "ja"]
 
 
 class _Model(BaseModel):
@@ -138,6 +138,13 @@ class HospitalQuestionData(_Model):
     notice: str
 
 
+class PriceGuideData(_Model):
+    """가격 가이드 화면(/prices)으로 가는 버튼. q = 시술 이름 필터, dept = 진료과 필터 (둘 다 선택)."""
+
+    q: str | None = None
+    dept: Literal["dermatology", "plastic", "internal", "ophthalmology", "korean_medicine"] | None = None
+
+
 # ------------------------------------------------------------------ 카드 (type으로 구분)
 class HospitalListCard(_Model):
     type: Literal["hospital_list"]
@@ -157,6 +164,11 @@ class HospitalDetailCard(_Model):
 class PriceListCard(_Model):
     type: Literal["price_list"]
     data: PriceListData
+
+
+class PriceGuideCard(_Model):
+    type: Literal["price_guide"]
+    data: PriceGuideData
 
 
 class SourcesCard(_Model):
@@ -191,7 +203,7 @@ class HospitalQuestionCard(_Model):
 
 Card = Annotated[
     Union[
-        HospitalListCard, HospitalSuggestionsCard, HospitalDetailCard, PriceListCard, SourcesCard,
+        HospitalListCard, HospitalSuggestionsCard, HospitalDetailCard, PriceListCard, PriceGuideCard, SourcesCard,
         TimeSlotsCard, BookingDraftCard, BookingListCard, AftercareThreadCard, HospitalQuestionCard,
     ],
     Field(discriminator="type"),

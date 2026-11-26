@@ -63,7 +63,7 @@ def test_messages_get_increasing_ids_and_defaults(db_engine):
         assert rows[0].refused is False and rows[0].created_at.tzinfo is not None
 
 
-@pytest.mark.parametrize("lang", ["ja", "zh", ""])
+@pytest.mark.parametrize("lang", ["th", "zh", ""])
 def test_session_lang_must_be_one_of_the_ui_languages(db_engine, lang):
     with Session(db_engine) as db:
         p = make_patient(db)
