@@ -89,7 +89,7 @@ def test_stored_conversation_is_text_only_and_state_restores_shown_hospitals():
     third_call = llm.calls[2]  # 두 번째 ask의 첫 LLM 호출
     ctx = third_call[0]["content"]
     assert "1. Demo Dermatology Clinic A (id 9001)" in ctx and "2. Demo Dermatology Clinic B (id 9002)" in ctx
-    assert [m["role"] for m in third_call[1:]] == ["user", "assistant", "user"]  # 이전 대화는 텍스트만 다시 들어감
+    assert [m["role"] for m in third_call[1:] if m["role"] != "system"] == ["user", "assistant", "user"]  # 이전 대화는 텍스트만 다시 들어감 (답 언어 지시 제외)
     assert not any(m["role"] == "tool" for m in third_call)
 
 

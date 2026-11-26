@@ -11,11 +11,13 @@
 
 from __future__ import annotations
 
+import re
+
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timezone
 from typing import Any, Callable, Protocol
 
-from ai.agent.prompts.orchestrator import build_system_prompt
+from ai.agent.prompts.orchestrator import LANGUAGE_NAMES, build_system_prompt
 from ai.agent.tools.booking_store import BookingError, BookingGateway, BookingStore
 from ai.agent.tools.registry import JSON, ToolContext, ToolRegistry
 from ai.llm import safety
@@ -103,6 +105,21 @@ def _card(tool: str, result: JSON) -> JSON | None:
     if tool == "check_availability" and not result.get("slots"):
         return None
     return {"type": kind, "data": {k: v for k, v in result.items() if not k.startswith("_")}}
+
+
+_HANGUL = re.compile(r"[가-힣]")
+_LETTER = re.compile(r"[^\W\d_]")
+_BRACKETS = re.compile(r"[(\[（【][^)\]）】]*[)\]）】]")
+
+
+def needs_translation(text: str, language: str) -> bool:
+    """설정 언어가 한국어가 아닌데 답 글자의 30% 넘게 한글이면 True. 괄호 안(병원 한국어 이름 등)은 빼고 센다.
+    일본어 화면 + 한국어 질문에 모델이 프롬프트 지시를 어기고 한국어로 답한 사례 (2026-11-26)"""
+    if language == "ko" or language not in LANGUAGE_NAMES:
+        return False
+    body = _BRACKETS.sub("", text)
+    letters = _LETTER.findall(body)
+    return len(letters) >= 10 and len(_HANGUL.findall(body)) / len(letters) > 0.3
 
 
 def _trim(history: list[Message], max_messages: int) -> list[Message]:
@@ -211,7 +228,12 @@ class Orchestrator:
         def ask(with_tools: bool) -> LLMResponse:
             # guard 지시는 이번 턴 호출에만 붙이고 대화 기록에는 남기지 않는다
             extra = [{"role": "system", "content": guard_note}] if guard_note else []
-            msgs = [system, *base, *extra, *turn]
+            # 답 언어 = 화면에서 고른 언어. 시스템 프롬프트 맨 앞 규칙만으로는 일본어 화면 + 한국어 질문에 한국어로 답해서
+            # 매 호출 사용자 글 바로 앞에 한 번 더 (2026-11-26)
+            name = LANGUAGE_NAMES.get(state.language)
+            lang = [{"role": "system", "content": f"Write your reply to the user in {name} only, whatever language "
+                                                  "the user wrote in; translate Korean tool text, and use name_en for hospitals unless replying in Korean."}] if name else []
+            msgs = [system, *base, *lang, *extra, *turn]  # guard 지시가 사용자 글 바로 앞
             return self.llm.chat(msgs, tools=specs if with_tools else None, service="chatbot")
 
         res = ask(True)
@@ -239,6 +261,19 @@ class Orchestrator:
             turn.pop()
 
         text = (res.text or "").strip()
+        if needs_translation(text, state.language):
+            # 설정 언어로 한 번 더 옮긴다 (도구 없이 1번). 실패하면 원래 답 그대로
+            name = LANGUAGE_NAMES[state.language]
+            try:
+                fixed = self.llm.chat([
+                    {"role": "system", "content": f"Translate the assistant message into {name}. Keep hospital names in "
+                                                  "English or as written, keep phone numbers, numbers, lists and formatting. "
+                                                  "Output only the translation."},
+                    {"role": "user", "content": text},
+                ], service="chatbot")
+                text = (fixed.text or "").strip() or text
+            except Exception:  # noqa: BLE001 — 번역이 안 돼도 답은 보낸다
+                pass
         turn.append({"role": "assistant", "content": text})
         state.residency = ctx.residency  # record_residency가 바꿨을 수 있음
         state.history = base + turn

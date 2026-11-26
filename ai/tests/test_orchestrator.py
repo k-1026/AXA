@@ -90,7 +90,7 @@ def test_made_up_visa_answer_gets_no_draft_card():
             "nationality": "VN", "visa_needed": False, "visa_statement": "비자는 필요 없어요"}
     orch, llm = make([call(("prepare_booking_request", args)), say("비자 서류 안내가 필요하신가요?"),
                       call(("prepare_booking_request", {**args, "visa_statement": "아니요 필요 없어요"})), say("카드를 확인해 주세요.")])
-    state = ConversationState(patient_id="demo-patient-1", residency="short_term")
+    state = ConversationState(patient_id="demo-patient-1", residency="short_term", language="ko")  # 한국어 대화 (번역 호출 없음)
     state.history = [{"role": "user", "content": "예시 피부과의원에 12월 2일 오후 2시 여드름 흉터 상담 요청"},
                      {"role": "assistant", "content": "국적이 어디세요?"}]
     first = orch.handle(state, "베트남이에요")
@@ -145,7 +145,7 @@ def test_guard_note_is_sent_this_turn_only():
     assert sent[-2]["role"] == "system" and "Do not answer that part" in sent[-2]["content"] and sent[-1]["role"] == "user"
     assert all(m["role"] != "system" for m in state.history)
     orch.handle(state, "ok, show me clinics in Jung-gu")
-    assert [m["role"] for m in llm.calls[1][0]].count("system") == 1  # 다음 턴에는 guard 없음
+    assert not any("Do not answer that part" in m["content"] for m in llm.calls[1][0] if m["role"] == "system")  # 다음 턴에는 guard 없음
 
 
 def test_pii_is_masked_before_llm_and_history():
@@ -190,7 +190,8 @@ def test_recommendation_request_is_not_guarded_and_makes_card():
     state = ConversationState(language="zh-CN", residency="short_term")
     reply = orch.handle(state, "给我推荐一家皮肤科")
     assert reply.safety_categories == [] and not reply.medical_notice
-    assert [m["role"] for m in llm.calls[0][0]].count("system") == 1  # guard 지시 없음
+    sys_msgs = [m["content"] for m in llm.calls[0][0] if m["role"] == "system"]
+    assert len(sys_msgs) == 2 and "Simplified Chinese" in sys_msgs[1]  # 시스템 프롬프트 + 답 언어 지시만 (guard 지시 없음)
     card = reply.cards[0]
     assert card["type"] == "hospital_suggestions" and card["data"]["suggestions"][0]["hospital_id"] == 9002
     assert "referral fee" in card["data"]["basis"]
@@ -227,3 +228,31 @@ def test_resident_rules_are_in_prompt_only_for_residents():
         orch.handle(ConversationState(residency=residency), "hi")
         system = llm.calls[0][0][0]["content"]
         assert ("This user lives in Korea" in system) is expected
+
+
+def test_reply_language_follows_app_setting_not_message():
+    """화면을 일본어로 하면 한국어로 물어도 일본어로 답하게 (2026-11-26)."""
+    from ai.agent.prompts.orchestrator import build_system_prompt
+    p = build_system_prompt(today="2026-11-26", language="ja", logged_in=True, residency=None)
+    assert "Always reply in Japanese" in p and "same language as the user's latest message" not in p
+    assert "Always reply in Traditional Chinese" in build_system_prompt(today="x", language="zh-TW", logged_in=True, residency=None)
+
+
+def test_language_reminder_is_sent_right_before_the_user_turn_every_call():
+    orch, llm = make([say("ok")])
+    orch.handle(ConversationState(language="ja"), "수성구 피부과")
+    sent = llm.calls[0][0]
+    assert sent[-2]["role"] == "system" and "in Japanese only" in sent[-2]["content"] and sent[-1]["role"] == "user"
+
+
+def test_reply_in_korean_for_a_japanese_user_is_translated_once():
+    from ai.agent.core.orchestrator import needs_translation
+    ko = "수성구의 피부과 병원 7곳을 이름순으로 보여드립니다. 원하시는 병원을 골라 주세요."
+    assert needs_translation(ko, "ja") and not needs_translation(ko, "ko")
+    assert not needs_translation("寿城区の皮膚科は7件です (닥터스피부과의원, 빌리브피부과의원)", "ja")  # 괄호 안 한국어 이름은 괜찮음
+    orch, llm = make([say(ko), say("寿城区の皮膚科を7件お見せします。")])
+    reply = orch.handle(ConversationState(language="ja"), "수성구 피부과 찾아줘")
+    assert reply.text == "寿城区の皮膚科を7件お見せします。" and len(llm.calls) == 2
+    assert "Japanese" in llm.calls[1][0][0]["content"] and llm.calls[1][1] is None  # 번역 호출은 도구 없이
+    orch, llm = make([say(ko)])
+    assert orch.handle(ConversationState(language="ko"), "수성구 피부과").text == ko and len(llm.calls) == 1
