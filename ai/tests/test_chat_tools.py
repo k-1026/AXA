@@ -20,7 +20,8 @@ def test_tools_have_valid_specs():
 
 def test_validation_errors_are_returned_not_raised():
     assert "problems" in R.run("search_hospitals", {}, SHORT)
-    assert "problems" in R.run("search_hospitals", {"department": "피부과", "district": "강남구"}, SHORT)
+    # 대구에 없는 지역: 별칭 표(DISTRICT_ALIASES)에 없으면 대구 구·군 목록과 함께 오류 (2026-11-26, 전에는 enum 검사 problems)
+    assert "수성구" in R.run("search_hospitals", {"department": "피부과", "district": "강남구"}, SHORT)["error"]
     assert "problems" in R.run("get_hospital", {"hospital_id": "9001"}, SHORT)
     assert "problems" in R.run("search_hospitals", {"department": "피부과", "foo": 1}, SHORT)
     assert "available" in R.run("no_such_tool", {}, SHORT)
@@ -223,6 +224,8 @@ def test_search_hospitals_tells_model_no_requests_for_residents():
 def test_search_results_carry_phone_numbers():
     res = R.run("search_hospitals", {"department": "피부과"}, SHORT)
     assert res["hospitals"] and all(h.get("tel") for h in res["hospitals"])
+
+
 def test_db_mode_prices_give_a_price_guide_button_with_item_and_department():
     # 11/26: 숫자 대신 가격 가이드 버튼 카드. 시술 이름(q)·진료과(dept)로 걸러서 열림
     from ai.agent.core.orchestrator import _card
@@ -247,3 +250,36 @@ def test_prompt_keeps_price_answers_to_price_only():
     assert "don't append booking questions" in SYSTEM_PROMPT
 
 
+# --- 2026-11-26 화면 점검에서 나온 것 ---
+def test_district_aliases_in_other_languages_map_to_korean():
+    # 일본어 寿城区를 모델이 달성군으로 옮긴 사례 → 코드에서 한국어 이름으로
+    for alias in ("寿城区", "壽城區", "Suseong-gu", "suseong", "대구 수성구"):
+        res = R.run("search_hospitals", {"department": "피부과", "district": alias}, SHORT)
+        assert "error" not in res and res["hospitals"] and all(h["district"] == "수성구" for h in res["hospitals"]), alias
+    bad = R.run("search_hospitals", {"department": "피부과", "district": "Busan"}, SHORT)
+    assert "error" in bad and "수성구" in bad["error"]
+    rec = R.run("recommend_hospitals", {"department": "피부과", "district": "Suseong-gu"}, SHORT)
+    assert rec["status"] == "ok" and all(s["district"] == "수성구" for s in rec["suggestions"])
+
+
+def test_list_reports_shown_and_total_and_demo_hospitals_without_phone():
+    class Db:
+        def search(self, **kw):
+            assert kw["limit"] == 10  # 기본 10곳 (예전 5곳 → 답 "5곳" vs 카드 "7곳")
+            rows = [{"hospital_id": i, "name_ko": f"병원{i}", "name_en": f"H{i}", "district": "수성구", "departments": ["피부과"],
+                     "is_registered_facility": True, "tel": "" if i == 9002 else "053-000-1234",
+                     "staff_languages": [], "ai_translation_chat": False} for i in (1, 9002)]
+            return {"count": 12, "hospitals": rows}
+    res = R.run("search_hospitals", {"department": "피부과"}, ToolContext(residency="short_term", hospitals=Db()))
+    assert res["shown"] == 2 and "Showing 2 of 12" in res["note"]
+    assert res["hospitals"][1]["tel"] is None and "demo hospitals" in res["note"]
+
+
+def test_not_joined_reason_says_registered_but_not_partner():
+    class Db:
+        def booking_info(self, hospital_id):
+            return {"id": 1, "name_en": "Real", "departments": ["피부과"], "is_registered_facility": True,
+                    "accepts_requests": False, "tel": "053-000-0000", "hours": {}}
+    res = R.run("prepare_booking_request", {"hospital_id": 1}, ToolContext(residency="short_term", hospitals=Db()))
+    assert res["status"] == "not_available" and "registered foreign-patient facility" in res["reason"]
+    assert "not a MediDaegu partner" in res["reason"]

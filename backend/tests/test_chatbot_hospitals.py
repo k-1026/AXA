@@ -116,7 +116,7 @@ def test_실제_등록_병원은_예약_초안을_만들지_않음(client, db_en
     r = client.post(ASK, headers=auth(token), json={"message": "book Y1, no visa help"})
     assert "booking_draft" not in cards(r)
     out = _tool_result(llm, "prepare_booking_request")
-    assert out["status"] == "not_available" and "not joined" in out["reason"]
+    assert out["status"] == "not_available" and "not a MediDaegu partner" in out["reason"]
 
 
 def test_가상_병원_예약_가능_시간은_진료_시간에서(client, db_engine, llm):

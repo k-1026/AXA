@@ -113,7 +113,7 @@ def test_tool_error_goes_back_to_model_without_card():
     orch, llm = make([call(("search_hospitals", {"department": "피부과", "district": "강남구"})), say("Which district in Daegu?")])
     reply = orch.handle(ConversationState(), "강남구 피부과")
     assert reply.trace[0].ok is False and reply.cards == []
-    assert "problems" in llm.calls[1][0][-1]["content"]
+    assert "error" in llm.calls[1][0][-1]["content"]  # 대구에 없는 지역 → 오류를 모델에 돌려줌
 
 
 def test_step_limit_forces_answer_without_tools():
