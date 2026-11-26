@@ -4,7 +4,7 @@ import markup from './demo/markup.html?raw';
 import { startDashboard } from './demo/legacy.js';
 import './demo/demo.css';
 
-// 입점 병원 대시보드 (/dashboard). 예전 dashboard/대시보드.html(포트 5175)을 그대로 옮겨 옴:
+// 옛 입점 병원 대시보드 (/dashboard/legacy, 보관용 — 기능을 새 /dashboard로 옮기면 삭제). 예전 dashboard/대시보드.html(포트 5175)을 그대로 옮겨 옴:
 // 화면 틀은 demo/markup.html, 동작은 demo/legacy.js, 스타일은 demo/demo.css (.md-dashboard 아래로만)
 export default function DashboardPage() {
   const host = useRef<HTMLDivElement>(null);

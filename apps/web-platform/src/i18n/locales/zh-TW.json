@@ -128,6 +128,10 @@
   "hospital": {
     "homepage": "官網",
     "instagram": "Instagram",
+    "email": "電子郵件",
+    "languages": "診療·諮詢語言",
+    "parkingNote": "停車說明",
+    "edited": "含醫院自行更新的資訊",
     "more": "查看更多（剩餘 {{count}} 家）",
     "empty": "沒有符合條件的醫院。",
     "back": "醫院列表",

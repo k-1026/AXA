@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import type { TabProps } from './props';
 import { Card, Locked } from '../ui';
-import { AFTERCARE_CASE, AFTERCARE_KEYWORDS, AFTERCARE_STATUS, IMPROVEMENTS, SATISFACTION } from '../sample';
+import { AFTERCARE_KEYWORDS } from '../sample';
+import AftercareStatusTiles from '../AftercareStatusTiles';
+import AftercareChat from '../AftercareChat';
+import { useStaffExpired } from '../useStaffExpired';
 
 const GUIDE_TEMPLATE = [
   '귀국 후 주의사항 (병원이 작성)',
@@ -14,10 +17,14 @@ const GUIDE_TEMPLATE = [
 export default function AftercareTab({ mode }: TabProps) {
   const operating = mode === 'operating';
   const [checked, setChecked] = useState<boolean[]>(GUIDE_TEMPLATE.map((_, i) => i > 2));
+  const onExpired = useStaffExpired();
+  const [rev, setRev] = useState(0); // 채팅에서 답장·상태를 바꾸면 처리 현황도 다시 불러옴
 
   return (
     <div className="grid">
-      <Card title="방문 후 안내문·체크리스트" kind="setup" wide={!operating}>
+      {/* 방문 후 안내문·체크리스트: 초기 모드에서만 (운영 후 모드에서는 뺌) */}
+      {!operating && (
+      <Card title="방문 후 안내문·체크리스트" kind="setup" wide>
         <ul className="checklist">
           {GUIDE_TEMPLATE.map((g, i) => (
             <li key={g}>
@@ -30,16 +37,13 @@ export default function AftercareTab({ mode }: TabProps) {
         </ul>
         <p className="note">KHIDI 다국어 서식집을 참고한 기본 항목. 방문 완료 환자에게 언어별로 자동 전달돼요. 사후 진료 판단은 의료진이 상담 화면에서 직접 해요</p>
       </Card>
+      )}
 
       {operating ? (
         <>
-          <Card title="처리 현황" kind="example">
-            <ul className="today">
-              {AFTERCARE_STATUS.map((s) => (
-                <li key={s.name} className={s.name === '미답변' ? 'is-alert' : undefined}><b>{s.n}</b>{s.name}</li>
-              ))}
-            </ul>
-          </Card>
+          <AftercareStatusTiles key={rev} onExpired={onExpired} />
+          {/* 반복 키워드(1) | 사후관리 채팅(2) 한 줄 */}
+          <div className="row-1-2">
           <Card title="반복 키워드 (지난달 대비)" kind="example">
             <table className="tbl">
               <thead><tr><th>키워드</th><th>이번 달</th><th>지난달</th></tr></thead>
@@ -51,23 +55,8 @@ export default function AftercareTab({ mode }: TabProps) {
             </table>
             <p className="note">&lsquo;안내 부족&rsquo;과 &lsquo;비용 설명&rsquo;이 늘었어요 → 안내문에 미리 넣을 내용 확인</p>
           </Card>
-          <Card title="대표 사례" kind="example">
-            <p className="case-who">{AFTERCARE_CASE.who} · <span className="badge badge-locked">{AFTERCARE_CASE.keyword}</span></p>
-            <p>{AFTERCARE_CASE.summary}</p>
-            <p className="mini">이름·연락처·사진은 가림 · 원래 대화는 병원 직원만 열람</p>
-          </Card>
-          <Card title="개선 기록" kind="example">
-            <table className="tbl">
-              <thead><tr><th>날짜</th><th>바꾼 안내</th><th>관련 문의 (전→후)</th></tr></thead>
-              <tbody>
-                {IMPROVEMENTS.map((m) => <tr key={m.date}><td>{m.date}</td><td>{m.change}</td><td>{m.before} → {m.after}</td></tr>)}
-              </tbody>
-            </table>
-          </Card>
-          <Card title="만족도 (병원 내부용)" kind="example">
-            <p className="big">{SATISFACTION.score}<small> / 5 · 응답 {SATISFACTION.responses}명</small></p>
-            <p className="mini">환자 화면에 공개하지 않음 (치료경험담 광고 금지 유형)</p>
-          </Card>
+          <AftercareChat rev={rev} onExpired={onExpired} onChanged={() => setRev((n) => n + 1)} />
+          </div>
         </>
       ) : (
         <>

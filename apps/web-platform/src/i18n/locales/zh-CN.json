@@ -128,6 +128,10 @@
   "hospital": {
     "homepage": "官网",
     "instagram": "Instagram",
+    "email": "电子邮箱",
+    "languages": "诊疗·咨询语言",
+    "parkingNote": "停车说明",
+    "edited": "含医院自行更新的信息",
     "more": "查看更多（剩余 {{count}} 家）",
     "empty": "没有符合条件的医院。",
     "back": "医院列表",

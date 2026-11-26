@@ -97,6 +97,10 @@
   "hospital": {
     "homepage": "ウェブサイト",
     "instagram": "Instagram",
+    "email": "メール",
+    "languages": "診療・相談言語",
+    "parkingNote": "駐車案内",
+    "edited": "医療機関が直接更新した情報を含みます",
     "more": "もっと見る (残り{{count}}件)",
     "empty": "条件に合う病院がありません。",
     "back": "病院一覧",

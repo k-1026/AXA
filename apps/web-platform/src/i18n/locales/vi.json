@@ -128,6 +128,10 @@
   "hospital": {
     "homepage": "Trang web",
     "instagram": "Instagram",
+    "email": "Email",
+    "languages": "Ngôn ngữ tư vấn",
+    "parkingNote": "Thông tin đỗ xe",
+    "edited": "Có thông tin do phòng khám cập nhật",
     "more": "Xem thêm (còn {{count}} cơ sở)",
     "empty": "Không có bệnh viện phù hợp.",
     "back": "Danh sách bệnh viện",

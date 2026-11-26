@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { HospitalData } from './types';
+import { applyOverride, readOverrides } from './overrides';
 
 type State =
   | { status: 'loading' }
@@ -27,7 +28,11 @@ export function useHospitals(): State {
   useEffect(() => {
     let cancelled = false;
     load()
-      .then((data) => !cancelled && setState({ status: 'ready', data }))
+      // 병원이 대시보드에서 고친 정보를 덮어씀 (지금은 같은 브라우저 localStorage, overrides.ts)
+      .then((data) => {
+        const ov = readOverrides();
+        return !cancelled && setState({ status: 'ready', data: { ...data, items: data.items.map((h) => applyOverride(h, ov)) } });
+      })
       .catch(() => !cancelled && setState({ status: 'error' }));
     return () => {
       cancelled = true;
