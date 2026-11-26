@@ -250,6 +250,8 @@ if (existsSync(demoPath)) {
       hours: week,
       lunchWeek: d.lunch ? `${d.lunch[0]}~${d.lunch[1]}` : undefined,
       sunday: week[6] ? undefined : 'closed',
+      // 예시 병원 대표사진 (AI로 만든 가상 접수대 사진, 2026-11-26): public/hospitals/demo/<id>.jpg 가 있으면 사용
+      photo: existsSync(resolve(here, '../public/hospitals/demo', `${d.ykiho}.jpg`)) ? `/hospitals/demo/${d.ykiho}.jpg` : undefined,
     });
   }
   items.sort((a, b) => collator.compare(a.name, b.name));
