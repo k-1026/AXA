@@ -210,6 +210,38 @@ def test_nvidia_model_names_get_vendor_prefix():
     assert [p.model for p in other.providers()] == ["nemotron-x"]  # NVIDIA 주소가 아니면 건드리지 않음
 
 
+# --- nemotron 숨은 생각(reasoning) 끄기 (2026-11-25, 응답 속도) ---------------------------
+
+
+def test_nemotron_thinking_switch_is_sent_in_body():
+    on = LLMSettings(_env_file=None, gemini_api_key="", nemotron_api_key="k2", nemotron_model="n")
+    assert on.providers()[0].extra_body == {}  # 기본은 켬 (정확도 유지)
+    s = LLMSettings(_env_file=None, gemini_api_key="k", gemini_model="g", nemotron_api_key="k2", nemotron_model="n",
+                    nemotron_thinking=False)
+    gem, nemo = s.providers()
+    assert gem.extra_body == {}
+    assert nemo.extra_body == {"chat_template_kwargs": {"enable_thinking": False}}
+
+    seen = {}
+
+    def handler(req):
+        seen["body"] = json.loads(req.content)
+        return ok_text()
+
+    make_client(handler, providers=(nemo,)).chat([{"role": "user", "content": "x"}], tools=TOOLS)
+    assert seen["body"]["chat_template_kwargs"] == {"enable_thinking": False} and seen["body"]["tools"] == TOOLS
+
+
+def test_reasoning_content_is_not_echoed_back():
+    def handler(req):
+        return httpx.Response(200, json={"model": "m", "choices": [{"finish_reason": "tool_calls", "message": {
+            "role": "assistant", "content": "", "reasoning_content": "긴 생각...",
+            "tool_calls": [{"id": "c1", "type": "function", "function": {"name": "search_hospitals", "arguments": "{}"}}]}}]})
+
+    res = make_client(handler).chat([{"role": "user", "content": "x"}], tools=TOOLS)
+    assert "reasoning_content" not in res.as_assistant_message()
+
+
 # --- 모델·소요 시간 로그 (응답이 느린 이유를 배포 로그에서 보려고) ---------------------------
 
 

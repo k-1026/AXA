@@ -92,7 +92,9 @@ def tool_result_message(tool_call_id: str, name: str, result: Any) -> Message:
 
 
 _STANDARD_TOOL_CALL_KEYS = {"id", "type", "function", "index"}
-_STANDARD_MESSAGE_KEYS = {"role", "content", "tool_calls", "refusal", "annotations", "audio", "function_call"}
+_STANDARD_MESSAGE_KEYS = {"role", "content", "tool_calls", "refusal", "annotations", "audio", "function_call",
+                          # 숨은 생각 글: 다음 호출에 다시 보내면 입력 토큰만 늘어난다 (Gemini thought_signature와 달리 필요 없음)
+                          "reasoning_content", "reasoning"}
 
 
 def _parse_response(provider: ProviderConfig, data: dict[str, Any]) -> LLMResponse:
@@ -222,6 +224,7 @@ class LLMClient:
             "messages": messages,
             "temperature": self.temperature if temperature is None else temperature,
         }
+        body.update(provider.extra_body)
         if tools:
             body["tools"] = tools
             body["tool_choice"] = tool_choice or "auto"
