@@ -148,6 +148,7 @@ export function ConsultPage() {
             <div className="chat-composer">
               {form && (
                 <BookingForm
+                  hospital={hospitals.status === 'ready' ? hospitals.data.items.find((x) => x.id === active.hospitalId) : undefined}
                   member={consult.mode === 'member'}
                   onSubmit={async (b, extra) => {
                     await consult.requestBooking(b, extra);

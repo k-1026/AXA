@@ -497,7 +497,9 @@
       "changeTitle": "變更預約",
       "changeSubmit": "申請變更",
       "changeHint": "變更後醫院會重新確認，確認前顯示為「待確認」。",
-      "errTime": "請選擇現在之後的時間。"
+      "errTime": "請選擇現在之後的時間。",
+      "errClosed": "該日期或時間不在醫院門診時間內，請選擇門診時間內的日期與時間。",
+      "closedOption": "休診"
     },
     "visitedNote": "已完成就診，可在術後管理中與醫護人員交流。"
   },

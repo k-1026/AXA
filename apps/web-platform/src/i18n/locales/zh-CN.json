@@ -497,7 +497,9 @@
       "changeTitle": "更改预约",
       "changeSubmit": "申请更改",
       "changeHint": "更改后医院会重新确认，确认前显示为“待确认”。",
-      "errTime": "请选择现在之后的时间。"
+      "errTime": "请选择现在之后的时间。",
+      "errClosed": "该日期或时间不在医院诊疗时间内，请选择诊疗时间内的日期和时间。",
+      "closedOption": "休诊"
     },
     "visitedNote": "已完成就诊，可在术后管理中与医护人员交流。"
   },
