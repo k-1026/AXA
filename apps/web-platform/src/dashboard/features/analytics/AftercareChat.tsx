@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { Expired, LANG, NAT, TRT, call, errText, slotLabel } from './bookingShared';
+import { WaitBadge, WaitLegend, clinicMinutes, useClinicClock, waitLevel } from './waitTime';
 
 type Status = 'new' | 'in_progress' | 'resolved';
 type Thread = {
@@ -37,6 +38,18 @@ export default function AftercareChat({ rev, onExpired, onChanged }: { rev: numb
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ ok: boolean; msg: string } | null>(null);
   const box = useRef<HTMLDivElement>(null);
+  const { hours, now } = useClinicClock();
+  // 대기 시작점: 연 대화는 마지막 병원 답장 뒤 첫 환자 글(정확), 안 연 대화는 목록의 마지막 글 시각(목록 API에 첫 미답 시각이 없어 근사 — 실제보다 짧게 보일 수 있음)
+  const waitMin = (t: Thread) => {
+    if (t.status === 'resolved' || t.unanswered <= 0) return null;
+    let since = t.last_message_at;
+    if (thread?.id === t.id) {
+      const lastStaff = Math.max(0, ...thread.messages.filter((m) => m.sender !== 'patient').map((m) => Date.parse(m.created_at)));
+      const first = thread.messages.find((m) => m.sender === 'patient' && Date.parse(m.created_at) > lastStaff);
+      if (first) since = first.created_at;
+    }
+    return clinicMinutes(since, now, hours);
+  };
 
   const fail = useCallback((e: unknown) => {
     if (e instanceof Expired) { onExpired(); return true; }
@@ -104,24 +117,28 @@ export default function AftercareChat({ rev, onExpired, onChanged }: { rev: numb
         <h3>사후관리 채팅</h3>
         <span className="mini">{list ? `대화 ${list.length}개 · 미답변 ${list.filter((t) => t.status !== 'resolved' && t.unanswered > 0).length}개` : error ? '서버에서 불러오지 못했어요' : '불러오는 중…'}</span>
       </header>
+      <WaitLegend known={hours.known} />
 
       <div className="chat">
         <div className="chat-list" role="listbox" aria-label="사후관리 대화 목록">
-          {list?.length ? list.map((t) => (
+          {list?.length ? list.map((t) => {
+            const wm = waitMin(t);
+            return (
             <button key={t.id} type="button" role="option" aria-selected={sel === t.id}
-              className={`chat-item${sel === t.id ? ' is-on' : ''}`} onClick={() => pick(t.id)}>
-              <span className="chat-item-top"><b>{tid(t)} · {who(t)}</b>{t.status !== 'resolved' && t.unanswered > 0 && <i className="chat-dot" aria-label="답할 것 있음" />}</span>
+              className={`chat-item${sel === t.id ? ' is-on' : ''}${wm != null ? ` wait-edge-${waitLevel(wm)}` : ''}`} onClick={() => pick(t.id)}>
+              <span className="chat-item-top"><b>{tid(t)} · {who(t)}</b>{wm != null && <WaitBadge min={wm} />}</span>
               <span>{title(t)} <span className={`st-chip ${AC_CHIP[t.status]}`}>{AC_ST[t.status]}</span></span>
               <small>{t.last_message ? t.last_message.slice(0, 40) : sub(t)}</small>
             </button>
-          )) : <p className="mini chat-empty">{list ? '사후관리 대화가 없어요' : '불러오는 중…'}</p>}
+            );
+          }) : <p className="mini chat-empty">{list ? '사후관리 대화가 없어요' : '불러오는 중…'}</p>}
         </div>
 
         {cur ? (
           <div className="chat-thread">
             <div className="chat-head">
               <div>
-                <b>{tid(cur)} · {title(cur)}</b>
+                <b>{tid(cur)} · {title(cur)} {waitMin(cur) != null && <WaitBadge min={waitMin(cur)!} />}</b>
                 <small>{who(cur)} · {sub(cur)}</small>
               </div>
               <div className="day-acts">

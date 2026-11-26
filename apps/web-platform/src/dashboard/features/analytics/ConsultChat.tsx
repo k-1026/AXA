@@ -7,6 +7,7 @@ import {
   ACTIONS, ActionDialog, Expired, ST, call, errText, loadOpenRequests, reqId, reqTitle, reqWho, slotLabel,
   type ActionMode, type DbReq,
 } from './bookingShared';
+import { WaitBadge, WaitLegend, clinicMinutes, useClinicClock, waitLevel } from './waitTime';
 
 type Msg = { from: 'patient' | 'staff'; main: string; sub: string | null; at: string };
 
@@ -16,6 +17,14 @@ const lastAsk = (r: DbReq) => Math.max(0, ...(r.questions ?? []).map((x) => Date
 const lastReply = (r: DbReq) => Math.max(0, ...(r.replies ?? []).map((x) => Date.parse(x.sent_at)));
 // 빨간 점: 대기 중인데 병원 답장이 없거나, 마지막 글이 환자 질문
 const unread = (r: DbReq) => (r.status === 'pending' && !(r.replies ?? []).length) || lastAsk(r) > lastReply(r);
+// 답하지 않은 첫 환자 글 시각 (대기 시간 시작점): 마지막 답장 뒤의 첫 질문, 답장이 없는 대기 요청은 요청 시각
+const waitingSince = (r: DbReq): string | null => {
+  const lr = lastReply(r);
+  const q = (r.questions ?? []).filter((x) => Date.parse(x.created_at) > lr).sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at))[0];
+  if (q) return q.created_at;
+  if (r.status === 'pending' && !(r.replies ?? []).length) return r.created_at;
+  return null;
+};
 const sub = (r: DbReq) =>
   (r.status === 'proposed' && r.confirmed_slot ? `시간 제안함 ${slotLabel(r.confirmed_slot)}`
     : r.status === 'confirmed' && r.confirmed_slot ? `확정 ${slotLabel(r.confirmed_slot)}`
@@ -42,6 +51,8 @@ export default function ConsultChat({ rev, onExpired, onChanged }: { rev: number
   const [note, setNote] = useState<{ ok: boolean; msg: string } | null>(null);
   const [open, setOpen] = useState<ActionMode | null>(null);
   const box = useRef<HTMLDivElement>(null);
+  const { hours, now } = useClinicClock();
+  const waitMin = (r: DbReq) => { const since = waitingSince(r); return since ? clinicMinutes(since, now, hours) : null; };
 
   const load = useCallback(async () => {
     try { setList(await loadOpenRequests()); setError(false); }
@@ -76,26 +87,30 @@ export default function ConsultChat({ rev, onExpired, onChanged }: { rev: number
       <header className="card-head">
         <span className="badge badge-live">실제</span>
         <h3>상담 채팅</h3>
-        <span className="mini">{list ? `대화 ${list.length}개 · 답할 것 ${list.filter(unread).length}개` : error ? '서버에서 불러오지 못했어요' : '불러오는 중…'}</span>
+        <span className="mini">{list ? `대화 ${list.length}개 · 답할 것 ${list.filter(unread).length}개 · 위급 ${list.filter((r) => { const m = waitMin(r); return m != null && waitLevel(m) === 'urgent'; }).length}개` : error ? '서버에서 불러오지 못했어요' : '불러오는 중…'}</span>
       </header>
+      <WaitLegend known={hours.known} />
 
       <div className="chat">
         <div className="chat-list" role="listbox" aria-label="상담 목록">
-          {list?.length ? list.map((r) => (
+          {list?.length ? list.map((r) => {
+            const wm = waitMin(r);
+            return (
             <button key={r.id} type="button" role="option" aria-selected={cur?.id === r.id}
-              className={`chat-item${cur?.id === r.id ? ' is-on' : ''}`} onClick={() => pick(r.id)}>
-              <span className="chat-item-top"><b>{reqId(r)} · {reqWho(r)}</b>{unread(r) && <i className="chat-dot" aria-label="답할 것 있음" />}</span>
+              className={`chat-item${cur?.id === r.id ? ' is-on' : ''}${wm != null ? ` wait-edge-${waitLevel(wm)}` : ''}`} onClick={() => pick(r.id)}>
+              <span className="chat-item-top"><b>{reqId(r)} · {reqWho(r)}</b>{wm != null && <WaitBadge min={wm} />}</span>
               <span>{reqTitle(r)} <span className={`st-chip st-${r.status}`}>{ST[r.status]}</span></span>
               <small>{sub(r)}</small>
             </button>
-          )) : <p className="mini chat-empty">{list ? '대화가 없어요' : '불러오는 중…'}</p>}
+            );
+          }) : <p className="mini chat-empty">{list ? '대화가 없어요' : '불러오는 중…'}</p>}
         </div>
 
         {cur ? (
           <div className="chat-thread">
             <div className="chat-head">
               <div>
-                <b>{reqId(cur)} · {reqTitle(cur)}</b>
+                <b>{reqId(cur)} · {reqTitle(cur)} {waitMin(cur) != null && <WaitBadge min={waitMin(cur)!} />}</b>
                 <small>{reqWho(cur)} · {sub(cur)}</small>
               </div>
               <div className="day-acts">

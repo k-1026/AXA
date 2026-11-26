@@ -270,6 +270,20 @@
 .hd .chat-confirm { border: 1px solid var(--accent); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
 .hd .chat-confirm p { margin: 0; font-size: .85rem; }
 .hd .chat-confirm-text { background: var(--surface-muted); border-radius: 6px; padding: 6px 8px; white-space: pre-wrap; }
+/* 답하지 않은 대기 시간 색 (waitTime.tsx): 신규 0~2h 초록 · 주의 2~4h 노랑 · 위급 4h+ 빨강 (진료시간 기준) */
+.hd .wait-new { --wait: #15803D; --wait-bg: #e6f4ea; --wait-ink: #15803D; }
+.hd .wait-warn { --wait: #F5B800; --wait-bg: #fff6d6; --wait-ink: #8a6500; }
+.hd .wait-urgent { --wait: #DC2626; --wait-bg: #fde7e7; --wait-ink: #DC2626; }
+.hd .wait { flex: none; font-size: .68rem; font-weight: 800; padding: 1px 7px; border-radius: 999px; white-space: nowrap; color: var(--wait-ink); background: var(--wait-bg); border: 1px solid var(--wait); }
+.hd .chat-head .wait { vertical-align: 2px; margin-left: 4px; }
+.hd .wait-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--wait); }
+.hd .wait-legend { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: .76rem; color: var(--text-muted); }
+.hd .wait-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.hd .wait-legend small { font-size: .72rem; }
+.hd .chat-item.wait-edge-new { box-shadow: inset 4px 0 0 #15803D; }
+.hd .chat-item.wait-edge-warn { box-shadow: inset 4px 0 0 #F5B800; background: #fffbea; }
+.hd .chat-item.wait-edge-urgent { box-shadow: inset 4px 0 0 #DC2626; background: #fff1f1; }
+.hd .chat-item.is-on[class*='wait-edge'] { background: var(--surface); }
 /* 사후관리: 반복 키워드(1) | 사후관리 채팅(2) */
 .hd .row-1-2 { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 16px; align-items: start; }
 @media (max-width: 1000px) { .hd .row-1-2 { grid-template-columns: 1fr; } }
