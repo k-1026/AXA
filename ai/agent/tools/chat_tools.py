@@ -36,8 +36,8 @@ from ai.agent.tools.booking_store import (
 from ai.agent.tools.registry import JSON, Tool, ToolContext, ToolError, ToolRegistry
 from ai.llm.safety import _VISA_RE
 
-# 사용자 언어 코드 = 프론트·백엔드가 지원하는 5개 (backend `patients.preferred_lang`, 요청서 `lang`)
-LANGS = ["en", "zh-CN", "zh-TW", "vi", "ko"]
+# 사용자 언어 코드 = 프론트·백엔드가 지원하는 6개 (backend `patients.preferred_lang`, 요청서 `lang`)
+LANGS = ["en", "zh-CN", "zh-TW", "vi", "ko", "ja"]
 # 한국어 진료과 이름 → DB `departments.code` (= 프론트 키, docs/backend-db-schema.md 5절).
 # 표에 없는 진료과(치과·정형외과·한방 등)는 병원 찾기까지만 되고 예약 요청은 못 한다. DB 진료과가 늘면 표만 넓힌다
 DEPT_CODES = {"피부과": "dermatology", "성형외과": "plastic", "내과": "internal", "안과": "ophthalmology"}

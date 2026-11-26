@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 from typing_extensions import Annotated
 
-Lang = Literal["ko", "en", "zh-TW", "zh-CN", "vi"]
+Lang = Literal["ko", "en", "zh-TW", "zh-CN", "vi", "ja"]
 
 
 def _check_tz(value: str) -> str:

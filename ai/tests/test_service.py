@@ -116,7 +116,7 @@ def test_input_validation_and_language_aliases():
             service.ask(ME, None, bad, "en")
         assert (e.value.status, e.value.code) == (422, "validation")
     with pytest.raises(ChatServiceError) as e:
-        service.ask(ME, None, "hi", "ja")  # 프론트·백엔드가 지원하지 않는 언어
+        service.ask(ME, None, "hi", "th")  # 프론트·백엔드가 지원하지 않는 언어 (ja는 11-26 추가)
     assert e.value.code == "validation" and "zh-CN" in e.value.detail["supported"]
     service.ask(ME, None, "你好", "zh")  # 옛 코드는 zh-CN으로
     assert "language=zh-CN" in system_prompt(llm)

@@ -11,8 +11,8 @@ from typing import Annotated, Any, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
-UI_LANGUAGES = ("ko", "en", "zh-TW", "zh-CN", "vi")  # 백엔드 patients.preferred_lang · 프론트 번역 파일과 같음
-Language = Literal["ko", "en", "zh-TW", "zh-CN", "vi"]
+UI_LANGUAGES = ("ko", "en", "zh-TW", "zh-CN", "vi", "ja")  # 백엔드 patients.preferred_lang · 프론트 번역 파일과 같음
+Language = Literal["ko", "en", "zh-TW", "zh-CN", "vi", "ja"]
 
 
 class _Model(BaseModel):

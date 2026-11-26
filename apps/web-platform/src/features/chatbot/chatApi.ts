@@ -2,7 +2,7 @@
 // 카드 형식의 기준은 백엔드 ai/agent/schemas.py (OpenAPI → packages/shared-types가 생기면 그 타입으로 교체)
 import { api } from '../../components/api';
 
-export type ChatLang = 'ko' | 'en' | 'zh-TW' | 'zh-CN' | 'vi';
+export type ChatLang = 'ko' | 'en' | 'zh-TW' | 'zh-CN' | 'vi' | 'ja';
 
 export interface HospitalBrief {
   hospital_id: number;
@@ -55,7 +55,7 @@ export interface ChatResponse {
   medical_notice: boolean;
 }
 
-const LANGS: ChatLang[] = ['ko', 'en', 'zh-TW', 'zh-CN', 'vi'];
+const LANGS: ChatLang[] = ['ko', 'en', 'zh-TW', 'zh-CN', 'vi', 'ja'];
 export const chatLang = (lng: string): ChatLang => (LANGS as string[]).includes(lng) ? (lng as ChatLang) : 'en';
 
 export const askChatbot = (token: string, sessionId: string | undefined, message: string, language: ChatLang) =>
