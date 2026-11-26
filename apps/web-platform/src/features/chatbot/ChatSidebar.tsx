@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLocalized } from '../../lib/common';
 import { MoreMenu } from './MoreMenu';
-import { BotIcon, CloseIcon, GearIcon, InfoIcon, PlusIcon, SearchIcon } from './icons';
+import { BotIcon, CloseIcon, InfoIcon, PlusIcon, SearchIcon } from './icons';
 import { dayGroup, dotDate, listTime } from './time';
 import type { Conversation } from './types';
 import { lastActivity, type ChatMode } from './useConversations';
@@ -107,10 +106,6 @@ export function ChatSidebar({ mode, activeId, search, onNew, onSelect, onDelete,
           <InfoIcon />
           {t(`chat.saveNote.${mode}`)}
         </p>
-        <Link to="/mypage" className="chat-settings">
-          <GearIcon />
-          {t('chat.settings')}
-        </Link>
       </div>
     </aside>
   );

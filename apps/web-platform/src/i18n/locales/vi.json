@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "Đặt lịch khám tại Daegu bắt đầu từ MediDaegu.",
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",
     "login": "Đăng nhập / Đăng ký"
@@ -38,7 +39,7 @@
     "main": "Trang chủ",
     "hospitals": "Thông tin bệnh viện",
     "prices": "Hướng dẫn giá",
-    "chatbot": "Chatbot (Câu hỏi thường gặp)",
+    "chatbot": "Chatbot",
     "about": "Giới thiệu dịch vụ",
     "booking": "Tư vấn / Đặt lịch",
     "aftercare": "Chăm sóc sau khám",
@@ -128,6 +129,10 @@
   "hospital": {
     "homepage": "Trang web",
     "instagram": "Instagram",
+    "email": "Email",
+    "languages": "Ngôn ngữ tư vấn",
+    "parkingNote": "Thông tin đỗ xe",
+    "edited": "Có thông tin do phòng khám cập nhật",
     "more": "Xem thêm (còn {{count}} cơ sở)",
     "empty": "Không có bệnh viện phù hợp.",
     "back": "Danh sách bệnh viện",
@@ -150,7 +155,9 @@
     "rcvSat": "Giờ tiếp nhận (Thứ 7)",
     "noPhoto": "Chưa có ảnh đại diện",
     "consultBtn": "Tư vấn",
-    "reserveBtn": "Đặt lịch"
+    "reserveBtn": "Đặt lịch",
+    "notJoined": "Bệnh viện này chưa tham gia MediDaegu. Vui lòng liên hệ trực tiếp với bệnh viện.",
+    "callBtn": "Gọi điện"
   },
   "prices": {
     "more": "Xem thêm (còn {{count}} mục)",
@@ -240,7 +247,7 @@
     },
     "visits": {
       "title": "Nhật ký khám",
-      "subtitle": "Nhật ký riêng về các bệnh viện bạn đã đến và trải nghiệm của bạn.",
+      "subtitle": "Bệnh viện bạn đã đến khám sẽ tự động hiện từ lịch hẹn. Bạn chỉ cần ghi lại trải nghiệm của mình.",
       "private": "Chỉ mình bạn xem được",
       "formTitle": "Viết nhật ký mới",
       "hospital": "Bệnh viện",
@@ -253,13 +260,15 @@
       "cancel": "Hủy",
       "edit": "Sửa",
       "delete": "Xóa",
-      "deleteConfirm": "Xóa nhật ký này? Không thể hoàn tác.",
+      "deleteConfirm": "Xóa ghi chú của bạn? Không thể hoàn tác.",
       "listTitle": "Nhật ký đã lưu",
-      "none": "Chưa có nhật ký nào.",
+      "none": "Chưa có lần khám nào hoàn tất. Khi bệnh viện đánh dấu đã khám, lần khám sẽ tự động hiện ở đây.",
       "deviceNote": "Nhật ký không gửi lên máy chủ mà chỉ lưu trong trình duyệt này. Xóa dữ liệu trình duyệt sẽ mất nhật ký, và người dùng chung thiết bị có thể xem được, nên hãy cẩn thận trên thiết bị công cộng.",
       "errHospital": "Hãy nhập bệnh viện.",
       "errDate": "Hãy chọn ngày khám từ hôm nay trở về trước.",
-      "errNote": "Hãy nhập trải nghiệm của bạn."
+      "errNote": "Hãy nhập trải nghiệm của bạn.",
+      "auto": "Tự động từ lịch hẹn",
+      "treatment": "Điều trị"
     }
   },
   "legal": {
@@ -332,7 +341,6 @@
       "demo": "Hội thoại demo không được lưu",
       "member": "Hội thoại được lưu tự động"
     },
-    "settings": "Cài đặt",
     "summary": {
       "none": "Hội thoại mới",
       "hospital": "Thông tin bệnh viện",
@@ -501,7 +509,9 @@
       "changeTitle": "Đổi lịch",
       "changeSubmit": "Gửi yêu cầu đổi",
       "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\".",
-      "errTime": "Vui lòng chọn thời gian sau hiện tại."
+      "errTime": "Vui lòng chọn thời gian sau hiện tại.",
+      "errClosed": "Bệnh viện không làm việc vào ngày hoặc giờ đó. Vui lòng chọn ngày và giờ trong giờ làm việc.",
+      "closedOption": "Nghỉ"
     },
     "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
   },
@@ -542,7 +552,10 @@
     "cancelMsg": "Tôi đã hủy lịch hẹn {{when}}.",
     "footnote": "Giờ hẹn theo giờ Hàn Quốc (KST).",
     "sampleNote": "Bệnh viện và lịch hẹn mẫu.",
-    "proposedNote": "Bệnh viện đã đề xuất giờ khác. Vui lòng kiểm tra trong phần tư vấn.",
+    "proposedNote": "Bệnh viện đã đề xuất thời gian khác. Nếu phù hợp, hãy chấp nhận; nếu không, bạn có thể đổi hoặc hủy yêu cầu.",
+    "accept": "Chấp nhận thời gian này",
+    "proposedTime": "Thời gian đề xuất",
+    "acceptMsg": "Tôi đã chấp nhận thời gian bệnh viện đề xuất ({{when}}).",
     "expiredNote": "Tất cả ngày mong muốn đã qua nên yêu cầu này đã hết hạn.",
     "noShowNote": "Bệnh viện đã đánh dấu lịch hẹn này là không đến. Nếu muốn khám, vui lòng gửi yêu cầu đặt lịch mới."
   },
@@ -553,7 +566,7 @@
     "none": "Chưa có lần khám nào hoàn tất.",
     "start": "Sau khi lần khám được ghi nhận hoàn tất, bạn có thể trao đổi với nhân viên y tế của bệnh viện tại đây.",
     "visitedOn": "Khám ngày {{date}}",
-    "doctorLabel": "{{name}} · Nhân viên y tế",
+    "doctorLabel": "{{name}} · Nhân viên bệnh viện",
     "notice": "Hãy hỏi nhân viên y tế của bệnh viện về tình trạng sau điều trị. Nếu triệu chứng nặng hoặc xấu đi đột ngột, hãy gọi ngay cho bệnh viện hoặc 119.",
     "empty": "Hãy để lại câu hỏi hoặc tình trạng hiện tại. Bạn cũng có thể gửi ảnh và video.",
     "sampleNote": "Bệnh viện và tin nhắn mẫu, không phải hồ sơ khám thật.",
@@ -603,7 +616,10 @@
       "notJoined": "Bệnh viện này chưa nhận đặt lịch trên MediDaegu. Vui lòng liên hệ trực tiếp.",
       "duplicate": "Bạn đã có yêu cầu chưa xử lý ở bệnh viện này. Xem trong Quản lý đặt lịch.",
       "invalidTransition": "Không thể thực hiện ở trạng thái hiện tại. Vui lòng tải lại.",
-      "login": "Vui lòng đăng nhập."
+      "login": "Vui lòng đăng nhập.",
+      "timeConflict": "Thời gian này trùng với lịch hẹn khác. Không thể gửi yêu cầu trong vòng 1 giờ trước hoặc sau lịch hẹn bạn đã có (kể cả lịch đang chờ xác nhận). Vui lòng chọn giờ khác.",
+      "sameDay": "Bạn đã có lịch hẹn (hoặc yêu cầu) ở bệnh viện này trong ngày đó. Để đổi giờ, hãy sửa trong Quản lý đặt lịch.",
+      "tooMany": "Bạn có 5 yêu cầu đang chờ phản hồi. Hãy chờ bệnh viện trả lời hoặc hủy yêu cầu không cần, rồi thử lại."
     }
   },
   "staff": {
@@ -621,6 +637,7 @@
     "regNoHint": "Định dạng: M-2009-03-01-0013",
     "err": {
       "hospitalTaken": "Bệnh viện này đã tham gia. Liên hệ tài khoản đại diện.",
+      "signupClosed": "Trong thời gian trình diễn, chúng tôi chưa nhận đăng ký của bệnh viện thực. Vui lòng liên hệ đơn vị vận hành để tham gia.",
       "notRegistered": "Không phải cơ sở đã đăng ký hoặc không hoạt động nên không thể tham gia.",
       "tooMany": "Thử quá nhiều lần. Vui lòng thử lại sau."
     }
@@ -648,6 +665,42 @@
     "err": {
       "required": "Vui lòng trả lời câu hỏi về tình trạng lưu trú trước.",
       "notEligible": "Người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch. Nếu tình trạng đã thay đổi, hãy trả lời lại ở Trang của tôi."
+    }
+  },
+  "filter": {
+    "label": "Bộ lọc bệnh viện",
+    "dept": "Chuyên khoa",
+    "district": "Khu vực",
+    "lang": "Ngôn ngữ khám và tư vấn",
+    "deptTitle": "Bạn đang tìm dịch vụ khám nào?",
+    "multi": "Có thể chọn nhiều mục",
+    "city": "Thành phố Daegu",
+    "districtTitle": "Chọn quận/huyện",
+    "districtSearch": "Tìm quận/huyện",
+    "districtAll": "Toàn Daegu",
+    "districtNone": "Không có quận/huyện phù hợp",
+    "langTitle": "Chọn ngôn ngữ bạn thấy dễ trao đổi",
+    "langNote": "Xem cách hỗ trợ ở trang chi tiết bệnh viện.",
+    "langSample": "Hiện chỉ các bệnh viện mẫu dùng để trình diễn có thông tin ngôn ngữ (dữ liệu mẫu). Bệnh viện chưa có thông tin ngôn ngữ không được đưa vào kết quả.",
+    "reset": "Xóa tất cả",
+    "apply": "Xem {{count}} bệnh viện",
+    "noResult": "Không có bệnh viện phù hợp",
+    "remove": "Bỏ điều kiện: {{label}}",
+    "close": "Đóng",
+    "applied": "Điều kiện đang áp dụng",
+    "notApplied": "Chưa áp dụng",
+    "direct": "Trao đổi trực tiếp",
+    "interpret": "Có hỗ trợ phiên dịch",
+    "sample": "Mẫu",
+    "langNoneShort": "Không có",
+    "langUnknown": "Chưa có thông tin hỗ trợ ngôn ngữ. Vui lòng hỏi trực tiếp bệnh viện.",
+    "langs": {
+      "ko": "Tiếng Hàn",
+      "en": "Tiếng Anh",
+      "ja": "Tiếng Nhật",
+      "zh": "Tiếng Trung",
+      "vi": "Tiếng Việt",
+      "ru": "Tiếng Nga"
     }
   }
 }

@@ -37,7 +37,7 @@ def test_병원이_확정_답장하면_알림_환자가_취소하면_알림_없�
     assert [(n["kind"], n["status"]) for n in got] == [("reply", None), ("status", "confirmed")]
     assert all(n["request_id"] == rid and n["hospital_id"] == h.id and n["read"] is False for n in got)
 
-    rid2 = post(client, make_hospital(db), me).json()["id"]
+    rid2 = post(client, make_hospital(db), me, preferred_slots=[slot(5)]).json()["id"]  # 다른 날 (1시간 규칙)
     assert client.post(f"/api/v1/me/booking-requests/{rid2}/cancel", json={}, headers=me).status_code == 200
     assert len(_mine(client, me)) == 2  # 내가 한 취소는 알리지 않음
 

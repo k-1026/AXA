@@ -19,16 +19,6 @@ export const SETUP_ITEMS: SetupItem[] = [
 ];
 
 // ── 운영 후 예시 ──
-export const KPI = [
-  { label: '상세페이지 방문자', now: 1240, prev: 1051, unit: '명' },
-  { label: '상담 신청', now: 86, prev: 79, unit: '건' },
-  { label: '예약 확정', now: 31, prev: 33, unit: '건' },
-  { label: '방문 완료', now: 24, prev: 23, unit: '건' },
-  { label: '취소율', now: 12, prev: 9, unit: '%', lowerIsBetter: true },
-];
-
-export const TODAY = { newConsults: 5, bookingRequests: 3, visitsToday: 2, unanswered: 4 };
-
 export const CHANNELS = [
   { name: '메디대구 지도·목록', visits: 610, consults: 41, bookings: 16 },
   { name: '인스타그램 링크', visits: 380, consults: 29, bookings: 5 },
@@ -80,14 +70,6 @@ export const PRE_VISIT_QUESTIONS = [
   { name: '예상 비용', n: 10, fix: '항목별 가격 범위 등록' },
 ];
 
-export const FUNNEL = [
-  { name: '병원 상세 조회', n: 1240 },
-  { name: '상담 시작', n: 86 },
-  { name: '예약 신청', n: 48 },
-  { name: '예약 확정', n: 31 },
-  { name: '방문 완료', n: 24 },
-];
-
 export const FIRST_REPLY = { medianMin: 160, prevMedianMin: 210, within1h: 38, outsideHours: 27 };
 
 export const CANCEL_REASONS = [
@@ -112,13 +94,6 @@ export const PREFERRED_DAYS = [
   { name: '일', req: 2, ok: 1 },
 ];
 
-export const AFTERCARE_STATUS = [
-  { name: '신규 문의', n: 6 },
-  { name: '미답변', n: 2 },
-  { name: '처리 중', n: 3 },
-  { name: '해결 완료', n: 18 },
-];
-
 export const AFTERCARE_KEYWORDS = [
   { name: '안내 부족', now: 7, prev: 4 },
   { name: '재방문 일정', now: 6, prev: 6 },
@@ -127,15 +102,19 @@ export const AFTERCARE_KEYWORDS = [
   { name: '대기시간', now: 2, prev: 3 },
 ];
 
-export const AFTERCARE_CASE = {
-  who: '대만 · 30대 · 방문 11/03',
-  summary: '귀국 후 관리 방법 안내문을 못 받았다고 문의. 중국어(번체) 안내문을 다시 보내고 해결.',
-  keyword: '안내 부족',
+export const SATISFACTION = { score: 4.6, responses: 17 };
+// 사후관리 평균 첫 답변 (분, 옛 대시보드 예시 5시간 40분) — 목록 API에 메시지 시각이 없어 예시 (대화별 조회는 열람 기록이 남아 쓰지 않음)
+export const AFTERCARE_FIRST_REPLY_MIN = 340;
+
+// ── 홈: 방문자 수 이번 달 vs 지난달 (일별, 옛 대시보드 통계 탭 예시값 그대로) ── page_events 생기면 실제로
+export const DAILY_VISITORS = {
+  now: [52, 61, 48, 70, 66, 90, 95, 58, 63, 72, 69, 84, 101, 97, 76, 88],
+  prev: [44, 50, 47, 55, 60, 71, 78, 49, 52, 58, 61, 66, 80, 79, 62, 70],
 };
 
-export const IMPROVEMENTS = [
-  { date: '10/20', change: '방문 후 안내문에 중국어(번체) 추가', before: 5, after: 2, keyword: '안내 부족' },
-  { date: '10/02', change: '상세페이지에 주차·지하철 안내 추가', before: 9, after: 4, keyword: '위치' },
+// ── 홈: 메디대구 전체 이용자 중 우리 병원 (옛 대시보드 통계 탭 예시값) ── 비율만, 다른 병원 순위·숫자는 안 보여 줌
+export const PLATFORM_SHARE = [
+  { label: '병원 페이지 방문자 비중', pct: 4.1 },
+  { label: '상담 요청 비중', pct: 5.3 },
+  { label: '같은 진료과 안에서 방문자 비중', pct: 11.8 },
 ];
-
-export const SATISFACTION = { score: 4.6, responses: 17 };

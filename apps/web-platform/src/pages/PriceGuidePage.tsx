@@ -46,8 +46,8 @@ export function PriceGuidePage() {
   // q가 있으면 시술 이름(한·영)이나 묶음 이름에 그 말이 들어간 것만. 하나도 없으면 전체를 보여 주고 안내
   const matched = q ? all.filter(({ c, p }) => [p.ko, p.en, c.ko, c.en].some((s) => norm(s).includes(norm(q)))) : all;
   const cards = matched.length ? matched : all;
-  // 더 보기 한 번 누르면 그다음부터 무한 스크롤
-  const { shown, showButton, more, sentinelRef, autoLoading } = useLoadMore(cards.length, PAGE_SIZE, `${dept ?? ''}|${q ?? ''}`);
+  // 처음부터 무한 스크롤 (시술 이름·진료과가 바뀌면 처음으로)
+  const { shown, sentinelRef, autoLoading } = useLoadMore(cards.length, PAGE_SIZE, `${dept ?? ''}|${q ?? ''}`, true);
   const visibleCards = cards.slice(0, shown);
 
   return (
@@ -83,11 +83,6 @@ export function PriceGuidePage() {
             </div>
           </section>
         ))}
-      {showButton && (
-        <button type="button" className="more-button" onClick={more}>
-          {t('prices.more', { count: cards.length - shown })}
-        </button>
-      )}
       {autoLoading && <div ref={sentinelRef} className="load-more-sentinel" aria-hidden="true" />}
 
       <p className="detail-source">{t('prices.notice')}</p>

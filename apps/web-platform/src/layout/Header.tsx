@@ -4,6 +4,7 @@ import { LANGUAGES } from '../i18n';
 import { CURRENCIES, useCurrency, type Currency } from '../components/currency';
 import { useAuth } from '../components/auth';
 import { NotificationBell } from '../features/notifications/NotificationBell';
+import { Logo } from '../components/Logo';
 
 export function Header() {
   const { t, i18n } = useTranslation();
@@ -14,9 +15,13 @@ export function Header() {
 
   return (
     <header className="site-header">
-      <Link to="/" className="brand">
-        MediDaegu
-      </Link>
+      <div className="brand-wrap">
+        <Link to="/" className="brand" aria-label="MediDaegu">
+          <Logo />
+        </Link>
+        {/* 캐치프레이즈 (2026-11 팀 확정, 화면 언어별) */}
+        <p className="brand-tagline">{t('header.tagline')}</p>
+      </div>
       <div className="header-actions">
         <label className="header-select">
           <span className="visually-hidden">{t('header.language')}</span>

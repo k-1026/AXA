@@ -8,6 +8,7 @@ import { BookingForm } from '../features/consult/BookingForm';
 import { HospitalThumb } from '../features/consult/HospitalThumb';
 import { bookingDateFull } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
+import { useHospitals } from '../features/hospital/useHospitals';
 import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { displayStatus, type BookingRequest, type DisplayStatus } from '../features/consult/types';
 import { LegalLinks } from '../features/legal/LegalLinks';
@@ -37,10 +38,12 @@ export function BookingsPage() {
   const text = useLocalized();
   const navigate = useNavigate();
   const consult = useConsultThreads();
+  const hospitals = useHospitals(); // 예약 변경 폼의 진료시간
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('visit');
   const [editing, setEditing] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [accepting, setAccepting] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   const all = consult.bookings;
@@ -127,7 +130,7 @@ export function BookingsPage() {
                 <div className="bk-when">
                   <CalendarIcon />
                   <p>
-                    {editable && <span className="bk-wish">{t('bookings.wish')} </span>}
+                    {editable && <span className="bk-wish">{t(status === 'proposed' ? 'bookings.proposedTime' : 'bookings.wish')} </span>}
                     {bookingDateFull(booking.date, booking.time, i18n.language)}
                   </p>
                   <span className={`consult-status is-${status}`}>{t(`consult.status.${status}`)}</span>
@@ -155,6 +158,7 @@ export function BookingsPage() {
                 {editing === key ? (
                   <BookingForm
                     initial={booking}
+                    hospital={hospitals.status === 'ready' ? hospitals.data.items.find((x) => x.id === thread.hospitalId) : undefined}
                     member={consult.mode === 'member'}
                     onSubmit={async (b, extra) => {
                       await consult.changeBooking(thread.hospitalId, message.id, b, t('bookings.changeMsg', { when: bookingDateFull(b.date, b.time, i18n.language) }), extra);
@@ -192,9 +196,28 @@ export function BookingsPage() {
                         {t('aftercare.aftercareButton')}
                       </button>
                     )}
+                    {status === 'proposed' && (
+                      <button
+                        type="button"
+                        className="is-primary"
+                        disabled={accepting === key}
+                        onClick={async () => {
+                          setAccepting(key);
+                          try {
+                            await consult.acceptBooking(thread.hospitalId, message.id, t('bookings.acceptMsg', { when: bookingDateFull(booking.date, booking.time, i18n.language) }));
+                            setCancelError(null);
+                          } catch (err) {
+                            setCancelError(t(bookingErrorKey(err)));
+                          }
+                          setAccepting(null);
+                        }}
+                      >
+                        {t('bookings.accept')}
+                      </button>
+                    )}
                     {editable && (
                       <>
-                        <button type="button" className="is-primary" onClick={() => setEditing(key)}>
+                        <button type="button" className={status === 'proposed' ? undefined : 'is-primary'} onClick={() => setEditing(key)}>
                           <PencilIcon />
                           {t('bookings.change')}
                         </button>

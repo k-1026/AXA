@@ -1,13 +1,13 @@
 import { useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CoinsIcon, HospitalIcon, PinIcon, PlusIcon, SendIcon, TranslateIcon } from './icons';
+import { CoinsIcon, HospitalIcon, PlusIcon, SendIcon, TranslateIcon } from './icons';
 import type { Topic } from './types';
 
 const QUICK: { topic: Topic; Icon: () => JSX.Element }[] = [
   { topic: 'hospital', Icon: HospitalIcon },
   { topic: 'price', Icon: CoinsIcon },
   { topic: 'interpret', Icon: TranslateIcon },
-  { topic: 'tour', Icon: PinIcon },
+  // 대구 관광 빠른 메뉴는 뺌 (2026-11-26) — '관광'을 직접 물으면 답은 그대로 나옴
 ];
 
 interface Props {

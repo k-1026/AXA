@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import type { TabProps } from './props';
-import { BarList, Card, Funnel, Locked, won } from '../ui';
-import { CANCEL_REASONS, FIRST_REPLY, FUNNEL, PREFERRED_DAYS, REPEAT_CHANGES, SAMPLE_HOURS } from '../sample';
+import { BarList, Card, Locked, won } from '../ui';
+import { CANCEL_REASONS, FIRST_REPLY, PREFERRED_DAYS, REPEAT_CHANGES, SAMPLE_HOURS } from '../sample';
+import BookingStatusTiles from '../BookingStatusTiles';
+import BookingCalendar from '../BookingCalendar';
+import BookingRequestList from '../BookingRequestList';
+import ConsultChat from '../ConsultChat';
+import { useStaffExpired } from '../useStaffExpired';
 import { DEPT_LABEL } from '../types';
 
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -20,32 +25,42 @@ export default function BookingTab({ data, mode, dept }: TabProps) {
   const pct = (n: number) => Math.round((n / h.known) * 100);
   const prices = data.prices.byDept[dept] ?? [];
   const deptName = DEPT_LABEL[dept];
+  const onExpired = useStaffExpired();
+  const [rev, setRev] = useState(0); // 캘린더·요청 목록·채팅 중 한 곳에서 처리하면 모두 다시 불러옴
+  const changed = () => setRev((n) => n + 1);
 
   return (
     <div className="grid">
-      <Card title="예약 가능 요일" kind="setup">
-        <div className="days">
-          {DAYS.map((d, i) => (
-            <button type="button" key={d} className={slots[i] ? 'day is-on' : 'day'} aria-pressed={slots[i]}
-              onClick={() => setSlots(slots.map((v, j) => (j === i ? !v : v)))}>{d}</button>
-          ))}
-        </div>
-        <p className="note">요일마다 받을 수 있는 시간대와 예약 수를 정하면 환자는 그 안에서만 신청해요</p>
-      </Card>
+      {/* 예약 현황 (DB): 운영 후 모드에서만 맨 위 */}
+      {operating && <BookingStatusTiles key={rev} onExpired={onExpired} />}
 
-      <Card title="자주 묻는 질문 기본 틀" kind="setup">
-        <ul className="faq">
-          {FAQ_TEMPLATE.map((f) => <li key={f.q}><b>{f.q}</b><span>{f.a}</span></li>)}
-        </ul>
-        <p className="note">KHIDI 다국어 서식집을 참고한 기본 질문. 답을 채우면 5개 언어로 보여요</p>
-      </Card>
+      {/* 예약 캘린더 (DB + 수기): 운영 후 모드에서만 */}
+      {operating && <BookingCalendar rev={rev} onExpired={onExpired} onChanged={changed} />}
+
+      {/* 예약 가능 요일·자주 묻는 질문: 초기 모드에서만 (운영 후 모드에서는 뺌) */}
+      {!operating && (
+        <>
+          <Card title="예약 가능 요일" kind="setup">
+            <div className="days">
+              {DAYS.map((d, i) => (
+                <button type="button" key={d} className={slots[i] ? 'day is-on' : 'day'} aria-pressed={slots[i]}
+                  onClick={() => setSlots(slots.map((v, j) => (j === i ? !v : v)))}>{d}</button>
+              ))}
+            </div>
+            <p className="note">요일마다 받을 수 있는 시간대와 예약 수를 정하면 환자는 그 안에서만 신청해요</p>
+          </Card>
+
+          <Card title="자주 묻는 질문 기본 틀" kind="setup">
+            <ul className="faq">
+              {FAQ_TEMPLATE.map((f) => <li key={f.q}><b>{f.q}</b><span>{f.a}</span></li>)}
+            </ul>
+            <p className="note">KHIDI 다국어 서식집을 참고한 기본 질문. 답을 채우면 5개 언어로 보여요</p>
+          </Card>
+        </>
+      )}
 
       {operating ? (
         <>
-          <Card title="어느 단계에서 환자를 놓치나?" kind="example" wide>
-            <Funnel steps={FUNNEL} />
-            <p className="note">비율은 바로 앞 단계 대비. 상담을 시작하고도 예약 신청까지 가는 건 56% → 첫 답변 시간·비용 안내 확인. 신청 → 확정 65% → 희망 시간대와 확정 가능 시간 확인</p>
-          </Card>
           <Card title="첫 답변 소요 시간" kind="example">
             <p className="big">{hm(FIRST_REPLY.medianMin)}<small> 중앙값</small></p>
             <p className="mini">지난달 {hm(FIRST_REPLY.prevMedianMin)} · 1시간 안에 답한 상담 {FIRST_REPLY.within1h}% · 상담 시간 밖 문의 {FIRST_REPLY.outsideHours}%</p>
@@ -67,33 +82,43 @@ export default function BookingTab({ data, mode, dept }: TabProps) {
         </>
       )}
 
-      <Card title={`대구 ${deptName} 진료시간 (진료시간 신고 ${h.known}곳 기준)`} kind="public" source={data.hours.source}>
-        <table className="tbl">
-          <thead><tr><th></th><th>대구 {deptName}</th><th>우리 병원</th></tr></thead>
-          <tbody>
-            <tr><td>평일 저녁 7시 이후</td><td>{pct(h.night)}%</td><td>{SAMPLE_HOURS.night ? '진료' : '–'}</td></tr>
-            <tr><td>토요일</td><td>{pct(h.saturday)}%</td><td>{SAMPLE_HOURS.saturday ? '진료' : '–'}</td></tr>
-            <tr><td>일요일</td><td>{pct(h.sunday)}%</td><td>{SAMPLE_HOURS.sunday ? '진료' : '–'}</td></tr>
-          </tbody>
-        </table>
-        <p className="mini">대구 {deptName} {h.total}곳 중 진료시간이 공개된 곳은 {h.known}곳 ({Math.round((h.known / h.total) * 100)}%) · 우리 병원 칸은 예시</p>
-      </Card>
+      {operating ? (
+        <>
+          {/* 운영 후: 공공 카드(진료시간·비급여 가격) 대신 요청 목록 · 상담 채팅 (DB) */}
+          <BookingRequestList rev={rev} onExpired={onExpired} onChanged={changed} />
+          <ConsultChat rev={rev} onExpired={onExpired} onChanged={changed} />
+        </>
+      ) : (
+        <>
+          <Card title={`대구 ${deptName} 진료시간 (진료시간 신고 ${h.known}곳 기준)`} kind="public" source={data.hours.source}>
+            <table className="tbl">
+              <thead><tr><th></th><th>대구 {deptName}</th><th>우리 병원</th></tr></thead>
+              <tbody>
+                <tr><td>평일 저녁 7시 이후</td><td>{pct(h.night)}%</td><td>{SAMPLE_HOURS.night ? '진료' : '–'}</td></tr>
+                <tr><td>토요일</td><td>{pct(h.saturday)}%</td><td>{SAMPLE_HOURS.saturday ? '진료' : '–'}</td></tr>
+                <tr><td>일요일</td><td>{pct(h.sunday)}%</td><td>{SAMPLE_HOURS.sunday ? '진료' : '–'}</td></tr>
+              </tbody>
+            </table>
+            <p className="mini">대구 {deptName} {h.total}곳 중 진료시간이 공개된 곳은 {h.known}곳 ({Math.round((h.known / h.total) * 100)}%) · 우리 병원 칸은 예시</p>
+          </Card>
 
-      <Card title={`대구 ${deptName} 비급여 가격 분포`} kind="public" source={prices.length ? data.prices.source : undefined}>
-        {prices.length ? (
-          <table className="tbl">
-            <thead><tr><th>항목</th><th>기관</th><th>최소</th><th>중앙</th><th>최대</th></tr></thead>
-            <tbody>
-              {prices.slice(0, 5).map((p) => (
-                <tr key={p.item}><td>{p.item}</td><td>{p.count}</td><td>{won(p.min)}</td><td><b>{won(p.median)}</b></td><td>{won(p.max)}</td></tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="note">대구 {deptName} 항목은 공공 비급여 가격이 없어요 (의원급은 공개 의무 없음). 가격 범위를 직접 등록하면 환자 화면에 &ldquo;병원 고지 가격&rdquo;으로 보여요</p>
-        )}
-        <p className="mini">다른 병원과 1:1 비교는 하지 않고 대구 전체 분포만 보여줘요</p>
-      </Card>
+          <Card title={`대구 ${deptName} 비급여 가격 분포`} kind="public" source={prices.length ? data.prices.source : undefined}>
+            {prices.length ? (
+              <table className="tbl">
+                <thead><tr><th>항목</th><th>기관</th><th>최소</th><th>중앙</th><th>최대</th></tr></thead>
+                <tbody>
+                  {prices.slice(0, 5).map((p) => (
+                    <tr key={p.item}><td>{p.item}</td><td>{p.count}</td><td>{won(p.min)}</td><td><b>{won(p.median)}</b></td><td>{won(p.max)}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="note">대구 {deptName} 항목은 공공 비급여 가격이 없어요 (의원급은 공개 의무 없음). 가격 범위를 직접 등록하면 환자 화면에 &ldquo;병원 고지 가격&rdquo;으로 보여요</p>
+            )}
+            <p className="mini">다른 병원과 1:1 비교는 하지 않고 대구 전체 분포만 보여줘요</p>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

@@ -57,6 +57,15 @@ export function ReservePage() {
       </section>
     );
   }
+  if (!h.demo) {
+    return (
+      <section className="placeholder-page">
+        <p>{t('hospital.notJoined')}</p>
+        {h.tel && <p><a href={`tel:${h.tel}`}>{t('hospital.callBtn')} · {h.tel}</a></p>}
+        <Link to="/hospitals">← {t('reserve.back')}</Link>
+      </section>
+    );
+  }
 
   const slots = date ? slotsFor(h, date, today, nowTime) : [];
   const weekdays = Array.from({ length: 7 }, (_, i) =>

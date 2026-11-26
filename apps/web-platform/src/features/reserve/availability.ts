@@ -37,20 +37,26 @@ export function addDays(date: string, n: number) {
 
 export type Slot = { time: string; free: boolean };
 
-export function slotsFor(h: Hospital, date: string, today: string, nowTime: string): Slot[] {
+// 그 병원 그날 진료시간 안의 30분 단위 시작 시간 (점심 제외). 휴진일이면 빈 목록
+// 서버도 진료시간 밖 희망 일시는 422 closed로 막음 (backend _check_open)
+export function openTimes(h: Hospital, date: string): string[] {
   const day = weekdayIndex(date);
   const week = h.hours ?? DEFAULT_WEEK;
   const range = week[day];
   if (!range) return [];
   const brk = h.hours ? lunch(day === 5 ? h.lunchSat : h.lunchWeek) : day === 5 ? null : ([13 * 60, 14 * 60] as [number, number]);
-  const slots: Slot[] = [];
+  const times: string[] = [];
   for (let m = toMin(range[0]); m + STEP <= toMin(range[1]); m += STEP) {
     if (brk && m < brk[1] && m + STEP > brk[0]) continue;
-    const time = toHhmm(m);
-    if (date === today && time <= nowTime) continue;
-    slots.push({ time, free: hash(`${h.id}|${date}|${time}`) % 100 >= 30 });
+    times.push(toHhmm(m));
   }
-  return slots;
+  return times;
+}
+
+export function slotsFor(h: Hospital, date: string, today: string, nowTime: string): Slot[] {
+  return openTimes(h, date)
+    .filter((time) => !(date === today && time <= nowTime))
+    .map((time) => ({ time, free: hash(`${h.id}|${date}|${time}`) % 100 >= 30 }));
 }
 
 export const isBookable = (h: Hospital, date: string, today: string, nowTime: string) =>

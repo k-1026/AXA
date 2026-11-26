@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "預約大邱醫療，從MediDaegu開始。",
     "language": "語言",
     "currency": "貨幣",
     "login": "登入 / 註冊"
@@ -38,7 +39,7 @@
     "main": "首頁",
     "hospitals": "醫院資訊",
     "prices": "價格指南",
-    "chatbot": "聊天機器人（常見問題）",
+    "chatbot": "聊天機器人",
     "about": "服務介紹",
     "booking": "諮詢/預約",
     "aftercare": "就診後管理",
@@ -128,6 +129,10 @@
   "hospital": {
     "homepage": "官網",
     "instagram": "Instagram",
+    "email": "電子郵件",
+    "languages": "診療·諮詢語言",
+    "parkingNote": "停車說明",
+    "edited": "含醫院自行更新的資訊",
     "more": "查看更多（剩餘 {{count}} 家）",
     "empty": "沒有符合條件的醫院。",
     "back": "醫院列表",
@@ -150,7 +155,9 @@
     "rcvSat": "掛號時間（週六）",
     "noPhoto": "暫無代表照片",
     "consultBtn": "諮詢",
-    "reserveBtn": "預約"
+    "reserveBtn": "預約",
+    "notJoined": "這家醫院尚未入駐 MediDaegu。諮詢、預約請直接聯絡醫院。",
+    "callBtn": "電話諮詢"
   },
   "prices": {
     "more": "顯示更多（還有 {{count}} 項）",
@@ -240,7 +247,7 @@
     },
     "visits": {
       "title": "就診紀錄",
-      "subtitle": "記錄您去過的醫院和當天經歷的私人日記。",
+      "subtitle": "已就診的醫院會從預約中自動顯示，您只需寫下當天的體驗。",
       "private": "僅您本人可見",
       "formTitle": "寫新紀錄",
       "hospital": "醫院",
@@ -253,13 +260,15 @@
       "cancel": "取消",
       "edit": "修改",
       "delete": "刪除",
-      "deleteConfirm": "要刪除這筆紀錄嗎？刪除後無法復原。",
+      "deleteConfirm": "要刪除寫下的體驗嗎？刪除後無法復原。",
       "listTitle": "已儲存的紀錄",
-      "none": "還沒有儲存的紀錄。",
+      "none": "還沒有已就診的醫院。醫院標記為已就診後，會自動顯示在這裡。",
       "deviceNote": "紀錄不會傳送到伺服器，只儲存在此瀏覽器中。清除瀏覽器資料後紀錄會一併消失，使用同一裝置的人也能看到，在公用裝置上請注意。",
       "errHospital": "請輸入醫院。",
       "errDate": "請選擇今天或更早的就診日期。",
-      "errNote": "請輸入您的經歷。"
+      "errNote": "請輸入您的經歷。",
+      "auto": "來自預約",
+      "treatment": "診療"
     }
   },
   "legal": {
@@ -332,7 +341,6 @@
       "demo": "示範對話不會被儲存",
       "member": "對話會自動儲存"
     },
-    "settings": "設定",
     "summary": {
       "none": "新對話",
       "hospital": "醫院資訊",
@@ -501,7 +509,9 @@
       "changeTitle": "變更預約",
       "changeSubmit": "申請變更",
       "changeHint": "變更後醫院會重新確認，確認前顯示為「待確認」。",
-      "errTime": "請選擇現在之後的時間。"
+      "errTime": "請選擇現在之後的時間。",
+      "errClosed": "該日期或時間不在醫院門診時間內，請選擇門診時間內的日期與時間。",
+      "closedOption": "休診"
     },
     "visitedNote": "已完成就診，可在術後管理中與醫護人員交流。"
   },
@@ -542,7 +552,10 @@
     "cancelMsg": "已取消{{when}}的預約。",
     "footnote": "預約時間以韓國時間（KST）為準。",
     "sampleNote": "範例醫院與預約資訊。",
-    "proposedNote": "醫院提議了其他時間，請在諮詢中確認。",
+    "proposedNote": "醫院建議了其他時間。如果合適請接受，不合適可以變更或取消。",
+    "accept": "接受這個時間",
+    "proposedTime": "建議時間",
+    "acceptMsg": "我已接受醫院建議的時間（{{when}}）。",
     "expiredNote": "所有希望日期皆已過去，此申請已過期。",
     "noShowNote": "醫院已將此預約標示為未到診。如需就診，請重新提出預約申請。"
   },
@@ -553,7 +566,7 @@
     "none": "還沒有已完成的就診。",
     "start": "在醫院完成診療並記錄為已就診後，可在這裡與該醫院的醫護人員交流。",
     "visitedOn": "{{date}} 就診",
-    "doctorLabel": "{{name}} · 醫護人員",
+    "doctorLabel": "{{name}} · 醫院工作人員",
     "notice": "診療後的狀態請詢問該醫院的醫護人員。如症狀嚴重或突然惡化，請立即致電醫院或撥打119。",
     "empty": "請留下診療後的疑問或目前的狀態，也可以傳送照片與影片。",
     "sampleNote": "範例醫院與對話，並非真實診療紀錄。",
@@ -603,7 +616,10 @@
       "notJoined": "這家醫院尚未在 MediDaegu 接受預約，請直接聯絡醫院。",
       "duplicate": "這家醫院已有尚未處理的申請，請到預約管理確認。",
       "invalidTransition": "目前狀態無法執行，請重新整理。",
-      "login": "請先登入。"
+      "login": "請先登入。",
+      "timeConflict": "與其他預約時間重疊。已有預約（含待確認）前後1小時內無法申請，請選擇其他時間。",
+      "sameDay": "您當天在這家醫院已有預約（申請）。如需改時間，請到預約管理修改。",
+      "tooMany": "您有5個申請正在等待回覆。請等醫院回覆或取消不需要的申請後再試。"
     }
   },
   "staff": {
@@ -621,6 +637,7 @@
     "regNoHint": "格式：M-2009-03-01-0013",
     "err": {
       "hospitalTaken": "這家醫院已經入駐，請聯絡醫院代表帳號。",
+      "signupClosed": "目前為展示期間，暫不受理真實醫院的入駐申請。如需入駐，請聯絡營運方。",
       "notRegistered": "不是已登記機構或未營業，無法入駐。",
       "tooMany": "嘗試次數過多，請稍後再試。"
     }
@@ -648,6 +665,42 @@
     "err": {
       "required": "請先回答居留狀態問題。",
       "notEligible": "居住在韓國的外國人無法申請諮詢・預約。如居留狀態有變，請到我的頁面重新回答。"
+    }
+  },
+  "filter": {
+    "label": "醫院篩選",
+    "dept": "診療類別",
+    "district": "地區",
+    "lang": "診療·諮詢語言",
+    "deptTitle": "您想找哪類診療？",
+    "multi": "可複選",
+    "city": "大邱廣域市",
+    "districtTitle": "選擇區·郡",
+    "districtSearch": "搜尋區·郡",
+    "districtAll": "大邱全部",
+    "districtNone": "沒有符合的區·郡",
+    "langTitle": "請選擇您方便溝通的語言",
+    "langNote": "支援方式請在醫院詳情頁確認。",
+    "langSample": "目前只有示範用範例醫院有語言資訊（範例資料）。沒有語言資訊的醫院不列入結果。",
+    "reset": "全部重設",
+    "apply": "查看{{count}}家醫院",
+    "noResult": "沒有符合條件的醫院",
+    "remove": "移除條件：{{label}}",
+    "close": "關閉",
+    "applied": "已套用的條件",
+    "notApplied": "尚未套用",
+    "direct": "可直接溝通",
+    "interpret": "提供口譯",
+    "sample": "範例",
+    "langNoneShort": "無",
+    "langUnknown": "尚無語言支援資訊，請直接向醫院確認。",
+    "langs": {
+      "ko": "韓語",
+      "en": "英語",
+      "ja": "日語",
+      "zh": "中文",
+      "vi": "越南語",
+      "ru": "俄語"
     }
   }
 }

@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "Your Partner in Medical Booking, MediDaegu.",
     "language": "Language",
     "currency": "Currency",
     "login": "Log in / Sign up"
@@ -38,7 +39,7 @@
     "main": "Home",
     "hospitals": "Hospitals",
     "prices": "Price guide",
-    "chatbot": "Chatbot (FAQ)",
+    "chatbot": "Chatbot",
     "about": "About",
     "booking": "Consultation / Booking",
     "aftercare": "Aftercare",
@@ -128,6 +129,10 @@
   "hospital": {
     "homepage": "Website",
     "instagram": "Instagram",
+    "email": "Email",
+    "languages": "Consultation languages",
+    "parkingNote": "Parking info",
+    "edited": "Includes details updated by the clinic",
     "more": "Show more ({{count}} left)",
     "empty": "No hospitals match these filters.",
     "back": "Hospital list",
@@ -150,7 +155,9 @@
     "rcvSat": "Reception (Sat)",
     "noPhoto": "No photo available",
     "consultBtn": "Consult",
-    "reserveBtn": "Book"
+    "reserveBtn": "Book",
+    "notJoined": "This hospital has not joined MediDaegu yet. Please contact the hospital directly.",
+    "callBtn": "Call"
   },
   "prices": {
     "more": "Show more ({{count}} left)",
@@ -240,7 +247,7 @@
     },
     "visits": {
       "title": "Visit log",
-      "subtitle": "Your private diary of the hospitals you visited and how it went.",
+      "subtitle": "Hospitals you visited appear here automatically from your bookings. Just write down how it went.",
       "private": "Only you can see this",
       "formTitle": "Add an entry",
       "hospital": "Hospital",
@@ -253,13 +260,15 @@
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete",
-      "deleteConfirm": "Delete this entry? This can't be undone.",
+      "deleteConfirm": "Delete your note? This can't be undone.",
       "listTitle": "Saved entries",
-      "none": "No entries yet.",
+      "none": "No completed visits yet. When a hospital marks your visit as completed, it shows up here automatically.",
       "deviceNote": "Entries aren't sent to a server. They stay in this browser only, so clearing browser data removes them, and anyone using this device can see them. Be careful on shared devices.",
       "errHospital": "Enter a hospital.",
       "errDate": "Choose a visit date that is today or earlier.",
-      "errNote": "Enter your experience."
+      "errNote": "Enter your experience.",
+      "auto": "From your booking",
+      "treatment": "Treatment"
     }
   },
   "legal": {
@@ -332,7 +341,6 @@
       "demo": "Demo chats are not saved",
       "member": "Chats are saved automatically"
     },
-    "settings": "Settings",
     "summary": {
       "none": "New chat",
       "hospital": "Hospital info",
@@ -501,7 +509,9 @@
       "changeTitle": "Change booking",
       "changeSubmit": "Request change",
       "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then.",
-      "errTime": "Please choose a time later than now."
+      "errTime": "Please choose a time later than now.",
+      "errClosed": "The hospital is not open at that day or time. Please choose a date and time within its hours.",
+      "closedOption": "Closed"
     },
     "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare."
   },
@@ -542,7 +552,10 @@
     "cancelMsg": "I cancelled my booking for {{when}}.",
     "footnote": "Booking times are in Korea Standard Time (KST).",
     "sampleNote": "Sample hospitals and bookings.",
-    "proposedNote": "The hospital proposed a different time. Please check it in the consultation chat.",
+    "proposedNote": "The hospital proposed a different time. Accept it if it works for you, or change or cancel the request.",
+    "accept": "Accept this time",
+    "proposedTime": "Proposed time",
+    "acceptMsg": "I accepted the time the hospital proposed ({{when}}).",
     "expiredNote": "All preferred dates have passed, so this request has expired.",
     "noShowNote": "The clinic marked this booking as not attended. To visit, please send a new booking request."
   },
@@ -553,7 +566,7 @@
     "none": "No completed visits yet.",
     "start": "After your treatment is recorded as completed, you can talk with that hospital’s medical staff here.",
     "visitedOn": "Visited {{date}}",
-    "doctorLabel": "{{name}} · Medical staff",
+    "doctorLabel": "{{name}} · Hospital staff",
     "notice": "Ask the hospital’s medical staff about your condition after treatment. If symptoms are severe or suddenly worse, call the hospital right away or dial 119.",
     "empty": "Tell the medical staff how you feel or ask a question. You can send photos and videos too.",
     "sampleNote": "Sample hospital and messages. Not a real medical record.",
@@ -603,7 +616,10 @@
       "notJoined": "This hospital does not take bookings on MediDaegu yet. Please contact the hospital directly.",
       "duplicate": "You already have a pending request at this hospital. Check My bookings.",
       "invalidTransition": "This is not possible in the current status. Please refresh.",
-      "login": "Please log in."
+      "login": "Please log in.",
+      "timeConflict": "This overlaps another booking. You can't request within 1 hour before or after a booking you already have (including pending ones). Please pick another time.",
+      "sameDay": "You already have a booking (or request) at this hospital on that day. To change the time, edit it in My bookings.",
+      "tooMany": "You have 5 requests waiting for a reply. Wait for the hospitals to answer or cancel ones you don't need, then try again."
     }
   },
   "staff": {
@@ -621,6 +637,7 @@
     "regNoHint": "Format: M-2009-03-01-0013",
     "err": {
       "hospitalTaken": "This hospital has already joined. Contact its owner account.",
+      "signupClosed": "We are not accepting sign-ups for real hospitals during the demo period. Please contact the operator to join.",
       "notRegistered": "Not a registered institution or not operating, so it cannot join.",
       "tooMany": "Too many attempts. Please try again later."
     }
@@ -648,6 +665,42 @@
     "err": {
       "required": "Please answer the questions about your stay first.",
       "notEligible": "Foreign residents of Korea cannot request consultations or bookings. If your status has changed, answer again in My Page."
+    }
+  },
+  "filter": {
+    "label": "Hospital filters",
+    "dept": "Medical category",
+    "district": "Area",
+    "lang": "Consultation language",
+    "deptTitle": "What care are you looking for?",
+    "multi": "You can choose more than one",
+    "city": "Daegu",
+    "districtTitle": "Choose districts",
+    "districtSearch": "Search districts",
+    "districtAll": "All of Daegu",
+    "districtNone": "No matching district",
+    "langTitle": "Choose the languages you're comfortable with",
+    "langNote": "Check the hospital page for how each language is supported.",
+    "langSample": "For now only the demo hospitals have language data (sample data). Hospitals without language data are not included.",
+    "reset": "Clear all",
+    "apply": "Show {{count}} hospitals",
+    "noResult": "No hospitals match these filters",
+    "remove": "Remove filter: {{label}}",
+    "close": "Close",
+    "applied": "Applied filters",
+    "notApplied": "Not applied yet",
+    "direct": "Speak directly",
+    "interpret": "Interpreter available",
+    "sample": "Sample",
+    "langNoneShort": "None",
+    "langUnknown": "No language information yet. Please ask the hospital directly.",
+    "langs": {
+      "ko": "Korean",
+      "en": "English",
+      "ja": "Japanese",
+      "zh": "Chinese",
+      "vi": "Vietnamese",
+      "ru": "Russian"
     }
   }
 }
