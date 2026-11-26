@@ -66,9 +66,15 @@ export function HospitalDetailPage() {
               {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
             </p>
           ) : (
-            <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult">
-              {t('consult.startWith')}
-            </Link>
+            // 목록 카드와 같은 두 버튼: 예약하기(달력 → 시간 → 신청) · 병원에 상담하기 (2026-11-26)
+            <div className="detail-actions">
+              <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="detail-consult">
+                {t('hospital.reserveBtn')}
+              </Link>
+              <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult is-secondary">
+                {t('consult.startWith')}
+              </Link>
+            </div>
           )}
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
