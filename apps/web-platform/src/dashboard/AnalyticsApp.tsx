@@ -74,6 +74,7 @@ export default function App() {
           <h1>{current.label}</h1>
           <p>{current.q}</p>
           <p className="legend">
+            <span className="badge badge-live">실제</span> 우리 병원 DB 데이터
             <span className="badge badge-setup">설정</span> 병원이 채우는 것
             <span className="badge badge-public">공공</span> 대구 기준선 (실제 공공데이터)
             <span className="badge badge-example">예시</span> 가짜 운영 데이터

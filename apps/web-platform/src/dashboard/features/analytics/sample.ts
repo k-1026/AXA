@@ -27,7 +27,6 @@ export const KPI = [
   { label: '취소율', now: 12, prev: 9, unit: '%', lowerIsBetter: true },
 ];
 
-export const TODAY = { newConsults: 5, bookingRequests: 3, visitsToday: 2, unanswered: 4 };
 
 export const CHANNELS = [
   { name: '메디대구 지도·목록', visits: 610, consults: 41, bookings: 16 },

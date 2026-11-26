@@ -69,6 +69,7 @@
 .hd .badge-public { color: var(--public); background: var(--public-soft); }
 .hd .badge-setup { color: var(--setup); background: var(--setup-soft); }
 .hd .badge-example { color: var(--example); background: var(--example-soft); }
+.hd .badge-live { color: var(--good); background: #e3f5ea; }
 .hd .badge-locked { color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); }
 
 .hd .note { margin: 0; font-size: .85rem; color: var(--text); background: var(--surface-muted); border-radius: 8px; padding: 8px 10px; }
@@ -109,6 +110,16 @@
 .hd .today b { font-size: 1.5rem; color: var(--text); }
 .hd .today li.is-alert { background: #fde8dd; }
 .hd .today li.is-alert b { color: var(--bad); }
+/* 홈 "오늘 할 일" 타일 (실제 DB, TodayTiles.tsx) */
+.hd .today-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.hd .today-tile { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); background: var(--surface); }
+.hd .today-tile:hover { border-color: var(--accent); }
+.hd .today-tile.is-alert { background: #fdf0e8; border-color: #f3c4a8; }
+.hd .today-label { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--text-muted); }
+.hd .today-val { font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.hd .today-tile.is-alert .today-val { color: var(--bad); }
+.hd .today-go { font-size: .8rem; color: var(--accent); font-weight: 600; }
+.hd .today-err { font-size: .8rem; color: var(--bad); }
 
 /* 막대 목록 */
 .hd .bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }

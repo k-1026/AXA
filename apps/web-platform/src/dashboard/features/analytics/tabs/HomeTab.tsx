@@ -1,15 +1,24 @@
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { TabProps } from './props';
 import { Card, Delta, Locked, LineChart, fmt } from '../ui';
-import { KPI, TODAY } from '../sample';
+import { KPI } from '../sample';
+import TodayTiles from '../TodayTiles';
+import { clearStaffToken } from '../../../../features/staff/staffSession';
 
 export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
   const done = setup.filter((s) => s.done).length;
   const p = data.patients;
   const visitors = data.visitors.monthly.filter((m) => m.days >= 28);
   const operating = mode === 'operating';
+  const navigate = useNavigate();
+  // 로그인 만료(401) → 토큰 지우고 로그인 화면으로
+  const onExpired = useCallback(() => { clearStaffToken(); navigate('/login', { replace: true, state: { who: 'staff' } }); }, [navigate]);
 
   return (
     <div className="grid">
+      <TodayTiles onExpired={onExpired} />
+
       {operating ? (
         <Card title="이번 달 성과 (지난달 대비)" kind="example" wide>
           <div className="kpis">
@@ -51,19 +60,6 @@ export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
           ))}
         </ul>
       </Card>
-
-      {operating ? (
-        <Card title="오늘 할 일" kind="example">
-          <ul className="today">
-            <li><b>{TODAY.newConsults}</b>새 상담</li>
-            <li><b>{TODAY.bookingRequests}</b>예약 요청</li>
-            <li><b>{TODAY.visitsToday}</b>오늘 방문 예정</li>
-            <li className="is-alert"><b>{TODAY.unanswered}</b>미답변 문의</li>
-          </ul>
-        </Card>
-      ) : (
-        <Locked title="오늘 할 일 (새 상담·예약 요청·오늘 방문·미답변)" when="첫 상담이 들어오면 여기에 모여요" />
-      )}
 
       <Card title="대구 등록 유치의료기관" kind="public" source={data.registered.source}>
         <p className="big">{fmt(data.registered.total)}<small>곳</small></p>
