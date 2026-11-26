@@ -26,6 +26,11 @@
       "ios": "Trên iPhone/iPad, nhấn Chia sẻ → \"Thêm vào Màn hình chính\" rồi mở từ đó để nhận thông báo.",
       "serverOff": "Hiện chưa dùng được thông báo trên thiết bị. Thông báo trong trang vẫn hoạt động.",
       "failed": "Không đổi được cài đặt thông báo. Vui lòng thử lại sau."
+    },
+    "reminder": {
+      "48h": "Lịch hẹn tại {{hospital}} còn chưa đầy 2 ngày. Nếu không đến được, hãy hủy sớm trong Quản lý đặt lịch.",
+      "24h": "Lịch hẹn tại {{hospital}} còn chưa đầy 24 giờ. Vui lòng kiểm tra giờ và địa điểm.",
+      "2h": "Lịch hẹn tại {{hospital}} còn chưa đầy 2 giờ. Hãy kiểm tra địa điểm trước khi đi."
     }
   },
   "header": {

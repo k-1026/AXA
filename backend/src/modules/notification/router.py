@@ -20,7 +20,7 @@ Me = Annotated[PatientPrincipal, Depends(current_patient)]
 
 class NotificationOut(BaseModel):
     id: int
-    kind: str  # status · reply · aftercare
+    kind: str  # status · reply · aftercare · reminder (status = 48h·24h·2h)
     request_id: str
     hospital_id: int | None  # 화면에서 병원 이름을 찾는 데 씀
     status: str | None

@@ -20,6 +20,7 @@ from modules.notification import push
 from modules.notification.models import KINDS, Notification
 
 NOTIFY_STATUS = ("confirmed", "rejected", "proposed", "visited", "no_show", "expired")
+REMINDER_STAGES = ("48h", "24h", "2h")  # 방문 전 리마인드 (notification/reminders.py)
 LIST_LIMIT = 50
 REALTIME_TTL = timedelta(hours=1)
 
@@ -28,6 +29,8 @@ def notify(db: Session, patient_id: uuid.UUID | None, kind: str, request_id: uui
     if patient_id is None:  # 탈퇴한 환자의 요청서
         return
     if kind not in KINDS or (kind == "status" and status not in NOTIFY_STATUS):
+        return
+    if kind == "reminder" and status not in REMINDER_STAGES:
         return
     db.add(Notification(patient_id=patient_id, kind=kind, request_id=request_id, status=status))
     push.queue(db, patient_id, kind, request_id, status)  # 구독한 브라우저에 commit 뒤 푸시 (결정 30)
