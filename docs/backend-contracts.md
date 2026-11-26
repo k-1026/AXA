@@ -90,7 +90,6 @@
 | `booking.service.get_for_patient(db, patient_id, request_id)` | B | A | → `BookingOut` / 없으면 `not_found` |
 | `booking.service.patient_accept(db, patient_id, request_id)` | B | A | → `BookingOut` |
 | `booking.service.patient_cancel(db, patient_id, request_id)` | B | A | → `BookingOut` |
-| `booking.service.is_open(db, hospital_id, slot: datetime)` | B | A (챗봇 초안, `modules/chatbot/hospitals.py`) · B 내부 (요청서 저장·시간 제안) | → `bool`. 한국 시간 기준 휴진일·진료 전후·점심이면 False, 그날 진료시간 데이터가 없거나 unknown이면 True (2026-11-26) |
 | `consent.service.require(db, patient_id, kinds: list[str], request_id=None)` | A | A·B | 없으면 `consent.required` |
 | `consent.service.record(db, patient_id, kind, version, lang, request_id=None)` | A | A | → `ConsentOut` |
 | `notification.service.notify(db, patient_id, kind, request_id, status=None)` | A | B (상태 변경·답장, **commit 전**) | `kind` = status·reply·aftercare. commit하지 않음 → 부르는 쪽 commit에 같이 (결정 27) |
@@ -106,7 +105,7 @@
 | 칸 | 타입 | 필수 | 비고 |
 |---|---|---|---|
 | `department_code` | str | O | 진료과 코드 = `departments.code` (`dermatology`, `plastic`, `internal`, `ophthalmology` …) |
-| `preferred_slots` | list[datetime] | O | 1~3개, 시간대 포함, 지금 이후만 → UTC로 저장. **그 병원 진료시간 안만** — 휴진일·진료 전후·점심이면 422 `validation`, `detail.errors[].loc = ["preferred_slots", i]` (진료시간 데이터 없으면 막지 않음, 2026-11-26) |
+| `preferred_slots` | list[datetime] | O | 1~3개, 시간대 포함, 지금 이후만 → UTC로 저장 |
 | `patient_timezone` | str (IANA, 예 `Asia/Taipei`) | O | 화면 표시용 |
 | `lang` | str (`ko`/`en`/`zh-TW`/`zh-CN`/`vi`/`ja`) | O | 요청 언어 (`patients.preferred_lang`·프론트 번역과 같은 6개, `ja`는 2026-11-26 추가) |
 | `nationality` | str (국가 코드) | O | |
@@ -235,7 +234,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
-| 2026-11-26 | 5·6·7 | 요청서 희망 일시는 그 병원 진료시간 안만 (422 `validation`, `loc: ["preferred_slots", i]`) · `booking.service.is_open()` 추가 (챗봇 초안도 같은 기준) · 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
+| 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
 | 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |
 | 2026-11-23 | 6-3 | 사진 썸네일: 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb?`, 응답 첨부에 `thumb_url`(환자·병원, 없으면 null) — 칸 추가만 (결정 29) | A (**B 확인 필요** — aftercare는 B 모듈, `router_tenant` 응답 칸 추가) | `backend-A-media-thumbs` → `backend` |
 | 2026-11-23 | 6-1·6-2·7 | 방문 전 환자 질문 `POST /me/booking-requests/{id}/questions`, 환자·병원 예약 응답에 `questions`, 챗봇 `hospital_question` 카드(초안만) (결정 32, 마이그레이션 0013). 챗봇 조건 맞춤 제안·예약 = 입점 가상 병원만 (결정 31) | A (**B 확인 필요** — booking 응답 칸 추가, `router_tenant` 한 곳) | `backend-A-chatbot-demo-flow` → `backend` (`backend-A-web-push` 다음) |

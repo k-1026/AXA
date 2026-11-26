@@ -40,7 +40,7 @@ def _data(**kw) -> dict:
         lang="zh-TW",
         nationality="TW",
         contact_method="email",
-        preferred_slots=["2026-11-20T02:00:00Z"],
+        preferred_slots=["2026-11-21T01:00:00Z"],
         department_code="dermatology",
         treatment="laser_toning",
         visa_needed=False,

@@ -21,7 +21,6 @@ from sqlalchemy.orm import Session
 from ai.agent.session_store import JSON
 from ai.agent.tools.chat_tools import DEPT_CODES
 from core.errors import AppError
-from modules.booking import service as booking_service
 from modules.hospital import service as hospital_service
 from modules.hospital.models import Hospital
 from modules.tenant.models import Tenant
@@ -103,10 +102,6 @@ class HospitalGateway:
             # d.can_request(등록·영업 중)만 보면 실제 병원도 true라 다음 턴에 "입점하지 않은 병원"으로 말이 바뀌었다 (2026-11-26)
             "can_request_consultation": bool(d.can_request) and hospital_id in self._accepting_demo_ids(),
         }
-
-    def is_open(self, hospital_id: int, slot) -> bool:
-        """희망 일시가 진료시간 안인지 — 백엔드 요청서 저장과 같은 기준 (booking.service.is_open)."""
-        return booking_service.is_open(self.db, hospital_id, slot)
 
     # ---------- 조건 맞춤 제안·예약 = 가상 병원만 (결정 31) ----------
 

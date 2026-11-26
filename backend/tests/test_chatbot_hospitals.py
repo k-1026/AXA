@@ -173,20 +173,3 @@ def test_입점_가상_병원만_상세에_요청_가능_목록에도_응대_언
     extra = _demo_extra().get(9002, {})
     assert h["staff_languages"] == extra.get("staff_languages", []) and h["ai_translation_chat"] == extra.get("ai_translation_chat", False)
 
-
-def test_가상_병원_휴진일_희망_일시는_초안_없이_후보만(client, db_engine, llm):
-    from sqlalchemy.orm import Session
-
-    from db_rows import demo_partner
-
-    with Session(db_engine) as s:
-        demo_partner(s, 9002)
-    token = _visitor(client)
-    llm.script += [call("prepare_booking_request", {"hospital_id": 9002, "department": "피부과", "preferred_slots": ["2030-12-08 10:00"],
-                                                    "language": "en", "nationality": "TW", "visa_needed": False, "visa_statement": "no visa help",
-                                                    "inquiry": "x"}), say("Closed that day.")]
-    r = client.post(ASK, headers=auth(token), json={"message": "book 9002 Sunday, no visa help"})
-    assert "booking_draft" not in cards(r)
-    out = _tool_result(llm, "prepare_booking_request")
-    assert out["status"] == "needs_info" and out["closed_slots"] == ["2030-12-08 10:00"]  # 2030-12-08 = 일요일
-    assert out["open_candidates"] == {"2030-12-08": []}
