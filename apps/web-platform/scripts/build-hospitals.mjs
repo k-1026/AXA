@@ -5,7 +5,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { englishName } from './romanize.mjs';
+import { chooseEnglishName } from './romanize.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '../../..');
@@ -170,10 +170,12 @@ function noHiraItem(reg) {
     console.warn(`⚠ 심평원·좌표 없음: ${reg.registration_no} ${reg.name_en}`);
     return null;
   }
+  // 한국어 이름이 없어 공식 영문명을 대소문자만 정리해 씀 (oblige plastic surgery clinic → Oblige Plastic Surgery Clinic)
+  const en = chooseEnglishName('', reg.name_en).nameEn;
   return {
     id: reg.registration_no,
-    name: reg.name_en,
-    nameEn: reg.name_en,
+    name: en,
+    nameEn: en,
     type: extra.type,
     district: extra.district,
     addr: extra.addr,
@@ -186,6 +188,15 @@ function noHiraItem(reg) {
     photo: photos.get(reg.registration_no),
   };
 }
+
+// 영어 이름: 공식 영문명(메디컬코리아 등록 목록) 우선, 없거나 다른 병원 이름이면 자동 표기 (docs/번역-표기-기준.md 2-1)
+const officialEn = new Map(registeredRows.filter((r) => r.ykiho).map((r) => [r.ykiho, r.name_en]));
+const nameSources = { manual: 0, official: 0, auto: 0 };
+const englishOf = (ykiho, nameKo) => {
+  const c = chooseEnglishName(nameKo, officialEn.get(ykiho));
+  nameSources[c.source]++;
+  return c.nameEn;
+};
 
 // 메디컬코리아 등록 유치의료기관 161곳 전부 (진료시간이 없으면 빈칸으로 표시)
 const items = registeredRows
@@ -203,7 +214,7 @@ const items = registeredRows
     return {
       id: r.ykiho,
       name,
-      nameEn: englishName(name),
+      nameEn: englishOf(r.ykiho, name),
       type: r.clCdNm,
       district: r.sgguCdNm.replace(/^대구/, ''),
       addr: r.addr,
@@ -272,3 +283,4 @@ writeFileSync(
   }),
 );
 console.log(`hospitals.json: ${items.length}곳`);
+console.log(`영어 이름: 공식 ${nameSources.official} · 수동 ${nameSources.manual} · 자동 ${nameSources.auto}`);
