@@ -29,14 +29,14 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('initial');
   const [dept, setDept] = useState<DeptKey>('dermatology');
   const [setup, setSetup] = useState(SETUP_ITEMS);
-  // 헤더 병원 이름·구: 로그인한 계정의 병원 (/tenant/me + 병원 목록). 운영 후 모드에서만, 초기 모드는 예시 그대로
+  // 헤더 병원 이름·구: 로그인한 계정의 병원 (/tenant/me + 병원 목록). 두 모드 모두, 못 불러오면 예시 이름
   const [profile, setProfile] = useState<HospitalProfile | null>(null);
   useEffect(() => {
     let alive = true;
     loadHospitalProfile(readStaffToken()).then((p) => { if (alive) setProfile(p); });
     return () => { alive = false; };
   }, []);
-  const real = mode === 'operating' && profile;
+  const real = profile;
 
   useEffect(() => {
     const onHash = () => {
