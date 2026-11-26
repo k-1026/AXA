@@ -67,7 +67,11 @@
 | `residency.required` | 422 | 계정에 체류 형태 답이 없음 → `PUT /me/residency` 먼저 (예약 요청 때, 결정 28) |
 | `residency.not_eligible` | 403 | 국내 거주 외국인 → 상담·예약 요청 불가, 정보 열람만 (의료법 제27조 제3항 제2호, 결정 28) |
 | `booking.invalid_transition` | 409 | 상태 흐름에 없는 변경 |
-| `booking.duplicate` | 409 | 같은 병원에 처리 안 된 요청이 이미 있음 |
+| `booking.duplicate` | 409 | (2026-11-26부터 안 씀 — 아래 시간 규칙으로 바뀜) |
+| `booking.time_conflict` | 409 | 내 다른 살아 있는 예약(확인 대기·시간 제안·확정, 어느 병원이든) 시간 앞뒤 60분 안. `detail` = `request_id`·`hospital_id`·`slot`·`buffer_minutes` (docs/booking-rules.md) |
+| `booking.same_day` | 409 | 같은 병원에 그날 살아 있는 예약(요청)이 이미 있음. `detail` = `request_id`·`date`(한국 날짜) |
+| `booking.too_many` | 409 | 처리 전 요청(확인 대기·시간 제안)이 이미 5건. `detail.max` |
+| `booking.patient_conflict` | 409 | (병원 쪽) 확정·제안하려는 시간이 그 환자의 다른 **확정** 예약과 60분 이내 → 다른 시간 제안. `detail`은 time_conflict와 같음 |
 | `hospital.not_requestable` | 403 | 상담·예약 요청을 받을 수 없는 병원 (`can_request = false`: 유치의료기관 미등록 또는 폐업·영업 미확인). `detail.reason` = `unregistered`/`not_operating`/`not_joined`(등록 기관이지만 메디대구 입점 안 함 = tenant 없음·`requests_enabled=false`, 예약 요청 때만). 병원 정보 공개(목록·상세·챗봇)는 **등록 병원만** — 미등록 병원은 목록에 없고 상세는 404 `not_found` (결정 21) |
 | `rate_limited` | 429 | 제출 횟수 초과 · 챗봇 호출 초과(`detail.limit` = `minute`/`day`/`sessions`, `detail.retry_after` 초) |
 | `fx.unavailable` | 503 | 환율을 받지 못했고 저장된 값도 없음 |
@@ -125,7 +129,7 @@
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
-| `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending`. 먼저 계정 체류 형태 확인(6-6절) | 422 `residency.required`, 403 `residency.not_eligible`, 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.duplicate`, 422 `consent.required`·`validation` |
+| `POST /hospitals/{hospital_id}/booking-requests` | 6절 `BookingCreate` → 201, 상태 `pending`. 먼저 계정 체류 형태 확인(6-6절) | 422 `residency.required`, 403 `residency.not_eligible`, 403 `hospital.not_requestable`(`unregistered`/`not_operating`/`not_joined`), 404 `not_found`, 409 `booking.time_conflict`·`booking.same_day`·`booking.too_many`, 422 `consent.required`·`validation` |
 | `GET /me/booking-requests` | 내 예약 요청 목록 (최근 순). 각 항목에 `questions[{text_original, text_translated, created_at}]` (방문 전 내 질문, 결정 32) | — |
 | `POST /me/booking-requests/{id}/questions` | `{text(1~1000자)}` → 201 `PatientBookingOut`. 방문 전(`pending`·`proposed`·`confirmed`)에만, 그 요청서에 번역 동의가 있으면 병원용 한국어 번역 (결정 32) | 409 `booking.invalid_transition`, 404, 422, 429 `rate_limited`(요청서당 30개) |
 | `GET /me/booking-requests/{id}` | 상세 | 404 `not_found`(남의 것 포함) |

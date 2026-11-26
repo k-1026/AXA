@@ -39,7 +39,7 @@ export function PriceGuidePage() {
     PROCEDURE_CATEGORIES.filter((c) => c.dept === d).flatMap((c) => c.items.map((p) => ({ d, c, p }))),
   );
   // 더 보기 한 번 누르면 그다음부터 무한 스크롤
-  const { shown, showButton, more, sentinelRef, autoLoading } = useLoadMore(cards.length, PAGE_SIZE, dept ?? '');
+  const { shown, sentinelRef, autoLoading } = useLoadMore(cards.length, PAGE_SIZE, dept ?? '', true);
   const visibleCards = cards.slice(0, shown);
 
   return (
@@ -67,11 +67,6 @@ export function PriceGuidePage() {
             </div>
           </section>
         ))}
-      {showButton && (
-        <button type="button" className="more-button" onClick={more}>
-          {t('prices.more', { count: cards.length - shown })}
-        </button>
-      )}
       {autoLoading && <div ref={sentinelRef} className="load-more-sentinel" aria-hidden="true" />}
 
       <p className="detail-source">{t('prices.notice')}</p>

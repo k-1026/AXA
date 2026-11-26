@@ -152,11 +152,64 @@ def test_희망_시간은_1_3개_미래만(client, db):
     assert post(client, h, me, preferred_slots=[slot(-1)]).status_code == 422
 
 
-def test_같은_병원에_처리_안된_요청이_있으면_409(client, db):
+# ---------- 중복 예약 규칙 (docs/booking-rules.md) ----------
+
+
+def at(days: int, hour: int) -> str:
+    """지금부터 days일 뒤 hour시 (UTC)."""
+    d = (datetime.now(timezone.utc) + timedelta(days=days)).replace(hour=hour, minute=0, second=0, microsecond=0)
+    return d.isoformat()
+
+
+def test_같은_병원도_처리_전_요청이_있어도_다른_날이면_요청_가능(client, db):
     h, me = make_hospital(db), patient(client)
-    assert post(client, h, me).status_code == 201
-    r = post(client, h, me)
-    assert (r.status_code, r.json()["code"]) == (409, "booking.duplicate")
+    assert post(client, h, me, preferred_slots=[at(3, 2)]).status_code == 201
+    assert post(client, h, me, preferred_slots=[at(4, 2)]).status_code == 201
+
+
+def test_같은_병원_같은_날은_시간이_달라도_409(client, db):
+    h, me = make_hospital(db), patient(client)
+    assert post(client, h, me, preferred_slots=[at(3, 1)]).status_code == 201
+    r = post(client, h, me, preferred_slots=[at(3, 6)])
+    assert (r.status_code, r.json()["code"]) == (409, "booking.same_day")
+
+
+def test_다른_병원이라도_앞뒤_1시간_안이면_409_1시간_떨어지면_가능(client, db):
+    h1, h2, h3, me = make_hospital(db), make_hospital(db), make_hospital(db), patient(client)
+    assert post(client, h1, me, preferred_slots=[at(3, 5)]).status_code == 201
+    r = post(client, h2, me, preferred_slots=[at(3, 5)[:14] + "30:00+00:00"])  # 30분 뒤
+    assert (r.status_code, r.json()["code"]) == (409, "booking.time_conflict")
+    assert r.json()["detail"]["hospital_id"] == h1.id
+    assert post(client, h3, me, preferred_slots=[at(3, 6)]).status_code == 201  # 정확히 1시간 뒤는 가능
+
+
+def test_희망_시간_3개_중_하나만_겹쳐도_409(client, db):
+    h1, h2, me = make_hospital(db), make_hospital(db), patient(client)
+    assert post(client, h1, me, preferred_slots=[at(3, 1), at(4, 1), at(5, 1)]).status_code == 201
+    r = post(client, h2, me, preferred_slots=[at(6, 1), at(5, 1)])
+    assert r.json()["code"] == "booking.time_conflict"
+
+
+def test_취소한_요청의_시간은_다시_쓸_수_있다(client, db):
+    h1, h2, me = make_hospital(db), make_hospital(db), patient(client)
+    rid = post(client, h1, me, preferred_slots=[at(3, 2)]).json()["id"]
+    assert client.post(f"/api/v1/me/booking-requests/{rid}/cancel", json={}, headers=me).status_code == 200
+    assert post(client, h2, me, preferred_slots=[at(3, 2)]).status_code == 201
+
+
+def test_다른_사람의_예약과는_겹쳐도_된다(client, db):
+    h = make_hospital(db)
+    a, b = patient(client, "a@example.com"), patient(client, "b@example.com")
+    assert post(client, h, a, preferred_slots=[at(3, 2)]).status_code == 201
+    assert post(client, h, b, preferred_slots=[at(3, 2)]).status_code == 201
+
+
+def test_처리_전_요청은_5건까지(client, db):
+    me = patient(client)
+    for i in range(5):
+        assert post(client, make_hospital(db), me, preferred_slots=[at(3 + i, 2)]).status_code == 201
+    r = post(client, make_hospital(db), me, preferred_slots=[at(9, 2)])
+    assert (r.status_code, r.json()["code"]) == (409, "booking.too_many")
 
 
 # ---------- 내 예약 ----------

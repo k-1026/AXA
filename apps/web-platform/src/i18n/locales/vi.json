@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "Đặt lịch khám tại Daegu bắt đầu từ MediDaegu.",
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",
     "login": "Đăng nhập / Đăng ký"
@@ -38,7 +39,7 @@
     "main": "Trang chủ",
     "hospitals": "Thông tin bệnh viện",
     "prices": "Hướng dẫn giá",
-    "chatbot": "Chatbot (Câu hỏi thường gặp)",
+    "chatbot": "Chatbot",
     "about": "Giới thiệu dịch vụ",
     "booking": "Tư vấn / Đặt lịch",
     "aftercare": "Chăm sóc sau khám",
@@ -237,7 +238,7 @@
     },
     "visits": {
       "title": "Nhật ký khám",
-      "subtitle": "Nhật ký riêng về các bệnh viện bạn đã đến và trải nghiệm của bạn.",
+      "subtitle": "Bệnh viện bạn đã đến khám sẽ tự động hiện từ lịch hẹn. Bạn chỉ cần ghi lại trải nghiệm của mình.",
       "private": "Chỉ mình bạn xem được",
       "formTitle": "Viết nhật ký mới",
       "hospital": "Bệnh viện",
@@ -250,13 +251,15 @@
       "cancel": "Hủy",
       "edit": "Sửa",
       "delete": "Xóa",
-      "deleteConfirm": "Xóa nhật ký này? Không thể hoàn tác.",
+      "deleteConfirm": "Xóa ghi chú của bạn? Không thể hoàn tác.",
       "listTitle": "Nhật ký đã lưu",
-      "none": "Chưa có nhật ký nào.",
+      "none": "Chưa có lần khám nào hoàn tất. Khi bệnh viện đánh dấu đã khám, lần khám sẽ tự động hiện ở đây.",
       "deviceNote": "Nhật ký không gửi lên máy chủ mà chỉ lưu trong trình duyệt này. Xóa dữ liệu trình duyệt sẽ mất nhật ký, và người dùng chung thiết bị có thể xem được, nên hãy cẩn thận trên thiết bị công cộng.",
       "errHospital": "Hãy nhập bệnh viện.",
       "errDate": "Hãy chọn ngày khám từ hôm nay trở về trước.",
-      "errNote": "Hãy nhập trải nghiệm của bạn."
+      "errNote": "Hãy nhập trải nghiệm của bạn.",
+      "auto": "Tự động từ lịch hẹn",
+      "treatment": "Điều trị"
     }
   },
   "legal": {
@@ -602,7 +605,10 @@
       "notJoined": "Bệnh viện này chưa nhận đặt lịch trên MediDaegu. Vui lòng liên hệ trực tiếp.",
       "duplicate": "Bạn đã có yêu cầu chưa xử lý ở bệnh viện này. Xem trong Quản lý đặt lịch.",
       "invalidTransition": "Không thể thực hiện ở trạng thái hiện tại. Vui lòng tải lại.",
-      "login": "Vui lòng đăng nhập."
+      "login": "Vui lòng đăng nhập.",
+      "timeConflict": "Thời gian này trùng với lịch hẹn khác. Không thể gửi yêu cầu trong vòng 1 giờ trước hoặc sau lịch hẹn bạn đã có (kể cả lịch đang chờ xác nhận). Vui lòng chọn giờ khác.",
+      "sameDay": "Bạn đã có lịch hẹn (hoặc yêu cầu) ở bệnh viện này trong ngày đó. Để đổi giờ, hãy sửa trong Quản lý đặt lịch.",
+      "tooMany": "Bạn có 5 yêu cầu đang chờ phản hồi. Hãy chờ bệnh viện trả lời hoặc hủy yêu cầu không cần, rồi thử lại."
     }
   },
   "staff": {
@@ -647,6 +653,42 @@
     "err": {
       "required": "Vui lòng trả lời câu hỏi về tình trạng lưu trú trước.",
       "notEligible": "Người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch. Nếu tình trạng đã thay đổi, hãy trả lời lại ở Trang của tôi."
+    }
+  },
+  "filter": {
+    "label": "Bộ lọc bệnh viện",
+    "dept": "Chuyên khoa",
+    "district": "Khu vực",
+    "lang": "Ngôn ngữ khám và tư vấn",
+    "deptTitle": "Bạn đang tìm dịch vụ khám nào?",
+    "multi": "Có thể chọn nhiều mục",
+    "city": "Thành phố Daegu",
+    "districtTitle": "Chọn quận/huyện",
+    "districtSearch": "Tìm quận/huyện",
+    "districtAll": "Toàn Daegu",
+    "districtNone": "Không có quận/huyện phù hợp",
+    "langTitle": "Chọn ngôn ngữ bạn thấy dễ trao đổi",
+    "langNote": "Xem cách hỗ trợ ở trang chi tiết bệnh viện.",
+    "langSample": "Hiện chỉ các bệnh viện mẫu dùng để trình diễn có thông tin ngôn ngữ (dữ liệu mẫu). Bệnh viện chưa có thông tin ngôn ngữ không được đưa vào kết quả.",
+    "reset": "Xóa tất cả",
+    "apply": "Xem {{count}} bệnh viện",
+    "noResult": "Không có bệnh viện phù hợp",
+    "remove": "Bỏ điều kiện: {{label}}",
+    "close": "Đóng",
+    "applied": "Điều kiện đang áp dụng",
+    "notApplied": "Chưa áp dụng",
+    "direct": "Trao đổi trực tiếp",
+    "interpret": "Có hỗ trợ phiên dịch",
+    "sample": "Mẫu",
+    "langNoneShort": "Không có",
+    "langUnknown": "Chưa có thông tin hỗ trợ ngôn ngữ. Vui lòng hỏi trực tiếp bệnh viện.",
+    "langs": {
+      "ko": "Tiếng Hàn",
+      "en": "Tiếng Anh",
+      "ja": "Tiếng Nhật",
+      "zh": "Tiếng Trung",
+      "vi": "Tiếng Việt",
+      "ru": "Tiếng Nga"
     }
   }
 }

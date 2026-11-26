@@ -1,17 +1,17 @@
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSavedHospitals } from './savedHospitals';
 
-const HEART = 'M12 20.5s-8-4.9-8-10.7A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.8c0 5.8-8 10.7-8 10.7Z';
+// 납작한(평면) 하트 한 개: 찜 전에는 진한 선만, 찜하면 빨간색으로 꽉 채움 (SNS '좋아요' 방식, 2026-11-26)
+const HEART =
+  'M12 20.6s-7.4-4.5-9.2-9C1.5 8.3 3.5 4.6 7.1 4.6c2 0 3.6 1.1 4.9 2.9 1.3-1.8 2.9-2.9 4.9-2.9 3.6 0 5.6 3.7 4.3 7-1.8 4.5-9.2 9-9.2 9Z';
 
-// 병원 찜 버튼. 찜할 때만 하트가 떠올랐다가 아래부터 색이 차오른다
+// 병원 찜 버튼. 찜할 때만 하트가 톡 커졌다가 제자리로 돌아온다
 export function SaveHeart({ id, name }: { id: string; name: string }) {
   const { t } = useTranslation();
   const { isSaved, toggle } = useSavedHospitals();
   const [popping, setPopping] = useState(false);
   const saved = isSaved(id);
-  // 카드마다 SVG id가 겹치지 않게. useId의 콜론(:r1:)은 url(#…) 참조에서 빼 둔다
-  const gradientId = `save-heart-fill-${useId().replace(/:/g, '')}`;
 
   return (
     <button
@@ -28,15 +28,7 @@ export function SaveHeart({ id, name }: { id: string; name: string }) {
       }}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <defs>
-          <linearGradient id={gradientId} x1="0.2" y1="0" x2="0.8" y2="1">
-            <stop offset="0" stopColor="#fb7185" />
-            <stop offset="1" stopColor="#e11d48" />
-          </linearGradient>
-        </defs>
-        <path className="save-heart-color" d={HEART} fill={`url(#${gradientId})`} />
-        <path className="save-heart-shine" d="M7.4 9.6a2.3 2.3 0 0 1 1.9-2" />
-        <path className="save-heart-line" d={HEART} />
+        <path d={HEART} />
       </svg>
     </button>
   );

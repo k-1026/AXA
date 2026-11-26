@@ -80,12 +80,25 @@ def test_not_enabled_tenant_rejects_requests(db):
     assert e.value.code == "not_found"
 
 
-def test_duplicate_open_request_is_409(db):
+def test_same_hospital_same_day_is_409(db):
     p, t = _patient(db), _tenant(db)
     service.create_request(db, p.id, t.id, _data())
     with pytest.raises(Exception) as e:
-        service.create_request(db, p.id, t.id, _data())
-    assert e.value.code == "booking.duplicate"
+        service.create_request(db, p.id, t.id, _data(preferred_slots=["2026-11-21T05:00:00Z"]))
+    assert e.value.code == "booking.same_day"
+
+
+def test_staff_cannot_confirm_time_overlapping_patients_other_confirmed_booking(db):
+    """병원이 확정·제안하려는 시간이 그 환자의 다른 병원 확정 예약과 1시간 이내면 409 booking.patient_conflict."""
+    p, t1, t2 = _patient(db), _tenant(db), _tenant(db, "예시 안과의원", 9002)
+    a = service.create_request(db, p.id, t1.id, _data(preferred_slots=["2026-11-21T01:00:00Z"]))
+    b = service.create_request(db, p.id, t2.id, _data(preferred_slots=["2026-11-21T03:00:00Z"]))
+    service.staff_act(db, t1.id, "s", a.id, "confirm", datetime(2026, 11, 21, 1, 0, tzinfo=timezone.utc))
+    with pytest.raises(Exception) as e:
+        service.staff_act(db, t2.id, "s", b.id, "propose", datetime(2026, 11, 21, 1, 30, tzinfo=timezone.utc))
+    assert e.value.code == "booking.patient_conflict"
+    ok = service.staff_act(db, t2.id, "s", b.id, "confirm", datetime(2026, 11, 21, 3, 0, tzinfo=timezone.utc))
+    assert ok.status == "confirmed"
 
 
 def test_full_flow_each_change_logs_one_event(db):
