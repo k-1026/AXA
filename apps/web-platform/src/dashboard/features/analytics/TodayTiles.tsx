@@ -1,6 +1,6 @@
 // 홈 "오늘 할 일" 타일 4개 (옛 /dashboard/legacy 홈에서 가져옴, 화면은 새 디자인)
 // 새 상담·오늘 방문: GET /tenant/analytics/summary 의 today · 미답변 사후관리: GET /tenant/aftercare (해결 안 된 대화의 unanswered)
-// 결제 금액 입력은 백엔드 기능이 아직 없어 예시 숫자. 누르면 아직 기능이 있는 옛 화면(/dashboard/legacy)의 해당 탭으로
+// 결제 금액 입력은 백엔드 기능이 아직 없어 예시 숫자. 누르면 새 화면의 상담·예약 / 사후관리 / 진료·결제 확인 탭으로
 import { useEffect, useState } from 'react';
 import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
@@ -43,10 +43,10 @@ export default function TodayTiles({ onExpired }: { onExpired: () => void }) {
   const v = (n: number | undefined) => (today ? fmt(n ?? 0) : error ? '—' : '…');
   const ac = today?.aftercareUnanswered ?? 0;
   const tiles = [
-    { label: '새 상담 요청', val: v(today?.newRequests), go: '답변하러 가기 →', href: '/dashboard/legacy#booking', live: true },
-    { label: '미답변 사후관리', val: v(today?.aftercareUnanswered), go: today ? (ac ? `답하지 않은 대화 ${ac}개 →` : '미답변 없음 →') : '불러오는 중…', href: '/dashboard/legacy#aftercare', live: true, alert: ac > 0 },
-    { label: '오늘 방문 예정', val: v(today?.visitsToday), go: '확정된 오늘 예약 →', href: '/dashboard/legacy#booking', live: true },
-    { label: '결제 금액 입력', val: '1', go: '방문 완료 R-1036 →', href: '/dashboard/legacy#receipt', live: false },
+    { label: '새 상담 요청', val: v(today?.newRequests), go: '답변하러 가기 →', href: '#booking', live: true },
+    { label: '미답변 사후관리', val: v(today?.aftercareUnanswered), go: today ? (ac ? `답하지 않은 대화 ${ac}개 →` : '미답변 없음 →') : '불러오는 중…', href: '#aftercare', live: true, alert: ac > 0 },
+    { label: '오늘 방문 예정', val: v(today?.visitsToday), go: '확정된 오늘 예약 →', href: '#booking', live: true },
+    { label: '결제 금액 입력', val: '1', go: '방문 완료 R-1036 →', href: '#receipt', live: false },
   ];
 
   return (

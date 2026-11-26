@@ -12,12 +12,14 @@ import HomeTab from './features/analytics/tabs/HomeTab';
 import InflowTab from './features/analytics/tabs/InflowTab';
 import BookingTab from './features/analytics/tabs/BookingTab';
 import AftercareTab from './features/analytics/tabs/AftercareTab';
+import ReceiptTab from './features/analytics/tabs/ReceiptTab';
 
 const TABS = [
   { key: 'home', label: '홈', q: '이번 달 어떤 단계의 성과가 좋아지거나 떨어졌는가?', C: HomeTab },
   { key: 'inflow', label: '유입·관심', q: '어디에 홍보하고, 어떤 언어와 진료항목의 설명을 보강할까?', C: InflowTab },
   { key: 'booking', label: '상담·예약', q: '어느 단계에서 환자를 놓치나?', C: BookingTab },
   { key: 'aftercare', label: '사후관리', q: '어떤 안내를 미리 제공하고, 어떤 응대 과정을 개선할까?', C: AftercareTab },
+  { key: 'receipt', label: '진료·결제 확인', q: '방문 완료 후 실제 진료 금액·영수증을 등록 → 환자도 확인 → 메디대구가 체결 수수료 계산', C: ReceiptTab },
 ] as const;
 
 const tabFromHash = () => TABS.find((t) => `#${t.key}` === window.location.hash)?.key ?? 'home';
