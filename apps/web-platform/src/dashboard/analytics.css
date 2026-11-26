@@ -111,7 +111,7 @@
 .hd .today li.is-alert { background: #fde8dd; }
 .hd .today li.is-alert b { color: var(--bad); }
 /* 홈 "오늘 할 일" 타일 (실제 DB, TodayTiles.tsx) */
-.hd .today-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.hd .today-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .hd .today-tile { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); background: var(--surface); }
 .hd .today-tile:hover { border-color: var(--accent); }
 .hd .today-tile.is-alert { background: #fdf0e8; border-color: #f3c4a8; }
@@ -120,6 +120,7 @@
 .hd .today-tile.is-alert .today-val { color: var(--bad); }
 .hd .today-go { font-size: .8rem; color: var(--accent); font-weight: 600; }
 .hd .today-err { font-size: .8rem; color: var(--bad); }
+.hd .today-val .stars { font-size: .85rem; color: #e0a100; margin-left: 6px; letter-spacing: 1px; vertical-align: middle; }
 /* 홈 한 줄 3칸 (운영 후: 요청·체결·방문 / 공공 카드 3개). 칸 윗선을 맞춤 */
 .hd .row3 { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
 @media (max-width: 900px) { .hd .row3 { grid-template-columns: 1fr; } }
