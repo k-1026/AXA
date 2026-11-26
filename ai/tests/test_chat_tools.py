@@ -37,12 +37,14 @@ def test_scar_flow_department_then_neutral_list():
     assert "not a recommendation" in res["note"] and res["_demo"] is True
 
 
-def test_translation_badge_filter():
+def test_language_filter_uses_staff_languages_only():
     zh = R.run("search_hospitals", {"department": "피부과", "language": "zh-CN"}, SHORT)["hospitals"]
-    # B는 직원 중국어, A는 AI 번역 채팅으로 포함
-    assert {h["hospital_id"] for h in zh} == {9001, 9002}
-    dental_vi = R.run("search_hospitals", {"department": "치과", "language": "vi"}, SHORT)["hospitals"]
-    assert dental_vi and dental_vi[0]["staff_languages"] == [] and dental_vi[0]["ai_translation_chat"] is True
+    # B만 직원 중국어. A(직원 영어)는 AI 번역 채팅이 있어도 빠짐
+    assert {h["hospital_id"] for h in zh} == {9002}
+    assert R.run("search_hospitals", {"department": "치과", "language": "vi"}, SHORT)["hospitals"] == []
+    # 한국어는 거르지 않고, 카드에는 AI 번역 배지 정보가 그대로 남음
+    ko = R.run("search_hospitals", {"department": "치과", "language": "ko"}, SHORT)["hospitals"]
+    assert ko and ko[0]["staff_languages"] == [] and ko[0]["ai_translation_chat"] is True
 
 
 def test_booking_draft_rules():
@@ -125,17 +127,20 @@ def test_recommend_by_match_only_for_short_term_visitors():
     assert R.run("recommend_hospitals", args, ToolContext())["ask"] == "residency"
     assert R.run("recommend_hospitals", args, ToolContext(residency="resident"))["status"] == "not_available"
     res = R.run("recommend_hospitals", args, SHORT)
-    first, second = res["suggestions"]
-    # B: 직원 중국어(+2) + 12/4 시간(+1) → A(AI 번역 +1)보다 앞. 미등록 C는 제외
-    assert [first["hospital_id"], second["hospital_id"]] == [9002, 9001]
-    assert "staff speak zh" in first["match_reasons"] and "consultation slots on 2026-12-04" in first["match_reasons"]
-    assert second["match_reasons"][0] == "AI translation chat available"
+    # 직원 중국어가 되는 B만. A(직원 영어만)는 AI 번역이 있어도 추천하지 않음. 미등록 C는 제외
+    assert [s["hospital_id"] for s in res["suggestions"]] == [9002]
+    reasons = res["suggestions"][0]["match_reasons"]
+    assert "staff speak zh" in reasons and "consultation slots on 2026-12-04" in reasons
     assert "not a judgment of medical quality" in res["basis"] and "referral fee" in res["basis"]
 
 
-def test_recommend_skips_hospitals_without_language_support():
-    res = R.run("recommend_hospitals", {"department": "성형외과", "language": "en"}, SHORT)
-    assert res["suggestions"] == []  # 가상성형외과: 직원 zh·vi, AI 번역 없음
+def test_recommend_matches_language_by_staff_only():
+    # 가상성형외과: 직원 zh·vi. AI 번역 채팅은 있지만 언어 추천 기준은 직원 언어
+    assert R.run("recommend_hospitals", {"department": "성형외과", "language": "en"}, SHORT)["suggestions"] == []
+    vi = R.run("recommend_hospitals", {"department": "성형외과", "language": "vi"}, SHORT)["suggestions"]
+    assert [s["hospital_id"] for s in vi] == [9003] and vi[0]["match_reasons"][0] == "staff speak vi"
+    # 한국어는 언어 조건으로 거르지 않음
+    assert [s["hospital_id"] for s in R.run("recommend_hospitals", {"department": "성형외과", "language": "ko"}, SHORT)["suggestions"]] == [9003]
     assert "error" in R.run("recommend_hospitals", {"department": "피부과", "preferred_date": "12/04"}, SHORT)
 
 

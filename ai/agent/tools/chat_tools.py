@@ -56,7 +56,7 @@ NEUTRAL_NOTE = "Listed in name order. This is not a recommendation or ranking."
 LANGUAGE_UNKNOWN_NOTE = ("Language support is not in the hospital data, so the list is not filtered by language. "
                          "Ask the hospital which languages they support.")
 RECOMMEND_BASIS = (
-    "Suggested only by how well each hospital matches the user's stated conditions (language support, opening day, "
+    "Suggested only by how well each hospital matches the user's stated conditions (staff language, opening day, "
     "available time). This is not a judgment of medical quality, skill or results. All are registered foreign-patient "
     "facilities. MediDaegu is a registered patient facilitator and may receive a referral fee from hospitals; "
     "the fee does not affect the order."
@@ -167,8 +167,9 @@ def _search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
         rows = [h for h in rows if h["district"] == args["district"]]
     if args.get("registered_only", True):
         rows = [h for h in rows if h["is_registered_facility"]]
-    if lang := args.get("language"):
-        rows = [h for h in rows if lang_family(lang) in h["staff_languages"] or h["ai_translation_chat"]]
+    # 언어는 직원 응대 언어로만 거름 (추천과 같은 기준, AI 번역은 입점 병원 공통이라 기준 아님). 한국어는 거르지 않음
+    if (lang := args.get("language")) and lang_family(lang) != "ko":
+        rows = [h for h in rows if lang_family(lang) in h["staff_languages"]]
     if day := args.get("open_on"):
         rows = [h for h in rows if h["hours"].get(day)]
     rows.sort(key=lambda h: h["name_en"])  # 중립 정렬
@@ -198,15 +199,13 @@ def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     scored = []
     for h in rows:
         score, reasons = 0, []
-        if lang:
-            if lang_family(lang) in h["staff_languages"]:
-                score += 2
-                reasons.append(f"staff speak {lang_family(lang)}")
-            elif h["ai_translation_chat"]:
-                score += 1
-                reasons.append("AI translation chat available")
-            else:
-                continue  # 소통 수단이 없는 병원은 제안하지 않음
+        # 언어 조건은 직원 응대 언어로만 맞춘다. AI 번역 채팅은 입점 병원 모두 지원하는 플랫폼 기능이라
+        # 추천 기준이 되지 않음 (2026-11-26). 한국어는 모든 병원이 되므로 조건에서 뺀다
+        if lang and lang_family(lang) != "ko":
+            if lang_family(lang) not in h["staff_languages"]:
+                continue  # 그 언어를 하는 직원이 없으면 제안하지 않음
+            score += 2
+            reasons.append(f"staff speak {lang_family(lang)}")
         if day and h["hours"].get(day):
             score += 1
             reasons.append(f"open on {day} ({h['hours'][day]})")
@@ -474,7 +473,7 @@ def build_registry() -> ToolRegistry:
     r.register(Tool(
         "search_hospitals",
         "대구 병원을 조건으로 검색해 **여러 곳을 이름순**으로 돌려준다 (추천·순위 아님 — 추천 요청은 recommend_hospitals). "
-        "기본은 외국인환자 유치의료기관 등록 병원만. language를 주면 그 언어로 직원 응대 또는 AI 번역 채팅이 되는 병원만.",
+        "기본은 외국인환자 유치의료기관 등록 병원만. language를 주면 그 언어로 응대하는 직원이 있는 병원만 (AI 번역 채팅은 기준 아님).",
         {"type": "object", "properties": {
             "department": {"type": "string", "description": "한국어 진료과명. 예: 피부과, 성형외과, 치과, 내과, 가정의학과, 정형외과, 한방"},
             "district": {"type": "string", "enum": DISTRICTS},
