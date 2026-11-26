@@ -218,3 +218,12 @@ def test_visa_question_gets_note_but_no_medical_notice():
     reply = orch.handle(ConversationState(), "의료비자 받을 수 있을까요?")
     assert reply.safety_categories == ["visa"] and reply.medical_notice is False
     assert any(m["role"] == "system" and "embassy" in m["content"] for m in llm.calls[0][0][1:])
+
+
+def test_resident_rules_are_in_prompt_only_for_residents():
+    """국내 거주 계정은 첫 턴부터 예약·추천·찜을 권하지 않게 규칙을 붙인다 (2026-11-26)."""
+    for residency, expected in (("resident", True), ("short_term", False), (None, False)):
+        orch, llm = make([say("ok")])
+        orch.handle(ConversationState(residency=residency), "hi")
+        system = llm.calls[0][0][0]["content"]
+        assert ("This user lives in Korea" in system) is expected

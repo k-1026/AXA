@@ -205,3 +205,16 @@ def test_prompt_hides_ids_and_asks_language():
     from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
     assert "Never show hospital ids" in SYSTEM_PROMPT
     assert "ask which language" in SYSTEM_PROMPT
+
+
+def test_search_hospitals_tells_model_no_requests_for_residents():
+    args = {"department": "피부과"}
+    resident = R.run("search_hospitals", args, ToolContext(residency="resident"))
+    short = R.run("search_hospitals", args, SHORT)
+    assert resident["hospitals"] == short["hospitals"]  # 열람은 같음
+    assert "not available" in resident["note"] and "not available" not in short["note"]
+
+
+def test_search_results_carry_phone_numbers():
+    res = R.run("search_hospitals", {"department": "피부과"}, SHORT)
+    assert res["hospitals"] and all(h.get("tel") for h in res["hospitals"])

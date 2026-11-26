@@ -87,6 +87,23 @@ whether they want the hospital's help with visa paperwork for a consultation req
 """
 
 
+# 국내 거주(resident) 계정: 정보 열람만 (compliance 2-2, 의료법 제27조 제3항 제2호·시행규칙 제19조의2).
+# 도구가 not_available을 돌려줄 때까지 기다리면 병원을 고른 3번째 턴에야 안 된다고 말한다 (2026-11-26 재현) → 처음부터 알린다.
+# 서버 쪽 막기(prepare_booking_request·recommend_hospitals의 not_available)는 그대로 둔다
+RESIDENT_RULES = """
+# This user lives in Korea (residency=resident)
+MediDaegu can only connect short-term foreign visitors with hospitals. For this user:
+- Never offer, suggest or ask about consultation requests, bookings, recommendations, saving or favouriting hospitals, \
+and never end a reply with an offer to book or send a request.
+- If the user asks to book, send a consultation request, or get a recommendation or suggestion, do not call \
+prepare_booking_request or recommend_hospitals. In that same reply, say briefly that consultation requests and \
+suggestions through MediDaegu are only for short-term visitors, so they should contact the hospital directly, and \
+give the hospital's phone number. Phone numbers are in the search_hospitals results (tel); don't call get_hospital \
+just to find a number. "The first one" means the first hospital in the most recently shown list.
+- You can still help normally with hospital search, hours, location, language support and prices.
+"""
+
+
 def build_system_prompt(
     *, today: str, language: str, logged_in: bool, residency: str | None, extra_context: str | None = None
 ) -> str:
@@ -96,6 +113,8 @@ def build_system_prompt(
         logged_in="yes" if logged_in else "no",
         residency=residency or "unknown",
     )
+    if residency == "resident":
+        prompt += RESIDENT_RULES
     if extra_context:
         # 서버가 저장한 대화 상태에서 만든 사실. 대화 기록(텍스트만 저장)에 없는 도구 결과를 대신한다
         prompt += f"\n# Conversation context (from the server, trusted)\n{extra_context.strip()}\n"

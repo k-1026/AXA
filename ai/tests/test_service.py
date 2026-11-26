@@ -367,3 +367,24 @@ def test_account_without_an_answer_still_uses_what_the_chat_recorded():
     ])
     r = service.ask(ME, None, "I am visiting for a week", "en")
     assert sessions.get(ME.patient_id, r.session_id).state["residency"] == "short_term"
+
+
+def test_detail_of_a_listed_hospital_keeps_the_list_order():
+    """목록 속 병원 상세를 봐도 "첫 번째 병원"이 바뀌지 않는다 (2026-11-26)."""
+    from ai.agent.service import _shown_from_cards
+
+    prev = [{"id": 9001, "name": "A"}, {"id": 9002, "name": "B"}]
+    detail = {"type": "hospital_detail", "data": {"hospital_id": 9002, "name_en": "B"}}
+    assert _shown_from_cards([detail], prev) is None  # 그대로 둠
+    other = {"type": "hospital_detail", "data": {"hospital_id": 9003, "name_en": "C"}}
+    assert _shown_from_cards([other], prev) == [{"id": 9003, "name": "C"}]  # 목록에 없던 병원이면 바꿈
+    listing = {"type": "hospital_list", "data": {"hospitals": [{"hospital_id": 9004, "name_en": "D"}]}}
+    assert _shown_from_cards([listing, detail], prev) == [{"id": 9002, "name": "B"}]  # 새 목록이 있으면 기존 규칙
+
+
+def test_same_turn_list_plus_detail_keeps_the_list():
+    from ai.agent.service import _shown_from_cards
+
+    listing = {"type": "hospital_list", "data": {"hospitals": [{"hospital_id": 9001, "name_en": "A"}, {"hospital_id": 9002, "name_en": "B"}]}}
+    detail = {"type": "hospital_detail", "data": {"hospital_id": 9002, "name_en": "B"}}
+    assert _shown_from_cards([listing, detail]) == [{"id": 9001, "name": "A"}, {"id": 9002, "name": "B"}]

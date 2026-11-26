@@ -54,6 +54,7 @@ def _brief(h) -> JSON:
         "district": _district(h.sggu),
         "departments": [DEPT_KO.get(d, d) for d in h.departments],
         "is_registered_facility": h.is_registered_facility,
+        "tel": h.tel or "",  # 목록에서 바로 전화번호 안내 (국내 거주자 안내 때 상세를 병원마다 다시 부르지 않게)
         "staff_languages": [],
         "ai_translation_chat": False,
     }

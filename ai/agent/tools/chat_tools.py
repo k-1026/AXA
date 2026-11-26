@@ -72,6 +72,7 @@ def _hospital_card(h: dict) -> JSON:
         "district": h["district"],
         "departments": h["departments"],
         "is_registered_facility": h["is_registered_facility"],
+        "tel": h["tel"],
         # 번역 가능 병원 표시 (plan 12-1 #5): 직원 직접 응대 언어와 AI 번역 채팅을 구분
         "staff_languages": h["staff_languages"],
         "ai_translation_chat": h["ai_translation_chat"],
@@ -134,7 +135,21 @@ def suggest_department(args: JSON, ctx: ToolContext) -> JSON:
     }
 
 
+RESIDENT_LIST_NOTE = ("This user lives in Korea: consultation requests and suggestions through MediDaegu are not available. "
+                      "Do not offer to book or send a request; the user can contact the hospitals directly.")
+
+
 def search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
+    res = _search_hospitals(args, ctx)
+    for h in res.get("hospitals", []):
+        if "tel" in h:
+            h["tel"] = daegu_tel(h["tel"])
+    if ctx.residency == "resident":  # 목록 끝에 "상담 요청 도와드릴까요?"를 붙이지 않게 (2026-11-26)
+        res["note"] = f"{res['note']} {RESIDENT_LIST_NOTE}"
+    return res
+
+
+def _search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     dept = args["department"]
     if ctx.hospitals is not None:  # 실제 병원 DB
         code = DEPT_CODES.get(dept)
