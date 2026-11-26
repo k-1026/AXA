@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocalized } from '../../lib/common';
 import { MoreMenu } from './MoreMenu';
 import { BotIcon, CloseIcon, GearIcon, InfoIcon, PlusIcon, SearchIcon } from './icons';
 import { dayGroup, dotDate, listTime } from './time';
@@ -19,9 +20,23 @@ interface Props {
 
 const GROUPS = ['today', 'yesterday', 'earlier'] as const;
 
+/** 목록 글자: 예시·빠른 메뉴 대화는 주제(병원 찾기 등), 회원 대화는 서버 제목 또는 첫 질문.
+ * "새 대화"는 아직 아무것도 묻지 않은 대화만 (전에는 회원 대화가 전부 "새 대화"로 보였음, 2026-11-26) */
+function useConversationLabel() {
+  const { t } = useTranslation();
+  const shown = useLocalized();
+  return (c: Conversation) => {
+    if (c.topic) return t(`chat.summary.${c.topic}`);
+    const first = c.messages.find((m) => m.role === 'user');
+    const text = c.title ?? (first ? shown(first.text) : '');
+    return text.trim() || t('chat.summary.none');
+  };
+}
+
 // 왼쪽 대화 목록. PC에서는 고정, 모바일에서는 서랍
 export function ChatSidebar({ mode, activeId, search, onNew, onSelect, onDelete, onClose }: Props) {
   const { t, i18n } = useTranslation();
+  const label = useConversationLabel();
   const [query, setQuery] = useState('');
   const items = search(query);
   const now = new Date();
@@ -71,7 +86,7 @@ export function ChatSidebar({ mode, activeId, search, onNew, onSelect, onDelete,
                           {c.sample && <span className="chat-sample-tag">{t('chat.sample')}</span>}
                         </strong>
                         <span>
-                          {listTime(lastActivity(c), i18n.language)} · {t(c.topic ? `chat.summary.${c.topic}` : 'chat.summary.none')}
+                          {listTime(lastActivity(c), i18n.language)} · {label(c)}
                         </span>
                       </span>
                     </button>
