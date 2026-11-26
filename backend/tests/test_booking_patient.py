@@ -210,3 +210,12 @@ def test_거절되면_내_예약에_거절_사유_코드(client, db):
     assert r.status_code == 200, r.json()
     mine = client.get("/api/v1/me/booking-requests", headers=me).json()[0]
     assert (mine["status"], mine["reject_reason"]) == ("rejected", "needs_consult")
+
+
+def test_일본어_계정_상담_언어도_받는다(client, db):
+    """프론트에 일본어 화면이 있어 가입·상담 언어로 ja를 받는다 (2026-11-26, 마이그레이션 0014)."""
+    r = client.post("/api/v1/auth/patient/signup", json={**SIGNUP, "email": "ja@example.com", "preferred_lang": "ja"})
+    assert r.status_code == 201, r.json()
+    me = {"Authorization": f"Bearer {r.json()['access_token']}"}
+    h = make_hospital(db)
+    assert post(client, h, me, lang="ja").status_code == 201

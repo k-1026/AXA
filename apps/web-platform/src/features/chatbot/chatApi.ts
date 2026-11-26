@@ -2,7 +2,7 @@
 // 카드 형식의 기준은 백엔드 ai/agent/schemas.py (OpenAPI → packages/shared-types가 생기면 그 타입으로 교체)
 import { api } from '../../components/api';
 
-export type ChatLang = 'ko' | 'en' | 'zh-TW' | 'zh-CN' | 'vi';
+export type ChatLang = 'ko' | 'en' | 'zh-TW' | 'zh-CN' | 'vi' | 'ja';
 
 export interface HospitalBrief {
   hospital_id: number;
@@ -22,6 +22,8 @@ export type ChatCard =
       type: 'hospital_detail';
       data: HospitalBrief & { hours: Record<string, string | null>; address_en: string; tel: string; hours_source: string; can_request_consultation: boolean };
     }
+  // 가격 가이드(/prices)로 가는 버튼. q = 시술 이름, dept = 진료과 (둘 다 없을 수 있음, 2026-11-26)
+  | { type: 'price_guide'; data: { q?: string; dept?: 'dermatology' | 'plastic' | 'internal' | 'ophthalmology' | 'korean_medicine' } }
   | { type: 'price_list'; data: { prices: { hospital_id: number; item: string; item_en: string; min: number; max: number; currency: string }[]; note: string } }
   | {
       type: 'booking_draft';
@@ -55,7 +57,7 @@ export interface ChatResponse {
   medical_notice: boolean;
 }
 
-const LANGS: ChatLang[] = ['ko', 'en', 'zh-TW', 'zh-CN', 'vi'];
+const LANGS: ChatLang[] = ['ko', 'en', 'zh-TW', 'zh-CN', 'vi', 'ja'];
 export const chatLang = (lng: string): ChatLang => (LANGS as string[]).includes(lng) ? (lng as ChatLang) : 'en';
 
 export const askChatbot = (token: string, sessionId: string | undefined, message: string, language: ChatLang) =>

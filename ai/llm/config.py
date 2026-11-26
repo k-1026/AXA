@@ -9,8 +9,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
+from typing import Any
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,6 +26,8 @@ class ProviderConfig:
     base_url: str
     api_key: str
     model: str
+    # 요청 본문에 덧붙일 제공자 고유 값 (예: nemotron의 chat_template_kwargs)
+    extra_body: dict[str, Any] = field(default_factory=dict, compare=False, hash=False)
 
 
 class LLMSettings(BaseSettings):
@@ -47,10 +50,18 @@ class LLMSettings(BaseSettings):
     # 2026-11-10 실제 키로 확인: 3.5-super-vl은 응답 0.4~2.6초, 도구 호출 됨. 3.5-lightning은 더 느리고 도구 선택이 덜 정확.
     # 3-nano-30b-a3b는 2026-09-01 종료(410), 3-super-120b-a12b는 이 계정에서 404
     nemotron_model: str = "nvidia/nemotron-3.5-super-vl-120b-a12b,nvidia/nemotron-3.5-lightning-30b-a3b"
+    # nemotron-3.5는 기본으로 답 전에 숨은 생각 글(reasoning_content)을 길게 쓴다 → 출력 토큰·시간 대부분 (2026-11-25 측정:
+    # "통역 돼요?" 기본 2.9초·304토큰 중 285가 생각 / 끄면 0.9초·16토큰). NEMOTRON_THINKING=false로 끌 수 있다.
+    # 기본은 켬: 끄면 턴당 약 3배 빠르지만 시나리오 평가에서 체류 형태 기록·예약 상태 조회를 놓쳤다
+    # (ai/agent/eval/results/2026-11-25-scenario-nemotron-thinking-*.md — 켬 12/12 두 번, 끔 10/12·4/6·11/12)
+    nemotron_thinking: bool = True
 
     llm_temperature: float = 0.2
     llm_timeout_seconds: float = 30.0
     llm_max_retries: int = 2  # 같은 제공자에서 5xx·타임아웃 재시도 횟수
+    # 한도 초과(429)를 받은 모델은 이 시간(초) 동안 뒤로 미룬다. 무료 키는 하루 한도라 막히면 매번 다시 막힘 —
+    # 2026-11-26 로컬: 막힌 gemini-3.5-flash를 매 호출 먼저 시도하다 한 번은 62초 기다린 뒤 429 (한 턴 75.8초)
+    llm_rate_limit_cooldown_seconds: float = 600.0
     llm_usage_log_path: str = ""  # 비우면 메모리에만 기록
 
     def providers(self) -> list[ProviderConfig]:
@@ -75,7 +86,10 @@ class LLMSettings(BaseSettings):
                 # 접두사 없이 쓰면 404 "page not found"만 나와 원인을 찾기 어려움 (2026-11-10 확인)
                 if name == "nemotron" and "nvidia.com" in base_url and "/" not in m:
                     m = f"nvidia/{m}"
-                out.append(ProviderConfig(name, base_url, key, m))
+                extra = {}
+                if name == "nemotron" and not self.nemotron_thinking:
+                    extra = {"chat_template_kwargs": {"enable_thinking": False}}
+                out.append(ProviderConfig(name, base_url, key, m, extra))
         return out
 
 

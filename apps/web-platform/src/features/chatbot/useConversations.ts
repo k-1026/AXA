@@ -19,7 +19,13 @@ import type { ChatMessage, ChipAction, ChatText, Conversation } from './types';
 export type ChatMode = 'demo' | 'member';
 
 const memory = new Map<AccountKey, Conversation[]>();
-onAccountReset(() => memory.clear());
+// 지금 보던 대화의 화면 id (계정별). 서버 id가 없는 대화(빠른 메뉴 "가격 정보"만, 첫 질문이 오류로 끝난 대화)도
+// 다른 화면에 갔다 오면 그대로 열리게 (전에는 서버 id로만 기억해서 새 대화가 저절로 열렸음, 2026-11-26)
+const activeMemory = new Map<AccountKey, string>();
+onAccountReset(() => {
+  memory.clear();
+  activeMemory.clear();
+});
 
 // 서버 에러 코드 → 화면 문구 키 (chat.api.*)
 const API_ERRORS: Record<string, string> = {
@@ -37,8 +43,16 @@ const isBlank = (c: Conversation) => !c.remote && c.messages.every((m) => m.role
 // 목록에 시작 전 대화가 하나는 있게 해서 화면을 열면 바로 입력할 수 있게 한다
 const withBlank = (list: Conversation[]) => (list.some(isBlank) ? list : [newConversation(), ...list]);
 
-function load(key: AccountKey, mode: ChatMode): Conversation[] {
-  const list = withBlank(memory.get(key) ?? (mode === 'demo' ? SAMPLE_CONVERSATIONS : []));
+// 새로고침 직후: 기억한 서버 대화를 목록을 받기 전에 바로 "불러오는 중" 대화로 넣는다
+// (전에는 서버 목록이 올 때까지 약 1.5초 빈 새 대화가 보였음). 서버에서 지워졌으면 불러올 때 404 → 목록에서 빠짐
+function withSaved(list: Conversation[], saved: string | null): Conversation[] {
+  if (!saved || list.some((c) => c.id === saved || c.serverId === saved)) return list;
+  const at = now();
+  return [{ id: saved, serverId: saved, createdAt: at, messages: [], remote: true }, ...list];
+}
+
+function load(key: AccountKey, mode: ChatMode, saved: string | null = null): Conversation[] {
+  const list = withBlank(withSaved(memory.get(key) ?? (mode === 'demo' ? SAMPLE_CONVERSATIONS : []), saved));
   memory.set(key, list);
   return list;
 }
@@ -69,17 +83,19 @@ export function useConversations() {
   // 회원: 고른 대화(서버 id)를 탭 저장소에 기억해 새로고침해도 같은 대화를 다시 연다 (계정별 키)
   const activeKey = `chat.active@${account}`; // storage.ts가 앞에 "medidaegu."를 붙임
   const savedActive = () => (mode === 'member' ? readSessionSetting(activeKey) : null);
+  // 이 탭에서 보던 대화(화면 id)가 먼저, 없으면 새로고침 전에 기억한 서버 대화
+  const rememberedActive = () => activeMemory.get(account) ?? savedActive();
 
-  const [list, setList] = useState<Conversation[]>(() => load(account, mode));
-  const [activeId, setActiveId] = useState<string | null>(savedActive);
+  const [list, setList] = useState<Conversation[]>(() => load(account, mode, savedActive()));
+  const [activeId, setActiveId] = useState<string | null>(rememberedActive);
   const [listed, setListed] = useState(false); // 서버 대화 목록을 받았는지 (받기 전에는 기억한 대화를 덮어쓰지 않음)
   const accountRef = useRef(account);
   accountRef.current = account;
 
   // 로그인·로그아웃하면 그 계정의 대화로 바꿔 끼운다
   useEffect(() => {
-    setList(load(account, mode));
-    setActiveId(savedActive());
+    setList(load(account, mode, savedActive()));
+    setActiveId(rememberedActive());
     setListed(false);
     // savedActive는 account·mode로만 정해져서 의존성에 따로 넣지 않음
   }, [account, mode]);
@@ -108,11 +124,17 @@ export function useConversations() {
       .then((rows) => {
         if (stop) return;
         update((prev) => {
+          const byId = new Map(rows.map((r) => [r.id, r]));
+          // 이미 화면에 있는 대화(새로고침 때 먼저 넣은 대화 포함)도 서버의 날짜·제목으로 맞춘다
+          const merged = prev.map((c) => {
+            const r = c.serverId ? byId.get(c.serverId) : undefined;
+            return r ? { ...c, createdAt: r.created_at, lastMessageAt: r.last_message_at, title: r.title } : c;
+          });
           const known = new Set(prev.map((c) => c.serverId).filter(Boolean));
           const fromServer: Conversation[] = rows
             .filter((r) => !known.has(r.id))
-            .map((r) => ({ id: r.id, serverId: r.id, createdAt: r.created_at, lastMessageAt: r.last_message_at, messages: [], remote: true }));
-          return fromServer.length ? [...prev, ...fromServer] : prev;
+            .map((r) => ({ id: r.id, serverId: r.id, createdAt: r.created_at, lastMessageAt: r.last_message_at, title: r.title, messages: [], remote: true }));
+          return [...merged, ...fromServer];
         }, owner);
       })
       .catch(() => {}) // 목록을 못 받아도 새 대화는 할 수 있게
@@ -132,7 +154,12 @@ export function useConversations() {
   const active =
     sorted.find((c) => c.id === activeId || (!!activeId && c.serverId === activeId)) ?? sorted.find(isBlank) ?? sorted[0] ?? null;
 
-  // 지금 보고 있는 대화를 기억 (새 대화·아직 서버에 없는 대화면 지움 → 새로고침하면 새 대화)
+  // 이 탭에서 보던 대화(화면 id)를 계정별로 기억 → 다른 화면에 갔다 와도 그 대화 (서버 id가 없어도)
+  useEffect(() => {
+    if (active) activeMemory.set(account, active.id);
+  }, [account, active?.id]);
+
+  // 새로고침용: 보던 대화의 서버 id를 탭 저장소에 기억 (서버에 없는 대화면 지움 → 새로고침하면 새 대화)
   useEffect(() => {
     if (mode !== 'member' || !listed) return;
     writeSessionSetting(activeKey, active?.serverId ?? null);
@@ -235,16 +262,19 @@ export function useConversations() {
     );
     let serverId = conv.serverId;
     let patch: Partial<ChatMessage>;
+    const started = performance.now(); // 테스트용 응답 시간 (ChatMessages의 SHOW_TIMING)
     try {
       const r = await askChatbot(token, conv.serverId, userText, chatLang(i18n.language));
       serverId = r.session_id;
-      patch = { text: r.text, cards: r.cards, ai: r.ai_generated, medicalNotice: r.medical_notice, at: now() };
+      patch = { text: r.text, cards: r.cards, ai: r.ai_generated, medicalNotice: r.medical_notice, at: now(),
+                elapsedMs: performance.now() - started };
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'unknown';
       if (code === 'not_found') serverId = undefined; // 서버에서 지워진 대화 → 다음 질문은 새 대화로
       // 429는 한도 종류(detail.limit)에 따라 문구가 다르다: sessions = 저장된 대화 수 한도
       const sessionsFull = code === 'rate_limited' && e instanceof ApiError && e.detail.limit === 'sessions';
-      patch = { text: t(`chat.api.${sessionsFull ? 'tooManySessions' : API_ERRORS[code] ?? 'error'}`), failed: true };
+      patch = { text: t(`chat.api.${sessionsFull ? 'tooManySessions' : API_ERRORS[code] ?? 'error'}`), failed: true,
+                elapsedMs: performance.now() - started };
     }
     // 답을 기다리는 동안 사용자가 이 대화를 지웠다면, 그 사이 서버에 새로 생긴 대화도 지운다
     if (deleted.current.has(conv.id)) {
@@ -273,6 +303,9 @@ export function useConversations() {
 
   const choose = (label: ChatText, action: ChipAction) => {
     if (!active || busy) return;
+    // 빠른 메뉴 "가격 정보"는 회원도 서버(AI)를 거치지 않고 바로 안내 + 가격 가이드 버튼 (2026-11-26).
+    // AI는 "어떤 시술?"이라고 되묻고 버튼을 주지 않았다. 이 안내는 이 화면에만 있고 서버 대화 기록에는 저장되지 않는다
+    if (mode === 'member' && action.kind === 'topic' && action.topic === 'price') return push(active.id, label, replyToChip(t, action, active));
     if (mode === 'member') return void askServer(active, shown(label)); // 버튼 문구를 질문으로
     push(active.id, label, replyToChip(t, action, active));
   };
