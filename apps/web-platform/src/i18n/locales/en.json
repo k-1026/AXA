@@ -558,7 +558,7 @@
     "none": "No completed visits yet.",
     "start": "After your treatment is recorded as completed, you can talk with that hospital’s medical staff here.",
     "visitedOn": "Visited {{date}}",
-    "doctorLabel": "{{name}} · Medical staff",
+    "doctorLabel": "{{name}} · Hospital staff",
     "notice": "Ask the hospital’s medical staff about your condition after treatment. If symptoms are severe or suddenly worse, call the hospital right away or dial 119.",
     "empty": "Tell the medical staff how you feel or ask a question. You can send photos and videos too.",
     "sampleNote": "Sample hospital and messages. Not a real medical record.",
