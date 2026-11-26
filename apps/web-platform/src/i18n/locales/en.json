@@ -605,7 +605,10 @@
       "notJoined": "This hospital does not take bookings on MediDaegu yet. Please contact the hospital directly.",
       "duplicate": "You already have a pending request at this hospital. Check My bookings.",
       "invalidTransition": "This is not possible in the current status. Please refresh.",
-      "login": "Please log in."
+      "login": "Please log in.",
+      "timeConflict": "This overlaps another booking. You can't request within 1 hour before or after a booking you already have (including pending ones). Please pick another time.",
+      "sameDay": "You already have a booking (or request) at this hospital on that day. To change the time, edit it in My bookings.",
+      "tooMany": "You have 5 requests waiting for a reply. Wait for the hospitals to answer or cancel ones you don't need, then try again."
     }
   },
   "staff": {

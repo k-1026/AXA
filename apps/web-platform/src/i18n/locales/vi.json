@@ -605,7 +605,10 @@
       "notJoined": "Bệnh viện này chưa nhận đặt lịch trên MediDaegu. Vui lòng liên hệ trực tiếp.",
       "duplicate": "Bạn đã có yêu cầu chưa xử lý ở bệnh viện này. Xem trong Quản lý đặt lịch.",
       "invalidTransition": "Không thể thực hiện ở trạng thái hiện tại. Vui lòng tải lại.",
-      "login": "Vui lòng đăng nhập."
+      "login": "Vui lòng đăng nhập.",
+      "timeConflict": "Thời gian này trùng với lịch hẹn khác. Không thể gửi yêu cầu trong vòng 1 giờ trước hoặc sau lịch hẹn bạn đã có (kể cả lịch đang chờ xác nhận). Vui lòng chọn giờ khác.",
+      "sameDay": "Bạn đã có lịch hẹn (hoặc yêu cầu) ở bệnh viện này trong ngày đó. Để đổi giờ, hãy sửa trong Quản lý đặt lịch.",
+      "tooMany": "Bạn có 5 yêu cầu đang chờ phản hồi. Hãy chờ bệnh viện trả lời hoặc hủy yêu cầu không cần, rồi thử lại."
     }
   },
   "staff": {
