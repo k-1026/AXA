@@ -223,3 +223,44 @@ def test_search_hospitals_tells_model_no_requests_for_residents():
 def test_search_results_carry_phone_numbers():
     res = R.run("search_hospitals", {"department": "피부과"}, SHORT)
     assert res["hospitals"] and all(h.get("tel") for h in res["hospitals"])
+
+
+# --- 진료시간 밖 희망 일시 (2026-11-26) ---
+def _booking_args(slot):
+    return {"hospital_id": 9001, "department": "피부과", "preferred_slots": [slot], "language": "en",
+            "nationality": "TW", "visa_needed": False, "visa_statement": "아니요 필요 없어요", "inquiry": "x"}
+
+
+def test_closed_day_lunch_and_after_hours_get_no_draft():
+    from datetime import date
+
+    ctx = ToolContext(patient_id="p", residency="short_term", today=date(2026, 11, 26), user_texts=["아니요 필요 없어요"])
+    # 9001: 월~금 09:30-18:30, 토 09:30-14:00, 일 휴진 (가상 데이터)
+    for slot in ("2026-12-06 10:00", "2026-12-07 13:30", "2026-12-07 19:00", "2026-12-07 09:00"):
+        r = R.run("prepare_booking_request", _booking_args(slot), ctx)
+        assert r["status"] == "needs_info" and r["closed_slots"] == [slot], slot
+    sunday = R.run("prepare_booking_request", _booking_args("2026-12-06 10:00"), ctx)
+    assert sunday["open_candidates"] == {"2026-12-06": []}  # 휴진일은 후보 없음
+    assert "13:00" not in R.run("prepare_booking_request", _booking_args("2026-12-07 13:30"), ctx)["open_candidates"]["2026-12-07"]
+    assert R.run("prepare_booking_request", _booking_args("2026-12-07 10:00"), ctx)["status"] == "draft"
+
+
+def test_db_gateway_open_check_is_used_when_available():
+    from datetime import date
+
+    class Db:
+        def __init__(self):
+            self.asked = []
+
+        def booking_info(self, hospital_id):
+            return {"id": hospital_id, "name_en": "X", "departments": ["피부과"], "is_registered_facility": True,
+                    "accepts_requests": True, "tel": "053-000-0000", "hours": {"mon": "09:00-18:00"}}
+
+        def is_open(self, hospital_id, slot):
+            self.asked.append(slot)
+            return False  # 백엔드 기준이 닫혔다고 하면 hours와 상관없이 막음
+
+    db = Db()
+    ctx = ToolContext(patient_id="p", residency="short_term", today=date(2026, 11, 26), user_texts=["아니요 필요 없어요"], hospitals=db)
+    r = R.run("prepare_booking_request", _booking_args("2026-12-07 10:00"), ctx)
+    assert r["status"] == "needs_info" and r["closed_slots"] == ["2026-12-07 10:00"] and db.asked

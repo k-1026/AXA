@@ -1,4 +1,4 @@
-"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 12개 — 지금은 가짜 응답 (fake_data.py).
+"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 13개. 실제 서버는 DB 게이트웨이(ctx.hospitals·ctx.store), 테스트·평가는 가상 데이터(fake_data.py).
 
 | 의도 | 도구 |
 |---|---|
@@ -31,7 +31,7 @@ from typing import Any
 
 from ai.agent.tools import fake_data as fd
 from ai.agent.tools.booking_store import (
-    BookingError, BookingStore, parse_local_slot, required_consents, to_booking_create,
+    KST, BookingError, BookingStore, parse_local_slot, required_consents, to_booking_create,
 )
 from ai.agent.tools.registry import JSON, Tool, ToolContext, ToolError, ToolRegistry
 from ai.llm.safety import _VISA_RE
@@ -47,7 +47,6 @@ def lang_family(lang: str) -> str:
     """병원 직원 응대 언어는 중국어를 간체·번체로 나누지 않는다 (`zh`)."""
     return "zh" if lang.startswith("zh") else lang
 DISTRICTS = ["중구", "동구", "서구", "남구", "북구", "수성구", "달서구", "달성군", "군위군"]
-WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 AFTERCARE_TOPICS = ["schedule", "cost", "documents", "accommodation", "other_non_medical"]
 DOC_TOPICS = ["visa", "procedure", "rights", "payment", "other"]
 
@@ -112,6 +111,29 @@ def _slots_from_hours(h: dict, day: date) -> list[str]:
     start = int(open_[:2]) + (0 if open_[3:] == "00" else 1)  # 09:30 시작이면 10시부터
     end = int(close[:2])
     return [f"{t:02d}:00" for t in range(start, end) if t != 13]
+
+
+def _slot_open(ctx: ToolContext, h: dict, slot: datetime) -> bool:
+    """그 시간(한국 시간)이 진료시간 안인지. 실제 서버는 백엔드와 같은 기준(booking.service.is_open: 휴진일·진료 전후·점심),
+    가상 데이터는 hours + 점심 13시. 그 요일 진료시간을 모르면 막지 않는다 (모르는 것을 휴진으로 보지 않음)."""
+    if _uses_db(ctx) and hasattr(ctx.hospitals, "is_open"):
+        return ctx.hospitals.is_open(h["id"], slot)
+    local = slot.astimezone(KST)
+    hours = h.get("hours") or {}
+    day = WEEKDAYS[local.weekday()]
+    if day not in hours:
+        return True
+    if not hours[day]:
+        return False
+    open_, close = hours[day].split("-")
+    t = local.strftime("%H:%M")
+    return open_ <= t < close and not ("13:00" <= t < "14:00")
+
+
+def _open_candidates(ctx: ToolContext, h: dict, day: date) -> list[str]:
+    """그날 정시 후보 중 진료시간 안인 것만 (점심은 실제 기준으로 다시 거름)."""
+    return [t for t in _slots_from_hours(h, day)
+            if _slot_open(ctx, h, datetime.combine(day, time(int(t[:2])), tzinfo=KST))]
 
 
 def _parse_date(s: str, key: str) -> date:
@@ -274,7 +296,7 @@ def check_availability(args: JSON, ctx: ToolContext) -> JSON:
         raise ToolError("date_to가 date_from보다 빠릅니다")
     if _uses_db(ctx):  # 가상 병원 진료 시간에서 정시 후보 (최대 14일)
         days = [start + timedelta(days=i) for i in range(min((end - start).days + 1, 14))]
-        slots = {d.isoformat(): t for d in days if (t := _slots_from_hours(h, d))}
+        slots = {d.isoformat(): t for d in days if (t := _open_candidates(ctx, h, d))}
     else:
         slots = {d: t for d, t in fd.AVAILABILITY.get(h["id"], {}).items() if start <= date.fromisoformat(d) <= end}
     return {"hospital_id": h["id"], "slots": slots,
@@ -332,6 +354,16 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
             raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
         if now and slot <= now:
             raise ToolError(f"이미 지난 일시입니다: {s} (오늘 {ctx.today.isoformat()})")
+    # 진료시간 밖(휴진일·진료 전후·점심)이면 초안을 만들지 않는다 — 백엔드 요청서 저장도 같은 기준으로 거절 (2026-11-26)
+    closed = [s for s in slots if not _slot_open(ctx, h, parse_local_slot(s))]
+    if closed:
+        days = sorted({parse_local_slot(s).date() for s in closed})
+        return {"status": "needs_info", "missing": ["preferred_slots"], "closed_slots": closed,
+                "open_candidates": {d.isoformat(): _open_candidates(ctx, h, d) for d in days},
+                "hospital_hours": h.get("hours"),
+                "note": "These times are outside the hospital's hours (closed day, before or after hours, or lunch). "
+                        "Tell the user which times can't be requested and ask for other times; you may offer "
+                        "open_candidates (an empty list means the hospital is closed that day)."}
     # 국적은 초안에 저장돼 매 턴 "신뢰" 맥락에 들어가므로 자유 문장을 받지 않는다 (프롬프트 주입 경로 차단)
     nationality = str(args["nationality"]).strip().upper()
     if not re.fullmatch(r"[A-Z]{2}", nationality):
@@ -419,7 +451,8 @@ def open_aftercare_thread(args: JSON, ctx: ToolContext) -> JSON:
     if not bk.get("visited"):
         return {"status": "not_available", "reason": "Follow-up chat opens after the visit."}
     # 실제 저장소(backend BookingGateway)는 병원이 사후관리를 하는지·이미 있는 대화를 알려 줌. 가짜 저장소는 가상 대화
-    info = ctx.store.aftercare_for(ctx.patient_id, bk["id"]) if hasattr(ctx.store, "aftercare_for") else         {"available": True, "thread_id": f"demo-thread-{bk['id']}"}
+    info = (ctx.store.aftercare_for(ctx.patient_id, bk["id"]) if hasattr(ctx.store, "aftercare_for")
+            else {"available": True, "thread_id": f"demo-thread-{bk['id']}"})
     if not info.get("available"):
         return {"status": "not_available", "reason": "This hospital does not take follow-up messages here. "
                 "Tell the user to contact the hospital directly."}

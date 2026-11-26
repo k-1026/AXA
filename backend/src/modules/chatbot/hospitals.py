@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from ai.agent.session_store import JSON
 from ai.agent.tools.chat_tools import DEPT_CODES
 from core.errors import AppError
+from modules.booking import service as booking_service
 from modules.hospital import service as hospital_service
 from modules.hospital.models import Hospital
 from modules.tenant.models import Tenant
@@ -47,6 +48,7 @@ def _district(sggu: str | None) -> str:
 
 
 def _brief(h) -> JSON:
+    extra = _demo_extra().get(h.id, {})
     return {
         "hospital_id": h.id,
         "name_ko": h.name_ko,
@@ -55,8 +57,9 @@ def _brief(h) -> JSON:
         "departments": [DEPT_KO.get(d, d) for d in h.departments],
         "is_registered_facility": h.is_registered_facility,
         "tel": h.tel or "",  # 목록에서 바로 전화번호 안내 (국내 거주자 안내 때 상세를 병원마다 다시 부르지 않게)
-        "staff_languages": [],
-        "ai_translation_chat": False,
+        # 응대 언어·AI 번역은 가상 병원 자료에만 있음. 실제 병원은 데이터가 없어 비움 (목록·추천이 같은 값을 보게, 2026-11-26)
+        "staff_languages": extra.get("staff_languages", []),
+        "ai_translation_chat": extra.get("ai_translation_chat", False),
     }
 
 
@@ -96,8 +99,14 @@ class HospitalGateway:
             "address_en": d.addr_en or d.addr_ko or "",
             "tel": d.tel or "",
             "hours_source": f"{SOURCE_NOTE}, fetched {d.fetched_at:%Y-%m-%d}",
-            "can_request_consultation": d.can_request,
+            # 챗봇으로 요청을 보낼 수 있는지 = 등록·영업 중 + 메디대구 입점 (결정 31: 지금은 가상 병원만).
+            # d.can_request(등록·영업 중)만 보면 실제 병원도 true라 다음 턴에 "입점하지 않은 병원"으로 말이 바뀌었다 (2026-11-26)
+            "can_request_consultation": bool(d.can_request) and hospital_id in self._accepting_demo_ids(),
         }
+
+    def is_open(self, hospital_id: int, slot) -> bool:
+        """희망 일시가 진료시간 안인지 — 백엔드 요청서 저장과 같은 기준 (booking.service.is_open)."""
+        return booking_service.is_open(self.db, hospital_id, slot)
 
     # ---------- 조건 맞춤 제안·예약 = 가상 병원만 (결정 31) ----------
 

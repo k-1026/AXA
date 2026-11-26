@@ -152,6 +152,40 @@ def test_희망_시간은_1_3개_미래만(client, db):
     assert post(client, h, me, preferred_slots=[slot(-1)]).status_code == 422
 
 
+def test_진료시간_밖_희망_일시는_422(client, db):
+    """휴진일·진료 전후·점심이면 거절, 몇 번째 희망 일시인지 알려 줌. 진료시간 데이터가 없는 날은 막지 않음."""
+    from datetime import time as dtime
+    from zoneinfo import ZoneInfo
+
+    from modules.hospital.models import HospitalHours
+
+    h, me = make_hospital(db), patient(client)
+    days = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+    for i, d in enumerate(days):
+        closed = d == "sun"
+        db.add(HospitalHours(hospital_id=h.id, day=d, day_order=i, state="closed" if closed else "open", source="테스트",
+                             checked_at=utcnow(), open_time=None if closed else dtime(9, 30), close_time=None if closed else dtime(18, 30),
+                             lunch_start=None if closed else dtime(13), lunch_end=None if closed else dtime(14)))
+    db.commit()
+    kst = ZoneInfo("Asia/Seoul")
+    base = datetime.now(kst).date() + timedelta(days=7)
+    mon = base + timedelta(days=(0 - base.weekday()) % 7)  # 다음 월요일 이후
+    at = lambda day, hh, mm=0: datetime(day.year, day.month, day.day, hh, mm, tzinfo=kst).astimezone(timezone.utc).isoformat()
+    sun = mon + timedelta(days=6)
+
+    r = post(client, h, me, preferred_slots=[at(mon, 10), at(sun, 10), at(mon, 13, 30), at(mon, 19)][:3])
+    assert r.status_code == 422
+    assert [e["loc"] for e in r.json()["detail"]["errors"]] == [["preferred_slots", 1], ["preferred_slots", 2]]
+    assert post(client, h, me, preferred_slots=[at(mon, 19)]).status_code == 422  # 마감 뒤
+    assert post(client, h, me, preferred_slots=[at(mon, 9)]).status_code == 422  # 시작 전
+    assert post(client, h, me, preferred_slots=[at(mon, 10), at(mon, 18)]).status_code == 201
+
+
+def test_진료시간_데이터가_없으면_막지_않음(client, db):
+    h, me = make_hospital(db), patient(client)  # hospital_hours 없음
+    assert post(client, h, me).status_code == 201
+
+
 def test_같은_병원에_처리_안된_요청이_있으면_409(client, db):
     h, me = make_hospital(db), patient(client)
     assert post(client, h, me).status_code == 201

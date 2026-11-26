@@ -94,6 +94,12 @@ def create_request(db: Session, patient_id: uuid.UUID, tenant_id: uuid.UUID, dat
     tenant = db.get(Tenant, tenant_id)
     if tenant is None or not tenant.requests_enabled:
         raise _not_found()
+    # 희망 일시가 진료시간 밖(휴진일·진료 전후·점심)이면 받지 않음 (2026-11-26, 피드백 "예약 불가능 시간에 예약 안 되게")
+    closed = [i for i, s in enumerate(data.get("preferred_slots") or [])
+              if not is_open(db, tenant.hospital_id, datetime.fromisoformat(s.replace("Z", "+00:00")))]
+    if closed:
+        raise AppError(422, "validation", "희망 일시가 병원 진료시간이 아닙니다 (휴진일·진료 전후·점심)",
+                       {"errors": [{"loc": ["preferred_slots", i], "type": "closed"} for i in closed]})
     dup = db.scalar(
         select(BookingRequest.id).where(
             BookingRequest.patient_id == patient_id,
@@ -192,18 +198,23 @@ KST = ZoneInfo("Asia/Seoul")
 DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 
 
-def _check_open(db: Session, hospital_id: int, slot: datetime) -> None:
-    """제안 시간이 그 병원 진료시간 안인지 (한국 시간). 휴진일·진료 전후·점심이면 422 validation.
-    그날 진료시간 데이터가 없거나 unknown이면 막지 않음 (모르는 것을 휴진으로 보지 않음)."""
+def is_open(db: Session, hospital_id: int, slot: datetime) -> bool:
+    """그 시간이 병원 진료시간 안인지 (한국 시간). 휴진일·진료 전후·점심이면 False.
+    그날 진료시간 데이터가 없거나 unknown이면 True (모르는 것을 휴진으로 보지 않음).
+    병원 직원 시간 제안·환자 요청서·챗봇 초안이 같은 기준을 쓴다 (contracts 5절)."""
     local = slot.astimezone(KST)
     h = db.get(HospitalHours, (hospital_id, DAYS[local.weekday()]))
     if h is None or h.state not in ("open", "closed"):
-        return
+        return True
     t = local.time()
-    closed = (h.state == "closed" or h.open_time is None or h.close_time is None
-              or not (h.open_time <= t < h.close_time)
-              or (h.lunch_start is not None and h.lunch_end is not None and h.lunch_start <= t < h.lunch_end))
-    if closed:
+    return not (h.state == "closed" or h.open_time is None or h.close_time is None
+                or not (h.open_time <= t < h.close_time)
+                or (h.lunch_start is not None and h.lunch_end is not None and h.lunch_start <= t < h.lunch_end))
+
+
+def _check_open(db: Session, hospital_id: int, slot: datetime) -> None:
+    """병원 직원 시간 제안: 진료시간 밖이면 422 validation."""
+    if not is_open(db, hospital_id, slot):
         raise AppError(422, "validation", "병원 진료시간이 아닙니다 (휴진일·진료 전후·점심)",
                        {"errors": [{"loc": ["slot"], "type": "closed"}]})
 
