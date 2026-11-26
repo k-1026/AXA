@@ -120,6 +120,13 @@
 .hd .today-tile.is-alert .today-val { color: var(--bad); }
 .hd .today-go { font-size: .8rem; color: var(--accent); font-weight: 600; }
 .hd .today-err { font-size: .8rem; color: var(--bad); }
+/* 실제 타일과 예시 타일 사이 얇은 세로선 (사후관리 처리 현황): 타일 칸은 1fr, 선 칸은 1px */
+.hd .today-tiles.has-sep { grid-template-columns: repeat(4, minmax(0, 1fr)) 1px repeat(2, minmax(0, 1fr)); }
+.hd .today-sep { background: var(--border); width: 1px; align-self: stretch; margin: 4px 0; }
+@media (max-width: 900px) {
+  .hd .today-tiles.has-sep { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hd .today-sep { grid-column: 1 / -1; width: auto; height: 1px; margin: 2px 0; }
+}
 .hd .today-val .stars { font-size: .85rem; color: #e0a100; margin-left: 6px; letter-spacing: 1px; vertical-align: middle; }
 /* 홈 한 줄 3칸 (운영 후: 요청·체결·방문 / 공공 카드 3개). 칸 윗선을 맞춤 */
 .hd .row3 { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }

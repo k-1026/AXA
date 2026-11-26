@@ -60,14 +60,16 @@ export default function AftercareStatusTiles({ onExpired }: { onExpired: () => v
         <h3>처리 현황</h3>
         {error && <span className="today-err">서버에서 불러오지 못했어요</span>}
       </header>
-      <div className="today-tiles">
-        {tiles.map((t) => (
+      <div className="today-tiles has-sep">
+        {tiles.map((t, i) => [
+          // 해결 완료(실제)와 평균 첫 답변(예시) 사이 얇은 구분선
+          i === 4 && <span key="sep" className="today-sep" aria-hidden />,
           <a key={t.label} href={href} className={`today-tile${t.alert ? ' is-alert' : ''}`}>
             <span className="today-label">{t.label}{t.example && <span className="badge badge-example">예시</span>}</span>
             <span className="today-val">{t.val}{t.stars != null && <small className="stars" aria-label={`5점 중 ${t.stars}점`}>{'★'.repeat(Math.round(t.stars))}{'☆'.repeat(5 - Math.round(t.stars))}</small>}</span>
             <span className="today-go">{t.go}</span>
-          </a>
-        ))}
+          </a>,
+        ])}
       </div>
     </section>
   );

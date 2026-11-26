@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { TabProps } from './props';
 import { Card, Locked } from '../ui';
-import { AFTERCARE_CASE, AFTERCARE_KEYWORDS, IMPROVEMENTS, SATISFACTION } from '../sample';
+import { AFTERCARE_KEYWORDS } from '../sample';
 import AftercareStatusTiles from '../AftercareStatusTiles';
 import { useStaffExpired } from '../useStaffExpired';
 
@@ -50,23 +50,6 @@ export default function AftercareTab({ mode }: TabProps) {
               </tbody>
             </table>
             <p className="note">&lsquo;안내 부족&rsquo;과 &lsquo;비용 설명&rsquo;이 늘었어요 → 안내문에 미리 넣을 내용 확인</p>
-          </Card>
-          <Card title="대표 사례" kind="example">
-            <p className="case-who">{AFTERCARE_CASE.who} · <span className="badge badge-locked">{AFTERCARE_CASE.keyword}</span></p>
-            <p>{AFTERCARE_CASE.summary}</p>
-            <p className="mini">이름·연락처·사진은 가림 · 원래 대화는 병원 직원만 열람</p>
-          </Card>
-          <Card title="개선 기록" kind="example">
-            <table className="tbl">
-              <thead><tr><th>날짜</th><th>바꾼 안내</th><th>관련 문의 (전→후)</th></tr></thead>
-              <tbody>
-                {IMPROVEMENTS.map((m) => <tr key={m.date}><td>{m.date}</td><td>{m.change}</td><td>{m.before} → {m.after}</td></tr>)}
-              </tbody>
-            </table>
-          </Card>
-          <Card title="만족도 (병원 내부용)" kind="example">
-            <p className="big">{SATISFACTION.score}<small> / 5 · 응답 {SATISFACTION.responses}명</small></p>
-            <p className="mini">환자 화면에 공개하지 않음 (치료경험담 광고 금지 유형)</p>
           </Card>
         </>
       ) : (

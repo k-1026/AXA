@@ -102,17 +102,6 @@ export const AFTERCARE_KEYWORDS = [
   { name: '대기시간', now: 2, prev: 3 },
 ];
 
-export const AFTERCARE_CASE = {
-  who: '대만 · 30대 · 방문 11/03',
-  summary: '귀국 후 관리 방법 안내문을 못 받았다고 문의. 중국어(번체) 안내문을 다시 보내고 해결.',
-  keyword: '안내 부족',
-};
-
-export const IMPROVEMENTS = [
-  { date: '10/20', change: '방문 후 안내문에 중국어(번체) 추가', before: 5, after: 2, keyword: '안내 부족' },
-  { date: '10/02', change: '상세페이지에 주차·지하철 안내 추가', before: 9, after: 4, keyword: '위치' },
-];
-
 export const SATISFACTION = { score: 4.6, responses: 17 };
 // 사후관리 평균 첫 답변 (분, 옛 대시보드 예시 5시간 40분) — 목록 API에 메시지 시각이 없어 예시 (대화별 조회는 열람 기록이 남아 쓰지 않음)
 export const AFTERCARE_FIRST_REPLY_MIN = 340;
