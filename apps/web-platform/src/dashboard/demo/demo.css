@@ -1,4 +1,4 @@
-/* 병원 대시보드 (/dashboard, 예전 dashboard/대시보드.html의 <style>). 모든 규칙은 최상위 .md-dashboard 아래로만 — 환자 화면과 섞이지 않게 */
+/* 옛 병원 대시보드 (/dashboard/legacy 보관용, 예전 dashboard/대시보드.html의 <style>). 모든 규칙은 최상위 .md-dashboard 아래로만 — 환자 화면과 섞이지 않게 */
 .md-dashboard {
   /* 환자 웹사이트(apps/web-platform/src/styles.css)와 같은 색 */
   --bg:#f6f8fb; --card:#ffffff; --muted-bg:#eef1f5; --fg:#1f2933; --muted:#5b6673; --line:#d7dce3;

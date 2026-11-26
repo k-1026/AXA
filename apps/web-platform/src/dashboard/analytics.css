@@ -1,4 +1,4 @@
-/* 병원 통계 상세 프로토타입 (/dashboard/analytics, 예전 apps/web-hospital). 모든 규칙은 최상위 .hd 아래로만 — 환자 화면(src/styles.css)과 섞이지 않게. 색은 환자용과 같은 파랑 계열 */
+/* 병원 메인 대시보드 (/dashboard, 예전 /dashboard/analytics 통계 상세 · 예전 apps/web-hospital). 모든 규칙은 최상위 .hd 아래로만 — 환자 화면(src/styles.css)과 섞이지 않게. 색은 환자용과 같은 파랑 계열 */
 .hd {
   --bg: #f4f6fa;
   --surface: #ffffff;
