@@ -134,6 +134,7 @@ export default function BookingCalendar({ onExpired, onChanged }: { onExpired: (
         <span><i className="ev-dot st-manual" />수기 예약</span>
         <span className="cal-hint">{state === 'error' ? '서버에서 불러오지 못했어요' : state === 'loading' ? '불러오는 중…' : '날짜를 누르면 예약 추가·처리'}</span>
       </p>
+      <div className="cal-wrap">
       <div className="cal" role="grid" aria-label={`${ym} 예약`}>
         {WEEK.map((w, i) => <div key={w} className={`cal-wd${i >= 5 ? ' is-weekend' : ''}`} role="columnheader">{w}</div>)}
         {cells.map((d) => {
@@ -153,6 +154,28 @@ export default function BookingCalendar({ onExpired, onChanged }: { onExpired: (
             </button>
           );
         })}
+      </div>
+
+      {/* 오른쪽: 오늘 일정 (요일 한 칸 너비, 캘린더와 같은 높이 — 넘치면 안에서 스크롤) */}
+      <aside className="cal-today" aria-label="오늘 일정">
+        <div className="cal-today-in">
+          <p className="cal-today-head"><b>오늘 일정</b><small>{md(today)} ({dow(today)}) · {(byDay.get(today) ?? []).length}건</small></p>
+          {(byDay.get(today) ?? []).length ? (
+            <ul className="cal-today-list">
+              {(byDay.get(today) ?? []).map((e) => (
+                <li key={e.key}>
+                  <button type="button" className={`st-${e.kind === 'manual' ? 'manual' : e.status}`} onClick={() => setDay(today)} title={e.who}>
+                    <b>{khm(e.slot)}</b>
+                    <span>{e.label}</span>
+                    <small>{ST[e.status]}{e.kind === 'manual' ? ' · 수기' : ''}</small>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="cal-today-empty">{state === 'loading' ? '불러오는 중…' : '오늘 예약이 없어요'}</p>}
+          <button type="button" className="btn-ghost cal-today-add" onClick={() => setDay(today)}>+ 오늘 예약 추가</button>
+        </div>
+      </aside>
       </div>
       <p className="mini">대기는 환자 희망 1순위 시간, 나머지는 확정 시간 기준 · 수기 예약은 지금은 이 브라우저에만 저장돼요 (백엔드 연결 전)</p>
 

@@ -139,6 +139,26 @@
 .hd .cal-hint { margin-left: auto; }
 .hd .ev-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
 .hd .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+/* 캘린더 7칸 + 오른쪽 오늘 일정 1칸 (요일 한 칸 너비, 높이는 캘린더에 맞춤) */
+.hd .cal-wrap { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 1fr); gap: 10px; align-items: stretch; }
+.hd .cal-today { position: relative; min-width: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.hd .cal-today-in { position: absolute; inset: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.hd .cal-today-head { margin: 0 0 2px; display: flex; flex-direction: column; line-height: 1.3; }
+.hd .cal-today-head b { font-size: .85rem; color: var(--accent); }
+.hd .cal-today-head small { font-size: .72rem; color: var(--text-muted); }
+.hd .cal-today-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.hd .cal-today-list button { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; flex-direction: column; gap: 1px; padding: 5px 7px; border-radius: 6px; border-left: 3px solid var(--st); background: var(--st-bg); color: var(--text); }
+.hd .cal-today-list button:hover { filter: brightness(.97); }
+.hd .cal-today-list button:focus-visible { outline: 2px solid var(--accent); }
+.hd .cal-today-list b { font-size: .8rem; font-variant-numeric: tabular-nums; color: var(--st); }
+.hd .cal-today-list span { font-size: .78rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hd .cal-today-list small { font-size: .7rem; color: var(--text-muted); }
+.hd .cal-today-empty { margin: 0; font-size: .78rem; color: var(--text-muted); }
+.hd .cal-today-add { margin-top: auto; width: 100%; font-size: .75rem; }
+@media (max-width: 900px) {
+  .hd .cal-wrap { grid-template-columns: 1fr; }
+  .hd .cal-today-in { position: static; max-height: 260px; }
+}
 .hd .cal-wd { padding: 6px 8px; font-size: .78rem; font-weight: 700; color: var(--text-muted); background: var(--surface-muted); border-bottom: 1px solid var(--border); }
 .hd .cal-wd.is-weekend { color: var(--bad); }
 .hd .cal-day { all: unset; box-sizing: border-box; min-height: 96px; padding: 6px; display: flex; flex-direction: column; gap: 3px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); cursor: pointer; background: var(--surface); min-width: 0; }
