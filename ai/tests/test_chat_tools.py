@@ -223,3 +223,27 @@ def test_search_hospitals_tells_model_no_requests_for_residents():
 def test_search_results_carry_phone_numbers():
     res = R.run("search_hospitals", {"department": "피부과"}, SHORT)
     assert res["hospitals"] and all(h.get("tel") for h in res["hospitals"])
+def test_db_mode_prices_give_a_price_guide_button_with_item_and_department():
+    # 11/26: 숫자 대신 가격 가이드 버튼 카드. 시술 이름(q)·진료과(dept)로 걸러서 열림
+    from ai.agent.core.orchestrator import _card
+    from ai.agent.schemas import CARD_ADAPTER
+
+    class Db:
+        def booking_info(self, hospital_id):
+            return None
+    ctx = ToolContext(residency="short_term", hospitals=Db())
+    res = R.run("get_prices", {"item": " 필러 ", "department": "피부과"}, ctx)
+    assert res["guide_link"] == {"q": "필러", "dept": "dermatology"} and "button" in res["note"]
+    card = _card("get_prices", res)
+    assert card == {"type": "price_guide", "data": {"q": "필러", "dept": "dermatology"}}
+    CARD_ADAPTER.validate_python(card)  # 응답 카드 모델과 맞음
+    plain = _card("get_prices", R.run("get_prices", {}, ctx))  # "가격 정보" 버튼만 누른 경우 → 필터 없이
+    assert plain == {"type": "price_guide", "data": {}}
+    CARD_ADAPTER.validate_python(plain)
+
+
+def test_prompt_keeps_price_answers_to_price_only():
+    from ai.agent.prompts.orchestrator import SYSTEM_PROMPT
+    assert "don't append booking questions" in SYSTEM_PROMPT
+
+

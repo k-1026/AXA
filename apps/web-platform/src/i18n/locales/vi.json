@@ -162,7 +162,10 @@
     "fxNotice": "Số tiền quy đổi chỉ để tham khảo. Chi phí thực tế tính bằng won Hàn Quốc theo báo giá của bệnh viện. Tỷ giá áp dụng ngày {{applied}} (Ngân hàng Trung ương Hàn Quốc, số liệu ngày {{base}}; cập nhật lúc {{hour}}:00 giờ Hàn Quốc mỗi ngày) ·",
     "fxProvider": "Bank of Korea ECOS",
     "fxFallback": "Không tải được tỷ giá, giá được hiển thị bằng won Hàn Quốc.",
-    "fxReference": "Quy đổi theo tỷ giá tham khảo của Ngân hàng Trung ương châu Âu ({{date}}). Số tiền thực tế có thể khác."
+    "fxReference": "Quy đổi theo tỷ giá tham khảo của Ngân hàng Trung ương châu Âu ({{date}}). Số tiền thực tế có thể khác.",
+    "searchResult": "{{count}} thủ thuật liên quan đến “{{q}}”",
+    "noResult": "Không tìm thấy thủ thuật liên quan đến “{{q}}”, đang hiển thị tất cả.",
+    "clearSearch": "Xem tất cả"
   },
   "mypage": {
     "home": "Trang chủ",
@@ -356,7 +359,7 @@
       "askDept": "Bạn đang tìm chuyên khoa nào?",
       "askRegion": "Bạn muốn tìm ở khu vực nào?\nChọn khu vực để xem thông tin bệnh viện và kênh liên hệ chính thức.",
       "hospitals": "Trong Thông tin bệnh viện, bạn có thể xem các bệnh viện phù hợp theo khoảng cách hoặc tên. Vui lòng kiểm tra liên hệ chính thức và giờ khám của từng bệnh viện.",
-      "price": "Bạn có thể xem khoảng giá theo dịch vụ trong Hướng dẫn giá. Chi phí thực tế khác nhau, vui lòng xác nhận với bệnh viện.",
+      "price": "Vào Hướng dẫn giá để xem các thủ thuật được hỗ trợ và khoảng giá. Chi phí thực tế khác nhau tùy bệnh viện, vui lòng xác nhận với bệnh viện.",
       "interpret": "Hỗ trợ phiên dịch khác nhau tùy bệnh viện. Vui lòng kiểm tra ngôn ngữ hỗ trợ qua liên hệ chính thức của bệnh viện trước khi đến. Nếu cần phiên dịch du lịch, hãy gọi đường dây 1330.",
       "tour": "Thông tin du lịch Daegu đang được chuẩn bị. Tránh lịch trình dày ngay sau điều trị và hỏi bệnh viện về hướng dẫn hồi phục.",
       "emergency": "Đây có thể là tình huống khẩn cấp. Hãy gọi 119 ngay hoặc đến phòng cấp cứu gần nhất. 119 hỗ trợ phiên dịch tiếng nước ngoài.",

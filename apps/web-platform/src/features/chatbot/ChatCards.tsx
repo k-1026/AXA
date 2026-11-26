@@ -101,6 +101,25 @@ function AftercareCard({ data }: { data: Extract<ChatCard, { type: 'aftercare_th
   );
 }
 
+/** 가격 가이드 화면으로 가는 버튼 — 챗봇은 숫자를 말하지 않고, 공공 비급여 범위는 가격 가이드에서 본다 */
+function PriceGuideCard({ q, dept }: { q?: string; dept?: DepartmentKey }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const params = new URLSearchParams();
+  if (dept) params.set('dept', dept);
+  if (q) params.set('q', q);
+  const qs = params.toString();
+  return (
+    <section className="chat-card">
+      {(q || dept) && <h3>{q ? `"${q}"` : t(`dept.${dept}`)}</h3>}
+      <button type="button" onClick={() => navigate(`/prices${qs ? `?${qs}` : ''}`)}>
+        {t('chat.link.prices')}
+      </button>
+      {/* 금액 고지(공공 비급여·내국인 기준·병원 확인)는 가격 가이드 화면에 있다 */}
+    </section>
+  );
+}
+
 function Card({ card }: { card: ChatCard }) {
   const { t, i18n } = useTranslation();
   switch (card.type) {
@@ -141,6 +160,8 @@ function Card({ card }: { card: ChatCard }) {
         </section>
       );
     case 'price_list':
+    case 'price_guide':
+      return <PriceGuideCard q={card.data.q} dept={card.data.dept} />;
       return (
         <section className="chat-card">
           <h3>{t('chat.card.prices')}</h3>

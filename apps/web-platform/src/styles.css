@@ -5465,6 +5465,7 @@ body.chat-open {
 .chat-card-done a {
   color: var(--accent);
 }
+
 /* 테스트용 챗봇 응답 시간 (개발 서버에서만 보임) */
 .chat-timing {
   margin: 6px 0 0;
@@ -5474,3 +5475,20 @@ body.chat-open {
 }
 .chat-pending .chat-timing { margin: 0 0 0 6px; }
 
+/* 가격 가이드: 시술 이름으로 찾은 결과 안내 (챗봇 가격 버튼 ?q=) */
+.price-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: var(--c-ink-70);
+}
+.price-search-clear {
+  border: 1px solid var(--c-line, #d8dee8);
+  border-radius: 999px;
+  background: #fff;
+  padding: 2px 12px;
+  font: inherit;
+  cursor: pointer;
+}

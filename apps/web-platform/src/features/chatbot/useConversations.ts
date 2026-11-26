@@ -276,6 +276,9 @@ export function useConversations() {
 
   const choose = (label: ChatText, action: ChipAction) => {
     if (!active || busy) return;
+    // 빠른 메뉴 "가격 정보"는 회원도 서버(AI)를 거치지 않고 바로 안내 + 가격 가이드 버튼 (2026-11-26).
+    // AI는 "어떤 시술?"이라고 되묻고 버튼을 주지 않았다. 이 안내는 이 화면에만 있고 서버 대화 기록에는 저장되지 않는다
+    if (mode === 'member' && action.kind === 'topic' && action.topic === 'price') return push(active.id, label, replyToChip(t, action, active));
     if (mode === 'member') return void askServer(active, shown(label)); // 버튼 문구를 질문으로
     push(active.id, label, replyToChip(t, action, active));
   };

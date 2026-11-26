@@ -88,6 +88,9 @@ def _find_hospital(hospital_id: int) -> dict:
 def _uses_db(ctx: ToolContext) -> bool:
     return ctx.hospitals is not None and hasattr(ctx.hospitals, "booking_info")
 
+# 가격 가이드 화면(프론트 /prices)의 진료과 키 — 챗봇 가격 버튼이 그 과로 열리게 (2026-11-26)
+PRICE_GUIDE_DEPTS = {"피부과": "dermatology", "성형외과": "plastic", "내과": "internal", "안과": "ophthalmology",
+                     "한방": "korean_medicine", "한의원": "korean_medicine"}
 
 def _booking_hospital(ctx: ToolContext, hospital_id: int) -> dict:
     """조건 맞춤 제안·예약용 병원. 실제 서버에서는 DB (가상 입점 병원만 요청을 받음, 결정 31), 테스트는 가상 데이터."""
@@ -238,9 +241,15 @@ def get_hospital(args: JSON, ctx: ToolContext) -> JSON:
 def get_prices(args: JSON, ctx: ToolContext) -> JSON:
     if _uses_db(ctx):
         # 챗봇 가격은 아직 실제 데이터에 연결 전. 가짜 행(fake_data.PRICES)은 id가 시연 병원과 겹쳐 엉뚱한 값이 됨 (11/24)
-        return {"prices": [], "note": "The chatbot can't look up prices yet. Tell the user to open the Price Guide page "
-                                      "(menu '가격 가이드') for public non-covered fee ranges in Daegu, and that the hospital "
-                                      "gives the final estimate. Do not quote any numbers."}
+        # 대신 가격 가이드 화면으로 가는 버튼 카드(price_guide): 시술 이름(q)·진료과(dept)로 걸러서 열림 (11/26)
+        item = " ".join(str(args.get("item") or "").split())[:40] or None
+        return {"prices": [], "guide_link": {"q": item, "dept": PRICE_GUIDE_DEPTS.get(args.get("department") or "")},
+                "note": "The chatbot can't look up prices. A button to the Price Guide page"
+                        + (f" filtered to '{item}'" if item else "") + " is shown under your reply (in Korean the page is "
+                        "'가격 가이드'; use the page name in the user's language). Tell the user to press it to see the price "
+                        "ranges listed there for Daegu, that actual costs differ by hospital, and that the hospital gives "
+                        "the final estimate. Do not quote any numbers and do not call them official or public prices. "
+                        "Answer only the price question; don't add booking questions."}
     rows = fd.PRICES
     if hid := args.get("hospital_id"):
         rows = [p for p in rows if p["hospital_id"] == hid]
@@ -507,7 +516,9 @@ def build_registry() -> ToolRegistry:
         "병원을 몰라도 item만으로 조회 가능. 숫자는 이 결과만 사용하고 직접 만들지 않는다.",
         {"type": "object", "properties": {
             "hospital_id": {"type": "integer"},
-            "item": {"type": "string", "description": "시술·항목 키워드 (한국어 또는 영어)"}}},
+            "item": {"type": "string", "description": "시술·항목 키워드, 사용자가 말한 그대로 짧게 (예: 필러, 보톡스, 라식, 건강검진)"},
+            "department": {"type": "string", "enum": list(PRICE_GUIDE_DEPTS),
+                           "description": "그 시술을 보통 다루는 진료과 (알면). 가격 가이드 버튼이 이 과로 열림"}}},
         get_prices, "가격"))
     r.register(Tool(
         "retrieve_docs",

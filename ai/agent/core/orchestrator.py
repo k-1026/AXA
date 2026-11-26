@@ -91,6 +91,9 @@ def _card(tool: str, result: JSON) -> JSON | None:
         return None
     if tool == "recommend_hospitals" and not result.get("suggestions"):
         return None
+    if tool == "get_prices" and result.get("guide_link"):
+        # 서버: 숫자 대신 가격 가이드 화면으로 가는 버튼 (시술 이름·진료과로 걸러서 열림, 2026-11-26)
+        return {"type": "price_guide", "data": {k: v for k, v in result["guide_link"].items() if v}}
     if tool == "get_prices" and not result.get("prices"):
         return None
     if tool == "retrieve_docs" and not result.get("documents"):
