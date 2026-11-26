@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { TabProps } from './props';
-import { BarList, Card, Funnel, Locked, won } from '../ui';
-import { CANCEL_REASONS, FIRST_REPLY, FUNNEL, PREFERRED_DAYS, REPEAT_CHANGES, SAMPLE_HOURS } from '../sample';
+import { BarList, Card, Locked, won } from '../ui';
+import { CANCEL_REASONS, FIRST_REPLY, PREFERRED_DAYS, REPEAT_CHANGES, SAMPLE_HOURS } from '../sample';
+import BookingStatusTiles from '../BookingStatusTiles';
+import { useStaffExpired } from '../useStaffExpired';
 import { DEPT_LABEL } from '../types';
 
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -20,32 +22,37 @@ export default function BookingTab({ data, mode, dept }: TabProps) {
   const pct = (n: number) => Math.round((n / h.known) * 100);
   const prices = data.prices.byDept[dept] ?? [];
   const deptName = DEPT_LABEL[dept];
+  const onExpired = useStaffExpired();
 
   return (
     <div className="grid">
-      <Card title="예약 가능 요일" kind="setup">
-        <div className="days">
-          {DAYS.map((d, i) => (
-            <button type="button" key={d} className={slots[i] ? 'day is-on' : 'day'} aria-pressed={slots[i]}
-              onClick={() => setSlots(slots.map((v, j) => (j === i ? !v : v)))}>{d}</button>
-          ))}
-        </div>
-        <p className="note">요일마다 받을 수 있는 시간대와 예약 수를 정하면 환자는 그 안에서만 신청해요</p>
-      </Card>
+      {/* 예약 현황 (DB): 운영 후 모드에서만 맨 위 */}
+      {operating && <BookingStatusTiles onExpired={onExpired} />}
 
-      <Card title="자주 묻는 질문 기본 틀" kind="setup">
-        <ul className="faq">
-          {FAQ_TEMPLATE.map((f) => <li key={f.q}><b>{f.q}</b><span>{f.a}</span></li>)}
-        </ul>
-        <p className="note">KHIDI 다국어 서식집을 참고한 기본 질문. 답을 채우면 5개 언어로 보여요</p>
-      </Card>
+      {/* 예약 가능 요일·자주 묻는 질문: 초기 모드에서만 (운영 후 모드에서는 뺌) */}
+      {!operating && (
+        <>
+          <Card title="예약 가능 요일" kind="setup">
+            <div className="days">
+              {DAYS.map((d, i) => (
+                <button type="button" key={d} className={slots[i] ? 'day is-on' : 'day'} aria-pressed={slots[i]}
+                  onClick={() => setSlots(slots.map((v, j) => (j === i ? !v : v)))}>{d}</button>
+              ))}
+            </div>
+            <p className="note">요일마다 받을 수 있는 시간대와 예약 수를 정하면 환자는 그 안에서만 신청해요</p>
+          </Card>
+
+          <Card title="자주 묻는 질문 기본 틀" kind="setup">
+            <ul className="faq">
+              {FAQ_TEMPLATE.map((f) => <li key={f.q}><b>{f.q}</b><span>{f.a}</span></li>)}
+            </ul>
+            <p className="note">KHIDI 다국어 서식집을 참고한 기본 질문. 답을 채우면 5개 언어로 보여요</p>
+          </Card>
+        </>
+      )}
 
       {operating ? (
         <>
-          <Card title="어느 단계에서 환자를 놓치나?" kind="example" wide>
-            <Funnel steps={FUNNEL} />
-            <p className="note">비율은 바로 앞 단계 대비. 상담을 시작하고도 예약 신청까지 가는 건 56% → 첫 답변 시간·비용 안내 확인. 신청 → 확정 65% → 희망 시간대와 확정 가능 시간 확인</p>
-          </Card>
           <Card title="첫 답변 소요 시간" kind="example">
             <p className="big">{hm(FIRST_REPLY.medianMin)}<small> 중앙값</small></p>
             <p className="mini">지난달 {hm(FIRST_REPLY.prevMedianMin)} · 1시간 안에 답한 상담 {FIRST_REPLY.within1h}% · 상담 시간 밖 문의 {FIRST_REPLY.outsideHours}%</p>

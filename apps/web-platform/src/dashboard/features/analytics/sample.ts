@@ -70,14 +70,6 @@ export const PRE_VISIT_QUESTIONS = [
   { name: '예상 비용', n: 10, fix: '항목별 가격 범위 등록' },
 ];
 
-export const FUNNEL = [
-  { name: '병원 상세 조회', n: 1240 },
-  { name: '상담 시작', n: 86 },
-  { name: '예약 신청', n: 48 },
-  { name: '예약 확정', n: 31 },
-  { name: '방문 완료', n: 24 },
-];
-
 export const FIRST_REPLY = { medianMin: 160, prevMedianMin: 210, within1h: 38, outsideHours: 27 };
 
 export const CANCEL_REASONS = [
