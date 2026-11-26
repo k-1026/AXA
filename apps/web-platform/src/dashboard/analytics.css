@@ -222,6 +222,51 @@
   .hd .ev { font-size: 0; padding: 0; height: 6px; border-left-width: 0; }
   .hd .form-grid { grid-template-columns: 1fr; }
 }
+/* 상담·예약 "요청 목록" (BookingRequestList.tsx) */
+.hd .tbl-scroll { overflow-x: auto; }
+.hd .card-wide .tbl.req-tbl { max-width: none; }
+.hd .req-tbl td { vertical-align: middle; white-space: nowrap; }
+.hd .req-tbl td small { color: var(--text-muted); }
+.hd .req-acts { display: flex; gap: 6px; justify-content: flex-end; }
+/* 상담·예약 "상담 채팅" (ConsultChat.tsx) */
+.hd .chat { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; height: 520px; }
+.hd .chat-list { overflow-y: auto; border-right: 1px solid var(--border); background: var(--surface-muted); }
+.hd .chat-empty { padding: 14px; }
+.hd .chat-item { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: .82rem; }
+.hd .chat-item:hover { background: var(--accent-soft); }
+.hd .chat-item.is-on { background: var(--surface); box-shadow: inset 3px 0 0 var(--accent); }
+.hd .chat-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.hd .chat-item-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.hd .chat-item small { color: var(--text-muted); font-size: .74rem; }
+.hd .chat-item .st-chip { font-size: .66rem; padding: 1px 6px; }
+.hd .chat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); flex: none; }
+.hd .chat-thread { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 12px 14px; gap: 8px; }
+.hd .chat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.hd .chat-head > div:first-child { display: flex; flex-direction: column; }
+.hd .chat-head small { color: var(--text-muted); font-size: .78rem; }
+.hd .chat-sum { font-size: .82rem; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.hd .chat-chips { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.hd .chip { font-size: .7rem; padding: 1px 7px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); }
+.hd .chat-msgs { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 2px; }
+.hd .msg { max-width: 78%; padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; gap: 3px; font-size: .85rem; }
+.hd .msg p { margin: 0; white-space: pre-wrap; }
+.hd .msg small { font-size: .74rem; color: var(--text-muted); }
+.hd .msg time { font-size: .68rem; color: var(--text-muted); }
+.hd .msg-patient { align-self: flex-start; background: var(--surface-muted); border-top-left-radius: 2px; }
+.hd .msg-staff { align-self: flex-end; background: var(--accent-soft); border-top-right-radius: 2px; }
+.hd .msg-staff time { text-align: right; }
+.hd .chat-input { display: flex; gap: 8px; align-items: flex-end; }
+.hd .chat-input textarea { flex: 1; resize: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: .85rem; }
+.hd .chat-input .btn, .hd .chat-confirm .btn { padding: 8px 14px; background: var(--accent); border-color: var(--accent); }
+.hd .chat-input .btn:disabled { opacity: .45; }
+.hd .chat-confirm { border: 1px solid var(--accent); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.hd .chat-confirm p { margin: 0; font-size: .85rem; }
+.hd .chat-confirm-text { background: var(--surface-muted); border-radius: 6px; padding: 6px 8px; white-space: pre-wrap; }
+@media (max-width: 760px) {
+  .hd .chat { grid-template-columns: 1fr; height: auto; }
+  .hd .chat-list { max-height: 220px; border-right: 0; border-bottom: 1px solid var(--border); }
+  .hd .chat-msgs { max-height: 360px; }
+}
 /* 홈 "기간 성과" (실제 DB, KpiTrends.tsx) */
 .hd .period { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 .hd .period-presets { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }

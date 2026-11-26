@@ -3,42 +3,16 @@
 // - 날짜를 누르면 팝업: 그날 예약 목록 + DB 예약 처리(확정·시간 제안·거절·방문 완료·미방문, POST /tenant/booking-requests/{id}/{action})
 //   + 수기 예약 추가·수정·삭제 (manualBookings.ts, 지금은 이 브라우저에만 저장)
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
+import {
+  ACTIONS, ActionForm, DB_STATUSES, Expired, ST, TIMES, WEEK, call, dow, errText, khm, kday, md, reqId, reqTitle, reqWho, runAction, todayKst, toIso,
+  type ActionMode, type DbReq,
+} from './bookingShared';
 import { listManual, removeManual, saveManual, type ManualBooking, type ManualStatus } from './manualBookings';
 
-type DbReq = {
-  id: string; status: string; nationality: string; lang: string; treatment: string | null;
-  preferred_slots: string[]; confirmed_slot: string | null; message_translated: string | null;
-};
 type Ev =
   | { kind: 'db'; key: string; slot: string; status: string; label: string; who: string; req: DbReq }
   | { kind: 'manual'; key: string; slot: string; status: ManualStatus; label: string; who: string; m: ManualBooking };
-
-const DB_STATUSES = ['pending', 'proposed', 'confirmed', 'visited', 'no_show'] as const;
-const ST: Record<string, string> = {
-  pending: '대기', proposed: '시간 제안함', confirmed: '확정', visited: '방문 완료', no_show: '미방문', cancelled: '취소', rejected: '거절',
-};
-const NAT: Record<string, string> = { TW: '대만', CN: '중국', JP: '일본', MN: '몽골', VN: '베트남', US: '미국', TH: '태국' };
-const LANG: Record<string, string> = { 'zh-TW': '번체', 'zh-CN': '간체', en: '영어', vi: '베트남어', ja: '일본어', ko: '한국어' };
-const TRT: Record<string, string> = { laser_toning: '레이저 토닝', acne_scar: '여드름 흉터', botox: '보톡스', melasma: '기미 치료', filler: '필러' };
-const REJECT: Record<string, string> = { fully_booked: '예약이 마감됐어요', not_offered: '하지 않는 진료예요', needs_consult: '대면 상담이 먼저 필요해요', other: '기타' };
-const ERR: Record<string, string> = {
-  'booking.invalid_transition': '이미 다른 상태로 바뀐 예약이에요. 목록을 새로 불러왔어요',
-  validation: '입력값을 확인해 주세요', not_found: '예약을 찾을 수 없어요 (다른 곳에서 바뀌었을 수 있어요)',
-  'auth.forbidden': '이 계정으로는 할 수 없어요',
-};
-const TIMES = Array.from({ length: 21 }, (_, i) => `${String(9 + Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`); // 09:00~19:00
-
-// ---------- 한국 날짜·시간 ----------
-const kday = (iso: string) => new Date(new Date(iso).getTime() + 9 * 3600e3).toISOString().slice(0, 10);
-const khm = (iso: string) => new Date(new Date(iso).getTime() + 9 * 3600e3).toISOString().slice(11, 16);
-const toIso = (d: string, t: string) => new Date(`${d}T${t}:00+09:00`).toISOString();
-const todayKst = () => kday(new Date().toISOString());
-const md = (d: string) => `${+d.slice(5, 7)}월 ${+d.slice(8)}일`;
-const WEEK = ['월', '화', '수', '목', '금', '토', '일'];
-const dow = (d: string) => WEEK[(new Date(d + 'T00:00:00Z').getUTCDay() + 6) % 7];
-const slotLabel = (iso: string) => `${md(kday(iso))}(${dow(kday(iso))}) ${khm(iso)}`;
 
 // 그 달 칸 (월요일 시작, 앞뒤 달 날짜로 채움)
 function monthCells(ym: string): string[] {
@@ -56,19 +30,6 @@ const shiftMonth = (ym: string, n: number) => {
   return d.toISOString().slice(0, 7);
 };
 
-class Expired extends Error {}
-async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = readStaffToken();
-  const res = await fetch(API_BASE + path, {
-    ...init,
-    headers: { Authorization: 'Bearer ' + token, ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
-  });
-  const body = await res.json().catch(() => ({}));
-  if (res.status === 401) throw new Expired();
-  if (!res.ok) throw new Error(body.code || String(res.status));
-  return body as T;
-}
-
 function toEvents(db: DbReq[], manual: ManualBooking[]): Ev[] {
   const evs: Ev[] = [];
   for (const r of db) {
@@ -76,15 +37,15 @@ function toEvents(db: DbReq[], manual: ManualBooking[]): Ev[] {
     if (!slot) continue;
     evs.push({
       kind: 'db', key: r.id, slot, status: r.status, req: r,
-      label: TRT[r.treatment ?? ''] || r.treatment || '상담',
-      who: `R-${r.id.slice(0, 4).toUpperCase()} · ${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`,
+      label: reqTitle(r),
+      who: `${reqId(r)} · ${reqWho(r)}`,
     });
   }
   for (const m of manual) evs.push({ kind: 'manual', key: m.id, slot: m.slot, status: m.status, m, label: m.treatment || '수기 예약', who: m.name || '이름 없음' });
   return evs.sort((a, b) => a.slot.localeCompare(b.slot));
 }
 
-export default function BookingCalendar({ onExpired, onChanged }: { onExpired: () => void; onChanged?: () => void }) {
+export default function BookingCalendar({ rev = 0, onExpired, onChanged }: { rev?: number; onExpired: () => void; onChanged?: () => void }) {
   const [ym, setYm] = useState(() => todayKst().slice(0, 7));
   const [db, setDb] = useState<DbReq[]>([]);
   const [manual, setManual] = useState<ManualBooking[]>([]);
@@ -105,7 +66,7 @@ export default function BookingCalendar({ onExpired, onChanged }: { onExpired: (
     }
   }, [onExpired]);
 
-  useEffect(() => { if (readStaffToken()) load(); }, [load]);
+  useEffect(() => { if (readStaffToken()) load(); }, [load, rev]); // rev: 요청 목록·채팅에서 처리하면 다시 불러옴
 
   const events = useMemo(() => toEvents(db, manual), [db, manual]);
   const byDay = useMemo(() => {
@@ -187,7 +148,7 @@ export default function BookingCalendar({ onExpired, onChanged }: { onExpired: (
 }
 
 // ---------- 날짜 팝업 ----------
-type Panel = { ev?: Ev; mode: 'confirm' | 'propose' | 'reject' | 'visited' | 'no_show' | 'manual' } | null;
+type Panel = { ev?: Ev; mode: ActionMode | 'manual' } | null;
 
 function DayDialog({ day, events, onClose, onExpired, refresh }: {
   day: string; events: Ev[]; onClose: () => void; onExpired: () => void; refresh: () => Promise<void>;
@@ -212,23 +173,16 @@ function DayDialog({ day, events, onClose, onExpired, refresh }: {
     } catch (e) {
       if (e instanceof Expired) { onExpired(); return; }
       const code = (e as Error).message;
-      setErr(ERR[code] || `저장하지 못했어요: ${code}`);
+      setErr(errText(code));
       if (code === 'booking.invalid_transition' || code === 'not_found') await refresh();
     } finally {
       setBusy(false);
     }
   };
-  const act = (ev: Ev & { kind: 'db' }, action: string, body: object, done: string) =>
-    run(() => call(`/tenant/booking-requests/${ev.req.id}/${action === 'no_show' ? 'no-show' : action}`, { method: 'POST', body: JSON.stringify(body) }), done);
+  const act = (req: DbReq, action: ActionMode, body: object, done: string) => run(() => runAction(req, action, body), done);
 
-  const actionsFor = (ev: Ev) => {
-    if (ev.kind === 'manual') return [{ mode: 'manual' as const, label: '수정' }];
-    return ({
-      pending: [{ mode: 'confirm', label: '확정' }, { mode: 'propose', label: '시간 제안' }, { mode: 'reject', label: '거절' }],
-      proposed: [{ mode: 'propose', label: '다시 제안' }, { mode: 'reject', label: '거절' }],
-      confirmed: [{ mode: 'visited', label: '방문 완료' }, { mode: 'no_show', label: '미방문' }],
-    } as Record<string, { mode: NonNullable<Panel>['mode']; label: string }[]>)[ev.status] ?? [];
-  };
+  const actionsFor = (ev: Ev): { mode: NonNullable<Panel>['mode']; label: string }[] =>
+    ev.kind === 'manual' ? [{ mode: 'manual', label: '수정' }] : ACTIONS[ev.status] ?? [];
 
   return (
     <div className="dlg-wrap" onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}>
@@ -265,7 +219,7 @@ function DayDialog({ day, events, onClose, onExpired, refresh }: {
                     ? <ManualForm day={day} initial={ev.m} busy={busy} onCancel={() => setPanel(null)}
                         onSave={(m) => run(() => saveManual(m), '수기 예약을 고쳤어요 (이 브라우저에 저장)')}
                         onDelete={() => run(() => removeManual(ev.m.id), '수기 예약을 지웠어요')} />
-                    : <ActionForm ev={ev} mode={panel.mode} day={day} busy={busy} onCancel={() => setPanel(null)} act={act} />
+                    : <ActionForm req={ev.req} mode={panel.mode as ActionMode} day={day} busy={busy} onCancel={() => setPanel(null)} act={act} />
                 )}
               </li>
             ))}
@@ -279,75 +233,6 @@ function DayDialog({ day, events, onClose, onExpired, refresh }: {
           <button type="button" className="btn day-add" disabled={busy} onClick={() => { setErr(''); setToast(''); setPanel({ mode: 'manual' }); }}>+ 수기 예약 추가</button>
         )}
         <p className="mini">확정·시간 제안·거절·방문 처리는 DB에 저장되고 환자 화면에 바로 반영돼요. 거절·미방문은 되돌릴 수 없어요</p>
-      </div>
-    </div>
-  );
-}
-
-// DB 예약 처리 폼 (확정할 시간 고르기 · 제안할 시간 · 거절 사유 · 방문/미방문 확인)
-function ActionForm({ ev, mode, day, busy, onCancel, act }: {
-  ev: Ev & { kind: 'db' }; mode: NonNullable<Panel>['mode']; day: string; busy: boolean; onCancel: () => void;
-  act: (ev: Ev & { kind: 'db' }, action: string, body: object, done: string) => Promise<void>;
-}) {
-  const [slot, setSlot] = useState(ev.req.preferred_slots[0] ?? '');
-  const [d, setD] = useState(day < todayKst() ? todayKst() : day);
-  const [t, setT] = useState('10:00');
-  const [reason, setReason] = useState('');
-  const [err, setErr] = useState('');
-
-  const submit = () => {
-    setErr('');
-    if (mode === 'confirm') {
-      if (!slot) return setErr('확정할 시간을 골라 주세요');
-      return act(ev, 'confirm', { slot }, `예약을 확정했어요: ${slotLabel(slot)}`);
-    }
-    if (mode === 'propose') {
-      const iso = toIso(d, t);
-      if (new Date(iso) <= new Date()) return setErr('지난 시간은 고를 수 없어요');
-      return act(ev, 'propose', { slot: iso }, `다른 시간을 제안했어요: ${slotLabel(iso)}`);
-    }
-    if (mode === 'reject') {
-      if (!reason) return setErr('거절 사유를 골라 주세요');
-      return act(ev, 'reject', { reason }, '요청을 거절했어요');
-    }
-    return act(ev, mode, {}, mode === 'visited' ? '방문 완료로 바꿨어요' : '미방문으로 바꿨어요');
-  };
-
-  return (
-    <div className="day-panel">
-      {mode === 'confirm' && (
-        <fieldset>
-          <legend>확정할 시간 (환자 희망)</legend>
-          {ev.req.preferred_slots.map((s, i) => (
-            <label key={s} className="opt"><input type="radio" name="slot" checked={slot === s} onChange={() => setSlot(s)} /> {slotLabel(s)} <small>희망 {i + 1}</small></label>
-          ))}
-        </fieldset>
-      )}
-      {mode === 'propose' && (
-        <div className="pick">
-          <span>제안할 시간</span>
-          <input type="date" value={d} min={todayKst()} onChange={(e) => setD(e.target.value)} aria-label="날짜" />
-          <select value={t} onChange={(e) => setT(e.target.value)} aria-label="시간">{TIMES.map((x) => <option key={x}>{x}</option>)}</select>
-          <small>환자가 수락하면 확정돼요 · 진료시간 밖이면 서버가 거절해요</small>
-        </div>
-      )}
-      {mode === 'reject' && (
-        <label className="pick"><span>거절 사유</span>
-          <select value={reason} onChange={(e) => setReason(e.target.value)}>
-            <option value="">사유를 골라 주세요</option>
-            {Object.entries(REJECT).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </label>
-      )}
-      {(mode === 'visited' || mode === 'no_show') && (
-        <p className="note">확정 시간 {ev.req.confirmed_slot ? slotLabel(ev.req.confirmed_slot) : '—'} 예약을 {mode === 'visited' ? '방문 완료' : '미방문'}로 바꿀까요?{mode === 'no_show' && ' 되돌릴 수 없어요.'}</p>
-      )}
-      {err && <p className="dlg-err">{err}</p>}
-      <div className="day-acts">
-        <button type="button" className="btn-ghost" onClick={onCancel} disabled={busy}>취소</button>
-        <button type="button" className={mode === 'reject' || mode === 'no_show' ? 'btn is-danger' : 'btn'} onClick={submit} disabled={busy}>
-          {busy ? '처리 중…' : ({ confirm: '예약 확정', propose: '시간 제안 보내기', reject: '거절', visited: '방문 완료', no_show: '미방문', manual: '' } as const)[mode]}
-        </button>
       </div>
     </div>
   );
