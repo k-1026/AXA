@@ -37,3 +37,6 @@ data/interim/영업정보/registered_hours_fill.csv
 data/interim/영업정보/registered_hours_verify.csv
 data/interim/영업정보/registered_match_candidates.csv
 data/dev/
+.vercel
+.env*
+!.env.example
