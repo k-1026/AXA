@@ -19,15 +19,6 @@ export const SETUP_ITEMS: SetupItem[] = [
 ];
 
 // ── 운영 후 예시 ──
-export const KPI = [
-  { label: '상세페이지 방문자', now: 1240, prev: 1051, unit: '명' },
-  { label: '상담 신청', now: 86, prev: 79, unit: '건' },
-  { label: '예약 확정', now: 31, prev: 33, unit: '건' },
-  { label: '방문 완료', now: 24, prev: 23, unit: '건' },
-  { label: '취소율', now: 12, prev: 9, unit: '%', lowerIsBetter: true },
-];
-
-
 export const CHANNELS = [
   { name: '메디대구 지도·목록', visits: 610, consults: 41, bookings: 16 },
   { name: '인스타그램 링크', visits: 380, consults: 29, bookings: 5 },

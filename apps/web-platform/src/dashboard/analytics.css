@@ -120,6 +120,30 @@
 .hd .today-tile.is-alert .today-val { color: var(--bad); }
 .hd .today-go { font-size: .8rem; color: var(--accent); font-weight: 600; }
 .hd .today-err { font-size: .8rem; color: var(--bad); }
+/* 홈 "기간 성과" (실제 DB, KpiTrends.tsx) */
+.hd .period { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.hd .period-presets { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.hd .period-presets button { border: 0; background: var(--surface); padding: 6px 12px; cursor: pointer; color: var(--text-muted); font-size: .85rem; }
+.hd .period-presets button + button { border-left: 1px solid var(--border); }
+.hd .period-presets button[aria-pressed='true'] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.hd .period-dates { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); }
+.hd .period-dates input { padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: .85rem; color: var(--text); background: var(--surface); }
+.hd .period-note { margin: 0; flex-basis: 100%; font-size: .8rem; color: var(--text-muted); }
+.hd .period-err { color: var(--bad); font-weight: 600; }
+.hd .trend-legend { margin: 0; display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--text-muted); }
+.hd .trend-legend i { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid var(--accent); }
+.hd .trend-legend i.lg-prev { border-top: 2px dashed #9aa5b1; margin-left: 10px; }
+.hd .trends { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; transition: opacity .2s; }
+.hd .trends.is-loading { opacity: .5; }
+.hd .trend-card { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; min-width: 0; }
+.hd .trend-card .kpi-val { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.hd .trend-sub { font-size: .78rem; color: var(--text-muted); }
+.hd .trend { width: 100%; height: auto; display: block; margin-top: 4px; }
+.hd .trend .base { stroke: var(--border); stroke-width: 1; }
+.hd .trend .now { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.hd .trend .prev { fill: none; stroke: #9aa5b1; stroke-width: 2; stroke-dasharray: 4 4; }
+.hd .trend .pt { fill: var(--accent); }
+.hd .trend .axis { fill: var(--text-muted); font-size: 11px; }
 
 /* 막대 목록 */
 .hd .bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }

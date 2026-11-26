@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { TabProps } from './props';
-import { Card, Delta, Locked, LineChart, fmt } from '../ui';
-import { KPI } from '../sample';
+import { Card, Locked, LineChart, fmt } from '../ui';
 import TodayTiles from '../TodayTiles';
+import KpiTrends from '../KpiTrends';
 import { clearStaffToken } from '../../../../features/staff/staffSession';
 
 export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
@@ -21,18 +21,7 @@ export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
       {operating && <TodayTiles onExpired={onExpired} />}
 
       {operating ? (
-        <Card title="이번 달 성과 (지난달 대비)" kind="example" wide>
-          <div className="kpis">
-            {KPI.map((k) => (
-              <div className="kpi" key={k.label}>
-                <span className="kpi-label">{k.label}</span>
-                <span className="kpi-val">{fmt(k.now)}<small>{k.unit}</small></span>
-                <Delta now={k.now} prev={k.prev} unit={k.unit} lowerIsBetter={k.lowerIsBetter} />
-              </div>
-            ))}
-          </div>
-          <p className="note">예약 확정이 줄고 취소율이 올랐어요 → 상담·예약 탭에서 취소 사유를 확인해 보세요</p>
-        </Card>
+        <KpiTrends onExpired={onExpired} />
       ) : (
         <Locked
           title="이번 달 성과 (방문자·상담·예약·방문·취소율)"
