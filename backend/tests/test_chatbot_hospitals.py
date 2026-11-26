@@ -151,3 +151,37 @@ def test_챗봇_요청서_카드는_그대로_예약_API로_보낼_수_있다(cl
                     json={**card["request"], "consents": consents})
     assert r.status_code == 201, r.json()
     assert r.json()["status"] == "pending" and r.json()["hospital_id"] == 9002
+
+
+def test_가상_병원_점심시간은_초안_전에_알리고_후보에서도_뺀다(client, db_engine, llm):
+    """서버 요청서 검사(_check_open)와 같은 기준으로 점심시간도 (11/26 — 13:30은 초안이 만들어진 뒤 제출 때 422가 났음)."""
+    from datetime import time
+
+    from sqlalchemy import update
+    from sqlalchemy.orm import Session
+
+    from db_rows import demo_partner
+    from modules.hospital.models import HospitalHours
+
+    with Session(db_engine) as s:
+        demo_partner(s, 9002)  # 월~토 10:00-18:00
+        s.execute(update(HospitalHours).where(HospitalHours.hospital_id == 9002, HospitalHours.day == "mon")
+                  .values(lunch_start=time(12, 30), lunch_end=time(13, 30)))
+        s.commit()
+    token = _visitor(client)
+    base = {"hospital_id": 9002, "department": "피부과", "language": "en", "nationality": "TW", "visa_needed": False,
+            "visa_statement": "no visa help", "inquiry": "x"}
+    llm.script += [call("prepare_booking_request", {**base, "preferred_slots": ["2030-12-02 13:00"]}), say("Lunch.")]
+    r = client.post(ASK, headers=auth(token), json={"message": "book 9002 Monday 1pm, no visa help"})
+    assert "booking_draft" not in cards(r)
+    out = _tool_result(llm, "prepare_booking_request")
+    assert "error" in out and "lunch" in out["error"] and "12:30-13:30" in out["error"]
+
+    llm.script += [call("check_availability", {"hospital_id": 9002, "date_from": "2030-12-02"}), say("Times.")]
+    client.post(ASK, headers=auth(token), json={"message": "when on Monday?"})
+    slots = _tool_result(llm, "check_availability")["slots"]["2030-12-02"]
+    assert "12:00" in slots and "13:00" not in slots and "14:00" in slots
+
+    llm.script += [call("prepare_booking_request", {**base, "preferred_slots": ["2030-12-02 14:00"]}), say("Draft.")]
+    r = client.post(ASK, headers=auth(token), json={"message": "Monday 2pm then, no visa help"})
+    assert "booking_draft" in cards(r)
