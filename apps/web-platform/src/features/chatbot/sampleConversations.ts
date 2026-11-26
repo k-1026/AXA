@@ -4,16 +4,15 @@ import type { Conversation } from './types';
 
 const T = (ko: string, en: string) => ({ ko, en });
 // 모든 대화의 첫 인사라 6개 화면 언어를 모두 둔다 (예시 대화 본문은 한국어·영어만)
-// AI라서 의사·의료인 명칭(닥터·Dr.·醫師 등)을 쓰지 않음 (11/25, 의료인이 아닌데 의사 명칭을 쓰는 문제 소지)
 const GREETING = {
   ...T(
-    '안녕하세요! 대구 의료관광 AI 도우미입니다.\n병원 정보부터 대구 여행까지, 무엇이 궁금하신가요?',
-    "Hello! I'm the AI helper for medical travel in Daegu.\nWhat would you like to know, from hospitals to travel in Daegu?",
+    '안녕하세요! 대구 의료관광 도우미 닥터 권입니다.\n병원 정보부터 대구 여행까지, 무엇이 궁금하신가요?',
+    "Hello! I'm Dr. Kwon, your Daegu medical travel helper.\nWhat would you like to know, from hospitals to travel in Daegu?",
   ),
-  'zh-TW': '您好！我是大邱醫療旅遊 AI 小幫手。\n從醫院資訊到大邱旅遊，想了解什麼呢？',
-  'zh-CN': '您好！我是大邱医疗旅游 AI 小助手。\n从医院信息到大邱旅游，想了解什么呢？',
-  ja: 'こんにちは！大邱医療観光の AI アシスタントです。\n病院情報から大邱旅行まで、何を知りたいですか？',
-  vi: 'Xin chào! Tôi là trợ lý AI du lịch y tế Daegu của bạn.\nBạn muốn biết điều gì, từ bệnh viện đến du lịch ở Daegu?',
+  'zh-TW': '您好！我是大邱醫療旅遊小幫手權醫師。\n從醫院資訊到大邱旅遊，想了解什麼呢？',
+  'zh-CN': '您好！我是大邱医疗旅游小助手权医生。\n从医院信息到大邱旅游，想了解什么呢？',
+  ja: 'こんにちは！大邱医療観光アシスタントのドクター・クォンです。\n病院情報から大邱旅行まで、何を知りたいですか？',
+  vi: 'Xin chào! Tôi là Bác sĩ Kwon, trợ lý du lịch y tế Daegu của bạn.\nBạn muốn biết điều gì, từ bệnh viện đến du lịch ở Daegu?',
 };
 
 export const SAMPLE_CONVERSATIONS: Conversation[] = [
