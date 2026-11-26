@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { TabProps } from './props';
 import { Card, Locked } from '../ui';
-import { AFTERCARE_CASE, AFTERCARE_KEYWORDS, AFTERCARE_STATUS, IMPROVEMENTS, SATISFACTION } from '../sample';
+import { AFTERCARE_CASE, AFTERCARE_KEYWORDS, IMPROVEMENTS, SATISFACTION } from '../sample';
+import AftercareStatusTiles from '../AftercareStatusTiles';
+import { useStaffExpired } from '../useStaffExpired';
 
 const GUIDE_TEMPLATE = [
   '귀국 후 주의사항 (병원이 작성)',
@@ -14,10 +16,13 @@ const GUIDE_TEMPLATE = [
 export default function AftercareTab({ mode }: TabProps) {
   const operating = mode === 'operating';
   const [checked, setChecked] = useState<boolean[]>(GUIDE_TEMPLATE.map((_, i) => i > 2));
+  const onExpired = useStaffExpired();
 
   return (
     <div className="grid">
-      <Card title="방문 후 안내문·체크리스트" kind="setup" wide={!operating}>
+      {/* 방문 후 안내문·체크리스트: 초기 모드에서만 (운영 후 모드에서는 뺌) */}
+      {!operating && (
+      <Card title="방문 후 안내문·체크리스트" kind="setup" wide>
         <ul className="checklist">
           {GUIDE_TEMPLATE.map((g, i) => (
             <li key={g}>
@@ -30,16 +35,11 @@ export default function AftercareTab({ mode }: TabProps) {
         </ul>
         <p className="note">KHIDI 다국어 서식집을 참고한 기본 항목. 방문 완료 환자에게 언어별로 자동 전달돼요. 사후 진료 판단은 의료진이 상담 화면에서 직접 해요</p>
       </Card>
+      )}
 
       {operating ? (
         <>
-          <Card title="처리 현황" kind="example">
-            <ul className="today">
-              {AFTERCARE_STATUS.map((s) => (
-                <li key={s.name} className={s.name === '미답변' ? 'is-alert' : undefined}><b>{s.n}</b>{s.name}</li>
-              ))}
-            </ul>
-          </Card>
+          <AftercareStatusTiles onExpired={onExpired} />
           <Card title="반복 키워드 (지난달 대비)" kind="example">
             <table className="tbl">
               <thead><tr><th>키워드</th><th>이번 달</th><th>지난달</th></tr></thead>

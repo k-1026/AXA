@@ -102,13 +102,6 @@ export const PREFERRED_DAYS = [
   { name: '일', req: 2, ok: 1 },
 ];
 
-export const AFTERCARE_STATUS = [
-  { name: '신규 문의', n: 6 },
-  { name: '미답변', n: 2 },
-  { name: '처리 중', n: 3 },
-  { name: '해결 완료', n: 18 },
-];
-
 export const AFTERCARE_KEYWORDS = [
   { name: '안내 부족', now: 7, prev: 4 },
   { name: '재방문 일정', now: 6, prev: 6 },

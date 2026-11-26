@@ -1,21 +1,18 @@
-import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import type { TabProps } from './props';
 import { Card, Locked, LineChart, fmt } from '../ui';
 import TodayTiles from '../TodayTiles';
 import KpiTrends, { type Summary } from '../KpiTrends';
 import FunnelCard from '../FunnelCard';
-import { clearStaffToken } from '../../../../features/staff/staffSession';
+import { useStaffExpired } from '../useStaffExpired';
 
 export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
   const done = setup.filter((s) => s.done).length;
   const p = data.patients;
   const visitors = data.visitors.monthly.filter((m) => m.days >= 28);
   const operating = mode === 'operating';
-  const navigate = useNavigate();
   const [summary, setSummary] = useState<Summary | null>(null); // 기간 성과에서 고른 기간 합계 → 요청·체결·방문 카드
-  // 로그인 만료(401) → 토큰 지우고 로그인 화면으로
-  const onExpired = useCallback(() => { clearStaffToken(); navigate('/login', { replace: true, state: { who: 'staff' } }); }, [navigate]);
+  const onExpired = useStaffExpired(); // 로그인 만료(401) → 로그인 화면으로
 
   // 공공 카드 3개: 항상 홈 맨 아래
   const publicCards = (
