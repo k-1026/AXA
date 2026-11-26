@@ -145,6 +145,32 @@ a {
   margin-right: -0.32em;
 }
 
+/* 로고 옆 캐치프레이즈: 로고와 세로선으로 나누고, 좁은 화면에서는 숨김 */
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.brand-tagline {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 860px) {
+  .brand-tagline {
+    display: none;
+  }
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -414,7 +440,6 @@ a {
   border-radius: 50%;
   background: var(--surface);
   cursor: pointer;
-  perspective: 120px;
 }
 
 .save-heart:focus-visible {
@@ -422,101 +447,50 @@ a {
   outline-offset: 1px;
 }
 
+/* 평면 하트 (입체감·그라데이션·반짝임 없음): 찜 전 진한 선, 찜하면 빨간색으로 채움 */
 .save-heart svg {
   width: 26px;
   height: 26px;
   overflow: visible;
 }
 
-.save-heart-line {
-  fill: none;
-  stroke: var(--text-muted);
-  stroke-width: 1.7;
+.save-heart path {
+  fill: transparent;
+  stroke: #262626;
+  stroke-width: 2;
   stroke-linejoin: round;
-  transition: stroke 0.2s;
+  transition: fill 0.15s, stroke 0.15s;
 }
 
-.save-heart:hover .save-heart-line {
-  stroke: #e11d48;
+.save-heart:hover path {
+  stroke: #737373;
 }
 
-.save-heart.is-saved .save-heart-line {
-  stroke: #be123c;
-}
-
-.save-heart-color {
-  clip-path: inset(100% 0 0 0);
-}
-
-.save-heart.is-saved .save-heart-color {
-  clip-path: inset(0 0 0 0);
-}
-
-.save-heart-shine {
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  opacity: 0;
-}
-
-.save-heart.is-saved .save-heart-shine {
-  opacity: 0.85;
+.save-heart.is-saved path,
+.save-heart.is-saved:hover path {
+  fill: #ff3040;
+  stroke: #ff3040;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* 떠오름(입체) → 떠 있는 동안 색칠 → 내려앉음 */
+  /* 찜할 때 톡 커졌다가 살짝 줄고 제자리 */
   .save-heart.is-popping svg {
-    animation: save-heart-float 0.75s cubic-bezier(0.3, 0.7, 0.3, 1);
-  }
-
-  .save-heart.is-popping .save-heart-color {
-    animation: save-heart-paint 0.75s ease-in-out;
-  }
-
-  .save-heart.is-popping .save-heart-shine {
-    animation: save-heart-shine 0.75s linear;
+    animation: save-heart-pop 0.45s ease-out;
   }
 }
 
-@keyframes save-heart-float {
+@keyframes save-heart-pop {
   0% {
-    transform: translateY(0) scale(1) rotateX(0);
-    filter: drop-shadow(0 0 0 rgb(225 29 72 / 0));
+    transform: scale(1);
   }
-  35%,
-  65% {
-    transform: translateY(-10px) scale(1.25) rotateX(22deg);
-    filter: drop-shadow(0 9px 5px rgb(225 29 72 / 0.35));
+  25% {
+    transform: scale(1.25);
   }
-  85% {
-    transform: translateY(1px) scale(0.96) rotateX(0);
-    filter: drop-shadow(0 1px 1px rgb(225 29 72 / 0.2));
+  55% {
+    transform: scale(0.92);
   }
   100% {
-    transform: translateY(0) scale(1) rotateX(0);
-    filter: drop-shadow(0 0 0 rgb(225 29 72 / 0));
-  }
-}
-
-@keyframes save-heart-paint {
-  0%,
-  30% {
-    clip-path: inset(100% 0 0 0);
-  }
-  70%,
-  100% {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes save-heart-shine {
-  0%,
-  65% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0.85;
+    transform: scale(1);
   }
 }
 
@@ -3304,6 +3278,33 @@ body.chat-open {
 
 .chat-quick button {
   padding: 8px 18px;
+}
+
+/* 챗봇 자주 하는 질문은 한 줄로: 버튼이 칸을 나눠 갖고 좁으면 글자·여백을 줄인다 */
+#chat-quick {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+#chat-quick button {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  font-size: 0.85rem;
+}
+
+#chat-quick button span,
+#chat-quick button {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#chat-quick svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .chat-composer,

@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "Your Partner in Medical Booking, MediDaegu.",
     "language": "Language",
     "currency": "Currency",
     "login": "Log in / Sign up"
@@ -38,7 +39,7 @@
     "main": "Home",
     "hospitals": "Hospitals",
     "prices": "Price guide",
-    "chatbot": "Chatbot (FAQ)",
+    "chatbot": "Chatbot",
     "about": "About",
     "booking": "Consultation / Booking",
     "aftercare": "Aftercare",

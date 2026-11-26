@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "预约大邱医疗，从MediDaegu开始。",
     "language": "语言",
     "currency": "货币",
     "login": "登录 / 注册"
@@ -38,7 +39,7 @@
     "main": "首页",
     "hospitals": "医院信息",
     "prices": "价格指南",
-    "chatbot": "聊天机器人（常见问题）",
+    "chatbot": "聊天机器人",
     "about": "服务介绍",
     "booking": "咨询/预约",
     "aftercare": "就诊后管理",

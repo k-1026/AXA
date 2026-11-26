@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "Đặt lịch khám tại Daegu bắt đầu từ MediDaegu.",
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",
     "login": "Đăng nhập / Đăng ký"
@@ -38,7 +39,7 @@
     "main": "Trang chủ",
     "hospitals": "Thông tin bệnh viện",
     "prices": "Hướng dẫn giá",
-    "chatbot": "Chatbot (Câu hỏi thường gặp)",
+    "chatbot": "Chatbot",
     "about": "Giới thiệu dịch vụ",
     "booking": "Tư vấn / Đặt lịch",
     "aftercare": "Chăm sóc sau khám",

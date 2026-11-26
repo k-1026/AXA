@@ -1,5 +1,6 @@
 {
   "header": {
+    "tagline": "大邱の医療予約は、MediDaeguから",
     "language": "言語",
     "currency": "通貨",
     "login": "ログイン / 新規登録"
@@ -9,7 +10,7 @@
     "main": "ホーム",
     "hospitals": "病院情報",
     "prices": "価格ガイド",
-    "chatbot": "チャットボット (FAQ)",
+    "chatbot": "チャットボット",
     "about": "サービス紹介",
     "booking": "相談 / 予約",
     "aftercare": "アフターケア",
