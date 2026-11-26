@@ -2,8 +2,8 @@ import type { DepartmentKey } from './types';
 
 export const DEPARTMENTS: DepartmentKey[] = ['dermatology', 'plastic', 'internal', 'ophthalmology', 'korean_medicine', 'other'];
 
-// 메인 지도에 보이는 진료과 (서비스 5개, 한방 2026-11-23 추가). 치과 등 '기타'만 있는 병원은 지도에서 뺌 (병원 정보 목록에는 그대로)
-export const MAP_DEPARTMENTS: DepartmentKey[] = ['dermatology', 'plastic', 'internal', 'ophthalmology', 'korean_medicine'];
+// 메인 지도에 보이는 진료과 — 2026-11-26부터 '기타'(치과·정형외과 등)도 지도에 올려 등록 유치기관 161곳을 모두 보여 줌
+export const MAP_DEPARTMENTS: DepartmentKey[] = ['dermatology', 'plastic', 'internal', 'ophthalmology', 'korean_medicine', 'other'];
 export const onMap = (h: { depts: DepartmentKey[] }) => h.depts.some((d) => MAP_DEPARTMENTS.includes(d));
 
 // 지도 점 색상

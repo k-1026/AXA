@@ -38,7 +38,7 @@ export function MainPage() {
     }
   };
 
-  // 지도는 서비스 진료과(피부·성형·내과·안과)가 있는 병원만 — 한의원·치과 등 '기타'만 있는 병원은 뺌
+  // 지도에는 등록 병원 전부(기타 포함) + 시연용 예시 병원
   const mapItems = useMemo(() => (state.status === 'ready' ? state.data.items.filter(onMap) : []), [state]);
 
   const visible = useMemo(() => {

@@ -3,8 +3,9 @@
 흐름: 방문 완료(visited) → 환자가 첫 메시지(대화 열림) → 병원 답장 → 환자 화면에 답장·안 읽은 수
 """
 
+import itertools
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy.orm import Session
@@ -48,14 +49,24 @@ def _tenant(db, hid=9001, aftercare_on=True):
     return t
 
 
+_slot_day = itertools.count()
+
+
+def _next_slot() -> str:
+    d = datetime.fromisoformat(SLOT.replace("Z", "+00:00")) + timedelta(days=next(_slot_day))
+    return d.isoformat().replace("+00:00", "Z")
+
+
 def _req(db, p, t, visited=True):
+    when = _next_slot()
     r = booking.create_request(
         db, p.id, t.id,
-        dict(lang="zh-TW", nationality="TW", contact_method="email", preferred_slots=[SLOT],
+        # 요청서마다 다른 날 (같은 환자 예약은 1시간 이내로 겹칠 수 없음, booking.time_conflict)
+        dict(lang="zh-TW", nationality="TW", contact_method="email", preferred_slots=[when],
              department_code="dermatology", treatment="laser_toning", visa_needed=False),
     )
     if visited:
-        booking.staff_act(db, t.id, "s", r.id, "confirm", NOW)
+        booking.staff_act(db, t.id, "s", r.id, "confirm", datetime.fromisoformat(when.replace("Z", "+00:00")))
         booking.staff_act(db, t.id, "s", r.id, "visited")
     return r
 

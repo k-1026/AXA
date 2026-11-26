@@ -5,10 +5,12 @@ import { SaveHeart } from './SaveHeart';
 import { instagramHandle, useHospitalName } from './name';
 import type { Hospital } from './types';
 import { HospitalAddress } from './HospitalAddress';
+import { useIsResident } from '../../components/auth';
 
 export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
   const { t } = useTranslation();
   const nameOf = useHospitalName();
+  const resident = useIsResident();
 
   return (
     <article className="hospital-card">
@@ -58,20 +60,25 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
         </dl>
         {!h.demo && <p className="card-action-note">{t('hospital.notJoined')}</p>}
       </div>
-      {/* 상담·예약은 메디대구 입점 병원(지금은 시연용 가상 병원)만. 실제 병원은 끝까지 입력한 뒤 "입점 안 함" 오류가 나서 처음부터 직접 연락 안내 */}
-      {h.demo ? (
-        <div className="card-actions">
-          <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="card-action">{t('hospital.consultBtn')}</Link>
-          <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="card-action is-primary">{t('hospital.reserveBtn')}</Link>
-        </div>
-      ) : (
-        h.tel && (
-          <div className="card-actions">
-            <a href={`tel:${h.tel}`} className="card-action">{t('hospital.callBtn')}</a>
-          </div>
-        )
+      {/* 국내 거주 외국인은 유치 금지 대상 → 상담·예약·찜 없이 정보만 */}
+      {!resident && (
+        <>
+          {/* 상담·예약은 메디대구 입점 병원(지금은 시연용 가상 병원)만. 실제 병원은 끝까지 입력한 뒤 "입점 안 함" 오류가 나서 처음부터 직접 연락 안내 */}
+          {h.demo ? (
+            <div className="card-actions">
+              <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="card-action">{t('hospital.consultBtn')}</Link>
+              <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="card-action is-primary">{t('hospital.reserveBtn')}</Link>
+            </div>
+          ) : (
+            h.tel && (
+              <div className="card-actions">
+                <a href={`tel:${h.tel}`} className="card-action">{t('hospital.callBtn')}</a>
+              </div>
+            )
+          )}
+          <SaveHeart id={h.id} name={nameOf(h)} />
+        </>
       )}
-      <SaveHeart id={h.id} name={nameOf(h)} />
     </article>
   );
 }

@@ -29,6 +29,7 @@
     }
   },
   "header": {
+    "tagline": "预约大邱医疗，从MediDaegu开始。",
     "language": "语言",
     "currency": "货币",
     "login": "登录 / 注册"
@@ -38,7 +39,7 @@
     "main": "首页",
     "hospitals": "医院信息",
     "prices": "价格指南",
-    "chatbot": "聊天机器人（常见问题）",
+    "chatbot": "聊天机器人",
     "about": "服务介绍",
     "booking": "咨询/预约",
     "aftercare": "就诊后管理",
@@ -243,7 +244,7 @@
     },
     "visits": {
       "title": "就诊记录",
-      "subtitle": "记录您去过的医院和当天经历的私人日记。",
+      "subtitle": "已就诊的医院会从预约中自动显示，您只需写下当天的体验。",
       "private": "仅您本人可见",
       "formTitle": "写新记录",
       "hospital": "医院",
@@ -256,13 +257,15 @@
       "cancel": "取消",
       "edit": "修改",
       "delete": "删除",
-      "deleteConfirm": "要删除这条记录吗？删除后无法恢复。",
+      "deleteConfirm": "要删除写下的体验吗？删除后无法恢复。",
       "listTitle": "已保存的记录",
-      "none": "还没有保存的记录。",
+      "none": "还没有已就诊的医院。医院标记为已就诊后，会自动显示在这里。",
       "deviceNote": "记录不会发送到服务器，只保存在此浏览器中。清除浏览器数据后记录会一并消失，使用同一设备的人也能看到，在公用设备上请注意。",
       "errHospital": "请输入医院。",
       "errDate": "请选择今天或更早的就诊日期。",
-      "errNote": "请输入您的经历。"
+      "errNote": "请输入您的经历。",
+      "auto": "来自预约",
+      "treatment": "诊疗"
     }
   },
   "legal": {
@@ -610,7 +613,10 @@
       "notJoined": "这家医院尚未在 MediDaegu 接受预约，请直接联系医院。",
       "duplicate": "这家医院已有未处理的申请，请到预约管理确认。",
       "invalidTransition": "当前状态无法执行，请刷新。",
-      "login": "请先登录。"
+      "login": "请先登录。",
+      "timeConflict": "与其他预约时间重叠。已有预约（含待确认）前后1小时内无法申请，请选择其他时间。",
+      "sameDay": "您当天在这家医院已有预约（申请）。如需改时间，请到预约管理修改。",
+      "tooMany": "您有5个申请正在等待回复。请等医院回复或取消不需要的申请后再试。"
     }
   },
   "staff": {
@@ -656,6 +662,42 @@
     "err": {
       "required": "请先回答居留状态问题。",
       "notEligible": "居住在韩国的外国人无法申请咨询・预约。如居留状态有变，请到我的页面重新回答。"
+    }
+  },
+  "filter": {
+    "label": "医院筛选",
+    "dept": "诊疗类别",
+    "district": "地区",
+    "lang": "诊疗·咨询语言",
+    "deptTitle": "您想找哪类诊疗？",
+    "multi": "可多选",
+    "city": "大邱广域市",
+    "districtTitle": "选择区·郡",
+    "districtSearch": "搜索区·郡",
+    "districtAll": "大邱全部",
+    "districtNone": "没有匹配的区·郡",
+    "langTitle": "请选择您方便沟通的语言",
+    "langNote": "支持方式请在医院详情页确认。",
+    "langSample": "目前只有演示用示例医院有语言信息（示例数据）。没有语言信息的医院不计入结果。",
+    "reset": "全部重置",
+    "apply": "查看{{count}}家医院",
+    "noResult": "没有符合条件的医院",
+    "remove": "移除条件：{{label}}",
+    "close": "关闭",
+    "applied": "已应用的条件",
+    "notApplied": "尚未应用",
+    "direct": "可直接沟通",
+    "interpret": "提供翻译",
+    "sample": "示例",
+    "langNoneShort": "无",
+    "langUnknown": "暂无语言支持信息，请直接向医院确认。",
+    "langs": {
+      "ko": "韩语",
+      "en": "英语",
+      "ja": "日语",
+      "zh": "中文",
+      "vi": "越南语",
+      "ru": "俄语"
     }
   }
 }

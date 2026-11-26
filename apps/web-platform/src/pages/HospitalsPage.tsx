@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useIsResident } from '../components/auth';
 import { useTranslation } from 'react-i18next';
-import { FilterGrid } from '../features/hospital/FilterGrid';
 import { HospitalCard } from '../features/hospital/HospitalCard';
-import { DEPARTMENTS, DISTRICTS } from '../features/hospital/filters';
+import { HospitalFilterBar } from '../features/hospital/HospitalFilterBar';
+import { EMPTY_FILTERS, matches, readFilters, writeFilters, type SearchFilters } from '../features/hospital/searchFilters';
 import { useHospitals } from '../features/hospital/useHospitals';
-import type { DepartmentKey } from '../features/hospital/types';
 import { useLoadMore } from '../components/useLoadMore';
 
 const PAGE_SIZE = 24;
@@ -13,50 +13,38 @@ const PAGE_SIZE = 24;
 export function HospitalsPage() {
   const { t } = useTranslation();
   const state = useHospitals();
-  // 필터는 주소(?dept=&district=)에 저장 → 상세에서 뒤로 와도 유지
+  const resident = useIsResident();
+  // 적용된 조건은 주소(?dept=a,b&district=중구,수성구&lang=en)에 저장 → 상세에서 뒤로 와도 유지
   const [params, setParams] = useSearchParams();
-  // 주소에 모르는 진료과가 들어오면 필터 없이 (빈 목록이 되지 않게)
-  const rawDept = params.get('dept');
-  const dept = DEPARTMENTS.includes(rawDept as DepartmentKey) ? (rawDept as DepartmentKey) : null;
-  const district = params.get('district');
+  const applied = useMemo(() => readFilters(params), [params]);
+  const key = params.toString();
 
-  // 데이터가 이미 한국어 가나다순이라 언어와 상관없이 순서 그대로
+  const items = useMemo(() => (state.status === 'ready' ? state.data.items : []), [state]);
+
+  // 데이터가 이미 한국어 가나다순이라 언어와 상관없이 순서 그대로. 같은 id는 한 번만
   const visible = useMemo(() => {
-    if (state.status !== 'ready') return [];
-    return state.data.items.filter(
-      (h) => (!dept || h.depts.includes(dept)) && (!district || h.district === district),
-    );
-  }, [state, dept, district]);
-  // 더 보기 한 번 누르면 그다음부터 무한 스크롤
-  const { shown, showButton, more, sentinelRef, autoLoading } = useLoadMore(visible.length, PAGE_SIZE, `${dept}|${district}`);
+    const seen = new Set<string>();
+    const out = items.filter((h) => {
+      if (seen.has(h.id) || !matches(h, applied)) return false;
+      seen.add(h.id);
+      return true;
+    });
+    // 시연용 예시 병원(DEMO-…)은 가나다순 중간에 섞이지 않게 맨 위로 (나머지 순서는 그대로)
+    const isDemo = (h: { id: string }) => h.id.startsWith('DEMO-');
+    return [...out.filter(isDemo), ...out.filter((h) => !isDemo(h))];
+  }, [items, applied]);
+  const { shown, showButton, more, sentinelRef, autoLoading } = useLoadMore(visible.length, PAGE_SIZE, key);
 
-  const setFilter = (key: 'dept' | 'district') => (v: string | null) => {
-    const next = new URLSearchParams(params);
-    if (v) next.set(key, v);
-    else next.delete(key);
-    setParams(next, { replace: true });
-  };
-  const changeDept = setFilter('dept');
-  const changeDistrict = setFilter('district');
+  const apply = (f: SearchFilters) => setParams(writeFilters(params, f), { replace: true });
 
   return (
     <div className="hospitals-page">
-      <div className="filters">
-        <FilterGrid
-          label={t('dept.label')}
-          allLabel={t('dept.all')}
-          options={DEPARTMENTS.map((d) => ({ value: d, label: t(`dept.${d}`) }))}
-          selected={dept}
-          onSelect={changeDept}
-        />
-        <FilterGrid
-          label={t('district.label')}
-          allLabel={t('district.all')}
-          options={DISTRICTS.map((d) => ({ value: d, label: t(`district.${d}`) }))}
-          selected={district}
-          onSelect={changeDistrict}
-        />
-      </div>
+      <HospitalFilterBar hospitals={items} applied={applied} onApply={apply} />
+      {resident && (
+        <p className="residency-blocked">
+          {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
+        </p>
+      )}
 
       {state.status === 'loading' && <p className="list-status">{t('map.loading')}</p>}
       {state.status === 'error' && <p className="list-status">{t('map.error')}</p>}
@@ -64,7 +52,12 @@ export function HospitalsPage() {
         <>
           <p className="list-count">{t('map.count', { count: visible.length })}</p>
           {visible.length === 0 ? (
-            <p className="list-status">{t('hospital.empty')}</p>
+            <div className="list-empty">
+              <p className="list-status">{t('filter.noResult')}</p>
+              <button type="button" className="hf-apply" onClick={() => apply(EMPTY_FILTERS)}>
+                {t('filter.reset')}
+              </button>
+            </div>
           ) : (
             <div className="hospital-grid">
               {visible.slice(0, shown).map((h) => (

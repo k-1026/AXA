@@ -1,109 +1,33 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { matchHospitals } from '../map/HospitalSearch';
-import { useHospitalName } from '../hospital/name';
-import type { Hospital } from '../hospital/types';
-import { todayKst } from '../../lib/common';
-import type { VisitInput } from './visitLog';
-import { HospitalAddress } from '../hospital/HospitalAddress';
-
-const MAX_SUGGESTIONS = 8;
 
 interface Props {
-  hospitals: Hospital[];
-  initial?: VisitInput;
-  onSubmit: (input: VisitInput) => void;
+  initial?: string;
+  onSubmit: (note: string) => void;
   onCancel?: () => void;
 }
 
-// 병원은 목록에서 고르거나 직접 입력한다. 점수·추천 입력은 두지 않는다 (후기가 아니라 개인 기록)
-export function VisitForm({ hospitals, initial, onSubmit, onCancel }: Props) {
+// "나의 경험"만 쓰는 칸. 병원·날짜는 방문 완료된 예약에서 자동으로 채워져 여기서 입력하지 않는다
+// 점수·추천 입력은 두지 않는다 (후기가 아니라 개인 기록)
+export function VisitForm({ initial, onSubmit, onCancel }: Props) {
   const { t } = useTranslation();
-  const nameOf = useHospitalName();
-  const [hospitalName, setHospitalName] = useState(initial?.hospitalName ?? '');
-  const [hospitalId, setHospitalId] = useState(initial?.hospitalId);
-  const [date, setDate] = useState(initial?.date ?? todayKst()); // 기본값은 오늘 (한국 시간)
-  const [note, setNote] = useState(initial?.note ?? '');
-  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState(initial ?? '');
   const [error, setError] = useState('');
-
-  const suggestions = useMemo(
-    () =>
-      matchHospitals(hospitals, hospitalName)
-        .sort((a, b) => nameOf(a).localeCompare(nameOf(b)))
-        .slice(0, MAX_SUGGESTIONS),
-    [hospitals, hospitalName, nameOf],
-  );
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    const name = hospitalName.trim();
     const text = note.trim();
-    if (!name) return setError(t('mypage.visits.errHospital'));
-    if (!date || date > todayKst()) return setError(t('mypage.visits.errDate'));
     if (!text) return setError(t('mypage.visits.errNote'));
     setError('');
-    onSubmit({ hospitalId, hospitalName: name, date, note: text });
-    if (!initial) {
-      setHospitalName('');
-      setHospitalId(undefined);
-      setDate(todayKst());
-      setNote('');
-    }
+    onSubmit(text);
   };
 
   return (
     <form className="visit-form" onSubmit={submit} noValidate>
-      <div className="visit-form-row">
-        <label className="visit-field visit-hospital">
-          {t('mypage.visits.hospital')}
-          <input
-            type="text"
-            value={hospitalName}
-            placeholder={t('mypage.visits.hospitalPlaceholder')}
-            autoComplete="off"
-            onChange={(e) => {
-              setHospitalName(e.target.value);
-              setHospitalId(undefined);
-              setOpen(true);
-              setError('');
-            }}
-            onFocus={() => setOpen(true)}
-            onBlur={() => setOpen(false)}
-            onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
-          />
-          {open && suggestions.length > 0 && (
-            <ul className="map-search-list">
-              {suggestions.map((h) => (
-                <li key={h.id}>
-                  {/* onMouseDown: input blur보다 먼저 처리 */}
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      setHospitalName(nameOf(h));
-                      setHospitalId(h.id);
-                      setOpen(false);
-                      setError('');
-                    }}
-                  >
-                    <strong>{nameOf(h)}</strong>
-                    <span><HospitalAddress addr={h.addr} original={false} /></span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </label>
-        <label className="visit-field">
-          {t('mypage.visits.date')}
-          <input type="date" value={date} max={todayKst()} onChange={(e) => setDate(e.target.value)} />
-        </label>
-      </div>
       <label className="visit-field">
         {t('mypage.visits.note')}
         <textarea
-          rows={5}
+          rows={4}
           maxLength={2000}
           value={note}
           placeholder={t('mypage.visits.notePlaceholder')}

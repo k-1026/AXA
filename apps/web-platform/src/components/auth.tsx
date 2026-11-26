@@ -177,3 +177,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
+
+/** 국내 거주 외국인으로 로그인했는지 (결정 28). 유치 금지 대상 → 병원 정보 화면에서 상담·예약·찜 버튼을 숨김 */
+export const useIsResident = () => useAuth().user?.residency === 'resident';

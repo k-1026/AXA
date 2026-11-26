@@ -64,7 +64,11 @@ export default function App() {
     // 최상위 .hd 아래로만 이 화면 스타일이 적용됨 (analytics.css) — 환자 화면과 클래스 이름이 겹쳐도 섞이지 않게
     <div className="hd app">
       <header className="top">
-        <Link to="/dashboard" className="brand" aria-label="MediDaegu 병원"><Logo /><span className="brand-tag">병원</span></Link>
+        <div className="brand-wrap">
+          <Link to="/dashboard" className="brand" aria-label="MediDaegu 병원"><Logo /><span className="brand-tag">병원</span></Link>
+          {/* 캐치프레이즈 (환자 웹 헤더와 같은 문구, 병원 화면은 한국어) */}
+          <p className="brand-tagline">대구 의료 예약의 시작, 메디대구.</p>
+        </div>
         <div className="hospital">
           <b>{real ? profile.name : `예시 ${DEPT_LABEL[dept]}의원`}</b>
           <span>{real ? `대구${profile.district ? ` ${profile.district}` : ''}${profile.demo ? ' · 가상 병원' : ''}` : `대구 ${SAMPLE_DISTRICT} · 가상 병원`}</span>

@@ -8,6 +8,8 @@ import { instagramHandle, useHospitalName } from '../features/hospital/name';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
 import { HospitalAddress } from '../features/hospital/HospitalAddress';
+import { languageSupportOf, type SupportLang } from '../features/hospital/languageSupport';
+import { useIsResident } from '../components/auth';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -18,6 +20,7 @@ export function HospitalDetailPage() {
   const location = useLocation();
   const state = useHospitals();
   const nameOf = useHospitalName();
+  const resident = useIsResident();
 
   if (state.status === 'loading') return <p className="list-status">{t('map.loading')}</p>;
   if (state.status === 'error') return <p className="list-status">{t('map.error')}</p>;
@@ -58,10 +61,20 @@ export function HospitalDetailPage() {
               <li key={d}>{t(`dept.${d}`)}</li>
             ))}
           </ul>
-          {h.demo ? (
-            <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult">
-              {t('consult.startWith')}
-            </Link>
+          {resident ? (
+            <p className="residency-blocked">
+              {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
+            </p>
+          ) : h.demo ? (
+            // 목록 카드와 같은 두 버튼: 예약하기(달력 → 시간 → 신청) · 병원에 상담하기 (2026-11-26). 입점(가상) 병원만
+            <div className="detail-actions">
+              <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="detail-consult">
+                {t('hospital.reserveBtn')}
+              </Link>
+              <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult is-secondary">
+                {t('consult.startWith')}
+              </Link>
+            </div>
           ) : (
             <p className="detail-consult-note">{t('hospital.notJoined')}</p>
           )}
@@ -137,6 +150,8 @@ export function HospitalDetailPage() {
           </dl>
         </section>
 
+        <LanguageCard hospitalId={h.id} />
+
         <section className="detail-card detail-map-card">
           <h2>{t('hospital.location')}</h2>
           <MapContainer center={[h.lat, h.lng]} zoom={16} className="detail-map">
@@ -165,6 +180,31 @@ export function HospitalDetailPage() {
 const LANG_NAME: Record<string, string> = {
   ko: '한국어', en: 'English', 'zh-CN': '中文(简体)', 'zh-TW': '中文(繁體)', ja: '日本語', vi: 'Tiếng Việt', ru: 'Русский', mn: 'Монгол', th: 'ไทย',
 };
+
+// 진료·상담 언어 — '직접 소통 가능'과 '통역 지원'을 나눠서. 정보 없으면 지원한다고 쓰지 않음
+function LanguageCard({ hospitalId }: { hospitalId: string }) {
+  const { t } = useTranslation();
+  const s = languageSupportOf(hospitalId);
+  const names = (ls: SupportLang[]) => (ls.length ? ls.map((l) => t(`filter.langs.${l}`)).join(', ') : t('filter.langNoneShort'));
+  return (
+    <section className="detail-card">
+      <h2>
+        {t('filter.lang')}
+        {s?.sample && <span className="detail-sample">{t('filter.sample')}</span>}
+      </h2>
+      {s ? (
+        <dl className="hospital-facts">
+          <dt>{t('filter.direct')}</dt>
+          <dd>{names(s.direct)}</dd>
+          <dt>{t('filter.interpret')}</dt>
+          <dd>{names(s.interpret)}</dd>
+        </dl>
+      ) : (
+        <p className="detail-note">{t('filter.langUnknown')}</p>
+      )}
+    </section>
+  );
+}
 
 function yesNo(t: (k: string) => string, v: boolean | undefined) {
   if (v === undefined) return '';
