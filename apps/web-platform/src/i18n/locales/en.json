@@ -238,7 +238,7 @@
     },
     "visits": {
       "title": "Visit log",
-      "subtitle": "Your private diary of the hospitals you visited and how it went.",
+      "subtitle": "Hospitals you visited appear here automatically from your bookings. Just write down how it went.",
       "private": "Only you can see this",
       "formTitle": "Add an entry",
       "hospital": "Hospital",
@@ -251,13 +251,15 @@
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete",
-      "deleteConfirm": "Delete this entry? This can't be undone.",
+      "deleteConfirm": "Delete your note? This can't be undone.",
       "listTitle": "Saved entries",
-      "none": "No entries yet.",
+      "none": "No completed visits yet. When a hospital marks your visit as completed, it shows up here automatically.",
       "deviceNote": "Entries aren't sent to a server. They stay in this browser only, so clearing browser data removes them, and anyone using this device can see them. Be careful on shared devices.",
       "errHospital": "Enter a hospital.",
       "errDate": "Choose a visit date that is today or earlier.",
-      "errNote": "Enter your experience."
+      "errNote": "Enter your experience.",
+      "auto": "From your booking",
+      "treatment": "Treatment"
     }
   },
   "legal": {

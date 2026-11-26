@@ -238,7 +238,7 @@
     },
     "visits": {
       "title": "Nhật ký khám",
-      "subtitle": "Nhật ký riêng về các bệnh viện bạn đã đến và trải nghiệm của bạn.",
+      "subtitle": "Bệnh viện bạn đã đến khám sẽ tự động hiện từ lịch hẹn. Bạn chỉ cần ghi lại trải nghiệm của mình.",
       "private": "Chỉ mình bạn xem được",
       "formTitle": "Viết nhật ký mới",
       "hospital": "Bệnh viện",
@@ -251,13 +251,15 @@
       "cancel": "Hủy",
       "edit": "Sửa",
       "delete": "Xóa",
-      "deleteConfirm": "Xóa nhật ký này? Không thể hoàn tác.",
+      "deleteConfirm": "Xóa ghi chú của bạn? Không thể hoàn tác.",
       "listTitle": "Nhật ký đã lưu",
-      "none": "Chưa có nhật ký nào.",
+      "none": "Chưa có lần khám nào hoàn tất. Khi bệnh viện đánh dấu đã khám, lần khám sẽ tự động hiện ở đây.",
       "deviceNote": "Nhật ký không gửi lên máy chủ mà chỉ lưu trong trình duyệt này. Xóa dữ liệu trình duyệt sẽ mất nhật ký, và người dùng chung thiết bị có thể xem được, nên hãy cẩn thận trên thiết bị công cộng.",
       "errHospital": "Hãy nhập bệnh viện.",
       "errDate": "Hãy chọn ngày khám từ hôm nay trở về trước.",
-      "errNote": "Hãy nhập trải nghiệm của bạn."
+      "errNote": "Hãy nhập trải nghiệm của bạn.",
+      "auto": "Tự động từ lịch hẹn",
+      "treatment": "Điều trị"
     }
   },
   "legal": {
