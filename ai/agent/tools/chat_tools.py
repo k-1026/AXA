@@ -563,7 +563,7 @@ def build_registry() -> ToolRegistry:
     r.register(Tool(
         "prepare_booking_request",
         "사용자가 **직접 고른** 병원에 보낼 상담 요청서 **초안**을 만든다. 제출은 하지 않는다 — 사용자가 화면의 제출 버튼을 누른다. "
-        "빠진 값이 있으면 needs_info의 missing을 돌려주므로 사용자에게 한 번에 하나씩 물어본다. 값은 사용자가 말한 것만 쓰고 추측하지 않는다.",
+        "빠진 값이 있으면 needs_info의 missing을 돌려주므로 빠진 것을 **한 메시지에 모아** 물어본다. 값은 사용자가 말한 것만 쓰고 추측하지 않는다.",
         {"type": "object", "properties": {
             "hospital_id": {"type": "integer"},
             "department": {"type": "string", "description": "한국어 진료과명. 병원 진료과가 하나면 생략 가능"},
