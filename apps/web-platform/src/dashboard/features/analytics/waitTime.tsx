@@ -1,9 +1,10 @@
 // 답하지 않은 문의의 대기 시간 (진료시간 기준) → 신규·주의·위급 색 (상담 채팅·사후관리 채팅이 같이 씀)
 // 단계: 신규 0~2시간 초록 #15803D · 주의 2~4시간 노랑 #F5B800 · 위급 4시간 이상 빨강 #DC2626 (팀 기준)
-// 진료시간: 로그인한 병원(/tenant/me 의 hospital_id)을 /data/hospitals.json 에서 찾아 요일별 시간·점심시간을 씀
+// 진료시간: 로그인한 병원 정보(hospitalProfile.ts)의 요일별 시간·점심시간
 //   못 찾으면 평일 09:00~18:00 · 점심 12:30~13:30 (가정값)으로 계산
 import { useEffect, useState } from 'react';
-import { call } from './bookingShared';
+import { readStaffToken } from '../../../features/staff/staffSession';
+import { loadHospitalProfile } from './hospitalProfile';
 
 type Hours = { week: ([string, string] | null)[]; lunch: [string, string] | null; known: boolean };
 const FALLBACK: Hours = {
@@ -12,22 +13,8 @@ const FALLBACK: Hours = {
   known: false,
 };
 
-let cached: Promise<Hours> | null = null;
 function loadHours(): Promise<Hours> {
-  cached ??= (async () => {
-    try {
-      const me = await call<{ hospital_id: number }>('/tenant/me');
-      const d = await fetch('/data/hospitals.json').then((r) => r.json());
-      const h = (d.items ?? []).find((x: { id: string | number }) => x.id === `DEMO-${me.hospital_id}` || String(x.id) === String(me.hospital_id));
-      if (!h || !Array.isArray(h.hours)) return FALLBACK;
-      const m = /(\d{2}:\d{2})~(\d{2}:\d{2})/.exec(h.lunchWeek || '');
-      return { week: h.hours, lunch: m ? [m[1], m[2]] : null, known: true };
-    } catch {
-      cached = null; // 다음에 다시 시도
-      return FALLBACK;
-    }
-  })();
-  return cached;
+  return loadHospitalProfile(readStaffToken()).then((h) => (h?.hours ? { week: h.hours, lunch: h.lunch, known: true } : FALLBACK));
 }
 
 // 병원 진료시간 + 1분마다 다시 그리기용 현재 시각

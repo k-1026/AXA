@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Logo } from '../components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import './analytics.css';
-import { clearStaffToken } from '../features/staff/staffSession';
+import { clearStaffToken, readStaffToken } from '../features/staff/staffSession';
+import { loadHospitalProfile, type HospitalProfile } from './features/analytics/hospitalProfile';
 import publicData from './data/dashboard-public.json';
 import type { DeptKey, Mode, PublicData } from './features/analytics/types';
 import { DEPT_LABEL } from './features/analytics/types';
@@ -28,6 +29,14 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('initial');
   const [dept, setDept] = useState<DeptKey>('dermatology');
   const [setup, setSetup] = useState(SETUP_ITEMS);
+  // 헤더 병원 이름·구: 로그인한 계정의 병원 (/tenant/me + 병원 목록). 운영 후 모드에서만, 초기 모드는 예시 그대로
+  const [profile, setProfile] = useState<HospitalProfile | null>(null);
+  useEffect(() => {
+    let alive = true;
+    loadHospitalProfile(readStaffToken()).then((p) => { if (alive) setProfile(p); });
+    return () => { alive = false; };
+  }, []);
+  const real = mode === 'operating' && profile;
 
   useEffect(() => {
     const onHash = () => {
@@ -47,8 +56,8 @@ export default function App() {
       <header className="top">
         <Link to="/dashboard" className="brand" aria-label="MediDaegu 병원"><Logo /><span className="brand-tag">병원</span></Link>
         <div className="hospital">
-          <b>예시 {DEPT_LABEL[dept]}의원</b>
-          <span>대구 {SAMPLE_DISTRICT} · 가상 병원</span>
+          <b>{real ? profile.name : `예시 ${DEPT_LABEL[dept]}의원`}</b>
+          <span>{real ? `대구${profile.district ? ` ${profile.district}` : ''}${profile.demo ? ' · 가상 병원' : ''}` : `대구 ${SAMPLE_DISTRICT} · 가상 병원`}</span>
         </div>
         <label className="select">
           <span>진료과</span>
