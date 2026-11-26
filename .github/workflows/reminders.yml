@@ -1,0 +1,30 @@
+# 방문 전 리마인드 알림 (docs/booking-rules.md 3-2 N1) — 1시간마다 백엔드 /internal/reminders를 부른다
+# Vercel Cron은 무료(Hobby) 요금제에서 하루 1번만 돌 수 있어서 2시간 전 알림을 못 보냄 → GitHub Actions로 1시간마다
+# 필요한 저장소 Secrets (Settings → Secrets and variables → Actions):
+#   API_URL      백엔드 주소 (예: https://axa-seven.vercel.app)
+#   CRON_SECRET  백엔드 환경변수 CRON_SECRET과 같은 값
+# 둘 중 하나라도 없으면 아무것도 하지 않고 성공으로 끝남. 예약 실행은 기본 브랜치(main)에 있어야 돈다
+name: reminders
+
+on:
+  schedule:
+    - cron: "5 * * * *" # 매시 5분 (UTC). GitHub 사정으로 몇 분~수십 분 늦을 수 있음 → 단계 판단이 남은 시간 기준이라 괜찮음
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call reminders endpoint
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "API_URL 또는 CRON_SECRET이 없어 건너뜀"
+            exit 0
+          fi
+          curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "${API_URL%/}/api/v1/internal/reminders"
