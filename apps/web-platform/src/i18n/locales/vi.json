@@ -620,6 +620,7 @@
     "regNoHint": "Định dạng: M-2009-03-01-0013",
     "err": {
       "hospitalTaken": "Bệnh viện này đã tham gia. Liên hệ tài khoản đại diện.",
+      "signupClosed": "Trong thời gian trình diễn, chúng tôi chưa nhận đăng ký của bệnh viện thực. Vui lòng liên hệ đơn vị vận hành để tham gia.",
       "notRegistered": "Không phải cơ sở đã đăng ký hoặc không hoạt động nên không thể tham gia.",
       "tooMany": "Thử quá nhiều lần. Vui lòng thử lại sau."
     }

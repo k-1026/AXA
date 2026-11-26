@@ -31,6 +31,7 @@ function errorKey(e: unknown): string {
     if (e.code === 'auth.invalid_credentials') return 'auth.err.invalidCredentials';
     if (e.code === 'auth.email_taken') return 'auth.err.emailTaken';
     if (e.code === 'auth.hospital_taken') return 'staff.err.hospitalTaken';
+    if (e.code === 'auth.signup_closed') return 'staff.err.signupClosed'; // 지금은 가상 병원만 입점 (결정 34)
     if (e.code === 'hospital.not_requestable') return 'staff.err.notRegistered';
     if (e.code === 'auth.too_many_attempts') return 'staff.err.tooMany';
     if (e.code === 'consent.required') return 'auth.err.consent';
