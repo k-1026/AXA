@@ -23,9 +23,12 @@ export function HospitalsPage() {
   // 데이터가 이미 한국어 가나다순이라 언어와 상관없이 순서 그대로
   const visible = useMemo(() => {
     if (state.status !== 'ready') return [];
-    return state.data.items.filter(
+    const items = state.data.items.filter(
       (h) => (!dept || h.depts.includes(dept)) && (!district || h.district === district),
     );
+    // 시연용 예시 병원(DEMO-…)은 가나다순 중간에 섞이지 않게 맨 위로 (나머지 순서는 그대로)
+    const isDemo = (h: { id: string }) => h.id.startsWith('DEMO-');
+    return [...items.filter(isDemo), ...items.filter((h) => !isDemo(h))];
   }, [state, dept, district]);
   // 더 보기 한 번 누르면 그다음부터 무한 스크롤
   const { shown, showButton, more, sentinelRef, autoLoading } = useLoadMore(visible.length, PAGE_SIZE, `${dept}|${district}`);
