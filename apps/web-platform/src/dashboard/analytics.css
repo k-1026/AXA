@@ -230,6 +230,37 @@
   .hd .ev { font-size: 0; padding: 0; height: 6px; border-left-width: 0; }
   .hd .form-grid { grid-template-columns: 1fr; }
 }
+/* 마이 병원 탭 (MyHospitalTab.tsx) */
+.hd .mh-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.hd .mh-box { margin: 0; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.hd .mh-box legend { font-weight: 700; font-size: .9rem; padding: 0 4px; }
+.hd .mh-wide { grid-column: 1 / -1; }
+.hd .mh-box input, .hd .mh-box select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: .85rem; color: var(--text); background: var(--surface); min-width: 0; }
+.hd .mh-langs { display: flex; flex-wrap: wrap; gap: 6px; }
+.hd .mh-chip { display: inline-flex; align-items: center; gap: 5px; font-size: .82rem; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; cursor: pointer; }
+.hd .mh-chip input { margin: 0; }
+.hd .mh-chip.is-on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.hd .mh-hours { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.hd .mh-day { border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; font-size: .82rem; }
+.hd .mh-day.is-off { background: var(--surface-muted); }
+.hd .mh-day b.is-weekend { color: var(--bad); }
+.hd .mh-times { display: flex; flex-direction: column; gap: 3px; align-items: stretch; }
+.hd .mh-times > span { text-align: center; color: var(--text-muted); line-height: 1; }
+.hd .mh-toggle { display: inline-flex; align-items: center; gap: 5px; font-size: .82rem; cursor: pointer; }
+.hd .mh-grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.hd .mh-save { padding: 7px 18px; background: var(--accent); border-color: var(--accent); }
+.hd .mh-plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.hd .mh-plan { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; position: relative; }
+.hd .mh-plan input { position: absolute; top: 14px; right: 14px; }
+.hd .mh-plan.is-on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: var(--accent-soft); }
+.hd .mh-plan-top { display: flex; align-items: center; gap: 6px; }
+.hd .mh-plan-rate { font-size: 1.3rem; font-weight: 800; }
+.hd a.btn-ghost { text-decoration: none; display: inline-block; }
+@media (max-width: 900px) {
+  .hd .mh-sections, .hd .mh-plans { grid-template-columns: 1fr; }
+  .hd .mh-hours { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hd .mh-grid4 { grid-template-columns: 1fr 1fr; }
+}
 /* 진료·결제 확인 탭 (ReceiptTab.tsx) */
 .hd .today-tile.is-static { cursor: default; }
 .hd .today-tile.is-static:hover { border-color: var(--border); }

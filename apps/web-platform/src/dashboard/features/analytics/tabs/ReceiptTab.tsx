@@ -1,9 +1,10 @@
 // "진료·결제 확인" 탭. 옛 /dashboard/legacy 진료·결제 확인 화면을 새 디자인으로
 // 백엔드에 결제 금액·영수증 기능이 아직 없어 전부 예시 (입력해도 이 화면에서만 바뀌고 저장 안 됨)
-// 요금 v4: 기본 회원 무료 + 수수료 13% / 프리미엄 연 ₩1,800,000(월 ₩150,000) + 수수료 8% — 확인 완료된 진료비 기준 (금액은 가정값)
+// 회원 등급은 마이 병원에서 정한 값(membership.ts) · 요금 v4: 기본 회원 무료 + 수수료 13% / 프리미엄 연 ₩1,800,000(월 ₩150,000) + 수수료 8% — 확인 완료된 진료비 기준 (금액은 가정값)
 import { useState } from 'react';
 import type { TabProps } from './props';
 import { Card, Locked, fmt } from '../ui';
+import { useTier } from '../membership';
 
 type Row = { id: string; day: string; item: string; amount: number | null; pay: string; file: string; patient: string; status: 'done' | 'checking' | 'waiting' };
 const ROWS: Row[] = [
@@ -24,7 +25,7 @@ const short = (n: number) => `₩${(n / 1e6).toFixed(1)}M`;
 
 export default function ReceiptTab({ mode }: TabProps) {
   const operating = mode === 'operating';
-  const [tier, setTier] = useState<'basic' | 'premium'>('premium');
+  const tier = useTier(); // 회원 등급은 "마이 병원"에서 바꿈
   const [rows, setRows] = useState(ROWS);
   const [edit, setEdit] = useState<Row | null>(null);
   const rate = tier === 'basic' ? 0.13 : 0.08;
@@ -50,11 +51,7 @@ export default function ReceiptTab({ mode }: TabProps) {
         <header className="card-head">
           <span className="badge badge-example">예시</span>
           <h3>결제 확인 현황</h3>
-          <div className="period-presets" role="group" aria-label="회원 등급">
-            {(['basic', 'premium'] as const).map((t) => (
-              <button key={t} type="button" aria-pressed={tier === t} onClick={() => setTier(t)}>{t === 'basic' ? '기본 13%' : '프리미엄 8%'}</button>
-            ))}
-          </div>
+          <a className="mini" href="#myhospital">{tierName} 회원 · 수수료 {pct}% (마이 병원에서 변경)</a>
         </header>
         <div className="today-tiles">
           <div className="today-tile is-static"><span className="today-label">확인 완료 매출</span><span className="today-val">{short(CONFIRMED.revenue)}</span><span className="today-go">{CONFIRMED.count}건 · 수수료 {won(commission)}</span></div>

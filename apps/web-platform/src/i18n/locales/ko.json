@@ -128,6 +128,10 @@
   "hospital": {
     "homepage": "홈페이지",
     "instagram": "인스타그램",
+    "email": "이메일",
+    "languages": "진료·상담 언어",
+    "parkingNote": "주차 안내",
+    "edited": "병원이 직접 수정한 정보 포함",
     "more": "더 보기 ({{count}}곳 남음)",
     "empty": "조건에 맞는 병원이 없어요.",
     "back": "병원 목록",

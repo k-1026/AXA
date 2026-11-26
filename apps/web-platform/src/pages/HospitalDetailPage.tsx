@@ -80,6 +80,18 @@ export function HospitalDetailPage() {
                 </dd>
               </>
             )}
+            {h.email && (
+              <>
+                <dt>{t('hospital.email')}</dt>
+                <dd><a href={`mailto:${h.email}`}>{h.email}</a></dd>
+              </>
+            )}
+            {h.languages && h.languages.length > 0 && (
+              <>
+                <dt>{t('hospital.languages')}</dt>
+                <dd>{h.languages.map((l) => LANG_NAME[l] ?? l).join(' · ')}</dd>
+              </>
+            )}
             {h.instagram && (
               <>
                 <dt>{t('hospital.instagram')}</dt>
@@ -112,6 +124,12 @@ export function HospitalDetailPage() {
             <dd>{h.parking !== undefined ? t('hospital.parkingSpaces', { count: h.parking }) : ''}</dd>
             <dt>{t('hospital.parkingFee')}</dt>
             <dd>{yesNo(t, h.parkingFee)}</dd>
+            {h.parkingNote && (
+              <>
+                <dt>{t('hospital.parkingNote')}</dt>
+                <dd>{h.parkingNote}</dd>
+              </>
+            )}
           </dl>
         </section>
 
@@ -133,10 +151,16 @@ export function HospitalDetailPage() {
 
       <p className="detail-source">
         {t('popup.source', { date: state.data.meta.fetchedAt.slice(0, 10) })}
+        {h.edited && <> · {t('hospital.edited')}</>}
       </p>
     </article>
   );
 }
+
+// 진료·상담 언어: 각 언어 자기 이름으로 (어느 화면 언어에서도 알아보게)
+const LANG_NAME: Record<string, string> = {
+  ko: '한국어', en: 'English', 'zh-CN': '中文(简体)', 'zh-TW': '中文(繁體)', ja: '日本語', vi: 'Tiếng Việt', ru: 'Русский', mn: 'Монгол', th: 'ไทย',
+};
 
 function yesNo(t: (k: string) => string, v: boolean | undefined) {
   if (v === undefined) return '';
