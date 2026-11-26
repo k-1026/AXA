@@ -4,9 +4,10 @@ import { Card, Locked, LineChart, fmt } from '../ui';
 import TodayTiles from '../TodayTiles';
 import KpiTrends, { type Summary } from '../KpiTrends';
 import FunnelCard from '../FunnelCard';
+import { PlatformShareCard, VisitorsCard } from '../HomeExtraCards';
 import { useStaffExpired } from '../useStaffExpired';
 
-export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
+export default function HomeTab({ data, mode, dept, setup, toggleSetup }: TabProps) {
   const done = setup.filter((s) => s.done).length;
   const p = data.patients;
   const visitors = data.visitors.monthly.filter((m) => m.days >= 28);
@@ -37,13 +38,15 @@ export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
   );
 
   if (operating) {
-    // 운영 후: 오늘 할 일 → 기간 성과 → 요청·체결·방문(첫 칸) → 공공 카드 3개 (한 줄, 윗선 맞춤)
+    // 운영 후: 오늘 할 일 → 기간 성과 → 요청·체결·방문 | 방문자 이번 달 vs 지난달 | 전체 중 우리 병원 → 공공 카드 3개 (각 한 줄, 윗선 맞춤)
     return (
       <div className="grid">
         <TodayTiles onExpired={onExpired} />
         <KpiTrends onExpired={onExpired} onSummary={setSummary} />
         <div className="row3">
           <FunnelCard summary={summary} />
+          <VisitorsCard />
+          <PlatformShareCard dept={dept} />
         </div>
         <div className="row3">{publicCards}</div>
       </div>
