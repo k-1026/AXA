@@ -36,7 +36,7 @@ const has = (text: string, words: string[]) => {
 };
 
 const topicChips = (t: TFunction): Chip[] =>
-  (['hospital', 'price', 'interpret', 'tour'] as Topic[]).map((topic) => ({
+  (['hospital', 'price', 'interpret'] as Topic[]).map((topic) => ({
     label: t(`chat.topic.${topic}`),
     action: { kind: 'topic', topic },
   }));

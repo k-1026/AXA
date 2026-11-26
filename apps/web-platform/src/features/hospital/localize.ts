@@ -1,7 +1,8 @@
-// 병원 이름·주소를 화면 언어로 (데이터에는 한국어 이름·주소와 영어 이름만 있음)
-// - 이름: 영어 이름(scripts/romanize.mjs englishName) = "발음 표기 + 진료과 + 기관 종류" →
-//   중국어·베트남어·일본어는 진료과·기관 종류만 번역하고 발음 표기는 그대로 (고유 이름을 지어내지 않음)
-// - 주소: 도로명 주소를 국어의 로마자 표기법(음절 단위, romanize.mjs와 같은 표)으로 옮김.
+// 병원 이름·주소를 화면 언어로 (데이터에는 한국어 이름·주소와 영어 이름만 있음). 기준: docs/번역-표기-기준.md
+// - 이름: 영어 이름(scripts/romanize.mjs: 공식 영문명 또는 "고유 이름 + 진료과 + 기관 종류") →
+//   중국어·베트남어·일본어는 끝의 진료과·기관 종류만 번역하고 고유 이름은 알파벳 그대로 (고유 이름을 지어내지 않음)
+//   형식을 모르는 영어 이름(끝이 기관 종류가 아님)은 영어 이름 그대로
+// - 주소: 도로명 주소를 국어의 로마자 표기법(낱말 단위, romanize.mjs와 같은 표)으로 옮김.
 //   중국어·일본어는 시·구를 한자로. 정확한 위치 확인용 한국어 원문은 화면에서 함께 보여 준다
 
 type Lang = 'zh-TW' | 'zh-CN' | 'vi' | 'ja';
@@ -11,8 +12,12 @@ type Row = [en: string, zhTW: string, zhCN: string, vi: string, ja: string];
 const INSTITUTIONS: Row[] = [
   ['University Hospital', '大學醫院', '大学医院', 'Bệnh viện Đại học', '大学病院'],
   ['Long-term Care Hospital', '療養醫院', '疗养医院', 'Bệnh viện Dưỡng lão', '療養病院'],
+  ['Hospital of Korean Medicine', '韓醫醫院', '韩医医院', 'Bệnh viện Y học Hàn Quốc', '韓方病院'],
   ['Korean Medicine Hospital', '韓醫醫院', '韩医医院', 'Bệnh viện Y học Hàn Quốc', '韓方病院'],
   ["Children's Hospital", '兒童醫院', '儿童医院', 'Bệnh viện Nhi', '小児病院'],
+  ['Dental Hospital', '牙科醫院', '牙科医院', 'Bệnh viện Nha khoa', '歯科病院'],
+  ['Dental Clinic', '牙醫診所', '牙科诊所', 'Phòng khám Nha khoa', '歯科クリニック'],
+  ['Clinic of Korean Medicine', '韓醫診所', '韩医诊所', 'Phòng khám Y học Hàn Quốc', '韓医院'],
   ['Korean Medicine Clinic', '韓醫診所', '韩医诊所', 'Phòng khám Y học Hàn Quốc', '韓医院'],
   ['Medical Center', '醫療院', '医疗院', 'Trung tâm Y tế', '医療院'],
   ['Public Health Branch', '保健支所', '保健支所', 'Trạm Y tế', '保健支所'],
@@ -22,7 +27,17 @@ const INSTITUTIONS: Row[] = [
 ];
 const DEPARTMENTS: Row[] = [
   ['Rehabilitation Medicine', '復健科', '康复医学科', 'Phục hồi chức năng', 'リハビリテーション科'],
+  ['Korean Internal Medicine', '韓醫內科', '韩医内科', 'Nội khoa Y học Hàn Quốc', '韓方内科'],
+  ['Neuropsychiatry', '神經精神科', '神经精神科', 'Thần kinh - Tâm thần', '神経精神科'],
   ['Internal Medicine', '內科', '内科', 'Nội khoa', '内科'],
+  ['Orthodontics', '齒顎矯正科', '口腔正畸科', 'Chỉnh nha', '矯正歯科'],
+  ['Orthodontic', '齒顎矯正科', '口腔正畸科', 'Chỉnh nha', '矯正歯科'],
+  ['Orthopedic', '骨科', '骨科', 'Chấn thương Chỉnh hình', '整形外科'],
+  ['Dentistry', '牙科', '牙科', 'Nha khoa', '歯科'],
+  ['Gynecology', '婦科', '妇科', 'Phụ khoa', '婦人科'],
+  ['Ophthalmic', '眼科', '眼科', 'Mắt', '眼科'],
+  ['E.N.T', '耳鼻喉科', '耳鼻喉科', 'Tai Mũi Họng', '耳鼻咽喉科'],
+  ['Pain', '疼痛科', '疼痛科', 'Giảm đau', 'ペイン科'],
   ['Thoracic Surgery', '胸腔外科', '胸外科', 'Ngoại Lồng ngực', '胸部外科'],
   ['Plastic Surgery', '整形外科', '整形外科', 'Thẩm mỹ', '形成外科'],
   ['Family Medicine', '家庭醫學科', '家庭医学科', 'Y học Gia đình', '家庭医療科'],
@@ -47,8 +62,11 @@ const isLocal = (lang: string): lang is Lang => lang in COL;
 export function localHospitalName(nameEn: string, lang: string): string {
   if (!isLocal(lang)) return nameEn;
   // 시연 데이터의 끝 글자 구분자 ("Demo Dermatology Clinic A")
-  const tail = nameEn.match(/ ([A-Z])$/)?.[1] ?? '';
+  const tail = nameEn.match(/ (Clinic|Hospital) ([A-Z])$/)?.[2] ?? '';
   let rest = tail ? nameEn.slice(0, -2) : nameEn;
+  // 지점·지역이 기관 종류 뒤에 붙은 공식 영문명 ("Artner Clinic Juk-Jeon") → 지점은 고유 이름 쪽으로 ("Artner Juk-Jeon" + Clinic)
+  const branch = rest.match(/^(.+) (Clinic|Hospital) ([A-Z][\w-]+)$/);
+  if (branch) rest = `${branch[1]} ${branch[3]} ${branch[2]}`;
   const cut = (table: Row[]) => {
     const hit = table.find(([en]) => rest === en || rest.endsWith(` ${en}`));
     if (!hit) return undefined;

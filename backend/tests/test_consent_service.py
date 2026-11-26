@@ -61,7 +61,7 @@ def test_withdrawn_consent_does_not_count(db, patient):
 
 def _request(db, patient, hospital_id: int = 9001) -> uuid.UUID:
     """booking_requests FK(0007) → 실제 요청서 행이 있어야 요청서별 동의를 저장할 수 있음.
-    같은 병원에 처리 전 요청은 1건만(booking.duplicate) → 요청서마다 병원을 다르게."""
+    같은 환자 예약은 1시간 이내로 겹칠 수 없음(booking.time_conflict) → 요청서마다 병원·날짜를 다르게."""
     demo_hospital(db, hospital_id)
     tenant = db.query(Tenant).filter_by(hospital_id=hospital_id).one_or_none()
     if tenant is None:
@@ -70,7 +70,7 @@ def _request(db, patient, hospital_id: int = 9001) -> uuid.UUID:
         db.flush()
     r = booking.create_request(
         db, patient.id, tenant.id,
-        dict(lang="en", nationality="TW", contact_method="email", preferred_slots=["2026-11-21T01:00:00Z"],
+        dict(lang="en", nationality="TW", contact_method="email", preferred_slots=[f"2026-11-{21 + hospital_id - 9001:02d}T01:00:00Z"],
              department_code="dermatology", treatment="laser_toning", visa_needed=False),
     )
     return r.id

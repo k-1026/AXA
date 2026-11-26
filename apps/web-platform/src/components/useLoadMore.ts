@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 // 목록 "더 보기": 처음엔 버튼, 한 번 누르면 그다음부터는 끝까지 스크롤하면 자동으로 더 불러옴 (무한 스크롤)
 // resetKey(필터 등)가 바뀌면 처음 개수로 돌아가지만, 자동 불러오기는 켜 둔 채로 둔다
-export function useLoadMore(total: number, pageSize: number, resetKey: string) {
+// autoFromStart: 버튼 없이 처음부터 무한 스크롤 (가격 가이드, 2026-11-26)
+export function useLoadMore(total: number, pageSize: number, resetKey: string, autoFromStart = false) {
   const [shown, setShown] = useState(pageSize);
-  const [auto, setAuto] = useState(false);
+  const [auto, setAuto] = useState(autoFromStart);
   const [sentinel, setSentinel] = useState<HTMLElement | null>(null);
   const [prevKey, setPrevKey] = useState(resetKey);
 

@@ -8,7 +8,7 @@
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
@@ -89,23 +89,81 @@ def _move(
 # ---------- 환자 쪽 (A가 호출) ----------
 
 
+# ---------- 중복 예약 규칙 (docs/booking-rules.md) ----------
+# 한 환자의 "살아 있는" 예약(확인 대기·시간 제안·확정)끼리 시간이 겹치지 않게 한다.
+# - 시간 간격: 어느 병원이든 다른 예약 시간 앞뒤 60분 안에는 새 요청 불가 (이동·진료 시간)
+# - 같은 병원 같은 날: 하루 1건 (시간을 바꾸려면 기존 요청을 변경·취소)
+# - 처리 전 요청(확인 대기·시간 제안)은 한 사람당 최대 5건 (여기저기 걸어 두고 노쇼하는 것 방지)
+# 확인 대기 요청은 희망 시간 1~3개를 모두 "잡힌 시간"으로 본다 (병원이 그중 하나로 확정할 수 있음)
+BUFFER = timedelta(minutes=60)
+MAX_OPEN = 5
+ACTIVE = ("pending", "proposed", "confirmed")
+KST = ZoneInfo("Asia/Seoul")
+
+
+def _utc(d: datetime) -> datetime:
+    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d.astimezone(timezone.utc)
+
+
+def _held_slots(r: BookingRequest) -> list[datetime]:
+    """그 예약이 잡고 있는 시간 (UTC). 시간 제안·확정이면 그 시간, 확인 대기면 희망 시간 전부."""
+    if r.status in ("proposed", "confirmed") and r.confirmed_slot is not None:
+        return [_utc(r.confirmed_slot)]
+    out = []
+    for s in r.preferred_slots or []:
+        try:
+            out.append(_utc(datetime.fromisoformat(str(s).replace("Z", "+00:00"))))
+        except ValueError:
+            continue
+    return out
+
+
+def _check_patient_slots(
+    db: Session,
+    patient_id: uuid.UUID,
+    tenant_id: uuid.UUID,
+    slots: list[datetime],
+    *,
+    exclude: uuid.UUID | None = None,
+    statuses: tuple[str, ...] = ACTIVE,
+) -> None:
+    """slots가 같은 환자의 다른 살아 있는 예약과 겹치면 409. exclude = 지금 바꾸는 그 요청."""
+    q = select(BookingRequest).where(BookingRequest.patient_id == patient_id, BookingRequest.status.in_(statuses))
+    if exclude is not None:
+        q = q.where(BookingRequest.id != exclude)
+    new = [_utc(s) for s in slots]
+    for o in db.scalars(q):
+        held = _held_slots(o)
+        if o.tenant_id == tenant_id:
+            days = {h.astimezone(KST).date() for h in held}
+            hit = next((s for s in new if s.astimezone(KST).date() in days), None)
+            if hit is not None:
+                raise AppError(409, "booking.same_day", "같은 병원에 그날 예약(요청)이 이미 있습니다",
+                               {"request_id": str(o.id), "date": hit.astimezone(KST).date().isoformat()})
+        for s in new:
+            near = next((h for h in held if abs(h - s) < BUFFER), None)
+            if near is not None:
+                raise AppError(409, "booking.time_conflict", "다른 예약 시간과 1시간 이내로 겹칩니다",
+                               {"request_id": str(o.id), "hospital_id": o.hospital_id,
+                                "slot": near.isoformat().replace("+00:00", "Z"), "buffer_minutes": 60})
+
+
 def create_request(db: Session, patient_id: uuid.UUID, tenant_id: uuid.UUID, data: dict) -> BookingRequest:
-    """요청서 생성. 상태는 항상 pending. 등록 유치의료기관(requests_enabled)만 받음."""
+    """요청서 생성. 상태는 항상 pending. 등록 유치의료기관(requests_enabled)만 받음.
+    같은 병원에 처리 전 요청이 있어도 날짜가 다르면 받는다 (11/26 결정 — 예전 booking.duplicate 대신 시간 규칙)."""
     tenant = db.get(Tenant, tenant_id)
     if tenant is None or not tenant.requests_enabled:
         raise _not_found()
-    dup = db.scalar(
-        select(BookingRequest.id).where(
-            BookingRequest.patient_id == patient_id,
-            BookingRequest.tenant_id == tenant_id,
-            BookingRequest.status.in_(("pending", "proposed")),
-        )
-    )
-    if dup is not None:
-        raise AppError(409, "booking.duplicate", "이 병원에 처리 안 된 요청이 이미 있습니다")
+    # 처리 전 요청 수 제한 (예전 '같은 병원 처리 전 1건'은 풀음, e9f282c)
+    open_count = len(list(db.scalars(select(BookingRequest.id).where(
+        BookingRequest.patient_id == patient_id, BookingRequest.status.in_(("pending", "proposed"))))))
+    if open_count >= MAX_OPEN:
+        raise AppError(409, "booking.too_many", f"처리 전 요청은 {MAX_OPEN}건까지 보낼 수 있습니다", {"max": MAX_OPEN})
+    slots = [datetime.fromisoformat(str(s).replace("Z", "+00:00")) for s in data.get("preferred_slots") or []]
     # 희망 일시도 그 병원 진료시간 안만 (11/24 — 챗봇으로 21시 요청이 들어갔음). 몇 번째 희망인지 loc으로
-    for i, s in enumerate(data.get("preferred_slots") or []):
-        _check_open(db, tenant.hospital_id, s if isinstance(s, datetime) else datetime.fromisoformat(str(s)), ["preferred_slots", i])
+    for i, s in enumerate(slots):
+        _check_open(db, tenant.hospital_id, s, ["preferred_slots", i])
+    _check_patient_slots(db, patient_id, tenant_id, slots)
     req = BookingRequest(patient_id=patient_id, tenant_id=tenant_id, hospital_id=tenant.hospital_id, **data)
     db.add(req)
     db.flush()
@@ -133,7 +191,11 @@ def get_for_patient(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -
 
 
 def patient_accept(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -> BookingRequest:
-    return _move(db, get_for_patient(db, patient_id, request_id), "patient_accept", "patient", str(patient_id))
+    req = get_for_patient(db, patient_id, request_id)
+    if req.status == "proposed" and req.confirmed_slot is not None:
+        # 병원이 제안한 시간이 이미 확정된 다른 예약과 겹치면 수락 불가 (확인 대기 요청끼리는 막지 않음)
+        _check_patient_slots(db, patient_id, req.tenant_id, [req.confirmed_slot], exclude=req.id, statuses=("confirmed",))
+    return _move(db, req, "patient_accept", "patient", str(patient_id))
 
 
 def patient_cancel(
@@ -188,10 +250,18 @@ def staff_act(
     req = staff_get(db, tenant_id, request_id)
     if action == "propose" and slot is not None:
         _check_open(db, req.hospital_id, slot)
+    if action in ("confirm", "propose") and req.patient_id is not None:
+        # 병원이 정하려는 시간이 그 환자의 다른 확정 예약과 1시간 이내면 다른 시간을 고르게 함
+        when = slot or req.confirmed_slot or next(iter(_held_slots(req)), None)
+        if when is not None:
+            try:
+                _check_patient_slots(db, req.patient_id, req.tenant_id, [when], exclude=req.id, statuses=("confirmed",))
+            except AppError as e:
+                raise AppError(409, "booking.patient_conflict",
+                               "환자의 다른 확정 예약과 시간이 겹칩니다. 다른 시간을 제안하세요", e.detail) from e
     return _move(db, req, action, "staff", staff_id, slot=slot, reason=reason)
 
 
-KST = ZoneInfo("Asia/Seoul")
 DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 
 

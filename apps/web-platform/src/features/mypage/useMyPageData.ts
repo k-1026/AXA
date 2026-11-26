@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../components/auth';
 import { useSavedHospitals } from '../hospital/savedHospitals';
-import { useVisitLog } from './visitLog';
+import { useVisitedBookings } from './visitedBookings';
 import { useHospitals } from '../hospital/useHospitals';
 import { SAMPLE_MYPAGE, type MyPageData, type SavedHospital } from './sampleData';
 import { hospitalNames } from '../hospital/name';
@@ -20,7 +20,7 @@ export function useMyPageData(): { data: MyPageData; saved: SavedHospital[]; dem
   const { t } = useTranslation();
   const { saved: entries } = useSavedHospitals();
   const hospitals = useHospitals();
-  const { visits } = useVisitLog();
+  const visits = useVisitedBookings(); // 방문 기록 수 = 방문 완료된 예약 수 (자동)
 
   // 병원 정보 페이지에서 찜한 병원. 데이터에서 빠진 병원(폐업 등)은 보여주지 않는다
   const items = hospitals.status === 'ready' ? hospitals.data.items : [];

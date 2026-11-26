@@ -5,6 +5,7 @@ import { searchText, uid } from '../../lib/common';
 import { useHospitals } from '../hospital/useHospitals';
 import { hospitalNames } from '../hospital/name';
 import { acceptMine, cancelMine, createBooking, listMine, toLocal, ykihoOf, type BookingExtra } from './bookingApi';
+import { checkBookingRules } from './bookingRules';
 import { SAMPLE_THREADS } from './sampleThreads';
 import type { BookingRequest, ConsultThread } from './types';
 
@@ -145,11 +146,12 @@ export function useConsultThreads() {
   // 변경하면 병원이 다시 확인해야 하므로 확인 대기로 돌아간다 (예약번호도 새로 받음)
   // 실제 회원: 서버에는 "변경"이 없어서 기존 요청을 취소하고 새로 요청한다 (contracts 6-1절)
   const changeBooking = async (id: string, messageId: string, b: Omit<BookingRequest, 'status'>, notice: string, extra?: BookingExtra) => {
+    checkBookingRules(held(), { hospitalId: id, date: b.date, time: b.time }, messageId); // 바꾸는 그 예약은 빼고 비교
     const thread = list.find((t) => t.hospitalId === id);
     const old = bookingOf(id, messageId);
     if (mode === 'member' && token && thread) {
       if (old?.serverId) await cancelMine(token, old.serverId);
-      const next = await toServer(thread, b, extra);
+      const next = await toServer(thread, b, extra, messageId);
       editBooking(id, messageId, () => next);
     } else {
       editBooking(id, messageId, (o) => ({ ...o, ...b, status: 'pending', bookingNo: undefined }));
@@ -179,7 +181,12 @@ export function useConsultThreads() {
   const send = (text: string) => active && text.trim() && append(active.hospitalId, { text: text.trim() });
 
   // 실제 회원은 서버에 예약 요청을 보내고(실패하면 거부된 Promise → 폼이 오류 표시), 서버가 준 상태로 남긴다
-  const toServer = async (thread: NewThread, b: Omit<BookingRequest, 'status'>, extra?: BookingExtra): Promise<BookingRequest> => {
+  // 내 살아 있는 예약 전부 (중복 예약 규칙 비교용, bookingRules.ts)
+  const held = () => list.flatMap((t) => t.messages.filter((m) => m.booking).map((m) => ({ hospitalId: t.hospitalId, messageId: m.id, booking: m.booking! })));
+
+  const toServer = async (thread: NewThread, b: Omit<BookingRequest, 'status'>, extra?: BookingExtra, ignore?: string): Promise<BookingRequest> => {
+    // 서버에 보내기 전에 미리 막음 (예시 로그인은 서버가 없어서 여기서만 막힘). 변경은 changeBooking에서 이미 확인
+    if (ignore === undefined) checkBookingRules(held(), { hospitalId: thread.hospitalId, date: b.date, time: b.time });
     if (mode === 'demo' || !token) return { ...b, status: 'pending' };
     if (!extra) throw new Error('consent');
     return (await createBooking(token, thread.hospitalId, thread.dept, b, extra)).local;

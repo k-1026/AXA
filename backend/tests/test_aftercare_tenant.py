@@ -1,7 +1,8 @@
 """B: 병원 계정(/tenant/me) · 사후관리 대화와 병원 계정 연동 · 대시보드 확정. 가상 데이터만."""
 
+import itertools
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy.orm import Session
@@ -38,14 +39,24 @@ def _tenant(db, hid=9001, aftercare_on=True):
     return t
 
 
+_slot_day = itertools.count()
+
+
+def _next_slot() -> str:
+    d = datetime.fromisoformat(SLOT.replace("Z", "+00:00")) + timedelta(days=next(_slot_day))
+    return d.isoformat().replace("+00:00", "Z")
+
+
 def _req(db, p, t, visited=True):
+    when = _next_slot()
     r = booking.create_request(
         db, p.id, t.id,
-        dict(lang="zh-TW", nationality="TW", contact_method="email", preferred_slots=[SLOT],
+        # 요청서마다 다른 날 (같은 환자 예약은 1시간 이내로 겹칠 수 없음, booking.time_conflict)
+        dict(lang="zh-TW", nationality="TW", contact_method="email", preferred_slots=[when],
              department_code="dermatology", treatment="laser_toning", visa_needed=False),
     )
     if visited:
-        booking.staff_act(db, t.id, "s", r.id, "confirm", NOW)
+        booking.staff_act(db, t.id, "s", r.id, "confirm", datetime.fromisoformat(when.replace("Z", "+00:00")))
         booking.staff_act(db, t.id, "s", r.id, "visited")
     return r
 
@@ -149,5 +160,5 @@ def test_dashboard_confirm_with_first_preferred_slot(client, db):
     lst = client.get("/api/v1/tenant/booking-requests?status=pending", headers=_h(t)).json()
     slot = lst[0]["preferred_slots"][0]
     out = client.post(f"/api/v1/tenant/booking-requests/{r.id}/confirm", json={"slot": slot}, headers=_h(t)).json()
-    assert out["status"] == "confirmed" and out["confirmed_slot"].startswith("2026-11-21T01:00")
+    assert out["status"] == "confirmed" and out["confirmed_slot"].startswith(slot[:16])
     assert client.get("/api/v1/tenant/booking-requests?status=pending", headers=_h(t)).json() == []
