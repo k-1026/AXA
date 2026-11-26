@@ -1,6 +1,7 @@
 """병원 직원 가입·로그인 (A). 가입할 때 환자/병원 관계자를 나눔 — 병원 쪽은 입점 신청 = 병원 계정 + 대표 직원.
 
-- 가입: 등록 유치의료기관이고 영업 중인 병원만 (`hospital.service.require_requestable`) · 병원 1곳 = 계정 1개
+- 가입: 등록 유치의료기관이고 영업 중인 병원만 (`hospital.service.require_requestable`)
+  + 지금은 시연용 가상 병원(`is_demo`)만 — 실제 병원은 403 `auth.signup_closed` (설정 `STAFF_SIGNUP_REAL_HOSPITALS`, 11/25) · 병원 1곳 = 계정 1개
   (이미 입점했으면 409 `auth.hospital_taken`) · `terms`·`privacy` 동의 필수 (동의 기록은 환자용 표라 직원은 남기지 않음, 팀 확인)
 - 직원 계정 테이블 `tenants`·`staff_users`는 B 모델. 여기서는 만들기·읽기만
 - 로그인: 환자와 같은 규칙 (실패 응답 하나로, 시도 제한, argon2id). 직원 토큰은 세션 없이 `tenant_id`만 (contracts 3절)
@@ -12,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from core.config import get_settings
 from core.errors import AppError
 from core.security import create_access_token
 from modules.auth import attempts
@@ -33,6 +35,8 @@ def signup(db: Session, data: StaffSignupRequest) -> TokenOut:
         raise AppError(422, "consent.required", "가입하려면 필수 동의가 필요합니다", {"missing": missing})
     consent_service.check_versions(data.consents)
     basic = hospital_service.require_requestable(db, data.hospital_id)  # 미등록·폐업 403, 없으면 404
+    if not basic.is_demo and not get_settings().staff_signup_real_hospitals:  # 확인 절차 전까지 실제 병원은 닫음
+        raise AppError(403, "auth.signup_closed", "아직 입점 신청을 받지 않는 병원입니다 (운영자에게 문의)")
     email = normalize_email(data.email)
     if db.scalar(select(StaffUser.id).where(StaffUser.email == email)) is not None:
         raise _email_taken()

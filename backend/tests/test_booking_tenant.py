@@ -283,7 +283,7 @@ def test_proposal_must_be_within_hospital_hours(db, kst_slot, ok):
     from zoneinfo import ZoneInfo
     p, t = _patient(db), _tenant(db)
     _hours(db, t.hospital_id)
-    req = service.create_request(db, p.id, t.id, _data())
+    req = service.create_request(db, p.id, t.id, _data(preferred_slots=["2026-11-20T02:00:00+00:00"]))  # 금 11:00 (기본 희망은 토요일 = 휴진)
     at = datetime(*kst_slot, tzinfo=ZoneInfo("Asia/Seoul"))
     if ok:
         assert service.staff_act(db, t.id, "staff-1", req.id, "propose", at).status == "proposed"
@@ -297,3 +297,25 @@ def test_proposal_without_hours_data_is_not_blocked(db):
     p, t = _patient(db), _tenant(db)  # 진료시간 데이터가 없는 병원 → 막지 않음 (모르는 것을 휴진으로 보지 않음)
     req = service.create_request(db, p.id, t.id, _data())
     assert service.staff_act(db, t.id, "staff-1", req.id, "propose", datetime(2026, 11, 22, 2, 0, tzinfo=timezone.utc)).status == "proposed"
+
+
+@pytest.mark.parametrize("kst_slot,ok", [
+    ((2026, 11, 20, 11, 0), True),    # 금 11:00
+    ((2026, 11, 20, 21, 0), False),   # 금 21:00 — 진료 끝난 뒤 (11/24 사용자 제보: 챗봇으로 21시 요청이 들어감)
+    ((2026, 11, 22, 11, 0), False),   # 일 — 휴진
+    ((2026, 11, 20, 13, 0), False),   # 점심
+])
+def test_patient_request_must_be_within_hospital_hours(db, kst_slot, ok):
+    from zoneinfo import ZoneInfo
+    p, t = _patient(db), _tenant(db)
+    _hours(db, t.hospital_id)
+    good = datetime(2026, 11, 20, 11, 0, tzinfo=ZoneInfo("Asia/Seoul"))
+    at = datetime(*kst_slot, tzinfo=ZoneInfo("Asia/Seoul"))
+    data = _data(preferred_slots=[good.isoformat(), at.isoformat()])  # 하나라도 진료시간 밖이면 거절, 몇 번째인지 알려 줌
+    if ok:
+        assert service.create_request(db, p.id, t.id, data).status == "pending"
+    else:
+        with pytest.raises(Exception) as e:
+            service.create_request(db, p.id, t.id, data)
+        assert e.value.code == "validation" and e.value.detail["errors"][0]["loc"] == ["preferred_slots", 1]
+        assert e.value.detail["errors"][0]["type"] == "closed"

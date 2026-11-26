@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     def _empty_str_is_none(cls, v: str | None) -> str | None:
         return v or None
 
+    # 실제 병원(시드 가상 병원 is_demo가 아닌 곳) 입점 신청. 기본 끔 — 등록번호 확인·운영자 승인 절차가 생기기 전까지
+    # (11/25: 확인 없이 남의 병원 주인으로 가입해 그 병원 환자 요청서를 받을 수 있었음). 로컬 개발에서만 .env로 켬
+    staff_signup_real_hospitals: bool = False
+
     # 프론트 주소 (CORS). 배포 시 .env에 CORS_ORIGINS=["https://…vercel.app"] 처럼 JSON 목록
     cors_origins: list[str] = ["http://localhost:5403", "http://localhost:5173"]
 
