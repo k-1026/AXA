@@ -151,8 +151,15 @@ class LLMClient:
         tracker: UsageTracker | None = None,
         http: httpx.Client | None = None,
         sleep=None,
+        rate_limit_cooldown: float = 600.0,
+        clock=time.monotonic,
     ):
         self.providers = providers
+        # 429를 받은 (제공자, 모델) → 다시 앞에 세울 시각. 그 전까지는 다른 모델을 먼저 시도하고, 모두 막혔을 때만 시도한다.
+        # 인스턴스(프로세스) 메모리라 서버리스에서는 인스턴스마다 따로 — 그래도 같은 인스턴스의 다음 호출들은 빨라진다
+        self.rate_limit_cooldown = rate_limit_cooldown
+        self._clock = clock
+        self._cooling: dict[tuple[str, str], float] = {}
         self.temperature = temperature
         self.max_retries = max_retries
         self.tracker = tracker or UsageTracker()
@@ -167,6 +174,7 @@ class LLMClient:
             temperature=s.llm_temperature,
             timeout=s.llm_timeout_seconds,
             max_retries=s.llm_max_retries,
+            rate_limit_cooldown=s.llm_rate_limit_cooldown_seconds,
             tracker=kwargs.pop("tracker", None) or UsageTracker(s.llm_usage_log_path),
             **kwargs,
         )
@@ -187,7 +195,7 @@ class LLMClient:
 
         errors: list[LLMError] = []
         prev_failed: str | None = None
-        for provider in self.providers:
+        for provider in self._ordered():
             t0 = time.perf_counter()
             try:
                 res = with_retry(
@@ -200,15 +208,28 @@ class LLMClient:
                 self._log(service, provider, t0, fallback_from=prev_failed, error=e)
                 raise e  # 요청 자체 오류는 다른 제공자도 같을 가능성이 커서 넘기지 않음
             except (RateLimitError, TransientError) as e:
+                if isinstance(e, RateLimitError):
+                    self._cooling[(provider.name, provider.model)] = self._clock() + self.rate_limit_cooldown
                 self._record(service, tenant_id, provider, ok=False, fallback_from=prev_failed)
                 self._log(service, provider, t0, fallback_from=prev_failed, error=e)
                 errors.append(e)
                 prev_failed = provider.name
                 continue
+            self._cooling.pop((provider.name, provider.model), None)
             self._record(service, tenant_id, provider, ok=True, fallback_from=prev_failed, res=res)
             self._log(service, provider, t0, fallback_from=prev_failed, res=res, tools=len(tools or []))
             return res
         raise AllProvidersFailed(errors)
+
+    def _ordered(self) -> list[ProviderConfig]:
+        """설정 순서 그대로, 다만 최근 429를 받은 모델은 맨 뒤로 (모두 막혔으면 원래 순서대로 다 시도)."""
+        now = self._clock()
+        self._cooling = {k: t for k, t in self._cooling.items() if t > now}
+        ready = [p for p in self.providers if (p.name, p.model) not in self._cooling]
+        cooling = [p for p in self.providers if (p.name, p.model) in self._cooling]
+        if cooling:
+            log.info("llm skip %s (429 cooldown)", ",".join(p.model for p in cooling))
+        return ready + cooling
 
     # ------------------------------------------------------------------
     def _call(

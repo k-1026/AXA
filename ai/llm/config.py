@@ -59,6 +59,9 @@ class LLMSettings(BaseSettings):
     llm_temperature: float = 0.2
     llm_timeout_seconds: float = 30.0
     llm_max_retries: int = 2  # 같은 제공자에서 5xx·타임아웃 재시도 횟수
+    # 한도 초과(429)를 받은 모델은 이 시간(초) 동안 뒤로 미룬다. 무료 키는 하루 한도라 막히면 매번 다시 막힘 —
+    # 2026-11-26 로컬: 막힌 gemini-3.5-flash를 매 호출 먼저 시도하다 한 번은 62초 기다린 뒤 429 (한 턴 75.8초)
+    llm_rate_limit_cooldown_seconds: float = 600.0
     llm_usage_log_path: str = ""  # 비우면 메모리에만 기록
 
     def providers(self) -> list[ProviderConfig]:
