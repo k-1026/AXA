@@ -225,3 +225,22 @@ def test_db_mode_draft_rejects_times_outside_hospital_hours():
     assert R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-01 18:30"]}, ctx)["status"] == "draft"
     no_info = ToolContext(residency="short_term", hospitals=type("D", (), {"booking_info": lambda self, i: {**Db().booking_info(i), "hours": {}}})())
     assert R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-06 21:00"]}, no_info)["status"] == "draft"  # 모르면 막지 않음
+
+
+def test_db_mode_draft_rejects_lunch_break_and_candidates_skip_it():
+    # 11/26: 점심시간(서버 _check_open 기준)도 초안 단계에서 막음. lunch 정보가 없는 날은 예전처럼 13시만 뺌
+    class Db:
+        def booking_info(self, hospital_id):
+            return {"id": 9003, "name_ko": "x", "name_en": "x", "district": "중구", "departments": ["피부과"],
+                    "is_registered_facility": True, "accepts_requests": True, "staff_languages": [], "ai_translation_chat": False,
+                    "address_en": "x", "tel": "053-000-0003",
+                    "hours": {"mon": "10:00-19:00", "tue": "10:00-19:00"}, "lunch": {"mon": "12:30-13:30"}}
+    ctx = ToolContext(residency="short_term", hospitals=Db())
+    base = {"hospital_id": 9003, "department": "피부과", "language": "ko", "inquiry": "x", "nationality": "VN", "visa_needed": False}
+    lunch = R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-07 13:00"]}, ctx)  # 월 13:00
+    assert "error" in lunch and "lunch" in lunch["error"] and "12:30-13:30" in lunch["error"]
+    assert R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-07 13:30"]}, ctx)["status"] == "draft"  # 끝 시각은 OK
+    assert R.run("prepare_booking_request", {**base, "preferred_slots": ["2026-12-08 13:00"]}, ctx)["status"] == "draft"  # 화: 점심 정보 없음
+    mon = R.run("check_availability", {"hospital_id": 9003, "date_from": "2026-12-07", "date_to": "2026-12-08"}, ctx)["slots"]
+    assert "12:00" in mon["2026-12-07"] and "13:00" not in mon["2026-12-07"]
+    assert "13:00" not in mon["2026-12-08"] and "12:00" in mon["2026-12-08"]  # 정보 없으면 예전처럼 13시만 뺌
