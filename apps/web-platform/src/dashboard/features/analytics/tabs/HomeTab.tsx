@@ -17,7 +17,8 @@ export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
 
   return (
     <div className="grid">
-      <TodayTiles onExpired={onExpired} />
+      {/* 오늘 할 일 (DB): 운영 후 모드에서만 맨 위. 초기 모드는 아래 Locked 칸 */}
+      {operating && <TodayTiles onExpired={onExpired} />}
 
       {operating ? (
         <Card title="이번 달 성과 (지난달 대비)" kind="example" wide>
@@ -60,6 +61,8 @@ export default function HomeTab({ data, mode, setup, toggleSetup }: TabProps) {
           ))}
         </ul>
       </Card>
+
+      {!operating && <Locked title="오늘 할 일 (새 상담·예약 요청·오늘 방문·미답변)" when="첫 상담이 들어오면 여기에 모여요" />}
 
       <Card title="대구 등록 유치의료기관" kind="public" source={data.registered.source}>
         <p className="big">{fmt(data.registered.total)}<small>곳</small></p>
