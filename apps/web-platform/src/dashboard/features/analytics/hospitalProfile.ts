@@ -1,11 +1,12 @@
 // 로그인한 병원 정보: GET /tenant/me(이름·hospital_id) + /data/hospitals.json(구·진료시간·점심·가상 여부)
-// 헤더 병원 이름, 대기 시간(진료시간 기준) 계산이 같이 씀. 한 번만 불러와 재사용 (로그아웃·다른 계정 로그인 시 resetHospitalProfile)
+// 헤더 병원 이름·진료과, 대기 시간(진료시간 기준) 계산이 같이 씀. 토큰별로 한 번만 불러와 재사용 (다른 계정으로 로그인하면 토큰이 바뀌어 새로 불러옴)
 import { call } from './bookingShared';
 
 export type HospitalProfile = {
   name: string;
   district: string | null;
   demo: boolean;
+  depts: string[]; // 진료과 코드 (dermatology·plastic·ophthalmology …)
   hours: ([string, string] | null)[] | null; // 월~일
   lunch: [string, string] | null;
 };
@@ -25,6 +26,7 @@ export function loadHospitalProfile(token: string | null): Promise<HospitalProfi
         name: me.display_name || h?.name || '우리 병원',
         district: h?.district ?? null,
         demo: !!h?.demo,
+        depts: Array.isArray(h?.depts) ? h.depts : [],
         hours: Array.isArray(h?.hours) ? h.hours : null,
         lunch: m ? [m[1], m[2]] as [string, string] : null,
       };

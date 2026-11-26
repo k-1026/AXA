@@ -29,13 +29,19 @@ export default function App() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<string>(tabFromHash);
   const [mode, setMode] = useState<Mode>('initial');
+  // 진료과: 헤더 선택 대신 로그인한 병원의 진료과 중 통계가 있는 첫 번째 (없으면 피부과)
   const [dept, setDept] = useState<DeptKey>('dermatology');
   const [setup, setSetup] = useState(SETUP_ITEMS);
   // 헤더 병원 이름·구: 로그인한 계정의 병원 (/tenant/me + 병원 목록). 두 모드 모두, 못 불러오면 예시 이름
   const [profile, setProfile] = useState<HospitalProfile | null>(null);
   useEffect(() => {
     let alive = true;
-    loadHospitalProfile(readStaffToken()).then((p) => { if (alive) setProfile(p); });
+    loadHospitalProfile(readStaffToken()).then((p) => {
+      if (!alive) return;
+      setProfile(p);
+      const d = p?.depts.find((x): x is DeptKey => x in DEPT_LABEL);
+      if (d) setDept(d);
+    });
     return () => { alive = false; };
   }, []);
   const real = profile;
@@ -61,12 +67,6 @@ export default function App() {
           <b>{real ? profile.name : `예시 ${DEPT_LABEL[dept]}의원`}</b>
           <span>{real ? `대구${profile.district ? ` ${profile.district}` : ''}${profile.demo ? ' · 가상 병원' : ''}` : `대구 ${SAMPLE_DISTRICT} · 가상 병원`}</span>
         </div>
-        <label className="select">
-          <span>진료과</span>
-          <select value={dept} onChange={(e) => setDept(e.target.value as DeptKey)}>
-            {Object.entries(DEPT_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </label>
         <div className="mode" role="group" aria-label="데이터 상태">
           <button type="button" aria-pressed={mode === 'initial'} onClick={() => setMode('initial')}>초기 (데이터 없음)</button>
           <button type="button" aria-pressed={mode === 'operating'} onClick={() => setMode('operating')}>운영 후 (예시)</button>
