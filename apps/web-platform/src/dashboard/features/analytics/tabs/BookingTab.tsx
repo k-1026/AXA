@@ -3,6 +3,7 @@ import type { TabProps } from './props';
 import { BarList, Card, Locked, won } from '../ui';
 import { CANCEL_REASONS, FIRST_REPLY, PREFERRED_DAYS, REPEAT_CHANGES, SAMPLE_HOURS } from '../sample';
 import BookingStatusTiles from '../BookingStatusTiles';
+import BookingCalendar from '../BookingCalendar';
 import { useStaffExpired } from '../useStaffExpired';
 import { DEPT_LABEL } from '../types';
 
@@ -23,11 +24,15 @@ export default function BookingTab({ data, mode, dept }: TabProps) {
   const prices = data.prices.byDept[dept] ?? [];
   const deptName = DEPT_LABEL[dept];
   const onExpired = useStaffExpired();
+  const [rev, setRev] = useState(0); // 캘린더에서 예약을 처리하면 위 예약 현황도 다시 불러옴
 
   return (
     <div className="grid">
       {/* 예약 현황 (DB): 운영 후 모드에서만 맨 위 */}
-      {operating && <BookingStatusTiles onExpired={onExpired} />}
+      {operating && <BookingStatusTiles key={rev} onExpired={onExpired} />}
+
+      {/* 예약 캘린더 (DB + 수기): 운영 후 모드에서만 */}
+      {operating && <BookingCalendar onExpired={onExpired} onChanged={() => setRev((n) => n + 1)} />}
 
       {/* 예약 가능 요일·자주 묻는 질문: 초기 모드에서만 (운영 후 모드에서는 뺌) */}
       {!operating && (
