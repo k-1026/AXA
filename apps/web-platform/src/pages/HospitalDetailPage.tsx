@@ -9,6 +9,7 @@ import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
 import { HospitalAddress } from '../features/hospital/HospitalAddress';
 import { languageSupportOf, type SupportLang } from '../features/hospital/languageSupport';
+import { useIsResident } from '../components/auth';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -19,6 +20,7 @@ export function HospitalDetailPage() {
   const location = useLocation();
   const state = useHospitals();
   const nameOf = useHospitalName();
+  const resident = useIsResident();
 
   if (state.status === 'loading') return <p className="list-status">{t('map.loading')}</p>;
   if (state.status === 'error') return <p className="list-status">{t('map.error')}</p>;
@@ -59,9 +61,15 @@ export function HospitalDetailPage() {
               <li key={d}>{t(`dept.${d}`)}</li>
             ))}
           </ul>
-          <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult">
-            {t('consult.startWith')}
-          </Link>
+          {resident ? (
+            <p className="residency-blocked">
+              {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
+            </p>
+          ) : (
+            <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="detail-consult">
+              {t('consult.startWith')}
+            </Link>
+          )}
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
             <dd><HospitalAddress addr={h.addr} /></dd>

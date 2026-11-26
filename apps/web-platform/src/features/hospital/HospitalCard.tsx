@@ -5,10 +5,12 @@ import { SaveHeart } from './SaveHeart';
 import { instagramHandle, useHospitalName } from './name';
 import type { Hospital } from './types';
 import { HospitalAddress } from './HospitalAddress';
+import { useIsResident } from '../../components/auth';
 
 export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
   const { t } = useTranslation();
   const nameOf = useHospitalName();
+  const resident = useIsResident();
 
   return (
     <article className="hospital-card">
@@ -57,11 +59,16 @@ export function HospitalCard({ hospital: h }: { hospital: Hospital }) {
           )}
         </dl>
       </div>
-      <div className="card-actions">
-        <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="card-action">{t('hospital.consultBtn')}</Link>
-        <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="card-action is-primary">{t('hospital.reserveBtn')}</Link>
-      </div>
-      <SaveHeart id={h.id} name={nameOf(h)} />
+      {/* 국내 거주 외국인은 유치 금지 대상 → 상담·예약·찜 없이 정보만 */}
+      {!resident && (
+        <>
+          <div className="card-actions">
+            <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`} className="card-action">{t('hospital.consultBtn')}</Link>
+            <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="card-action is-primary">{t('hospital.reserveBtn')}</Link>
+          </div>
+          <SaveHeart id={h.id} name={nameOf(h)} />
+        </>
+      )}
     </article>
   );
 }

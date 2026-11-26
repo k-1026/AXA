@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useIsResident } from '../components/auth';
 import { useTranslation } from 'react-i18next';
 import { HospitalCard } from '../features/hospital/HospitalCard';
 import { HospitalFilterBar } from '../features/hospital/HospitalFilterBar';
@@ -12,6 +13,7 @@ const PAGE_SIZE = 24;
 export function HospitalsPage() {
   const { t } = useTranslation();
   const state = useHospitals();
+  const resident = useIsResident();
   // 적용된 조건은 주소(?dept=a,b&district=중구,수성구&lang=en)에 저장 → 상세에서 뒤로 와도 유지
   const [params, setParams] = useSearchParams();
   const applied = useMemo(() => readFilters(params), [params]);
@@ -38,6 +40,11 @@ export function HospitalsPage() {
   return (
     <div className="hospitals-page">
       <HospitalFilterBar hospitals={items} applied={applied} onApply={apply} />
+      {resident && (
+        <p className="residency-blocked">
+          {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
+        </p>
+      )}
 
       {state.status === 'loading' && <p className="list-status">{t('map.loading')}</p>}
       {state.status === 'error' && <p className="list-status">{t('map.error')}</p>}
