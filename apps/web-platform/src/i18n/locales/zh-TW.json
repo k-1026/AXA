@@ -649,5 +649,41 @@
       "required": "請先回答居留狀態問題。",
       "notEligible": "居住在韓國的外國人無法申請諮詢・預約。如居留狀態有變，請到我的頁面重新回答。"
     }
+  },
+  "filter": {
+    "label": "醫院篩選",
+    "dept": "診療類別",
+    "district": "地區",
+    "lang": "診療·諮詢語言",
+    "deptTitle": "您想找哪類診療？",
+    "multi": "可複選",
+    "city": "大邱廣域市",
+    "districtTitle": "選擇區·郡",
+    "districtSearch": "搜尋區·郡",
+    "districtAll": "大邱全部",
+    "districtNone": "沒有符合的區·郡",
+    "langTitle": "請選擇您方便溝通的語言",
+    "langNote": "支援方式請在醫院詳情頁確認。",
+    "langSample": "目前只有示範用範例醫院有語言資訊（範例資料）。沒有語言資訊的醫院不列入結果。",
+    "reset": "全部重設",
+    "apply": "查看{{count}}家醫院",
+    "noResult": "沒有符合條件的醫院",
+    "remove": "移除條件：{{label}}",
+    "close": "關閉",
+    "applied": "已套用的條件",
+    "notApplied": "尚未套用",
+    "direct": "可直接溝通",
+    "interpret": "提供口譯",
+    "sample": "範例",
+    "langNoneShort": "無",
+    "langUnknown": "尚無語言支援資訊，請直接向醫院確認。",
+    "langs": {
+      "ko": "韓語",
+      "en": "英語",
+      "ja": "日語",
+      "zh": "中文",
+      "vi": "越南語",
+      "ru": "俄語"
+    }
   }
 }

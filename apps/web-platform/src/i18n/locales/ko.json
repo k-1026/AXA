@@ -649,5 +649,41 @@
       "required": "체류 형태를 먼저 답해 주세요.",
       "notEligible": "한국에 거주하는 외국인은 상담·예약을 요청할 수 없어요. 체류 상태가 바뀌었다면 마이페이지에서 다시 답해 주세요."
     }
+  },
+  "filter": {
+    "label": "병원 찾기 필터",
+    "dept": "진료 카테고리",
+    "district": "지역",
+    "lang": "진료·상담 언어",
+    "deptTitle": "어떤 진료를 찾으세요?",
+    "multi": "여러 개 선택할 수 있어요",
+    "city": "대구광역시",
+    "districtTitle": "구·군 선택",
+    "districtSearch": "구·군 검색",
+    "districtAll": "대구 전체",
+    "districtNone": "일치하는 구·군이 없어요",
+    "langTitle": "편하게 소통할 언어를 선택하세요",
+    "langNote": "지원 방식은 병원 상세에서 확인하세요.",
+    "langSample": "지금은 시연용 예시 병원에만 언어 정보가 있어요 (예시 데이터). 언어 정보가 없는 병원은 결과에 넣지 않아요.",
+    "reset": "전체 초기화",
+    "apply": "병원 {{count}}곳 보기",
+    "noResult": "조건에 맞는 병원이 없어요",
+    "remove": "{{label}} 조건 빼기",
+    "close": "닫기",
+    "applied": "적용된 조건",
+    "notApplied": "아직 적용 안 됨",
+    "direct": "직접 소통 가능",
+    "interpret": "통역 지원",
+    "sample": "예시",
+    "langNoneShort": "없음",
+    "langUnknown": "언어 지원 정보가 없어요. 병원에 직접 확인하세요.",
+    "langs": {
+      "ko": "한국어",
+      "en": "영어",
+      "ja": "일본어",
+      "zh": "중국어",
+      "vi": "베트남어",
+      "ru": "러시아어"
+    }
   }
 }

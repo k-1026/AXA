@@ -5489,3 +5489,496 @@ body.chat-open {
 .chat-card-done a {
   color: var(--accent);
 }
+
+/* ---------- 병원 찾기 필터 바 (HospitalFilterBar.tsx) — 색은 사이트 공통 --accent / --accent-soft ---------- */
+.hf {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hf-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hf-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.hf-trigger:hover {
+  border-color: var(--accent);
+}
+
+.hf-trigger[aria-expanded='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.hf-trigger-icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--text-muted);
+}
+
+.hf-trigger[aria-expanded='true'] .hf-trigger-icon {
+  color: var(--accent);
+}
+
+/* 긴 이름(영어·베트남어)은 잘리지 않고 줄바꿈 */
+.hf-trigger-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.hf-chevron {
+  flex: none;
+  color: var(--text-muted);
+  transition: transform 0.15s;
+}
+
+.hf-trigger[aria-expanded='true'] .hf-chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.hf :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hf-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.hf-backdrop,
+.hf-sheet-head {
+  display: none;
+}
+
+.hf-body {
+  padding: 24px 24px 16px;
+}
+
+.hf-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.hf-title {
+  padding: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.hf-sub {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.hf-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px 16px;
+  margin-top: 16px;
+}
+
+.hf-options-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* 항목 이름까지 눌러도 선택 */
+.hf-check {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hf-check:hover {
+  background: var(--surface-muted);
+}
+
+.hf-check input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.hf-box {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+.hf-check input:checked + .hf-box {
+  border-color: var(--accent);
+  background: var(--accent)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E")
+    center / 16px no-repeat;
+}
+
+.hf-check input:focus-visible + .hf-box {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hf-check-label {
+  min-width: 0;
+  line-height: 22px;
+}
+
+.hf-note {
+  margin: 14px 0 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.hf-note-sample {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+}
+
+/* 지역: 왼쪽 시·도, 오른쪽 구·군 */
+.hf-region {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 24px;
+}
+
+.hf-city {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: start;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.hf-region-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hf-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: min(100%, 240px);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+}
+
+.hf-search:focus-within {
+  border-color: var(--accent);
+}
+
+.hf-search input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--text);
+}
+
+/* 하단: 칩 · 초기화 · 적용 */
+.hf-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.hf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.hf-chip:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.hf-chip span {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.hf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.hf-dirty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.hf-reset {
+  padding: 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.hf-reset:hover {
+  color: var(--text);
+}
+
+.hf-apply {
+  min-height: 46px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+
+.hf-apply:hover {
+  filter: brightness(1.08);
+}
+
+.hf-apply:disabled {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* 닫혀 있을 때 적용된 조건 */
+.hf-applied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.hf-applied-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 24px;
+}
+
+.list-empty .list-status {
+  padding-bottom: 8px;
+}
+
+.detail-sample {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  vertical-align: middle;
+}
+
+@media (max-width: 860px) {
+  .hf-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hf-region {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* 모바일: 필터를 누르면 아래에서 올라오는 시트, 적용 버튼은 시트 하단 고정 */
+@media (max-width: 640px) {
+  .hf-bar {
+    gap: 6px;
+  }
+
+  .hf-trigger {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-height: 64px;
+    padding: 8px 6px;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .hf-chevron {
+    display: none;
+  }
+
+  .hf-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .hf-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1101;
+    max-height: 85dvh;
+    border-radius: 20px 20px 0 0;
+    border-bottom: 0;
+  }
+
+  .hf-sheet-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 12px 0 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hf-sheet-tabs {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .hf-sheet-tabs button {
+    flex: none;
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: none;
+    font: inherit;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .hf-sheet-tabs button[aria-selected='true'] {
+    border-bottom-color: var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .hf-sheet-close {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .hf-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 12px;
+  }
+
+  .hf-options,
+  .hf-options-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hf-foot {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--surface);
+  }
+
+  .hf-actions {
+    justify-content: space-between;
+    margin-left: 0;
+  }
+
+  .hf-apply {
+    flex: 1;
+  }
+}

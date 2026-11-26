@@ -649,5 +649,41 @@
       "required": "Please answer the questions about your stay first.",
       "notEligible": "Foreign residents of Korea cannot request consultations or bookings. If your status has changed, answer again in My Page."
     }
+  },
+  "filter": {
+    "label": "Hospital filters",
+    "dept": "Medical category",
+    "district": "Area",
+    "lang": "Consultation language",
+    "deptTitle": "What care are you looking for?",
+    "multi": "You can choose more than one",
+    "city": "Daegu",
+    "districtTitle": "Choose districts",
+    "districtSearch": "Search districts",
+    "districtAll": "All of Daegu",
+    "districtNone": "No matching district",
+    "langTitle": "Choose the languages you're comfortable with",
+    "langNote": "Check the hospital page for how each language is supported.",
+    "langSample": "For now only the demo hospitals have language data (sample data). Hospitals without language data are not included.",
+    "reset": "Clear all",
+    "apply": "Show {{count}} hospitals",
+    "noResult": "No hospitals match these filters",
+    "remove": "Remove filter: {{label}}",
+    "close": "Close",
+    "applied": "Applied filters",
+    "notApplied": "Not applied yet",
+    "direct": "Speak directly",
+    "interpret": "Interpreter available",
+    "sample": "Sample",
+    "langNoneShort": "None",
+    "langUnknown": "No language information yet. Please ask the hospital directly.",
+    "langs": {
+      "ko": "Korean",
+      "en": "English",
+      "ja": "Japanese",
+      "zh": "Chinese",
+      "vi": "Vietnamese",
+      "ru": "Russian"
+    }
   }
 }

@@ -8,6 +8,7 @@ import { instagramHandle, useHospitalName } from '../features/hospital/name';
 import { useHospitals } from '../features/hospital/useHospitals';
 import type { Hospital } from '../features/hospital/types';
 import { HospitalAddress } from '../features/hospital/HospitalAddress';
+import { languageSupportOf, type SupportLang } from '../features/hospital/languageSupport';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -115,6 +116,8 @@ export function HospitalDetailPage() {
           </dl>
         </section>
 
+        <LanguageCard hospitalId={h.id} />
+
         <section className="detail-card detail-map-card">
           <h2>{t('hospital.location')}</h2>
           <MapContainer center={[h.lat, h.lng]} zoom={16} className="detail-map">
@@ -135,6 +138,31 @@ export function HospitalDetailPage() {
         {t('popup.source', { date: state.data.meta.fetchedAt.slice(0, 10) })}
       </p>
     </article>
+  );
+}
+
+// 진료·상담 언어 — '직접 소통 가능'과 '통역 지원'을 나눠서. 정보 없으면 지원한다고 쓰지 않음
+function LanguageCard({ hospitalId }: { hospitalId: string }) {
+  const { t } = useTranslation();
+  const s = languageSupportOf(hospitalId);
+  const names = (ls: SupportLang[]) => (ls.length ? ls.map((l) => t(`filter.langs.${l}`)).join(', ') : t('filter.langNoneShort'));
+  return (
+    <section className="detail-card">
+      <h2>
+        {t('filter.lang')}
+        {s?.sample && <span className="detail-sample">{t('filter.sample')}</span>}
+      </h2>
+      {s ? (
+        <dl className="hospital-facts">
+          <dt>{t('filter.direct')}</dt>
+          <dd>{names(s.direct)}</dd>
+          <dt>{t('filter.interpret')}</dt>
+          <dd>{names(s.interpret)}</dd>
+        </dl>
+      ) : (
+        <p className="detail-note">{t('filter.langUnknown')}</p>
+      )}
+    </section>
   );
 }
 
