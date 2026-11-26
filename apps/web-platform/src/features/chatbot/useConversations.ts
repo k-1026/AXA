@@ -235,16 +235,19 @@ export function useConversations() {
     );
     let serverId = conv.serverId;
     let patch: Partial<ChatMessage>;
+    const started = performance.now(); // 테스트용 응답 시간 (ChatMessages의 SHOW_TIMING)
     try {
       const r = await askChatbot(token, conv.serverId, userText, chatLang(i18n.language));
       serverId = r.session_id;
-      patch = { text: r.text, cards: r.cards, ai: r.ai_generated, medicalNotice: r.medical_notice, at: now() };
+      patch = { text: r.text, cards: r.cards, ai: r.ai_generated, medicalNotice: r.medical_notice, at: now(),
+                elapsedMs: performance.now() - started };
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'unknown';
       if (code === 'not_found') serverId = undefined; // 서버에서 지워진 대화 → 다음 질문은 새 대화로
       // 429는 한도 종류(detail.limit)에 따라 문구가 다르다: sessions = 저장된 대화 수 한도
       const sessionsFull = code === 'rate_limited' && e instanceof ApiError && e.detail.limit === 'sessions';
-      patch = { text: t(`chat.api.${sessionsFull ? 'tooManySessions' : API_ERRORS[code] ?? 'error'}`), failed: true };
+      patch = { text: t(`chat.api.${sessionsFull ? 'tooManySessions' : API_ERRORS[code] ?? 'error'}`), failed: true,
+                elapsedMs: performance.now() - started };
     }
     // 답을 기다리는 동안 사용자가 이 대화를 지웠다면, 그 사이 서버에 새로 생긴 대화도 지운다
     if (deleted.current.has(conv.id)) {

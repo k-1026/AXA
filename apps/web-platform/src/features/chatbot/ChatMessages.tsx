@@ -7,6 +7,20 @@ import { kstDay, longDate, msgTime } from './time';
 import { useLocalized } from '../../lib/common';
 import type { ChatMessage, Chip, Conversation } from './types';
 
+// 테스트용: 답 옆에 걸린 시간(초). 개발 서버(npm run dev)에서는 켜지고, 배포 빌드는 VITE_SHOW_CHAT_TIMING=true일 때만
+const SHOW_TIMING = import.meta.env.DEV || import.meta.env.VITE_SHOW_CHAT_TIMING === 'true';
+const secs = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
+
+/** 답을 기다리는 동안 흐르는 초 (질문 시각 기준) */
+function PendingTimer({ since }: { since: string }) {
+  const [ms, setMs] = useState(() => Date.now() - Date.parse(since));
+  useEffect(() => {
+    const id = window.setInterval(() => setMs(Date.now() - Date.parse(since)), 100);
+    return () => window.clearInterval(id);
+  }, [since]);
+  return <span className="chat-timing">⏱ {secs(Math.max(0, ms))}</span>;
+}
+
 interface Props {
   conversation: Conversation;
   onChip: (chip: Chip) => void;
@@ -90,13 +104,19 @@ export function ChatMessages({ conversation, onChip, onRetry }: Props) {
               <div className="chat-msg-body">
                 <div className={m.failed ? 'chat-bubble is-failed' : 'chat-bubble'}>
                   {m.pending ? (
-                    <p className="chat-pending">{t('chat.api.thinking')}</p>
+                    <p className="chat-pending">
+                      {t('chat.api.thinking')}
+                      {SHOW_TIMING && <> <PendingTimer since={m.at} /></>}
+                    </p>
                   ) : m.ai !== undefined && m.role === 'bot' ? (
                     <AnswerText text={text(m.text)} />
                   ) : (
                     <p>{text(m.text)}</p>
                   )}
                   {m.cards && <ChatCards cards={m.cards} />}
+                  {SHOW_TIMING && m.elapsedMs !== undefined && (
+                    <p className="chat-timing" title="테스트용: 질문을 보낸 뒤 답(또는 오류)을 받기까지 걸린 시간">⏱ {secs(m.elapsedMs)}</p>
+                  )}
                   {(m.ai || m.medicalNotice) && (
                     <p className="chat-ai-note">
                       {m.ai && <span className="chat-ai-badge">{t('chat.api.aiGenerated')}</span>}

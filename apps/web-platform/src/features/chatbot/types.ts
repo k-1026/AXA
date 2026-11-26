@@ -31,6 +31,7 @@ export interface ChatMessage {
   medicalNotice?: boolean; // "의료 상담이 아닙니다" 고지
   pending?: boolean; // 답을 기다리는 중
   failed?: boolean; // 서버 오류로 답을 못 받음
+  elapsedMs?: number; // 질문 → 답(또는 오류)까지 걸린 시간. 테스트용 표시 (개발 서버·VITE_SHOW_CHAT_TIMING=true에서만 보임)
 }
 
 export interface Conversation {

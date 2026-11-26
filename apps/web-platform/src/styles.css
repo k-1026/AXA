@@ -5465,3 +5465,12 @@ body.chat-open {
 .chat-card-done a {
   color: var(--accent);
 }
+/* 테스트용 챗봇 응답 시간 (개발 서버에서만 보임) */
+.chat-timing {
+  margin: 6px 0 0;
+  font-size: 0.75rem !important;
+  color: var(--c-ink-70);
+  font-variant-numeric: tabular-nums;
+}
+.chat-pending .chat-timing { margin: 0 0 0 6px; }
+
