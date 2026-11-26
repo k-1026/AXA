@@ -134,13 +134,19 @@ WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 
 
 def _slots_from_hours(h: dict, day: date) -> list[str]:
-    """진료 시간 안의 정시 후보 (마감 1시간 전까지, 점심 13시 제외). 확정은 병원이 함."""
-    span = h.get("hours", {}).get(WEEKDAYS[day.weekday()])
+    """진료 시간 안의 정시 후보 (마감 1시간 전까지, 점심 제외). 확정은 병원이 함.
+    점심은 병원 자료(lunch)가 있으면 그 시간, 없으면 13시만 뺀다 (예전 기준)."""
+    key = WEEKDAYS[day.weekday()]
+    span = h.get("hours", {}).get(key)
     if not span:
         return []
     open_, close = span.split("-")
     start = int(open_[:2]) + (0 if open_[3:] == "00" else 1)  # 09:30 시작이면 10시부터
     end = int(close[:2])
+    lunch = (h.get("lunch") or {}).get(key) if isinstance(h.get("lunch"), dict) else None
+    if lunch:
+        l0, l1 = lunch.split("-")
+        return [f"{t:02d}:00" for t in range(start, end) if not (l0 <= f"{t:02d}:00" < l1)]
     return [f"{t:02d}:00" for t in range(start, end) if t != 13]
 
 
@@ -378,6 +384,23 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
             raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
         if now and slot <= now:
             raise ToolError(f"이미 지난 일시입니다: {s} (오늘 {ctx.today.isoformat()})")
+        if _uses_db(ctx):  # 진료시간 밖이면 서버가 422로 막으므로 초안 단계에서 미리 알림 (11/24 — 21시 요청)
+            # hours: 값 = "HH:MM-HH:MM", None = 휴진, 키 없음 = 모름(막지 않음 — 서버 _check_open과 같은 기준)
+            hours = h.get("hours") if isinstance(h.get("hours"), dict) else {}
+            day_key = WEEKDAYS[slot.weekday()]
+            span = hours.get(day_key)
+            hhmm = s.strip()[-5:]
+            if day_key in hours and span is None:
+                raise ToolError(f"The hospital is closed on that day: {s}. Ask the user for another day "
+                                f"(hours: {h['hours']}). Use check_availability for candidate times.")
+            if span and not (span.split("-")[0] <= hhmm < span.split("-")[1]):
+                raise ToolError(f"{hhmm} is outside the hospital's hours that day ({span}): {s}. Ask the user for a time "
+                                "within the hours. Use check_availability for candidate times.")
+            # 점심시간 (서버 _check_open과 같은 기준). lunch: 요일 → "HH:MM-HH:MM", 없으면 점심 정보 없음 (11/26)
+            lunch = (h.get("lunch") or {}).get(day_key) if isinstance(h.get("lunch"), dict) else None
+            if lunch and lunch.split("-")[0] <= hhmm < lunch.split("-")[1]:
+                raise ToolError(f"{hhmm} is during the hospital's lunch break that day ({lunch}): {s}. Ask the user for "
+                                "another time. Use check_availability for candidate times.")
     # 국적은 초안에 저장돼 매 턴 "신뢰" 맥락에 들어가므로 자유 문장을 받지 않는다 (프롬프트 주입 경로 차단)
     nationality = str(args["nationality"]).strip().upper()
     if not re.fullmatch(r"[A-Z]{2}", nationality):

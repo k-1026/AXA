@@ -73,6 +73,13 @@ def _hours(rows) -> dict[str, str | None]:
     return out
 
 
+def _lunch(rows) -> dict[str, str]:
+    """요일별 점심시간 "HH:MM-HH:MM" (진료하는 날 중 점심 정보가 있는 날만). 챗봇 초안이 서버 요청서 검사(_check_open)와
+    같은 기준으로 점심시간도 막게 (11/26 — 13:30 같은 점심 시간은 초안이 만들어진 뒤 제출 때 422가 났음)."""
+    return {x.day: f"{x.lunch_start:%H:%M}-{x.lunch_end:%H:%M}" for x in rows
+            if x.state == "open" and x.lunch_start is not None and x.lunch_end is not None}
+
+
 class HospitalGateway:
     def __init__(self, db: Session):
         self.db = db
@@ -85,13 +92,18 @@ class HospitalGateway:
         )
         return {"count": len(rows), "hospitals": [_brief(h) for h in rows[:limit]]}
 
-    def get(self, hospital_id: int) -> JSON | None:
+    def _detail(self, hospital_id: int):
         try:
-            d = hospital_service.get_detail(self.db, hospital_id)
+            return hospital_service.get_detail(self.db, hospital_id)
         except AppError as e:
             if e.code == "not_found":
                 return None
             raise
+
+    def get(self, hospital_id: int, d=None) -> JSON | None:
+        d = d or self._detail(hospital_id)
+        if d is None:
+            return None
         return {
             **_brief(d),
             "hours": _hours(d.hours),
@@ -115,15 +127,16 @@ class HospitalGateway:
 
     def booking_info(self, hospital_id: int) -> JSON | None:
         """예약 도구용 (가상 병원 데이터와 같은 모양). 없으면 None. `accepts_requests` = 메디대구로 요청을 받는 병원."""
-        d = self.get(hospital_id)
-        if d is None:
+        detail = self._detail(hospital_id)
+        if detail is None:
             return None
+        d = self.get(hospital_id, detail)
         extra = _demo_extra().get(hospital_id, {})
         return {
             "id": d["hospital_id"], "name_ko": d["name_ko"], "name_en": d["name_en"], "district": d["district"],
             "departments": d["departments"], "is_registered_facility": d["is_registered_facility"],
             "staff_languages": extra.get("staff_languages", []), "ai_translation_chat": extra.get("ai_translation_chat", False),
-            "hours": d["hours"], "address_en": d["address_en"], "tel": d["tel"],
+            "hours": d["hours"], "lunch": _lunch(detail.hours), "address_en": d["address_en"], "tel": d["tel"],
             "accepts_requests": hospital_id in self._accepting_demo_ids(),
         }
 

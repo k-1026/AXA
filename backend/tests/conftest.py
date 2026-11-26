@@ -17,6 +17,8 @@ def test_settings(monkeypatch):
     # 웹 푸시도 .env 키와 상관없이 꺼 둠 (푸시 테스트만 가짜 키로 켬, 결정 30)
     monkeypatch.setenv("VAPID_PUBLIC_KEY", "")
     monkeypatch.setenv("VAPID_PRIVATE_KEY", "")
+    # 실제 병원 입점 신청도 .env와 상관없이 기본(닫힘)으로 (여는 테스트만 켬)
+    monkeypatch.setenv("STAFF_SIGNUP_REAL_HOSPITALS", "false")
     get_settings.cache_clear()
     get_engine.cache_clear()
     # 번역은 실제 LLM을 부르지 않음 (번역을 보는 테스트만 가짜 LLM으로 바꿈)

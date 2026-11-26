@@ -44,7 +44,7 @@
 | `sid` | 로그인 세션 id (`auth_sessions.id`) | 없음 (직원도 필요하면 B가 같은 방식으로) |
 | `exp` | 만료 시각 | 만료 시각 |
 
-- 발급: A(`auth`). 환자 `POST /auth/patient/signup`·`login`, 병원 관계자 `POST /auth/staff/signup`(입점 = 병원 계정 + 대표 직원 `owner`, 등록 유치기관·영업 중만, `{email, password, hospital_id, registration_no, consents}`)·`POST /auth/staff/login` — **가입할 때 환자/병원을 나눔**. 직원 토큰은 세션 없음. 검증 의존성(`core/security.py`): `current_patient()`, `current_staff()` — 병원 API는 `current_staff()`로 받은 `tenant_id`로만 조회
+- 발급: A(`auth`). 환자 `POST /auth/patient/signup`·`login`, 병원 관계자 `POST /auth/staff/signup`(입점 = 병원 계정 + 대표 직원 `owner`, 등록 유치기관·영업 중만 + 지금은 가상 병원(`is_demo`)만 — 실제 병원 403 `auth.signup_closed`(결정 34), `{email, password, hospital_id, registration_no, consents}`)·`POST /auth/staff/login` — **가입할 때 환자/병원을 나눔**. 직원 토큰은 세션 없음. 검증 의존성(`core/security.py`): `current_patient()`, `current_staff()` — 병원 API는 `current_staff()`로 받은 `tenant_id`로만 조회
 - `current_patient()`는 요청마다 DB에서 세션 확인: 로그아웃·만료·탈퇴(계정 삭제)면 401 `auth.required` → **로그아웃하면 그 토큰은 바로 못 씀** (`POST /auth/patient/logout`, 다른 기기 세션은 유지)
 
 ## 4. 에러 형식·코드
@@ -60,6 +60,7 @@
 | `auth.invalid_credentials` | 401 | 이메일 또는 비밀번호가 맞지 않음 (어느 쪽인지 알려주지 않음) |
 | `auth.email_taken` | 409 | 이미 가입된 이메일 (환자·직원 각각) |
 | `auth.hospital_taken` | 409 | 이미 입점한 병원 (병원 1곳 = 병원 계정 1개, 직원 가입 때) |
+| `auth.signup_closed` | 403 | 아직 입점 신청을 받지 않는 병원 (지금은 시연용 가상 병원 `is_demo`만 가입, 결정 34) |
 | `auth.too_many_attempts` | 429 | 로그인·탈퇴 비밀번호 실패 초과: 이메일당 15분 5회, IP당 15분 20회 (`detail.retry_after` 초). 성공하면 그 이메일 기록 초기화. 지금은 서버 메모리 → 운영 전 공유 저장소로 |
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
 | `validation` | 422 | 입력 오류 |
@@ -235,6 +236,7 @@
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
 | 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
+| 2026-11-25 | 3·4 | 직원 가입은 가상 병원(`is_demo`)만, 실제 병원은 403 `auth.signup_closed` (설정 `STAFF_SIGNUP_REAL_HOSPITALS`로만 엶, 결정 34) | A (**B 확인 필요**) | `backend-A-contract-signup-closed` → `backend` |
 | 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |
 | 2026-11-23 | 6-3 | 사진 썸네일: 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb?`, 응답 첨부에 `thumb_url`(환자·병원, 없으면 null) — 칸 추가만 (결정 29) | A (**B 확인 필요** — aftercare는 B 모듈, `router_tenant` 응답 칸 추가) | `backend-A-media-thumbs` → `backend` |
 | 2026-11-23 | 6-1·6-2·7 | 방문 전 환자 질문 `POST /me/booking-requests/{id}/questions`, 환자·병원 예약 응답에 `questions`, 챗봇 `hospital_question` 카드(초안만) (결정 32, 마이그레이션 0013). 챗봇 조건 맞춤 제안·예약 = 입점 가상 병원만 (결정 31) | A (**B 확인 필요** — booking 응답 칸 추가, `router_tenant` 한 곳) | `backend-A-chatbot-demo-flow` → `backend` (`backend-A-web-push` 다음) |

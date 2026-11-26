@@ -122,3 +122,31 @@ def test_직원_로그인_실패가_많으면_429(client, db):
         client.post("/api/v1/auth/staff/login", json={"email": "owner@example.com", "password": "wrong-pass"})
     r = client.post("/api/v1/auth/staff/login", json={"email": "owner@example.com", "password": PW})
     assert (r.status_code, r.json()["code"]) == (429, "auth.too_many_attempts")
+
+
+def _real(db) -> Hospital:  # 실제 병원 = 시드의 가상 병원(is_demo)이 아닌 곳
+    h = hospital(db)
+    h.is_demo = False
+    db.commit()
+    return h
+
+
+def test_실제_병원은_입점_신청이_닫혀_있으면_403_계정도_안_생김(client, db):
+    # 11/25: 확인 절차 없이 누구나 실제 병원 주인으로 가입해 그 병원 환자 요청서를 받을 수 있었음 (전체 점검 N1)
+    h = _real(db)
+    r = signup(client, h)
+    assert (r.status_code, r.json()["code"]) == (403, "auth.signup_closed")
+    assert db.query(Tenant).filter_by(hospital_id=h.id).count() == 0
+    assert db.query(StaffUser).filter_by(email="owner@example.com").count() == 0
+
+
+def test_실제_병원_입점은_설정으로만_열림(client, db, monkeypatch):
+    from core.config import get_settings
+
+    monkeypatch.setenv("STAFF_SIGNUP_REAL_HOSPITALS", "true")
+    get_settings.cache_clear()
+    assert signup(client, _real(db)).status_code == 201
+
+
+def test_가상_병원은_그대로_가입(client, db):
+    assert signup(client, hospital(db)).status_code == 201  # hospital() = is_demo
