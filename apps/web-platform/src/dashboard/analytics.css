@@ -120,6 +120,11 @@
 .hd .today-tile.is-alert .today-val { color: var(--bad); }
 .hd .today-go { font-size: .8rem; color: var(--accent); font-weight: 600; }
 .hd .today-err { font-size: .8rem; color: var(--bad); }
+/* 홈 한 줄 3칸 (운영 후: 요청·체결·방문 / 공공 카드 3개). 칸 윗선을 맞춤 */
+.hd .row3 { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .hd .row3 { grid-template-columns: 1fr; } }
+.hd .card-live .funnel-fill { background: var(--accent); }
+.hd .row3 .funnel li { grid-template-columns: 72px 1fr 36px 34px; gap: 8px; }
 /* 홈 "기간 성과" (실제 DB, KpiTrends.tsx) */
 .hd .period { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 .hd .period-presets { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }

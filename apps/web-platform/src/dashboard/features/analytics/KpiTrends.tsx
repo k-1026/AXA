@@ -8,7 +8,7 @@ import { fmt } from './ui';
 
 type KpiKey = 'views' | 'requests' | 'confirmed' | 'visited' | 'cancelRate';
 type Kpi = { key: KpiKey; now: number | null; prev: number | null; unit: 'count' | 'percent'; lowerIsBetter?: boolean };
-type Summary = { period: { from: string; to: string; prevFrom: string; prevTo: string }; kpi: Kpi[] };
+export type Summary = { period: { from: string; to: string; prevFrom: string; prevTo: string }; kpi: Kpi[]; funnel: { key: 'requests' | 'confirmed' | 'visited'; n: number }[] };
 type Bucket = { label: string; now: Record<KpiKey, number | null>; prev: Record<KpiKey, number | null> };
 type Trends = { summary: Summary; buckets: Bucket[]; size: number };
 
@@ -101,7 +101,8 @@ function CompareChart({ buckets, k }: { buckets: Bucket[]; k: KpiKey }) {
 
 const show = (v: number | null, unit: string) => (v == null ? '—' : `${fmt(v)}${unit}`);
 
-export default function KpiTrends({ onExpired }: { onExpired: () => void }) {
+// onSummary: 고른 기간의 합계를 홈의 다른 카드(요청 → 체결 → 방문)에도 넘김
+export default function KpiTrends({ onExpired, onSummary }: { onExpired: () => void; onSummary?: (s: Summary | null) => void }) {
   const today = useMemo(() => iso(new Date()), []);
   const [preset, setPreset] = useState<string>('month');
   const [range, setRange] = useState<[string, string]>(() => PRESETS[0].range(today) as [string, string]);
@@ -115,11 +116,12 @@ export default function KpiTrends({ onExpired }: { onExpired: () => void }) {
     if (!token || invalid) return;
     let alive = true;
     setState('loading');
+    onSummary?.(null);
     loadTrends(from, to, token)
-      .then((d) => { if (alive) { setData(d); setState('ok'); } })
+      .then((d) => { if (alive) { setData(d); setState('ok'); onSummary?.(d.summary); } })
       .catch((e) => { if (!alive) return; if (e instanceof Expired) onExpired(); else setState('error'); });
     return () => { alive = false; };
-  }, [from, to, invalid, onExpired]);
+  }, [from, to, invalid, onExpired, onSummary]);
 
   const pick = (key: string) => {
     const p = PRESETS.find((x) => x.key === key)!;
