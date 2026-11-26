@@ -3,6 +3,7 @@ import type { TabProps } from './props';
 import { Card, Locked } from '../ui';
 import { AFTERCARE_KEYWORDS } from '../sample';
 import AftercareStatusTiles from '../AftercareStatusTiles';
+import AftercareChat from '../AftercareChat';
 import { useStaffExpired } from '../useStaffExpired';
 
 const GUIDE_TEMPLATE = [
@@ -17,6 +18,7 @@ export default function AftercareTab({ mode }: TabProps) {
   const operating = mode === 'operating';
   const [checked, setChecked] = useState<boolean[]>(GUIDE_TEMPLATE.map((_, i) => i > 2));
   const onExpired = useStaffExpired();
+  const [rev, setRev] = useState(0); // 채팅에서 답장·상태를 바꾸면 처리 현황도 다시 불러옴
 
   return (
     <div className="grid">
@@ -39,7 +41,9 @@ export default function AftercareTab({ mode }: TabProps) {
 
       {operating ? (
         <>
-          <AftercareStatusTiles onExpired={onExpired} />
+          <AftercareStatusTiles key={rev} onExpired={onExpired} />
+          {/* 반복 키워드(1) | 사후관리 채팅(2) 한 줄 */}
+          <div className="row-1-2">
           <Card title="반복 키워드 (지난달 대비)" kind="example">
             <table className="tbl">
               <thead><tr><th>키워드</th><th>이번 달</th><th>지난달</th></tr></thead>
@@ -51,6 +55,8 @@ export default function AftercareTab({ mode }: TabProps) {
             </table>
             <p className="note">&lsquo;안내 부족&rsquo;과 &lsquo;비용 설명&rsquo;이 늘었어요 → 안내문에 미리 넣을 내용 확인</p>
           </Card>
+          <AftercareChat rev={rev} onExpired={onExpired} onChanged={() => setRev((n) => n + 1)} />
+          </div>
         </>
       ) : (
         <>

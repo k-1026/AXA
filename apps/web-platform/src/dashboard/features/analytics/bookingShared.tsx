@@ -16,7 +16,7 @@ export const DB_STATUSES = ['pending', 'proposed', 'confirmed', 'visited', 'no_s
 export const ST: Record<string, string> = {
   pending: '대기', proposed: '시간 제안함', confirmed: '확정', visited: '방문 완료', no_show: '미방문', cancelled: '취소', rejected: '거절',
 };
-export const NAT: Record<string, string> = { TW: '대만', CN: '중국', JP: '일본', MN: '몽골', VN: '베트남', US: '미국', TH: '태국' };
+export const NAT: Record<string, string> = { KR: '한국', TW: '대만', CN: '중국', JP: '일본', MN: '몽골', VN: '베트남', US: '미국', TH: '태국' };
 export const LANG: Record<string, string> = { 'zh-TW': '번체', 'zh-CN': '간체', en: '영어', vi: '베트남어', ja: '일본어', ko: '한국어' };
 export const TRT: Record<string, string> = { laser_toning: '레이저 토닝', acne_scar: '여드름 흉터', botox: '보톡스', melasma: '기미 치료', filler: '필러' };
 export const REJECT: Record<string, string> = { fully_booked: '예약이 마감됐어요', not_offered: '하지 않는 진료예요', needs_consult: '대면 상담이 먼저 필요해요', other: '기타' };
