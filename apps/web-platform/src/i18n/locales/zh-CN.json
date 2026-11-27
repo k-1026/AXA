@@ -12,7 +12,8 @@
       "proposed": "{{hospital}}提议了其他时间。",
       "visited": "您在{{hospital}}的就诊已记录为完成，现在可以使用术后管理对话。",
       "no_show": "您在{{hospital}}的预约被记录为未到诊。",
-      "expired": "您向{{hospital}}申请的希望日期均已过去。"
+      "expired": "您向{{hospital}}申请的希望日期均已过去。",
+      "paid": "{{hospital}}已确认您的付款。"
     },
     "reply": "{{hospital}}发来{{count}}条咨询回复。",
     "aftercare": "{{hospital}}医护人员发来{{count}}条术后管理消息。",
@@ -490,7 +491,8 @@
       "visited": "已就诊",
       "proposed": "医院提议其他时间",
       "expired": "已过期",
-      "no_show": "未到诊"
+      "no_show": "未到诊",
+      "paid": "已确认付款"
     },
     "quick": {
       "booking": "预约咨询",
@@ -520,6 +522,7 @@
       "closedOption": "休诊"
     },
     "visitedNote": "已完成就诊，可在术后管理中与医护人员交流。",
+    "paidNote": "医院已确认付款金额。您可以在术后管理中与医护人员交流。",
     "needBooking": "发送预约申请后即可给医院负责人发消息",
     "sendFailed": "发送失败，请稍后再试。"
   },

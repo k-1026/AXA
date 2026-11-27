@@ -184,6 +184,7 @@
 .hd .st-confirmed { --st: #1f6feb; --st-bg: #e3edfd; }
 .hd .st-visited { --st: #137a3a; --st-bg: #e3f5ea; }
 .hd .st-no_show { --st: #c2410c; --st-bg: #fde8dd; }
+.hd .st-paid { --st: #6d28d9; --st-bg: #efe8fc; } /* 결제 확인 (11/27) */
 .hd .st-cancelled, .hd .st-rejected { --st: #8a94a0; --st-bg: #f1f3f6; }
 .hd .st-manual { --st: #0f7c6e; --st-bg: #e2f4f0; }
 .hd .ev, .hd .st-chip { color: var(--st); background: var(--st-bg); border-color: var(--st); }

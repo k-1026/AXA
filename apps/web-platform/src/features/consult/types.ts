@@ -5,7 +5,8 @@ import type { ChatText } from '../chatbot/types';
 // 예약 요청 상태 = 백엔드 계약 (docs/backend-contracts.md 2절)
 // pending 대기 · confirmed 확정 · rejected 병원 거절 · proposed 병원이 다른 시간 제안 · cancelled 환자 취소 · expired 희망 날짜가 모두 지남
 // visited 병원이 방문 완료 표시 · no_show 병원이 미방문 표시 (결정 19, 병원 직원만 바꿈)
-export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'proposed' | 'cancelled' | 'expired' | 'visited' | 'no_show';
+// paid 병원이 결제 금액을 확인 (11/27, 방문 완료 다음)
+export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'proposed' | 'cancelled' | 'expired' | 'visited' | 'no_show' | 'paid';
 
 // 화면 표시용 상태
 export type DisplayStatus = BookingStatus;
