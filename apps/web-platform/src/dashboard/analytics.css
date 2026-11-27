@@ -454,3 +454,12 @@
 .hd .rev-detail { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; padding: 8px 12px; border-radius: 10px; background: var(--surface-muted); font-size: .85rem; }
 .hd .rev-detail .up { color: var(--good); font-weight: 700; }
 .hd .rev-detail .down { color: var(--bad); font-weight: 700; }
+
+
+/* 사후관리 처리 현황 → 환자 목록 (AftercarePatientList) */
+.hd button.today-tile { font: inherit; text-align: left; cursor: pointer; }
+.hd .today-tile.is-picked { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.hd .ac-prow { cursor: pointer; }
+.hd .ac-prow:hover td { background: var(--surface-muted); }
+.hd .ac-plast { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.hd .ac-plast small { display: block; color: var(--bad); font-weight: 700; }
