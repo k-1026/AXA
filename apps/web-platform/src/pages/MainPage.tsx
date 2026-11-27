@@ -8,10 +8,10 @@ import { useHospitals } from '../features/hospital/useHospitals';
 import type { DepartmentKey, Hospital } from '../features/hospital/types';
 import { onMap } from '../features/hospital/filters';
 
-// 메인 하단 광고 배너 (비의료 일반 광고주만 · 5초마다 돌아감)
+// 메인 하단 광고 배너 (비의료 일반 광고주만 · 5초마다 두 칸씩 넘어감)
 const ADS: Ad[] = [
-  { image: '/ads/hanbang-skincare.webp', alt: 'Yakryeongsi — Hanbang skincare. Rooted in Daegu.' },
-  { image: '/ads/biseulsan-ice-festival.webp', alt: 'Biseulsan Ice Festival — Daegu, on ice. Dalseong, Daegu' },
+  // 두 칸짜리 배너 (wide: 한 화면에 이것만)
+  { image: '/ads/daesatu-festival.png', alt: '대사투! 페스티벌 — 대구야, 한바탕 놀자! 사투리로 만나고, 축제로 즐기고', wide: true },
   { image: '/ads/eworld-daegu.webp', alt: "E-World Daegu — Your Daegu play date. Let's play", href: 'https://eworld.kr/#' },
   { image: '/ads/daegu-chimac-festival.webp', alt: 'Daegu Chimac Festival — Chicken. Beer. Daegu. Taste the fun', href: 'https://www.chimacfestival.com' },
 ];
