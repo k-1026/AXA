@@ -74,8 +74,8 @@ def test_input_validation(client, llm):
     token = signup(client)
     assert ask(client, token, "").json()["code"] == "validation"
     assert ask(client, token, "x" * 1001).json()["code"] == "validation"
-    r = ask(client, token, "hi", language="ja")
-    assert r.status_code == 422 and r.json()["code"] == "validation" and r.json()["detail"]["language"] == "ja"
+    r = ask(client, token, "hi", language="th")
+    assert r.status_code == 422 and r.json()["code"] == "validation" and r.json()["detail"]["language"] == "th"
     assert llm.calls == []
 
 

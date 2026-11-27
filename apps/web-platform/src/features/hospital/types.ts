@@ -30,6 +30,13 @@ export interface Hospital {
   emergencyNight?: boolean;
   parking?: number;
   parkingFee?: boolean;
+  /** 아래는 병원이 대시보드 "마이 병원"에서 직접 넣는 칸 (features/hospital/overrides.ts) */
+  email?: string;
+  /** 진료·상담 가능 언어 코드 (ko·en·zh-CN·zh-TW·ja·vi·ru·mn·th) */
+  languages?: string[];
+  parkingNote?: string;
+  /** 병원이 직접 고친 정보가 있음 → 상세 페이지에 "병원이 직접 수정" 표시 */
+  edited?: true;
 }
 
 export interface HospitalData {

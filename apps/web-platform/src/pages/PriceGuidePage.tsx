@@ -11,6 +11,8 @@ import { useExchangeRates, useFallbackRate } from '../components/exchangeRates';
 import { useLoadMore } from '../components/useLoadMore';
 
 const PAGE_SIZE = 12;
+// 시술 이름 찾기: 띄어쓰기·대소문자 무시 (챗봇 가격 버튼이 ?q=필러 처럼 연다, 2026-11-26)
+const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '');
 
 export function PriceGuidePage() {
   const { t, i18n } = useTranslation();
@@ -19,6 +21,7 @@ export function PriceGuidePage() {
   // 누른 시술 → 이 시술을 하는 병원 창
   const [opened, setOpened] = useState<Procedure | null>(null);
   const closeOpened = useCallback(() => setOpened(null), []);
+  const q = params.get('q')?.trim() || null;
   const { currency } = useCurrency();
   // 원화가 아닌 통화를 골랐을 때만 환율을 받는다
   const fx = useExchangeRates(currency !== 'KRW');
@@ -36,15 +39,20 @@ export function PriceGuidePage() {
   };
   const fxDate = fx.status === 'ready' ? day(fx.data.applied_on) : '';
 
+  // 진료과를 바꾸면 시술 이름 찾기는 풀린다
   const selectDept = (v: string | null) => setParams(v ? { dept: v } : {}, { replace: true });
+  const clearSearch = () => setParams(dept ? { dept } : {}, { replace: true });
 
   // 진료과 순서대로 카드를 한 줄로 세운 뒤 보여 줄 개수만큼 자르고, 다시 진료과별로 묶음
   const sections = DEPARTMENTS.filter((d) => !dept || d === dept);
-  const cards = sections.flatMap((d) =>
+  const all = sections.flatMap((d) =>
     PROCEDURE_CATEGORIES.filter((c) => c.dept === d).flatMap((c) => c.items.map((p) => ({ d, c, p }))),
   );
-  // 더 보기 한 번 누르면 그다음부터 무한 스크롤
-  const { shown, sentinelRef, autoLoading } = useLoadMore(cards.length, PAGE_SIZE, dept ?? '', true);
+  // q가 있으면 시술 이름(한·영)이나 묶음 이름에 그 말이 들어간 것만. 하나도 없으면 전체를 보여 주고 안내
+  const matched = q ? all.filter(({ c, p }) => [p.ko, p.en, c.ko, c.en].some((s) => norm(s).includes(norm(q)))) : all;
+  const cards = matched.length ? matched : all;
+  // 처음부터 무한 스크롤 (시술 이름·진료과가 바뀌면 처음으로)
+  const { shown, sentinelRef, autoLoading } = useLoadMore(cards.length, PAGE_SIZE, `${dept ?? ''}|${q ?? ''}`, true);
   const visibleCards = cards.slice(0, shown);
 
   return (
@@ -57,6 +65,14 @@ export function PriceGuidePage() {
         selected={dept}
         onSelect={selectDept}
       />
+      {q && (
+        <p className="price-search">
+          {matched.length ? t('prices.searchResult', { q, count: matched.length }) : t('prices.noResult', { q })}{' '}
+          <button type="button" className="price-search-clear" onClick={clearSearch}>
+            {t('prices.clearSearch')}
+          </button>
+        </p>
+      )}
 
       {sections
         .filter((d) => visibleCards.some((v) => v.d === d))

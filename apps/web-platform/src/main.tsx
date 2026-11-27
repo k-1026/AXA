@@ -1,6 +1,6 @@
 import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './i18n';
 import './styles.css';
 import { CurrencyProvider } from './components/currency';
@@ -28,8 +28,14 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { RequireStaff } from './features/staff/RequireStaff';
 
 // 병원 대시보드는 따로 떼어 불러옴 (환자 화면에서는 대시보드 코드·CSS를 내려받지 않음)
-const DashboardPage = lazy(() => import('./dashboard/DashboardPage'));
-const AnalyticsApp = lazy(() => import('./dashboard/AnalyticsApp')); // 통계 상세 프로토타입 (예전 apps/web-hospital)
+const AnalyticsApp = lazy(() => import('./dashboard/AnalyticsApp')); // 메인 대시보드 (/dashboard, 예전 /dashboard/analytics 통계 상세)
+const DashboardPage = lazy(() => import('./dashboard/DashboardPage')); // 옛 대시보드 보관 (/dashboard/legacy) — 기능을 새 화면으로 다 옮기면 삭제
+
+// 예전 주소 /dashboard/analytics#탭 → /dashboard#탭 (탭 해시 유지)
+function AnalyticsRedirect() {
+  const { hash } = useLocation();
+  return <Navigate to={{ pathname: '/dashboard', hash }} replace />;
+}
 
 // 계정별 저장(이름@계정) 전의 찜·방문 기록 키는 주인을 알 수 없어 지운다
 removeLegacySettings();
@@ -41,8 +47,10 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           {/* 입점 병원 대시보드: 환자 사이트 헤더·메뉴 없이 따로. 직원 토큰 있을 때만 (실제 권한은 백엔드가 확인) */}
-          <Route path="dashboard" element={<RequireStaff><Suspense fallback={null}><DashboardPage /></Suspense></RequireStaff>} />
-          <Route path="dashboard/analytics" element={<RequireStaff><Suspense fallback={null}><AnalyticsApp /></Suspense></RequireStaff>} />
+          <Route path="dashboard" element={<RequireStaff><Suspense fallback={null}><AnalyticsApp /></Suspense></RequireStaff>} />
+          <Route path="dashboard/analytics" element={<AnalyticsRedirect />} />
+          {/* 옛 대시보드(상담 답장·예약 확정·사후관리 채팅 등 백엔드 연결 기능) 보관용. 메뉴에는 없음, 주소로만 */}
+          <Route path="dashboard/legacy" element={<RequireStaff><Suspense fallback={null}><DashboardPage /></Suspense></RequireStaff>} />
           <Route element={<Layout />}>
             <Route index element={<MainPage />} />
             <Route path="hospitals" element={<HospitalsPage />} />

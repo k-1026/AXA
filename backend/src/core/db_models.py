@@ -12,6 +12,7 @@ from modules.consent import models as consent_models  # noqa: F401
 from modules.fx import models as fx_models  # noqa: F401
 from modules.hospital import models as hospital_models  # noqa: F401
 from modules.notification import models as notification_models  # noqa: F401
+from modules.pageview import models as pageview_models  # noqa: F401
 from modules.patient import models as patient_models  # noqa: F401
 from modules.question import models as question_models  # noqa: F401
 from modules.tenant import models as tenant_models  # noqa: F401

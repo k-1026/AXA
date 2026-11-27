@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
@@ -10,17 +11,24 @@ import type { Hospital } from '../features/hospital/types';
 import { HospitalAddress } from '../features/hospital/HospitalAddress';
 import { languageSupportOf, type SupportLang } from '../features/hospital/languageSupport';
 import { useIsResident } from '../components/auth';
+import { recordPageView } from '../features/hospital/pageView';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 export function HospitalDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const state = useHospitals();
   const nameOf = useHospitalName();
   const resident = useIsResident();
+
+  // 병원 대시보드 "상세페이지 방문자" (하루 한 번, 개인정보 없음 — features/hospital/pageView.ts)
+  const found = state.status === 'ready' && state.data.items.some((x) => x.id === id);
+  useEffect(() => {
+    if (found && id) recordPageView(id, i18n.language);
+  }, [found, id]); // 언어를 바꿔도 다시 보내지 않음
 
   if (state.status === 'loading') return <p className="list-status">{t('map.loading')}</p>;
   if (state.status === 'error') return <p className="list-status">{t('map.error')}</p>;
@@ -63,10 +71,10 @@ export function HospitalDetailPage() {
           </ul>
           {resident ? (
             <p className="residency-blocked">
-              {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
+              {t('residency.eligibilityNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
             </p>
-          ) : (
-            // 목록 카드와 같은 두 버튼: 예약하기(달력 → 시간 → 신청) · 병원에 상담하기 (2026-11-26)
+          ) : h.demo ? (
+            // 목록 카드와 같은 두 버튼: 예약하기(달력 → 시간 → 신청) · 병원에 상담하기 (2026-11-26). 입점(가상) 병원만
             <div className="detail-actions">
               <Link to={`/reserve/${encodeURIComponent(h.id)}`} className="detail-consult">
                 {t('hospital.reserveBtn')}
@@ -75,6 +83,8 @@ export function HospitalDetailPage() {
                 {t('consult.startWith')}
               </Link>
             </div>
+          ) : (
+            <p className="detail-consult-note">{t('hospital.notJoined')}</p>
           )}
           <dl className="hospital-facts">
             <dt>{t('popup.addr')}</dt>
@@ -93,6 +103,18 @@ export function HospitalDetailPage() {
                     {h.url}
                   </a>
                 </dd>
+              </>
+            )}
+            {h.email && (
+              <>
+                <dt>{t('hospital.email')}</dt>
+                <dd><a href={`mailto:${h.email}`}>{h.email}</a></dd>
+              </>
+            )}
+            {h.languages && h.languages.length > 0 && (
+              <>
+                <dt>{t('hospital.languages')}</dt>
+                <dd>{h.languages.map((l) => LANG_NAME[l] ?? l).join(' · ')}</dd>
               </>
             )}
             {h.instagram && (
@@ -127,6 +149,12 @@ export function HospitalDetailPage() {
             <dd>{h.parking !== undefined ? t('hospital.parkingSpaces', { count: h.parking }) : ''}</dd>
             <dt>{t('hospital.parkingFee')}</dt>
             <dd>{yesNo(t, h.parkingFee)}</dd>
+            {h.parkingNote && (
+              <>
+                <dt>{t('hospital.parkingNote')}</dt>
+                <dd>{h.parkingNote}</dd>
+              </>
+            )}
           </dl>
         </section>
 
@@ -150,10 +178,16 @@ export function HospitalDetailPage() {
 
       <p className="detail-source">
         {t('popup.source', { date: state.data.meta.fetchedAt.slice(0, 10) })}
+        {h.edited && <> · {t('hospital.edited')}</>}
       </p>
     </article>
   );
 }
+
+// 진료·상담 언어: 각 언어 자기 이름으로 (어느 화면 언어에서도 알아보게)
+const LANG_NAME: Record<string, string> = {
+  ko: '한국어', en: 'English', 'zh-CN': '中文(简体)', 'zh-TW': '中文(繁體)', ja: '日本語', vi: 'Tiếng Việt', ru: 'Русский', mn: 'Монгол', th: 'ไทย',
+};
 
 // 진료·상담 언어 — '직접 소통 가능'과 '통역 지원'을 나눠서. 정보 없으면 지원한다고 쓰지 않음
 function LanguageCard({ hospitalId }: { hospitalId: string }) {

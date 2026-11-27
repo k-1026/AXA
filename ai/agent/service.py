@@ -108,8 +108,18 @@ def normalize_language(code: str) -> str:
     return code
 
 
-def _shown_from_cards(cards: list[JSON]) -> list[JSON] | None:
-    """이번 턴에 보여 준 병원 목록(표시 순서). 목록·추천 카드가 있으면 그것으로 갈아 끼운다."""
+def _shown_from_cards(cards: list[JSON], previous: list[JSON] | None = None) -> list[JSON] | None:
+    """이번 턴에 보여 준 병원 목록(표시 순서). 목록·추천 카드가 있으면 그것으로 갈아 끼운다.
+    상세 카드뿐이고 그 병원이 이미 보여 준 목록에 있으면 목록을 그대로 둔다 — 목록 속 병원의 전화번호를 보려고
+    상세를 불렀을 때 "첫 번째 병원"이 상세 병원으로 바뀌던 문제 (2026-11-26)"""
+    lists = [c for c in cards if c["type"] in ("hospital_list", "hospital_suggestions")]
+    details = [c["data"]["hospital_id"] for c in cards if c["type"] == "hospital_detail"]
+    if not lists and previous and details and all(d in {h["id"] for h in previous} for d in details):
+        return None
+    if lists and details:  # 같은 턴에 목록 + 목록 속 병원 상세 → 목록이 기준
+        key = "hospitals" if lists[-1]["type"] == "hospital_list" else "suggestions"
+        if all(d in {h["hospital_id"] for h in lists[-1]["data"][key]} for d in details):
+            cards = [c for c in cards if c["type"] != "hospital_detail"]
     for card in reversed(cards):
         if card["type"] == "hospital_list":
             return [{"id": h["hospital_id"], "name": h["name_en"]} for h in card["data"]["hospitals"]]
@@ -229,7 +239,7 @@ class ChatService:
                 new_state["draft_known_booking_ids"] = [b["id"] for b in self.bookings.list_for_patient(patient.patient_id)]
             else:
                 new_state["draft_known_booking_ids"] = saved.get("draft_known_booking_ids", [])
-        shown = _shown_from_cards([c.model_dump(mode="json") for c in cards])
+        shown = _shown_from_cards([c.model_dump(mode="json") for c in cards], saved.get("shown_hospitals"))
         if shown:
             new_state["shown_hospitals"] = shown[:SHOWN_HOSPITALS_KEPT]
 

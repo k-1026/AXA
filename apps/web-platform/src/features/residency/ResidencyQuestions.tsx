@@ -2,9 +2,11 @@ import { useTranslation } from 'react-i18next';
 
 // 체류 형태 3문항 + 거주국 (docs/backend-contracts.md 6-6절, 결정 28)
 // 하나라도 해당하거나 거주국이 한국이면 국내 거주 → 정보 열람만 (의료법 제27조 제3항 제2호)
+// 국적(11/27, 결정 36): 한국 국적이면 해외에 살아도 같은 취급. 국적은 판단에만 쓰고 서버에 저장하지 않음
 // 가입 화면 · 예약 화면(답이 없는 기존 계정) · 마이페이지(다시 답하기)에서 같이 씀
 export interface ResidencyAnswers {
   country: string; // ISO 3166-1 alpha-2
+  nationality: string; // ISO 3166-1 alpha-2, 고르기 전에는 ''
   alien_registration: boolean; // ① 외국인등록 (G-1 제외)
   domestic_residence: boolean; // ② 국내거소신고 (외국국적동포)
   health_insurance: boolean; // ③ 국민건강보험 가입자·피부양자
@@ -17,6 +19,7 @@ const QUESTIONS = ['alien_registration', 'domestic_residence', 'health_insurance
 
 export const emptyResidency = (): ResidencyAnswers => ({
   country: 'TW',
+  nationality: '',
   alien_registration: false,
   domestic_residence: false,
   health_insurance: false,
@@ -24,7 +27,13 @@ export const emptyResidency = (): ResidencyAnswers => ({
 
 // 서버와 같은 규칙 (backend/src/modules/patient/schemas.py ResidencyIn.residency) — 화면 안내용, 판단은 서버
 export const residencyOf = (a: ResidencyAnswers): Residency =>
-  a.country === 'KR' || a.alien_registration || a.domestic_residence || a.health_insurance ? 'resident' : 'short_term';
+  a.country === 'KR' || a.nationality === 'KR' || a.alien_registration || a.domestic_residence || a.health_insurance ? 'resident' : 'short_term';
+
+// 서버로 보낼 때 고르지 않은 국적('')은 빼기 (서버는 ISO 2자리만 받음, 선택 칸)
+export const withoutBlankNationality = (a: ResidencyAnswers) => {
+  const { nationality, ...rest } = a;
+  return nationality ? a : rest;
+};
 
 export function ResidencyQuestions({ value, onChange }: { value: ResidencyAnswers; onChange: (v: ResidencyAnswers) => void }) {
   const { t, i18n } = useTranslation();
@@ -49,6 +58,17 @@ export function ResidencyQuestions({ value, onChange }: { value: ResidencyAnswer
           ))}
         </select>
       </label>
+      <label className="auth-field">
+        <span>{t('residency.nationality')}</span>
+        <select value={value.nationality} onChange={(e) => set('nationality', e.target.value)}>
+          <option value="" disabled>{t('residency.choose')}</option>
+          {COUNTRIES.map((c) => (
+            <option key={c} value={c}>
+              {names?.of(c) ?? c}
+            </option>
+          ))}
+        </select>
+      </label>
       <p className="residency-intro">{t('residency.intro')}</p>
       {QUESTIONS.map((q) => (
         <label key={q} className="auth-check">
@@ -58,7 +78,7 @@ export function ResidencyQuestions({ value, onChange }: { value: ResidencyAnswer
       ))}
       {residencyOf(value) === 'resident' && (
         <p className="residency-note" role="status">
-          {t('residency.residentNote')}
+          {t(value.nationality === 'KR' ? 'residency.koreanNote' : 'residency.residentNote')}
         </p>
       )}
     </fieldset>

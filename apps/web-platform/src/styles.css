@@ -1237,7 +1237,17 @@ a {
   display: block;
 }
 
-/* 배너는 AdRotator가 5초마다 돌림. 태블릿 이하는 한 자리만 */
+/* 두 칸 배너: 두 자리 전체를 쓰고 원본 비율 그대로 (자르지 않음) */
+.ad-slot.ad-wide {
+  grid-column: 1 / -1;
+}
+
+.ad-slot.ad-wide img {
+  aspect-ratio: auto;
+  height: auto;
+}
+
+/* 배너는 AdRotator가 5초마다 두 칸씩 넘김. 태블릿 이하는 한 자리만 */
 @media (max-width: 860px) {
   .ad-rotator > .ad-second {
     display: none;
@@ -1886,6 +1896,14 @@ button.mp-add {
 .mp-login-button {
   background: var(--accent);
   color: #fff;
+}
+
+/* 체류 형태 다시 답하기: 국적을 고르기 전에는 흐리게 (11/27) */
+.mp-login-button:disabled {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
 }
 
 .mp-login-secondary {
@@ -3216,10 +3234,10 @@ body.chat-open {
 
 .chat-input {
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* 여러 줄이 되면 + 버튼·보내기 버튼은 아래에 붙음 */
   gap: 8px;
-  height: 64px;
-  padding: 0 8px 0 10px;
+  min-height: 64px;
+  padding: 9px 8px 9px 10px;
   border: 1.5px solid var(--c-blue);
   border-radius: 14px;
   background: var(--c-white);
@@ -3247,18 +3265,28 @@ body.chat-open {
   height: 24px;
 }
 
-.chat-input input {
+.chat-input textarea {
   flex: 1;
   min-width: 0;
-  height: 100%;
-  padding: 0 8px;
+  max-height: calc(1.5em * 5 + 20px); /* 5줄까지 늘어나고 그 뒤는 스크롤 */
+  padding: 10px 8px;
   border: 0;
   background: none;
+  color: inherit;
+  font: inherit;
   font-size: 1rem;
+  line-height: 1.5;
+  overflow-y: auto;
+  resize: none;
   outline: none;
 }
 
-.chat-input input::placeholder {
+/* 포커스 표시는 바깥 입력 상자(.chat-input:focus-within)가 하므로 안쪽 선은 겹치지 않게 뺀다 */
+.chat-input textarea:focus-visible {
+  outline: none;
+}
+
+.chat-input textarea::placeholder {
   color: var(--c-ink-55);
 }
 
@@ -3493,8 +3521,8 @@ body.chat-open {
   }
 
   .chat-input {
-    height: 52px;
-    padding: 0 6px;
+    min-height: 52px;
+    padding: 6px;
   }
 
   .chat-input-plus {
@@ -3503,7 +3531,8 @@ body.chat-open {
   }
 
   /* iOS는 16px보다 작은 입력창을 누르면 화면을 확대하므로 16px 유지 */
-  .chat-input input {
+  .chat-input textarea {
+    padding: 7px 6px;
     font-size: 16px;
   }
 
@@ -5163,6 +5192,22 @@ body.chat-open {
   color: #ffffff;
 }
 
+.card-action-note,
+.detail-consult-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.card-action-note {
+  margin-top: 8px;
+}
+
+.detail-consult-note {
+  margin: 4px 0 12px;
+}
+
 /* 예약하기 페이지: 달력 → 시간 → 신청 */
 .reserve-page {
   max-width: 960px;
@@ -5349,6 +5394,30 @@ body.chat-open {
   cursor: pointer;
 }
 
+/* 예약 화면: 진료과·상담 언어 고르기, 다 고르기 전에는 신청 버튼 흐리게 (11/26) */
+.reserve-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px 12px;
+  width: 100%;
+}
+
+.reserve-fields select {
+  width: 100%;
+}
+
+.reserve-submit:disabled {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.reserve-need {
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 .reserve-note {
   margin: 0;
   font-size: 0.8rem;
@@ -5486,6 +5555,26 @@ body.chat-open {
   cursor: pointer;
 }
 
+/* 알림 받기 카드: 예약 완료 화면·마이페이지 (11/27) */
+.notify-push-card {
+  align-self: stretch;
+  margin-top: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--accent-line, var(--border));
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  text-align: left;
+}
+
+.notify-push-card .notify-push-title {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.notify-push-card p {
+  font-size: 0.85rem;
+}
+
 /* 체류 형태 3문항 (결정 28) — 가입·예약·마이페이지 */
 .residency-questions {
   display: flex;
@@ -5578,6 +5667,33 @@ body.chat-open {
 
 .chat-card-done a {
   color: var(--accent);
+}
+
+/* 테스트용 챗봇 응답 시간 (개발 서버에서만 보임) */
+.chat-timing {
+  margin: 6px 0 0;
+  font-size: 0.75rem !important;
+  color: var(--c-ink-70);
+  font-variant-numeric: tabular-nums;
+}
+.chat-pending .chat-timing { margin: 0 0 0 6px; }
+
+/* 가격 가이드: 시술 이름으로 찾은 결과 안내 (챗봇 가격 버튼 ?q=) */
+.price-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: var(--c-ink-70);
+}
+.price-search-clear {
+  border: 1px solid var(--c-line, #d8dee8);
+  border-radius: 999px;
+  background: #fff;
+  padding: 2px 12px;
+  font: inherit;
+  cursor: pointer;
 }
 
 /* ---------- 병원 찾기 필터 바 (HospitalFilterBar.tsx) — 색은 사이트 공통 --accent / --accent-soft ---------- */

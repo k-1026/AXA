@@ -81,6 +81,8 @@ def _move(
     req.updated_at = utcnow()
     if actor_type != "patient":  # 병원·시스템이 바꾼 것만 환자에게 알림 (같은 commit, 결정 27)
         notification.notify(db, req.patient_id, "status", req.id, nxt)
+    else:  # 환자가 취소·수락한 것은 병원 대시보드에 (11/27)
+        notification.notify_staff(db, req.tenant_id, "status", req.id, nxt)
     db.commit()
     db.refresh(req)
     return req
@@ -154,16 +156,21 @@ def create_request(db: Session, patient_id: uuid.UUID, tenant_id: uuid.UUID, dat
     tenant = db.get(Tenant, tenant_id)
     if tenant is None or not tenant.requests_enabled:
         raise _not_found()
+    # 처리 전 요청 수 제한 (예전 '같은 병원 처리 전 1건'은 풀음, e9f282c)
     open_count = len(list(db.scalars(select(BookingRequest.id).where(
         BookingRequest.patient_id == patient_id, BookingRequest.status.in_(("pending", "proposed"))))))
     if open_count >= MAX_OPEN:
         raise AppError(409, "booking.too_many", f"처리 전 요청은 {MAX_OPEN}건까지 보낼 수 있습니다", {"max": MAX_OPEN})
     slots = [datetime.fromisoformat(str(s).replace("Z", "+00:00")) for s in data.get("preferred_slots") or []]
+    # 희망 일시도 그 병원 진료시간 안만 (11/24 — 챗봇으로 21시 요청이 들어갔음). 몇 번째 희망인지 loc으로
+    for i, s in enumerate(slots):
+        _check_open(db, tenant.hospital_id, s, ["preferred_slots", i])
     _check_patient_slots(db, patient_id, tenant_id, slots)
     req = BookingRequest(patient_id=patient_id, tenant_id=tenant_id, hospital_id=tenant.hospital_id, **data)
     db.add(req)
     db.flush()
     db.add(BookingEvent(request_id=req.id, from_status=None, to_status="pending", actor_type="patient", actor_id=str(patient_id)))
+    notification.notify_staff(db, tenant_id, "request", req.id)  # 병원 대시보드에 바로 (같은 commit)
     db.commit()
     db.refresh(req)
     return req
@@ -261,9 +268,9 @@ def staff_act(
 DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 
 
-def _check_open(db: Session, hospital_id: int, slot: datetime) -> None:
-    """제안 시간이 그 병원 진료시간 안인지 (한국 시간). 휴진일·진료 전후·점심이면 422 validation.
-    그날 진료시간 데이터가 없거나 unknown이면 막지 않음 (모르는 것을 휴진으로 보지 않음)."""
+def _check_open(db: Session, hospital_id: int, slot: datetime, loc: list | None = None) -> None:
+    """시간이 그 병원 진료시간 안인지 (한국 시간). 휴진일·진료 전후·점심이면 422 validation (type "closed").
+    병원 시간 제안(결정 33)과 환자 요청 생성 둘 다. 그날 진료시간 데이터가 없거나 unknown이면 막지 않음."""
     local = slot.astimezone(KST)
     h = db.get(HospitalHours, (hospital_id, DAYS[local.weekday()]))
     if h is None or h.state not in ("open", "closed"):
@@ -274,7 +281,7 @@ def _check_open(db: Session, hospital_id: int, slot: datetime) -> None:
               or (h.lunch_start is not None and h.lunch_end is not None and h.lunch_start <= t < h.lunch_end))
     if closed:
         raise AppError(422, "validation", "병원 진료시간이 아닙니다 (휴진일·진료 전후·점심)",
-                       {"errors": [{"loc": ["slot"], "type": "closed"}]})
+                       {"errors": [{"loc": loc or ["slot"], "type": "closed"}]})
 
 
 # ---------- 상담 답장 (병원 직원) ----------

@@ -8,7 +8,7 @@
       <span class="badge" id="hdrAftercare">사후관리 지원</span>
       <span class="badge gray">이벤트가·광고 없음</span>
     </div>
-    <select id="period" aria-label="기간"><option>이번 달 (11/1~11/16)</option><option>지난달 (10월)</option><option>최근 3개월</option></select>
+    <select id="period" aria-label="기간"></select>
     <button class="hbtn" id="loginBtn">직원 로그인</button>
     <button class="hbtn" id="logoutBtn" hidden>로그아웃</button>
   </div>
@@ -25,14 +25,14 @@
   <button data-t="settings">병원 설정</button>
 </nav>
 <main>
-  <div class="banner">팀 논의 반영 <b>시안</b>입니다 (요금: v4 등급형 회원, 11/18 팀 결정). 병원 운영 숫자는 전부 <b>가상 예시</b>, <span class="badge pub">공공</span> 표시 카드는 실제 공공 통계(출처 표기)예요. 요금 금액은 가정값이에요 (기본 회원 무료 + 13% / 프리미엄 연 ₩1,800,000 + 8%).</div>
+  <div class="banner" id="dataBanner">로그인 전이라 병원 운영 숫자는 전부 <b>가상 예시</b>예요. <span class="badge pub">공공</span> 표시 카드만 실제 공공 통계(출처 표기)예요.</div>
 
   <!-- 홈 -->
   <section id="home">
     <div class="hero">
       <div>
         <h2>안녕하세요, 예시 피부과의원</h2>
-        <p class="sub" style="margin:0">11월 16일 (월) · 오늘 처리할 일 <b style="color:var(--brand)" id="todoTotal">12건</b> <span class="badge gray" id="dataSrc">예시 데이터</span></p>
+        <p class="sub" style="margin:0"><span id="todayLabel"></span> · 오늘 처리할 일 <b style="color:var(--brand)" id="todoTotal">12건</b> <span class="badge gray" id="dataSrc">예시 데이터</span></p>
       </div>
       <a class="hbtn" href="#settings" style="display:inline-flex;align-items:center;text-decoration:none">병원 정보 5/7 등록됨 →</a>
     </div>
@@ -42,15 +42,15 @@
       <a class="tile" href="#booking"><span class="tl">새 상담 요청</span><span class="tv" id="tNew">5</span><span class="tg">답변하러 가기 →</span></a>
       <a class="tile hot" href="#aftercare"><span class="tl">미답변 사후관리</span><span class="tv" id="tAc">4</span><span class="tg">7시간 지난 문의 있음 →</span></a>
       <a class="tile" href="#booking"><span class="tl">오늘 방문 예정</span><span class="tv" id="tVisit">2</span><span class="tg" id="tVisitG">11:00 · 15:30 →</span></a>
-      <a class="tile" href="#receipt"><span class="tl">결제 금액 입력</span><span class="tv">1</span><span class="tg">방문 완료 R-1036 →</span></a>
+      <a class="tile" href="#receipt" data-sample><span class="tl">결제 금액 입력</span><span class="tv">1</span><span class="tg">방문 완료 R-1036 →</span></a>
     </div>
 
-    <h3 class="sec">이번 달 성과 <small>11/1~11/16 · 지난달 같은 기간 대비</small></h3>
+    <h3 class="sec"><span id="perfTitle">이번 달 성과</span> <small id="perfRange"></small></h3>
     <div class="grid g4">
-      <div class="card kpi big"><div class="l">병원 페이지 방문자</div><div class="v" id="k_views">1,240</div><span class="up" id="d_views">▲ 18%</span><div class="spark" data-s="52,61,48,70,66,90,95,58,63,72,69,84,101,97,76,88"></div></div>
-      <div class="card kpi big"><div class="l">상담 요청</div><div class="v" id="k_requests">86</div><span class="up" id="d_requests">▲ 9%</span><div class="spark" data-s="3,5,4,6,5,7,8,4,5,6,5,6,9,8,5,6"></div></div>
-      <div class="card kpi big"><div class="l">예약 체결</div><div class="v" id="k_confirmed">31</div><span class="down" id="d_confirmed">▼ 6%</span><div class="spark" data-s="1,2,2,3,1,3,3,1,2,2,1,3,3,2,1,1"></div></div>
-      <div class="card kpi big"><div class="l">방문 완료</div><div class="v" id="k_visited">24</div><span class="up" id="d_visited">▲ 4%</span><div class="spark" data-s="1,1,2,2,1,2,2,1,1,2,1,2,3,1,1,1"></div></div>
+      <div class="card kpi big"><div class="l">병원 페이지 방문자</div><div class="v" id="k_views">1,240</div><span class="up" id="d_views">▲ 18%</span><div class="spark" data-live-hide data-s="52,61,48,70,66,90,95,58,63,72,69,84,101,97,76,88"></div></div>
+      <div class="card kpi big"><div class="l">상담 요청</div><div class="v" id="k_requests">86</div><span class="up" id="d_requests">▲ 9%</span><div class="spark" data-live-hide data-s="3,5,4,6,5,7,8,4,5,6,5,6,9,8,5,6"></div></div>
+      <div class="card kpi big"><div class="l">예약 체결</div><div class="v" id="k_confirmed">31</div><span class="down" id="d_confirmed">▼ 6%</span><div class="spark" data-live-hide data-s="1,2,2,3,1,3,3,1,2,2,1,3,3,2,1,1"></div></div>
+      <div class="card kpi big"><div class="l">방문 완료</div><div class="v" id="k_visited">24</div><span class="up" id="d_visited">▲ 4%</span><div class="spark" data-live-hide data-s="1,1,2,2,1,2,2,1,1,2,1,2,3,1,1,1"></div></div>
     </div>
 
     <div class="grid g3 mt">
@@ -61,16 +61,16 @@
           <div><b id="f_confirmed">31</b><span>예약 체결</span></div><i>›</i>
           <div><b id="f_visited">24</b><span>방문 완료</span></div>
         </div>
-        <div class="row mt"><span>첫 답변 시간 (중앙값)</span><b>3시간 12분</b></div>
+        <div class="row mt" data-sample><span>첫 답변 시간 (중앙값)</span><b>3시간 12분</b></div>
         <div class="row"><span>취소율</span><b style="color:var(--bad)" id="k_cancelRate">12.9%</b></div>
-        <div class="row"><span>사후관리 만족도</span><b>4.6 / 5</b></div>
+        <div class="row" data-sample><span>사후관리 만족도</span><b>4.6 / 5</b></div>
       </div>
-      <div class="card"><h3>확인이 필요해요</h3>
+      <div class="card" data-sample><h3>확인이 필요해요</h3>
         <div class="alert">응답 6시간 넘은 상담 요청 <b>2건</b> — 환자 이탈 위험</div>
         <div class="alert">"붉은기" 사후관리 문의 <b>+3건</b> — 방문 후 안내문 점검</div>
         <div class="alert i">통역 언어·가격 안내 미입력 — <a href="#settings">병원 설정</a>에서 입력</div>
       </div>
-      <div class="card"><h3>이번 달 예상 청구</h3>
+      <div class="card" data-sample><h3>이번 달 예상 청구</h3>
         <div class="bigsum" id="homeTotal">₩1,376,400</div>
         <p class="note" style="margin:0 0 10px">부가세 별도 · 진료비의 <b id="homeRatio">9.0%</b> · 12/5 발행</p>
         <div class="row"><span id="homeComLabel">체결 진료 수수료 (프리미엄 8%)</span><span id="homeCom">₩1,226,400</span></div>
@@ -79,7 +79,7 @@
       </div>
     </div>
 
-    <div class="card mt"><h3>메디대구로 받은 환자 1명당 비용 <span class="badge info">추정</span></h3>
+    <div class="card mt" data-sample><h3>메디대구로 받은 환자 1명당 비용 <span class="badge info">추정</span></h3>
       <div class="cmp">
         <div><span>메디대구</span><b id="homePer">₩57,350</b><div class="bar"><i id="homeBar" style="width:29%"></i></div></div>
         <div><span>광고 (업체 자료)</span><b>약 ₩200,000</b><div class="bar"><i style="width:100%;background:#cfd5dd"></i></div></div>
@@ -96,7 +96,7 @@
       <div class="card kpi"><div class="l">대기</div><div class="v" id="kPend">5</div></div>
       <div class="card kpi"><div class="l">시간 제안함</div><div class="v" id="kProp">3</div></div>
       <div class="card kpi"><div class="l">이번 주 확정</div><div class="v" id="kWeek">9</div></div>
-      <div class="card kpi"><div class="l">반복 변경 (2회 이상)</div><div class="v">2</div></div>
+      <div class="card kpi" data-sample><div class="l">반복 변경 (2회 이상)</div><div class="v">2</div></div>
     </div>
     <div class="card mt">
       <div class="calhead"><h3>예약 캘린더</h3><small id="calRange" class="note" style="margin:0"></small>
@@ -219,7 +219,7 @@
 
   <!-- 통계 -->
   <section id="stats" class="hidden">
-    <h2>통계</h2><p class="sub">우리 병원 숫자만 보여요. 다른 병원 숫자는 어떤 형태로도 나오지 않아요 · <a class="more" href="/dashboard/analytics">통계 상세 (유입·전환·사후관리) →</a></p>
+    <h2>통계</h2><p class="sub">우리 병원 숫자만 보여요. 다른 병원 숫자는 어떤 형태로도 나오지 않아요 · <a class="more" href="/dashboard">통계 상세 (유입·전환·사후관리) →</a></p>
     <div class="card" style="margin-bottom:14px"><h3>대구 외국인환자 흐름 <span class="badge pub">공공</span></h3>
       <div class="grid g4">
         <div class="kpi"><div class="l">2025 대구 외국인 환자</div><div class="v" style="font-size:22px">19,243명</div><span class="up">▲ 31.4% (전년 대비)</span></div>
@@ -376,7 +376,7 @@
 
   <!-- 요금·정산 -->
   <section id="billing" class="hidden">
-    <h2>요금·정산</h2><p class="sub">병원이 메디대구에 내는 돈 · 팀 논의안 (확정 전)</p>
+    <h2>요금·정산</h2><p class="sub">병원이 메디대구에 내는 돈 · 금액은 시연용 예시</p>
     <div class="grid g2">
       <div class="card"><h3>1. 회원 등급 (요금 v4)</h3>
         <div class="grid g2" id="subPlans" style="gap:10px">
@@ -387,7 +387,7 @@
       </div>
       <div class="card"><h3>2. 체결 진료 수수료</h3>
         <p style="margin:0">병원 결제 내역(진료·결제 확인 탭)을 받아 <b>결제 확인된 진료비</b>에 등급별 비율 청구</p>
-        <p class="note"><b>기본 13% · 프리미엄 8%</b> — 1건당 약 ₩94,900 / ₩58,400 (1건 진료비 73만 원 기준, 가정값). 업계 공개 요율 15~25%보다 낮고, 유치업체 상한(의원 30%) 안. 결제된 진료에만 내므로 조회·클릭에도 과금되는 광고보다 위험이 낮아요. 이번 달 확인 완료 21건 기준</p>
+        <p class="note"><b>기본 13% · 프리미엄 8%</b> — 1건당 약 ₩94,900 / ₩58,400 (1건 진료비 73만 원 기준, 예시). 결제 확인된 진료에만 청구하고 조회·클릭에는 청구하지 않아요. 이번 달 확인 완료 21건 기준</p>
       </div>
     </div>
     <div class="grid g2 mt">
@@ -410,51 +410,12 @@
     </div>
     <div class="card mt"><h3>요금 규칙</h3>
       <ul class="note rules" style="font-size:13px">
-        <li>🔶 팀 확인 필요: 프리미엄 회원비를 체결 수수료와 함께 받을 때 고시 수수료율 상한 계산에 합쳐지는지 [미확인] → 복지부·진흥원 질의 (기본 회원은 회원비 없음)</li>
         <li>회원 등급은 환자 화면의 병원 노출·정렬과 무관 (프리미엄이라고 위로 올라가지 않음)</li>
         <li>이벤트가·광고 상품은 팔지 않음</li>
-        <li>금액 근거: 경쟁사·시장 가격 분석 (research/company/가격산정-경쟁사분석.md). 광고 CAC·객단가·등록 예치금은 언론·업체 자료 1곳씩이라 교차검증 전 → 병원 인터뷰로 지불 의향 확인 필요</li>
         <li>프리미엄은 회원비를 합쳐도 진료비의 약 9.0% (이 병원 21건 기준) · 월 1건(73만 원)이면 8% + 20.5% = 28.5% → 의원 상한 30% 안. 넘으면 넘는 만큼 회원비에서 차감</li>
       </ul>
     </div>
 
-    <h2 class="mt" style="margin-top:28px">요금 근거 — 경쟁사와 비교</h2><p class="sub">경쟁사·시장 가격 분석으로 정한 금액 (research/company/가격산정-경쟁사분석.md)</p>
-    <div class="grid g2">
-      <div class="card"><h3>외국인 환자 1명을 데려오는 비용 (병원 부담)</h3>
-        <div class="row"><span>유치업체 수수료 상한 (의원 30%)</span><b>₩219,000</b></div><div class="bar"><i style="width:100%;background:#cfd5dd"></i></div>
-        <div class="row"><span>광고형 플랫폼 (업체 자료 추정)</span><b>약 ₩200,000</b></div><div class="bar"><i style="width:91%;background:#cfd5dd"></i></div>
-        <div class="row"><span><b>메디대구 기본 회원 (진료비 13%)</b></span><b>₩94,900</b></div><div class="bar"><i style="width:43%"></i></div>
-        <div class="row"><span><b>메디대구 프리미엄 회원 (진료비 8%)</b></span><b>₩58,400</b></div><div class="bar"><i style="width:27%"></i></div>
-        <div class="row"><span>트립닥 (회사 설명: 병원 무료)</span><b>₩0</b></div><div class="bar"><i style="width:0"></i></div>
-        <div class="row"><span>Bookimed (환자당 수수료)</span><b style="color:var(--muted)">요율 비공개</b></div>
-        <p class="note">기준: 1건 진료비 73만 원 (팀 기준 — 대구 외국인 환자 진료비 약 67억 원 ÷ 9,165명, 진흥원 2024 신용카드 보고서 대구 값 기반 추정). 광고 비용은 광고비 1,000만 원 → 시술 고객 50명 사례(마케팅 업체).</p>
-      </div>
-      <div class="card"><h3>경쟁사 과금 방식</h3>
-        <div class="scroll"><table><thead><tr><th>서비스</th><th>병원이 내는 것</th><th>성과와 연동</th></tr></thead><tbody>
-          <tr><td>강남언니 / UNNI</td><td>페이지 조회당 10~4,000원, 클릭당 550~100,000원. 등록 시 광고비 200만 원 예치 보도</td><td>없음 (상담·내원 무관)</td></tr>
-          <tr><td>바비톡</td><td>조회당 광고비 + 결제 시 PG 수수료</td><td>일부</td></tr>
-          <tr><td>모두닥</td><td>병원 광고 (단가 비공개)</td><td>—</td></tr>
-          <tr><td>트립닥</td><td>입점비·이용료·수수료 없음 (수익원 미공개)</td><td>—</td></tr>
-          <tr><td>Bookimed</td><td>입점 무료 + 환자당 수수료 (+일부 셋업비)</td><td>있음</td></tr>
-          <tr><td>등록 유치업체</td><td>진료비 대비 수수료 (상한 30·20·15%)</td><td>있음</td></tr>
-          <tr><td><b>메디대구</b></td><td><b>기본 회원 무료 + 13% / 프리미엄 회원 연 ₩1,800,000 + 8% (결제 확인된 진료비)</b></td><td><b>있음 (결제 확인 건만)</b></td></tr>
-        </tbody></table></div>
-      </div>
-      <div class="card"><h3>사후관리 이용료 비교</h3>
-        <div class="row"><span>기업용 CRM·메시지 솔루션 (Standard)</span><b>월 ₩1,000,000</b></div><div class="bar"><i style="width:100%;background:#cfd5dd"></i></div>
-        <div class="row"><span><b>메디대구 프리미엄 회원비 (수수료 8% 적용, 연 ₩1,800,000)</b></span><b>월 환산 ₩150,000</b></div><div class="bar"><i style="width:15%"></i></div>
-        <h4>원가</h4>
-        <div class="row"><span>AI 요약·번역 1건 (Gemini 2.5 Flash 기준 [가정])</span><b>약 ₩30</b></div>
-        <p class="note">입력 3만·출력 5천 토큰, 1달러 1,400원 가정. 큰 원가는 운영 인력·서버라 가격은 "다른 도구보다 훨씬 싸게"로 정함.</p>
-      </div>
-      <div class="card"><h3>회원비(입점) 비교</h3>
-        <div class="row"><span>강남언니 등록 광고비 예치 (보도)</span><b>₩2,000,000</b></div><div class="bar"><i style="width:100%;background:#cfd5dd"></i></div>
-        <div class="row"><span><b>메디대구 프리미엄 1년</b></span><b>₩1,800,000</b></div><div class="bar"><i style="width:90%"></i></div>
-        <div class="row"><span><b>메디대구 기본 회원 1년</b></span><b>₩0</b></div><div class="bar"><i style="width:0"></i></div>
-        <div class="row"><span>트립닥 · Bookimed (입점 무료)</span><b>₩0</b></div>
-        <p class="note">기본 회원은 회원비 없이 시작(콜드스타트), 환자가 늘면 프리미엄(연 ₩1,800,000)으로.</p>
-      </div>
-    </div>
   </section>
 
   <!-- 병원 설정 -->

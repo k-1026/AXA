@@ -1,19 +1,38 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { LANGUAGES } from '../i18n';
 import { todayKst } from '../lib/common';
 import { nowKstTime } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
-import { BookingConsentFields, consentReady, emptyConsent, toExtra, useResidencyCheck } from '../features/consult/BookingConsentFields';
+import { BookingConsentFields, consentReady, emptyConsent, toExtra, useResidencyCheck, type ConsentState } from '../features/consult/BookingConsentFields';
+import { readSessionSetting, writeSessionSetting } from '../components/storage';
 import { useAuth } from '../components/auth';
 import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { useHospitals } from '../features/hospital/useHospitals';
+import { PushToggle } from '../features/notifications/PushToggle';
 import { hospitalNames, useHospitalName } from '../features/hospital/name';
 import { addDays, DAYS_AHEAD, isBookable, slotsFor } from '../features/reserve/availability';
+import type { DepartmentKey } from '../features/hospital/types';
 
 // 공개 URL로 배포된 화면인지 (localhost·127.0.0.1이 아니면 공개 배포로 봄) — "예시 일정 · 실제 예약 아님" 문구용
 const IS_PUBLIC_DEPLOY = typeof window !== 'undefined'
   && !['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+
+// 다른 화면에 갔다 와도 고른 값 유지 (11/27): 병원별로 이 탭(sessionStorage)에만. 예약을 보내면 지움
+// 지난 날짜·이미 지난 시간·예약 안 되는 시간은 다시 채우지 않음 (아래 useEffect)
+type Draft = { month: string; date: string; time: string; dept: DepartmentKey | ''; language: string; consent: ConsentState };
+const draftKey = (id?: string) => `reserveDraft.${id ?? ''}`;
+function readDraft(id: string | undefined, today: string): Partial<Draft> {
+  try {
+    const d = JSON.parse(readSessionSetting(draftKey(id)) ?? 'null') as Partial<Draft> | null;
+    if (!d) return {};
+    if (d.date && d.date < today) return { ...d, month: undefined, date: '', time: '' };
+    return d;
+  } catch {
+    return {};
+  }
+}
 
 // 병원 목록의 "예약하기": 달력에서 날짜 → 그날 예약 가능한 시간 → 예약 신청
 // 신청하면 그 병원 상담에 예약 요청(확인 대기)으로 남고, 확정은 병원이 한다
@@ -25,11 +44,15 @@ export function ReservePage() {
   const consult = useConsultThreads();
   const today = todayKst();
   const nowTime = nowKstTime();
-  const [month, setMonth] = useState(today.slice(0, 7)); // YYYY-MM
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [draft] = useState(() => readDraft(id, today));
+  const [month, setMonth] = useState(draft.month ?? today.slice(0, 7)); // YYYY-MM
+  const [date, setDate] = useState(draft.date ?? '');
+  const [time, setTime] = useState(draft.time ?? '');
+  // 진료과·상담 언어는 환자가 직접 고름 (전에는 병원 첫 진료과·화면 언어로 그냥 보냄 → 한국어 화면이면 상담 언어 ko, 11/26)
+  const [dept, setDept] = useState<DepartmentKey | ''>(draft.dept ?? '');
+  const [language, setLanguage] = useState(draft.language ?? '');
   const [done, setDone] = useState(false);
-  const [consent, setConsent] = useState(emptyConsent);
+  const [consent, setConsent] = useState<ConsentState>(() => ({ ...emptyConsent(), ...draft.consent }));
   const residency = useAuth().user?.residency;
   const checkResidency = useResidencyCheck();
   const [error, setError] = useState('');
@@ -38,6 +61,18 @@ export function ReservePage() {
   const locale = i18n.language;
   const lastDay = addDays(today, DAYS_AHEAD - 1);
   const h = state.status === 'ready' ? state.data.items.find((x) => x.id === id) : undefined;
+
+  // 다시 채운 날짜·시간이 지금은 예약 안 되면 비움 (병원 정보를 받은 뒤 한 번)
+  useEffect(() => {
+    if (!h || !date) return;
+    if (!isBookable(h, date, today, nowTime)) { setDate(''); setTime(''); return; }
+    if (time && !slotsFor(h, date, today, nowTime).some((s) => s.time === time && s.free)) setTime('');
+  }, [h]); // 병원 정보가 처음 들어올 때만 (고르는 중에는 화면이 이미 막음)
+
+  useEffect(() => {
+    if (done) return;
+    writeSessionSetting(draftKey(id), JSON.stringify({ month, date, time, dept, language, consent } satisfies Draft));
+  }, [id, done, month, date, time, dept, language, consent]);
 
   // 달력 칸: 월요일 시작, 앞쪽 빈칸 포함
   const cells = useMemo(() => {
@@ -53,6 +88,15 @@ export function ReservePage() {
     return (
       <section className="placeholder-page">
         <p>{t('hospital.notFound')}</p>
+        <Link to="/hospitals">← {t('reserve.back')}</Link>
+      </section>
+    );
+  }
+  if (!h.demo) {
+    return (
+      <section className="placeholder-page">
+        <p>{t('hospital.notJoined')}</p>
+        {h.tel && <p><a href={`tel:${h.tel}`}>{t('hospital.callBtn')} · {h.tel}</a></p>}
         <Link to="/hospitals">← {t('reserve.back')}</Link>
       </section>
     );
@@ -77,8 +121,12 @@ export function ReservePage() {
   };
 
   const member = consult.mode === 'member';
+  const deptValue = dept || (h.depts.length === 1 ? h.depts[0] : ''); // 진료과가 하나뿐이면 그것
+  // 예약 버튼: 진료과·상담 언어를 고르고, 회원이면 국적·단기 방문·전달 동의까지 해야 눌림
+  const canSubmit = !!date && !!time && !!deptValue && !!language
+    && (!member || (residency !== 'resident' && consentReady(consent, false, residency)));
   const submit = async () => {
-    if (!date || !time) return;
+    if (!canSubmit) return;
     if (member && residency === 'resident') return setError(t('residency.err.notEligible'));
     if (member && !consentReady(consent, false, residency)) return setError(t('booking.err.consentNeeded'));
     setError('');
@@ -86,10 +134,11 @@ export function ReservePage() {
     try {
       if (member) await checkResidency(consent);
       await consult.requestBookingFor(
-        { hospitalId: h.id, name: hospitalNames(h), dept: h.depts[0], district: h.district, photo: h.photo },
-        { date, time, language: locale },
+        { hospitalId: h.id, name: hospitalNames(h), dept: deptValue, district: h.district, photo: h.photo },
+        { date, time, language },
         member ? toExtra(consent, false) : undefined,
       );
+      writeSessionSetting(draftKey(id), null);
       setDone(true);
     } catch (err) {
       setError(t(bookingErrorKey(err)));
@@ -107,6 +156,8 @@ export function ReservePage() {
           <p className="reserve-done-name">{nameOf(h)}</p>
           <p className="reserve-done-when">{dateLabel(date)} {time}</p>
           <p className="reserve-note">{t('reserve.doneBody')}</p>
+          {/* 병원 답이 오면 사이트를 닫아도 알림 (아직 안 켠 기기만) */}
+          <PushToggle variant="card" onlyWhenOff />
           <div className="reserve-done-actions">
             <Link to="/mypage/bookings" className="is-primary">{t('reserve.toBookings')}</Link>
             <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`}>{t('reserve.toConsult')}</Link>
@@ -181,11 +232,28 @@ export function ReservePage() {
           {date && time && (
             <div className="reserve-confirm">
               <p><strong>{dateLabel(date)} {time}</strong></p>
+              <div className="reserve-fields">
+                <label className="auth-field">
+                  <span>{t('reserve.dept')}</span>
+                  <select value={deptValue} onChange={(e) => setDept(e.target.value as DepartmentKey)}>
+                    <option value="" disabled>{t('booking.choose')}</option>
+                    {h.depts.map((d) => <option key={d} value={d}>{t(`dept.${d}`)}</option>)}
+                  </select>
+                </label>
+                <label className="auth-field">
+                  <span>{t('reserve.language')}</span>
+                  <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+                    <option value="" disabled>{t('booking.choose')}</option>
+                    {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+                  </select>
+                </label>
+              </div>
               {member && <BookingConsentFields value={consent} onChange={setConsent} hasNote={false} />}
               {error && <p className="consult-form-error" role="alert">{error}</p>}
-              <button type="button" className="reserve-submit" onClick={submit} disabled={busy}>
+              <button type="button" className="reserve-submit" onClick={submit} disabled={busy || !canSubmit}>
                 {busy ? t('auth.submitting') : t('reserve.submit')}
               </button>
+              {!canSubmit && !busy && residency !== 'resident' && <p className="reserve-need">{t('reserve.needAll')}</p>}
             </div>
           )}
           <p className="reserve-note">{t('reserve.note')}</p>

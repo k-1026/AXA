@@ -123,6 +123,19 @@ def _apply_manual(hours: list[HospitalHours], row: dict[str, str]) -> bool:
     return used
 
 
+def _tel(hira: str | None, registered: str | None) -> str | None:
+    """심평원 번호가 대구 지역번호(053)가 아닌데 유치기관 등록 명단 번호와 지역번호만 다르면 등록 명단 값을 쓴다.
+    예: 빌리브피부과의원(수성구) 심평원 063-745-1190 ↔ 등록 명단 053-745-1190 (063은 전북 — 오기로 판단, 2026-11-26).
+    그 밖에는 심평원 값 그대로 (번호 자체가 다르면 어느 쪽이 맞는지 모르므로 바꾸지 않음)."""
+    if not hira or not registered:
+        return hira or None
+    area, _, rest = hira.partition("-")
+    reg_area, _, reg_rest = registered.strip().partition("-")
+    if area != "053" and area.startswith("0") and reg_area == "053" and rest and rest == reg_rest:
+        return registered.strip()
+    return hira
+
+
 def _dgsbjt(path: Path | str | None) -> dict[str, set[str]]:
     """내과·안과 ykiho 목록."""
     if path is None or not Path(path).exists():
@@ -210,7 +223,7 @@ def load_hospitals(
         h.type_name_ko = r.get("clCdNm") or None
         h.sggu = r.get("sgguCdNm") or None
         h.addr_ko = r.get("addr") or None
-        h.tel = r.get("telno") or None
+        h.tel = _tel(r.get("telno"), (reg or {}).get("tel"))
         h.lng, h.lat = _float(r.get("XPos", "")), _float(r.get("YPos", ""))
         h.homepage = r.get("hospUrl") or None
         h.is_registered_facility = reg is not None

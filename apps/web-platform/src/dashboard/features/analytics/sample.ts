@@ -19,16 +19,6 @@ export const SETUP_ITEMS: SetupItem[] = [
 ];
 
 // ── 운영 후 예시 ──
-export const KPI = [
-  { label: '상세페이지 방문자', now: 1240, prev: 1051, unit: '명' },
-  { label: '상담 신청', now: 86, prev: 79, unit: '건' },
-  { label: '예약 확정', now: 31, prev: 33, unit: '건' },
-  { label: '방문 완료', now: 24, prev: 23, unit: '건' },
-  { label: '취소율', now: 12, prev: 9, unit: '%', lowerIsBetter: true },
-];
-
-export const TODAY = { newConsults: 5, bookingRequests: 3, visitsToday: 2, unanswered: 4 };
-
 export const CHANNELS = [
   { name: '메디대구 지도·목록', visits: 610, consults: 41, bookings: 16 },
   { name: '인스타그램 링크', visits: 380, consults: 29, bookings: 5 },
@@ -80,14 +70,6 @@ export const PRE_VISIT_QUESTIONS = [
   { name: '예상 비용', n: 10, fix: '항목별 가격 범위 등록' },
 ];
 
-export const FUNNEL = [
-  { name: '병원 상세 조회', n: 1240 },
-  { name: '상담 시작', n: 86 },
-  { name: '예약 신청', n: 48 },
-  { name: '예약 확정', n: 31 },
-  { name: '방문 완료', n: 24 },
-];
-
 export const FIRST_REPLY = { medianMin: 160, prevMedianMin: 210, within1h: 38, outsideHours: 27 };
 
 export const CANCEL_REASONS = [
@@ -112,13 +94,6 @@ export const PREFERRED_DAYS = [
   { name: '일', req: 2, ok: 1 },
 ];
 
-export const AFTERCARE_STATUS = [
-  { name: '신규 문의', n: 6 },
-  { name: '미답변', n: 2 },
-  { name: '처리 중', n: 3 },
-  { name: '해결 완료', n: 18 },
-];
-
 export const AFTERCARE_KEYWORDS = [
   { name: '안내 부족', now: 7, prev: 4 },
   { name: '재방문 일정', now: 6, prev: 6 },
@@ -127,15 +102,46 @@ export const AFTERCARE_KEYWORDS = [
   { name: '대기시간', now: 2, prev: 3 },
 ];
 
-export const AFTERCARE_CASE = {
-  who: '대만 · 30대 · 방문 11/03',
-  summary: '귀국 후 관리 방법 안내문을 못 받았다고 문의. 중국어(번체) 안내문을 다시 보내고 해결.',
-  keyword: '안내 부족',
+export const SATISFACTION = { score: 4.6, responses: 17 };
+// 사후관리 평균 첫 답변 (분, 옛 대시보드 예시 5시간 40분) — 목록 API에 메시지 시각이 없어 예시 (대화별 조회는 열람 기록이 남아 쓰지 않음)
+export const AFTERCARE_FIRST_REPLY_MIN = 340;
+
+// ── 홈: 방문자 수 이번 달 vs 지난달 (일별, 옛 대시보드 통계 탭 예시값 그대로) ── page_events 생기면 실제로
+export const DAILY_VISITORS = {
+  now: [52, 61, 48, 70, 66, 90, 95, 58, 63, 72, 69, 84, 101, 97, 76, 88],
+  prev: [44, 50, 47, 55, 60, 71, 78, 49, 52, 58, 61, 66, 80, 79, 62, 70],
 };
 
-export const IMPROVEMENTS = [
-  { date: '10/20', change: '방문 후 안내문에 중국어(번체) 추가', before: 5, after: 2, keyword: '안내 부족' },
-  { date: '10/02', change: '상세페이지에 주차·지하철 안내 추가', before: 9, after: 4, keyword: '위치' },
+// ── 홈: 메디대구 전체 이용자 중 우리 병원 (옛 대시보드 통계 탭 예시값) ── 비율만, 다른 병원 순위·숫자는 안 보여 줌
+export const PLATFORM_SHARE = [
+  { label: '병원 페이지 방문자 비중', pct: 4.1 },
+  { label: '상담 요청 비중', pct: 5.3 },
+  { label: '같은 진료과 안에서 방문자 비중', pct: 11.8 },
 ];
 
-export const SATISFACTION = { score: 4.6, responses: 17 };
+// ── 진료·결제 확인: 월별 확인 완료 매출 (예시, 최근 12개월 · 부가세 제외 진료비) ── 결제 확인 API 생기면 GET /tenant/revenue/monthly 로 교체
+// 이번 달(11월)은 결제 확인 현황 카드와 같은 값 (21건 · ₩15,330,000 · 확인 중 ₩3,060,000)
+export const MONTHLY_REVENUE: { month: string; revenue: number; count: number; checking?: number }[] = [
+  { month: '2025-12', revenue: 4380000, count: 6 },
+  { month: '2026-01', revenue: 3650000, count: 5 },
+  { month: '2026-02', revenue: 5110000, count: 7 },
+  { month: '2026-03', revenue: 6570000, count: 9 },
+  { month: '2026-04', revenue: 8030000, count: 11 },
+  { month: '2026-05', revenue: 7300000, count: 10 },
+  { month: '2026-06', revenue: 9490000, count: 13 },
+  { month: '2026-07', revenue: 10950000, count: 15 },
+  { month: '2026-08', revenue: 12410000, count: 17 },
+  { month: '2026-09', revenue: 11680000, count: 16 },
+  { month: '2026-10', revenue: 13690000, count: 18 },
+  { month: '2026-11', revenue: 15330000, count: 21, checking: 3060000 },
+];
+
+// ── 사후관리 처리 현황: 로그인 없는 미리보기(?preview=1)에서 보여 주는 예시 대화 목록 (실명·실제 환자 정보 없음) ──
+const hAgo = (h: number) => new Date(Date.now() - h * 3600e3).toISOString();
+export const SAMPLE_AFTERCARE_THREADS = () => [
+  { id: '7c2a-d1', request_id: '1a7c-r1', status: 'new' as const, tags: [], summary: '레이저 토닝 이틀 뒤 붉은기 문의', lang: 'zh-TW', nationality: 'TW', treatment: 'laser_toning', visited_slot: hAgo(50), last_message_at: hAgo(1.5), last_message: '還是有點紅，正常嗎？', unanswered: 1 },
+  { id: 'b41e-d2', request_id: '58b0-r2', status: 'in_progress' as const, tags: ['붓기'], summary: '보톡스 후 붓기 경과 확인 중', lang: 'vi', nationality: 'VN', treatment: 'botox', visited_slot: hAgo(170), last_message_at: hAgo(26), last_message: 'Cảm ơn bác sĩ', unanswered: 0 },
+  { id: 'e9d3-d3', request_id: 'c3e2-r3', status: 'new' as const, tags: [], summary: '귀국 후 연고 사용 기간 문의', lang: 'en', nationality: 'MN', treatment: 'acne_scar', visited_slot: hAgo(340), last_message_at: hAgo(6), last_message: 'How long should I keep using the ointment?', unanswered: 2 },
+  { id: '2b6f-d5', request_id: '7e19-r5', status: 'in_progress' as const, tags: [], summary: '기미 치료 후 색소 변화 문의', lang: 'ja', nationality: 'JP', treatment: 'melasma', visited_slot: hAgo(120), last_message_at: hAgo(3), last_message: 'まだ少し赤いです', unanswered: 1 },
+  { id: '35f8-d4', request_id: '9d41-r4', status: 'resolved' as const, tags: ['붓기', '재방문 일정'], summary: '필러 후 붓기 — 해결', lang: 'zh-CN', nationality: 'CN', treatment: 'filler', visited_slot: hAgo(600), last_message_at: hAgo(300), last_message: '好多了，谢谢', unanswered: 0 },
+];

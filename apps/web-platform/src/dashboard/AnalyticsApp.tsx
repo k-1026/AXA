@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Logo } from '../components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import './analytics.css';
-import { clearStaffToken } from '../features/staff/staffSession';
+import { clearStaffToken, readStaffToken } from '../features/staff/staffSession';
+import { loadHospitalProfile, type HospitalProfile } from './features/analytics/hospitalProfile';
 import publicData from './data/dashboard-public.json';
 import type { DeptKey, Mode, PublicData } from './features/analytics/types';
 import { DEPT_LABEL } from './features/analytics/types';
@@ -11,12 +12,16 @@ import HomeTab from './features/analytics/tabs/HomeTab';
 import InflowTab from './features/analytics/tabs/InflowTab';
 import BookingTab from './features/analytics/tabs/BookingTab';
 import AftercareTab from './features/analytics/tabs/AftercareTab';
+import ReceiptTab from './features/analytics/tabs/ReceiptTab';
+import MyHospitalTab from './features/analytics/tabs/MyHospitalTab';
 
 const TABS = [
   { key: 'home', label: '홈', q: '이번 달 어떤 단계의 성과가 좋아지거나 떨어졌는가?', C: HomeTab },
   { key: 'inflow', label: '유입·관심', q: '어디에 홍보하고, 어떤 언어와 진료항목의 설명을 보강할까?', C: InflowTab },
   { key: 'booking', label: '상담·예약', q: '어느 단계에서 환자를 놓치나?', C: BookingTab },
   { key: 'aftercare', label: '사후관리', q: '어떤 안내를 미리 제공하고, 어떤 응대 과정을 개선할까?', C: AftercareTab },
+  { key: 'receipt', label: '진료·결제 확인', q: '방문 완료 후 실제 진료 금액·영수증을 등록 → 환자도 확인 → 메디대구가 체결 수수료 계산', C: ReceiptTab },
+  { key: 'myhospital', label: '마이 병원', q: '환자에게 보이는 병원 정보를 직접 고치고, 회원 등급을 정해요', C: MyHospitalTab },
 ] as const;
 
 const tabFromHash = () => TABS.find((t) => `#${t.key}` === window.location.hash)?.key ?? 'home';
@@ -25,9 +30,24 @@ export default function App() {
   const data = publicData as PublicData;
   const navigate = useNavigate();
   const [tab, setTab] = useState<string>(tabFromHash);
-  const [mode, setMode] = useState<Mode>('initial');
+  // 모드 토글은 없앰: 로그인하면 바로 운영 후 화면 (초기 모드 코드는 탭 안에 남아 있음)
+  const mode: Mode = 'operating';
+  // 진료과: 헤더 선택 대신 로그인한 병원의 진료과 중 통계가 있는 첫 번째 (없으면 피부과)
   const [dept, setDept] = useState<DeptKey>('dermatology');
   const [setup, setSetup] = useState(SETUP_ITEMS);
+  // 헤더 병원 이름·구: 로그인한 계정의 병원 (/tenant/me + 병원 목록). 두 모드 모두, 못 불러오면 예시 이름
+  const [profile, setProfile] = useState<HospitalProfile | null>(null);
+  useEffect(() => {
+    let alive = true;
+    loadHospitalProfile(readStaffToken()).then((p) => {
+      if (!alive) return;
+      setProfile(p);
+      const d = p?.depts.find((x): x is DeptKey => x in DEPT_LABEL);
+      if (d) setDept(d);
+    });
+    return () => { alive = false; };
+  }, []);
+  const real = profile;
 
   useEffect(() => {
     const onHash = () => {
@@ -51,18 +71,8 @@ export default function App() {
           <p className="brand-tagline">대구 의료 예약의 시작, 메디대구.</p>
         </div>
         <div className="hospital">
-          <b>예시 {DEPT_LABEL[dept]}의원</b>
-          <span>대구 {SAMPLE_DISTRICT} · 가상 병원</span>
-        </div>
-        <label className="select">
-          <span>진료과</span>
-          <select value={dept} onChange={(e) => setDept(e.target.value as DeptKey)}>
-            {Object.entries(DEPT_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </label>
-        <div className="mode" role="group" aria-label="데이터 상태">
-          <button type="button" aria-pressed={mode === 'initial'} onClick={() => setMode('initial')}>초기 (데이터 없음)</button>
-          <button type="button" aria-pressed={mode === 'operating'} onClick={() => setMode('operating')}>운영 후 (예시)</button>
+          <b>{real ? profile.name : `예시 ${DEPT_LABEL[dept]}의원`}</b>
+          <span>{real ? `대구${profile.district ? ` ${profile.district}` : ''}${profile.demo ? ' · 가상 병원' : ''}` : `대구 ${SAMPLE_DISTRICT} · 가상 병원`}</span>
         </div>
         <button type="button" className="btn-ghost" onClick={() => { clearStaffToken(); navigate('/login', { replace: true, state: { who: 'staff' } }); }}>로그아웃</button>
       </header>
@@ -78,6 +88,7 @@ export default function App() {
           <h1>{current.label}</h1>
           <p>{current.q}</p>
           <p className="legend">
+            <span className="badge badge-live">실제</span> 우리 병원 DB 데이터
             <span className="badge badge-setup">설정</span> 병원이 채우는 것
             <span className="badge badge-public">공공</span> 대구 기준선 (실제 공공데이터)
             <span className="badge badge-example">예시</span> 가짜 운영 데이터

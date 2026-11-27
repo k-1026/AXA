@@ -17,6 +17,43 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-page-views · Claude (요청 1번: 방문자 수 = 상세 페이지 조회)
+- 한 일: 새 모듈 `modules/pageview` (`page_events` 테이블, 마이그레이션 0017 — 0016 다음이라 `backend-A-staff-realtime` 위에 만들고 `backend-A-analytics-series`를 합침). `POST /hospitals/page-views` 로그인 없이, 같은 병원·방문자·한국 날짜는 한 줄. **B 파일 `booking/analytics.py` 수정 (사용자 지시)** — `summary`·`series`의 `views` = 기간 안 줄 수(날마다 다른 방문자 수의 합), 지난 기간도
+- 바뀐 계약: contracts 변경 이력 1줄, 결정 37
+- 테스트: 백엔드 330개 통과 (새 4개: 하루 한 번만 셈·개인정보 칸 없음·API 검증·대시보드 숫자는 내 병원만+지난 기간+series)
+- 다음 할 일: 공용 DB에 0017 적용 (사용자 확인 후), 프론트 상세 페이지에서 보내기·대시보드 그래프 (`frontend-page-views`)
+- B에게 요청: `analytics.summary`·`series` 변경 확인
+- 막힌 것·질문: 보관 기간(제안 13개월) 미정, 요청 횟수 제한 없음(같은 날 같은 값은 한 줄이라 숫자는 안 부풀지만 다른 값을 계속 보내면 늘어남)
+
+### 2026-11-27 · backend-A-analytics-series · Claude (대시보드 첫 화면 느림)
+- 한 일: **B 파일 `booking/analytics.py`·`router_tenant.py` 수정 (사용자 지시: "그냥 너가 하고 올리면")** — `GET /tenant/analytics/series?from&to` 추가. 홈 "기간 성과" 그래프가 구간마다 summary를 따로 불러 처음 접속 때 19번(로컬 측정 그래프까지 6.3초) → 1번. 조회 2번(요청 생성 시각, 확정·취소·방문 이벤트 시각)을 한국 날짜로 나눠 구간 합. 구간 크기 = ceil(일수/12), 지난 기간은 같은 길이 바로 앞 기간을 같은 위치로. 최대 366일(넘으면 422). summary는 그대로
+- 바뀐 계약: contracts 변경 이력 1줄 (6-2 병원 API 추가), `dashboard-integration.md` 표 1줄
+- 테스트: 백엔드 323개 통과 (새 2개: 구간 숫자 = 그 구간 summary의 now·prev, 한국 날짜 경계, 직원만·기간 제한)
+- 다음 할 일: 프론트 `KpiTrends`가 series 사용 (`frontend-dashboard-load`)
+- B에게 요청: `analytics.series` 확인 (summary 계산과 같은 기준인지)
+### 2026-11-27 · backend-A-residency-nationality · Claude (국적 한국 → 국내 거주 취급)
+- 한 일: `ResidencyIn.nationality?` (KR → resident, 저장 안 함), 예약 요청서 국적 KR → 403 `residency.not_eligible`(`korean_nationality`), 챗봇 `prepare_booking_request` 국적 KR → not_available (결정 36)
+- 바뀐 계약: contracts 6-1·6-6·7 (칸 추가만)
+- 테스트: backend 324 passed (test_residency 3개 추가), AI 244 passed (1개 추가)
+- 다음 할 일: 화면 가입·마이페이지에 국적 질문 (frontend PR)
+- B에게 요청: 없음
+- 막힌 것·질문: 재외국민이 법적으로 외국인환자인지 미확인 — 규제 담당 확인 필요
+### 2026-11-27 · backend-A-staff-realtime · Claude (병원 대시보드 실시간 알림)
+- 한 일: `staff_notifications` 표(0016, RLS·Realtime) · `notify_staff()` · `POST /tenant/notifications/realtime-token`. 환자 요청 생성·취소·수락·질문·사후관리 글에서 병원에 한 줄 (결정 35)
+- 바뀐 계약: contracts 5·6-5
+- 테스트: backend 324 passed (새 테스트 `test_staff_notifications.py` 3개)
+- 다음 할 일: 공용 DB에 0015(리마인드, #122)·0016 적용 — **공용 DB가 아직 0014라 main의 리마인드 알림(kind=reminder)이 CHECK에 걸림**
+- B에게 요청: `booking/service.py`의 `create_request`·`_move`에 `notify_staff()` 한 줄씩 넣음 — 확인 부탁
+- 막힌 것·질문: 없음
+
+### 2026-11-25 · backend-A-contract-signup-closed · backend-A-signup-guard · Claude (입점 신청 막기, 전체 점검 N1)
+- 한 일: 직원 가입(`auth/staff.py` signup)이 등록번호 확인·운영자 승인 없이 실제 병원 owner를 만들고 `requests_enabled=True` → 누구나 실제 병원 160곳 중 아무 데나 먼저 가입해 그 병원 환자 요청서를 받을 수 있었음. 이제 가상 병원(`is_demo`)만 가입, 실제 병원은 403 `auth.signup_closed`(계정 안 만듦). 설정 `staff_signup_real_hospitals`(env `STAFF_SIGNUP_REAL_HOSPITALS`, 기본 false) — **`core/config.py` 공통 파일 변경**. 테스트 conftest에서 false 고정. 앞서 `backend-A-request-hours`(PR #106): 환자 희망 일시도 진료시간 안만(422 `closed`, loc `preferred_slots[i]`) + 챗봇 초안 단계 검사
+- 바뀐 계약: contracts 3·4절 (`auth.signup_closed` 403), 변경 이력 1줄, 결정 34
+- 테스트: 백엔드·AI 523개 통과 (새 3개, `backend` 기준 — #106 제외)
+- 다음 할 일: 프론트 가입 화면에 `auth.signup_closed` 문구(6개 언어, 지금은 "알 수 없는 오류"로 보임). 실제 병원 입점 절차(등록번호 확인·운영자 승인)는 12/4 뒤
+- B에게 요청: `core/config.py` 변경·contracts 4절 새 코드 확인
+- 막힌 것·질문: 없음
+
 ### 2026-11-24 (2) · backend-A-vercel-cron · Claude (결정 33 — 제안 시간은 환자 수락만, 진료시간 안만)
 - 한 일: **B 파일 `booking/service.py` 수정 (사용자 지시: "B한테 넘기지 말고")** — TRANSITIONS에서 `("proposed", "confirm")` 제거, `staff_act`의 propose에 `_check_open`(그 병원 `hospital_hours`, 한국 시간, 휴진·진료 전후·점심이면 422 validation, 데이터 없으면 통과). 알림 테스트를 "제안 → 환자 수락"으로 바꿈
 - 바뀐 계약: contracts 2절 (상태 표), 변경 이력 1줄, 결정 33

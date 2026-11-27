@@ -1,4 +1,4 @@
-/* 병원 대시보드 (/dashboard, 예전 dashboard/대시보드.html의 <style>). 모든 규칙은 최상위 .md-dashboard 아래로만 — 환자 화면과 섞이지 않게 */
+/* 옛 병원 대시보드 (/dashboard/legacy 보관용, 예전 dashboard/대시보드.html의 <style>). 모든 규칙은 최상위 .md-dashboard 아래로만 — 환자 화면과 섞이지 않게 */
 .md-dashboard {
   /* 환자 웹사이트(apps/web-platform/src/styles.css)와 같은 색 */
   --bg:#f6f8fb; --card:#ffffff; --muted-bg:#eef1f5; --fg:#1f2933; --muted:#5b6673; --line:#d7dce3;
@@ -31,6 +31,12 @@
 .md-dashboard nav button.on { background:var(--brand-soft); color:var(--brand); font-weight:600; }
 .md-dashboard nav .cnt { background:var(--bad); color:#fff; border-radius:999px; font-size:11px; padding:0 7px; margin-left:6px; font-weight:600; }
 .md-dashboard main { min-width:0; padding-bottom:60px; }
+/* 로그인(DB 연결) 뒤에도 서버 값이 아닌 것: 흐리게 + "예시" (markup data-sample · data-sample-tab · data-live-hide) */
+.md-dashboard.is-live [data-sample] { position:relative; opacity:.5; }
+.md-dashboard.is-live [data-sample]::after { content:'예시'; position:absolute; top:6px; right:8px; padding:1px 6px; border-radius:6px; background:var(--ex-soft); color:var(--ex); font-size:11px; font-weight:700; }
+.md-dashboard.is-live [data-live-hide] { display:none; }
+.md-dashboard.is-live .row[data-sample]::after { position:static; margin-left:6px; }
+.md-dashboard.is-live section[data-sample-tab]::before { content:attr(data-sample-tab); display:block; margin-bottom:12px; padding:8px 12px; border-radius:8px; background:var(--ex-soft); color:var(--ex); font-size:13px; font-weight:600; }
 .md-dashboard .banner { background:var(--ex-soft); color:#5c4a00; border:1px solid #f1e3a6; border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:13px; }
 .md-dashboard h2 { margin:0 0 4px; font-size:20px; } .md-dashboard .sub { color:var(--muted); margin:0 0 16px; }
 .md-dashboard h4 { margin:14px 0 6px; font-size:13px; color:var(--muted); }

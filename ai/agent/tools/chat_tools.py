@@ -1,4 +1,4 @@
-"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 12개 — 지금은 가짜 응답 (fake_data.py).
+"""챗봇(오케스트레이터)이 부르는 환자 쪽 도구 13개. 실제 서버는 DB 게이트웨이(ctx.hospitals·ctx.store), 테스트·평가는 가상 데이터(fake_data.py).
 
 | 의도 | 도구 |
 |---|---|
@@ -36,8 +36,8 @@ from ai.agent.tools.booking_store import (
 from ai.agent.tools.registry import JSON, Tool, ToolContext, ToolError, ToolRegistry
 from ai.llm.safety import _VISA_RE
 
-# 사용자 언어 코드 = 프론트·백엔드가 지원하는 5개 (backend `patients.preferred_lang`, 요청서 `lang`)
-LANGS = ["en", "zh-CN", "zh-TW", "vi", "ko"]
+# 사용자 언어 코드 = 프론트·백엔드가 지원하는 6개 (backend `patients.preferred_lang`, 요청서 `lang`)
+LANGS = ["en", "zh-CN", "zh-TW", "vi", "ko", "ja"]
 # 한국어 진료과 이름 → DB `departments.code` (= 프론트 키, docs/backend-db-schema.md 5절).
 # 표에 없는 진료과(치과·정형외과·한방 등)는 병원 찾기까지만 되고 예약 요청은 못 한다. DB 진료과가 늘면 표만 넓힌다
 DEPT_CODES = {"피부과": "dermatology", "성형외과": "plastic", "내과": "internal", "안과": "ophthalmology"}
@@ -47,7 +47,34 @@ def lang_family(lang: str) -> str:
     """병원 직원 응대 언어는 중국어를 간체·번체로 나누지 않는다 (`zh`)."""
     return "zh" if lang.startswith("zh") else lang
 DISTRICTS = ["중구", "동구", "서구", "남구", "북구", "수성구", "달서구", "달성군", "군위군"]
-WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+# 지역 이름 별칭 (영어·한자 간체·번체·일본어). 모델이 寿城区를 달성군으로 옮긴 사례가 있어 코드에서 바꾼다 (2026-11-26)
+DISTRICT_ALIASES = {
+    "중구": ["jung-gu", "junggu", "jung", "中区", "中區"],
+    "동구": ["dong-gu", "donggu", "东区", "東區", "東区"],
+    "서구": ["seo-gu", "seogu", "西区", "西區"],
+    "남구": ["nam-gu", "namgu", "南区", "南區"],
+    "북구": ["buk-gu", "bukgu", "北区", "北區"],
+    "수성구": ["suseong-gu", "suseonggu", "suseong", "寿城区", "壽城區", "寿城區", "壽城区"],
+    "달서구": ["dalseo-gu", "dalseogu", "dalseo", "达西区", "達西區", "達西区"],
+    "달성군": ["dalseong-gun", "dalseonggun", "dalseong", "达城郡", "達城郡"],
+    "군위군": ["gunwi-gun", "gunwigun", "gunwi", "军威郡", "軍威郡"],
+}
+_DISTRICT_LOOKUP = {a.lower(): ko for ko, names in DISTRICT_ALIASES.items() for a in [ko, *names]}
+DISTRICT_HELP = ("대구의 구·군. 한국어 이름으로 넣는다: " + ", ".join(f"{ko}({names[0]}, {names[3] if len(names) > 3 else names[-1]})"
+                 for ko, names in DISTRICT_ALIASES.items()) + ". 사용자가 다른 언어로 말해도 위 표로 바꾼다")
+
+
+def _district(args: JSON) -> JSON:
+    """district 별칭(영어·한자)을 한국어 이름으로. 모르는 값이면 다시 고르게 오류."""
+    d = args.get("district")
+    if not d:
+        return args
+    key = " ".join(str(d).split()).lower().removeprefix("daegu ").removeprefix("대구 ").removeprefix("대구")
+    ko = _DISTRICT_LOOKUP.get(key) or _DISTRICT_LOOKUP.get(key.replace(" ", "-"))
+    if ko is None:
+        raise ToolError(f"Unknown district '{d}'. Use one of: {', '.join(DISTRICTS)} "
+                        "(e.g. 수성구 = Suseong-gu = 寿城区).")
+    return {**args, "district": ko}
 AFTERCARE_TOPICS = ["schedule", "cost", "documents", "accommodation", "other_non_medical"]
 DOC_TOPICS = ["visa", "procedure", "rights", "payment", "other"]
 
@@ -56,11 +83,14 @@ NEUTRAL_NOTE = "Listed in name order. This is not a recommendation or ranking."
 LANGUAGE_UNKNOWN_NOTE = ("Language support is not in the hospital data, so the list is not filtered by language. "
                          "Ask the hospital which languages they support.")
 RECOMMEND_BASIS = (
-    "Suggested only by how well each hospital matches the user's stated conditions (language support, opening day, "
+    "Suggested only by how well each hospital matches the user's stated conditions (staff language, opening day, "
     "available time). This is not a judgment of medical quality, skill or results. All are registered foreign-patient "
     "facilities. MediDaegu is a registered patient facilitator and may receive a referral fee from hospitals; "
     "the fee does not affect the order."
 )
+# 가격 가이드 화면(프론트 /prices)의 진료과 키 — 챗봇 가격 버튼이 그 과로 열리게 (2026-11-26)
+PRICE_GUIDE_DEPTS = {"피부과": "dermatology", "성형외과": "plastic", "내과": "internal", "안과": "ophthalmology",
+                     "한방": "korean_medicine", "한의원": "korean_medicine"}
 PRICE_NOTE = "Public non-covered fee notice for Korean patients (demo values). Final cost may differ; ask the hospital."
 
 
@@ -72,6 +102,7 @@ def _hospital_card(h: dict) -> JSON:
         "district": h["district"],
         "departments": h["departments"],
         "is_registered_facility": h["is_registered_facility"],
+        "tel": h["tel"],
         # 번역 가능 병원 표시 (plan 12-1 #5): 직원 직접 응대 언어와 AI 번역 채팅을 구분
         "staff_languages": h["staff_languages"],
         "ai_translation_chat": h["ai_translation_chat"],
@@ -103,13 +134,19 @@ WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 
 
 def _slots_from_hours(h: dict, day: date) -> list[str]:
-    """진료 시간 안의 정시 후보 (마감 1시간 전까지, 점심 13시 제외). 확정은 병원이 함."""
-    span = h.get("hours", {}).get(WEEKDAYS[day.weekday()])
+    """진료 시간 안의 정시 후보 (마감 1시간 전까지, 점심 제외). 확정은 병원이 함.
+    점심은 병원 자료(lunch)가 있으면 그 시간, 없으면 13시만 뺀다 (예전 기준)."""
+    key = WEEKDAYS[day.weekday()]
+    span = h.get("hours", {}).get(key)
     if not span:
         return []
     open_, close = span.split("-")
     start = int(open_[:2]) + (0 if open_[3:] == "00" else 1)  # 09:30 시작이면 10시부터
     end = int(close[:2])
+    lunch = (h.get("lunch") or {}).get(key) if isinstance(h.get("lunch"), dict) else None
+    if lunch:
+        l0, l1 = lunch.split("-")
+        return [f"{t:02d}:00" for t in range(start, end) if not (l0 <= f"{t:02d}:00" < l1)]
     return [f"{t:02d}:00" for t in range(start, end) if t != 13]
 
 
@@ -134,7 +171,29 @@ def suggest_department(args: JSON, ctx: ToolContext) -> JSON:
     }
 
 
+RESIDENT_LIST_NOTE = ("This user lives in Korea: consultation requests and suggestions through MediDaegu are not available. "
+                      "Do not offer to book or send a request; the user can contact the hospitals directly.")
+
+
 def search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
+    args = _district(args)
+    res = _search_hospitals(args, ctx)
+    for h in res.get("hospitals", []):
+        if "tel" in h:
+            h["tel"] = daegu_tel(h["tel"]) or None
+    shown = len(res.get("hospitals", []))
+    res["shown"] = shown
+    if res.get("count", shown) > shown:  # 답의 "5곳"과 카드 "7곳"이 달라 보이던 것 (2026-11-26)
+        res["note"] = f"{res['note']} Showing {shown} of {res['count']} hospitals; say both numbers."
+    if any(h.get("tel") is None for h in res.get("hospitals", [])):
+        res["note"] = (f"{res['note']} Hospitals with no tel are demo hospitals (가상/Demo) for the presentation and have "
+                       "no phone number: if you list phone numbers, say so for them instead of leaving it out.")
+    if ctx.residency == "resident":  # 목록 끝에 "상담 요청 도와드릴까요?"를 붙이지 않게 (2026-11-26)
+        res["note"] = f"{res['note']} {RESIDENT_LIST_NOTE}"
+    return res
+
+
+def _search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     dept = args["department"]
     if ctx.hospitals is not None:  # 실제 병원 DB
         code = DEPT_CODES.get(dept)
@@ -144,7 +203,7 @@ def search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
                                                          f"{', '.join(DEPT_CODES)}."}
         found = ctx.hospitals.search(
             dept_code=code, district=args.get("district"), registered_only=args.get("registered_only", True),
-            open_on=args.get("open_on"), limit=args.get("limit", 5),
+            open_on=args.get("open_on"), limit=args.get("limit", 10),
         )
         return {**found, "note": note}
     rows = [h for h in fd.HOSPITALS if dept in h["departments"]]
@@ -152,16 +211,18 @@ def search_hospitals(args: JSON, ctx: ToolContext) -> JSON:
         rows = [h for h in rows if h["district"] == args["district"]]
     if args.get("registered_only", True):
         rows = [h for h in rows if h["is_registered_facility"]]
-    if lang := args.get("language"):
-        rows = [h for h in rows if lang_family(lang) in h["staff_languages"] or h["ai_translation_chat"]]
+    # 언어는 직원 응대 언어로만 거름 (추천과 같은 기준, AI 번역은 입점 병원 공통이라 기준 아님). 한국어는 거르지 않음
+    if (lang := args.get("language")) and lang_family(lang) != "ko":
+        rows = [h for h in rows if lang_family(lang) in h["staff_languages"]]
     if day := args.get("open_on"):
         rows = [h for h in rows if h["hours"].get(day)]
     rows.sort(key=lambda h: h["name_en"])  # 중립 정렬
-    limit = args.get("limit", 5)
+    limit = args.get("limit", 10)
     return {"count": len(rows), "hospitals": [_hospital_card(h) for h in rows[:limit]], "note": NEUTRAL_NOTE}
 
 
 def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
+    args = _district(args)
     # 소개·알선은 건강보험 미가입·국내 비거주 외국인에게만 허용 (의료법 제27조 제3항 제2호, 시행규칙 제19조의2)
     if ctx.residency is None:
         return {"status": "needs_info", "ask": "residency",
@@ -183,15 +244,13 @@ def recommend_hospitals(args: JSON, ctx: ToolContext) -> JSON:
     scored = []
     for h in rows:
         score, reasons = 0, []
-        if lang:
-            if lang_family(lang) in h["staff_languages"]:
-                score += 2
-                reasons.append(f"staff speak {lang_family(lang)}")
-            elif h["ai_translation_chat"]:
-                score += 1
-                reasons.append("AI translation chat available")
-            else:
-                continue  # 소통 수단이 없는 병원은 제안하지 않음
+        # 언어 조건은 직원 응대 언어로만 맞춘다. AI 번역 채팅은 입점 병원 모두 지원하는 플랫폼 기능이라
+        # 추천 기준이 되지 않음 (2026-11-26). 한국어는 모든 병원이 되므로 조건에서 뺀다
+        if lang and lang_family(lang) != "ko":
+            if lang_family(lang) not in h["staff_languages"]:
+                continue  # 그 언어를 하는 직원이 없으면 제안하지 않음
+            score += 2
+            reasons.append(f"staff speak {lang_family(lang)}")
         if day and h["hours"].get(day):
             score += 1
             reasons.append(f"open on {day} ({h['hours'][day]})")
@@ -225,9 +284,15 @@ def get_hospital(args: JSON, ctx: ToolContext) -> JSON:
 def get_prices(args: JSON, ctx: ToolContext) -> JSON:
     if _uses_db(ctx):
         # 챗봇 가격은 아직 실제 데이터에 연결 전. 가짜 행(fake_data.PRICES)은 id가 시연 병원과 겹쳐 엉뚱한 값이 됨 (11/24)
-        return {"prices": [], "note": "The chatbot can't look up prices yet. Tell the user to open the Price Guide page "
-                                      "(menu '가격 가이드') for public non-covered fee ranges in Daegu, and that the hospital "
-                                      "gives the final estimate. Do not quote any numbers."}
+        # 대신 가격 가이드 화면으로 가는 버튼 카드(price_guide): 시술 이름(q)·진료과(dept)로 걸러서 열림 (11/26)
+        item = " ".join(str(args.get("item") or "").split())[:40] or None
+        return {"prices": [], "guide_link": {"q": item, "dept": PRICE_GUIDE_DEPTS.get(args.get("department") or "")},
+                "note": "The chatbot can't look up prices. A button to the Price Guide page"
+                        + (f" filtered to '{item}'" if item else "") + " is shown under your reply (in Korean the page is "
+                        "'가격 가이드'; use the page name in the user's language). Tell the user to press it to see the price "
+                        "ranges listed there for Daegu, that actual costs differ by hospital, and that the hospital gives "
+                        "the final estimate. Do not quote any numbers and do not call them official or public prices. "
+                        "Answer only the price question; don't add booking questions."}
     rows = fd.PRICES
     if hid := args.get("hospital_id"):
         rows = [p for p in rows if p["hospital_id"] == hid]
@@ -282,7 +347,8 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
                 "hospital_tel": daegu_tel(h["tel"])}
     if not h.get("accepts_requests", True):  # 등록 병원이지만 메디대구 입점 X (결정 31: 예약은 가상 입점 병원만)
         return {"status": "not_available",
-                "reason": "This hospital has not joined MediDaegu, so consultation requests can't be sent through us. "
+                "reason": "This hospital is a registered foreign-patient facility, but it is not a MediDaegu partner hospital, "
+                          "so consultation requests can't be sent through us. Don't say it is unregistered. "
                           "Use recommend_hospitals to suggest MediDaegu partner hospitals (demo), or share the hospital's phone.",
                 "hospital_tel": daegu_tel(h["tel"])}
     # 백엔드 BookingCreate(docs/backend-contracts.md 6절)가 요구하는 칸. 연락 방법은 계정 이메일로 고정
@@ -318,10 +384,32 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
             raise ToolError(f"희망 일시는 'YYYY-MM-DD HH:MM' 형식이어야 합니다: {s}") from e
         if now and slot <= now:
             raise ToolError(f"이미 지난 일시입니다: {s} (오늘 {ctx.today.isoformat()})")
+        if _uses_db(ctx):  # 진료시간 밖이면 서버가 422로 막으므로 초안 단계에서 미리 알림 (11/24 — 21시 요청)
+            # hours: 값 = "HH:MM-HH:MM", None = 휴진, 키 없음 = 모름(막지 않음 — 서버 _check_open과 같은 기준)
+            hours = h.get("hours") if isinstance(h.get("hours"), dict) else {}
+            day_key = WEEKDAYS[slot.weekday()]
+            span = hours.get(day_key)
+            hhmm = s.strip()[-5:]
+            if day_key in hours and span is None:
+                raise ToolError(f"The hospital is closed on that day: {s}. Ask the user for another day "
+                                f"(hours: {h['hours']}). Use check_availability for candidate times.")
+            if span and not (span.split("-")[0] <= hhmm < span.split("-")[1]):
+                raise ToolError(f"{hhmm} is outside the hospital's hours that day ({span}): {s}. Ask the user for a time "
+                                "within the hours. Use check_availability for candidate times.")
+            # 점심시간 (서버 _check_open과 같은 기준). lunch: 요일 → "HH:MM-HH:MM", 없으면 점심 정보 없음 (11/26)
+            lunch = (h.get("lunch") or {}).get(day_key) if isinstance(h.get("lunch"), dict) else None
+            if lunch and lunch.split("-")[0] <= hhmm < lunch.split("-")[1]:
+                raise ToolError(f"{hhmm} is during the hospital's lunch break that day ({lunch}): {s}. Ask the user for "
+                                "another time. Use check_availability for candidate times.")
     # 국적은 초안에 저장돼 매 턴 "신뢰" 맥락에 들어가므로 자유 문장을 받지 않는다 (프롬프트 주입 경로 차단)
     nationality = str(args["nationality"]).strip().upper()
     if not re.fullmatch(r"[A-Z]{2}", nationality):
         raise ToolError("nationality는 ISO 3166-1 alpha-2 국가 코드(예: TW, VN, US)여야 합니다")
+    if nationality == "KR":  # 한국 국적은 해외에 살아도 유치 대상 아님 (결정 36, 서버도 403)
+        return {"status": "not_available",
+                "reason": "Consultation requests through MediDaegu are for foreign short-term visitors. Korean nationals "
+                          "(even if living abroad) can't send requests through us. Please contact the hospital directly.",
+                "hospital_tel": daegu_tel(h["tel"])}
     draft = {
         "hospital_id": h["id"], "hospital_name_en": h["name_en"], "department": department,
         "department_code": DEPT_CODES[department], "preferred_slots": slots, "language": args["language"], "nationality": nationality,
@@ -405,7 +493,8 @@ def open_aftercare_thread(args: JSON, ctx: ToolContext) -> JSON:
     if not bk.get("visited"):
         return {"status": "not_available", "reason": "Follow-up chat opens after the visit."}
     # 실제 저장소(backend BookingGateway)는 병원이 사후관리를 하는지·이미 있는 대화를 알려 줌. 가짜 저장소는 가상 대화
-    info = ctx.store.aftercare_for(ctx.patient_id, bk["id"]) if hasattr(ctx.store, "aftercare_for") else         {"available": True, "thread_id": f"demo-thread-{bk['id']}"}
+    info = (ctx.store.aftercare_for(ctx.patient_id, bk["id"]) if hasattr(ctx.store, "aftercare_for")
+            else {"available": True, "thread_id": f"demo-thread-{bk['id']}"})
     if not info.get("available"):
         return {"status": "not_available", "reason": "This hospital does not take follow-up messages here. "
                 "Tell the user to contact the hospital directly."}
@@ -459,10 +548,10 @@ def build_registry() -> ToolRegistry:
     r.register(Tool(
         "search_hospitals",
         "대구 병원을 조건으로 검색해 **여러 곳을 이름순**으로 돌려준다 (추천·순위 아님 — 추천 요청은 recommend_hospitals). "
-        "기본은 외국인환자 유치의료기관 등록 병원만. language를 주면 그 언어로 직원 응대 또는 AI 번역 채팅이 되는 병원만.",
+        "기본은 외국인환자 유치의료기관 등록 병원만. language를 주면 그 언어로 응대하는 직원이 있는 병원만 (AI 번역 채팅은 기준 아님).",
         {"type": "object", "properties": {
             "department": {"type": "string", "description": "한국어 진료과명. 예: 피부과, 성형외과, 치과, 내과, 가정의학과, 정형외과, 한방"},
-            "district": {"type": "string", "enum": DISTRICTS},
+            "district": {"type": "string", "description": DISTRICT_HELP},
             "language": {"type": "string", "enum": LANGS, "description": "사용자 언어 코드"},
             "open_on": {"type": "string", "enum": WEEKDAYS, "description": "그 요일에 진료하는 곳만"},
             "registered_only": {"type": "boolean", "description": "기본 true"},
@@ -476,7 +565,7 @@ def build_registry() -> ToolRegistry:
         "체류 형태를 모르면 needs_info를 돌려주므로 사용자에게 묻는다.",
         {"type": "object", "properties": {
             "department": {"type": "string", "description": "한국어 진료과명. 예: 피부과, 성형외과, 치과, 내과, 가정의학과, 정형외과, 한방"},
-            "district": {"type": "string", "enum": DISTRICTS},
+            "district": {"type": "string", "description": DISTRICT_HELP},
             "language": {"type": "string", "enum": LANGS, "description": "사용자 언어 코드"},
             "open_on": {"type": "string", "enum": WEEKDAYS},
             "preferred_date": {"type": "string", "description": "YYYY-MM-DD"}},
@@ -493,7 +582,9 @@ def build_registry() -> ToolRegistry:
         "병원을 몰라도 item만으로 조회 가능. 숫자는 이 결과만 사용하고 직접 만들지 않는다.",
         {"type": "object", "properties": {
             "hospital_id": {"type": "integer"},
-            "item": {"type": "string", "description": "시술·항목 키워드 (한국어 또는 영어)"}}},
+            "item": {"type": "string", "description": "시술·항목 키워드, 사용자가 말한 그대로 짧게 (예: 필러, 보톡스, 라식, 건강검진)"},
+            "department": {"type": "string", "enum": list(PRICE_GUIDE_DEPTS),
+                           "description": "그 시술을 보통 다루는 진료과 (알면). 가격 가이드 버튼이 이 과로 열림"}}},
         get_prices, "가격"))
     r.register(Tool(
         "retrieve_docs",
@@ -516,7 +607,7 @@ def build_registry() -> ToolRegistry:
     r.register(Tool(
         "prepare_booking_request",
         "사용자가 **직접 고른** 병원에 보낼 상담 요청서 **초안**을 만든다. 제출은 하지 않는다 — 사용자가 화면의 제출 버튼을 누른다. "
-        "빠진 값이 있으면 needs_info의 missing을 돌려주므로 사용자에게 한 번에 하나씩 물어본다. 값은 사용자가 말한 것만 쓰고 추측하지 않는다.",
+        "빠진 값이 있으면 needs_info의 missing을 돌려주므로 빠진 것을 **한 메시지에 모아** 물어본다. 값은 사용자가 말한 것만 쓰고 추측하지 않는다.",
         {"type": "object", "properties": {
             "hospital_id": {"type": "integer"},
             "department": {"type": "string", "description": "한국어 진료과명. 병원 진료과가 하나면 생략 가능"},

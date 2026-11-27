@@ -78,13 +78,13 @@
 | 보내는 곳 | 사이트 안 알림(종 아이콘) + 웹 푸시(구독한 기기). 잠금 화면 푸시에는 병원 이름을 넣지 않음 (사이트 안 알림에만) |
 | 문구 | "○○병원 예약이 2시간 안으로 다가왔어요. 출발 전 위치를 확인해 주세요." 등 6개 언어 (`notify.reminder.*`, `public/sw.js`). '모레·내일'은 실제 날짜와 어긋날 수 있어 "~안으로"로 씀 |
 | 누르면 | 예약 관리(`/mypage/bookings`) |
-| 코드 | `backend/src/modules/notification/reminders.py` · `POST/GET /api/v1/internal/reminders`(CRON_SECRET) · 마이그레이션 0014(알림 종류에 reminder 추가) · 테스트 `test_reminders.py` |
+| 코드 | `backend/src/modules/notification/reminders.py` · `POST/GET /api/v1/internal/reminders`(CRON_SECRET) · 마이그레이션 0015(알림 종류에 reminder 추가) · 테스트 `test_reminders.py` |
 
 **돌리는 법 (운영 설정 — 팀 작업 필요)**
 - Vercel Cron은 무료 요금제에서 **하루 1번**만 돌 수 있어 2시간 전 알림이 안 됨 → `.github/workflows/reminders.yml`(GitHub Actions)이 **매시 5분** 백엔드를 부름
 - 저장소 Settings → Secrets and variables → Actions에 `API_URL`(백엔드 주소) · `CRON_SECRET`(백엔드 환경변수와 같은 값) 등록. 없으면 아무것도 안 하고 끝남
 - GitHub 예약 실행은 **기본 브랜치(main)에 합쳐진 뒤**에만 돎. GitHub 사정으로 수십 분 늦을 수 있음 → 2시간 전 알림이 1시간 전쯤 갈 수 있음
-- DB에 마이그레이션 0014 적용 필요 (`alembic upgrade head`) — 안 하면 알림 저장 때 오류
+- DB에 마이그레이션 0015 적용 필요 (`alembic upgrade head`) — 안 하면 알림 저장 때 오류
 
 ---
 

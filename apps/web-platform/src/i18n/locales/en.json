@@ -25,7 +25,8 @@
       "unsupported": "This browser does not support notifications.",
       "ios": "On iPhone/iPad, tap Share → \"Add to Home Screen\" and open it from there to get notifications.",
       "serverOff": "Device notifications are not available right now. In-site notifications still work.",
-      "failed": "Could not change the notification setting. Please try again later."
+      "failed": "Could not change the notification setting. Please try again later.",
+      "cardTitle": "Get notified when the hospital replies"
     },
     "reminder": {
       "48h": "Your booking at {{hospital}} is within 2 days. If you can't make it, please cancel early in My bookings.",
@@ -138,6 +139,10 @@
   "hospital": {
     "homepage": "Website",
     "instagram": "Instagram",
+    "email": "Email",
+    "languages": "Consultation languages",
+    "parkingNote": "Parking info",
+    "edited": "Includes details updated by the clinic",
     "more": "Show more ({{count}} left)",
     "empty": "No hospitals match these filters.",
     "back": "Hospital list",
@@ -160,7 +165,9 @@
     "rcvSat": "Reception (Sat)",
     "noPhoto": "No photo available",
     "consultBtn": "Consult",
-    "reserveBtn": "Book"
+    "reserveBtn": "Book",
+    "notJoined": "This hospital has not joined MediDaegu yet. Please contact the hospital directly.",
+    "callBtn": "Call"
   },
   "prices": {
     "more": "Show more ({{count}} left)",
@@ -182,7 +189,10 @@
       "close": "Close",
       "srcHira": "Price on HIRA",
       "srcWeb": "Clinic website"
-    }
+    },
+    "searchResult": "{{count}} treatments related to “{{q}}”",
+    "noResult": "No treatments matched “{{q}}”, so all are shown.",
+    "clearSearch": "Show all"
   },
   "mypage": {
     "home": "Home",
@@ -377,7 +387,7 @@
       "askDept": "Which department are you looking for?",
       "askRegion": "Which area should we look in?\nPick an area and I'll show hospital information and official contact channels.",
       "hospitals": "In Hospital Info you can see matching hospitals sorted by distance or name. Please check each hospital’s official contacts and opening hours.",
-      "price": "You can see price ranges by treatment in the Price Guide. Actual costs vary, so please confirm with the hospital.",
+      "price": "Go to the Price Guide to see the treatments we cover and their price ranges. Actual costs vary by hospital, so please confirm with the hospital.",
       "interpret": "Interpreter support varies by hospital. Please check supported languages through the hospital’s official contact before visiting. For travel interpretation, you can call the 1330 Korea Travel Hotline.",
       "tour": "Daegu travel information is coming soon. Avoid a heavy schedule right after treatment, and check recovery advice with your hospital.",
       "emergency": "This may be an emergency. Call 119 now or go to the nearest emergency room. 119 offers foreign-language interpretation.",
@@ -519,7 +529,9 @@
       "changeTitle": "Change booking",
       "changeSubmit": "Request change",
       "changeHint": "The hospital checks your change again. It shows as \"Pending\" until then.",
-      "errTime": "Please choose a time later than now."
+      "errTime": "Please choose a time later than now.",
+      "errClosed": "The hospital is not open at that day or time. Please choose a date and time within its hours.",
+      "closedOption": "Closed"
     },
     "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare."
   },
@@ -574,7 +586,7 @@
     "none": "No completed visits yet.",
     "start": "After your treatment is recorded as completed, you can talk with that hospital’s medical staff here.",
     "visitedOn": "Visited {{date}}",
-    "doctorLabel": "{{name}} · Medical staff",
+    "doctorLabel": "{{name}} · Hospital staff",
     "notice": "Ask the hospital’s medical staff about your condition after treatment. If symptoms are severe or suddenly worse, call the hospital right away or dial 119.",
     "empty": "Tell the medical staff how you feel or ask a question. You can send photos and videos too.",
     "sampleNote": "Sample hospital and messages. Not a real medical record.",
@@ -611,7 +623,10 @@
     "doneTitle": "Booking request sent",
     "doneBody": "Your booking is confirmed once the hospital checks it. Until then it shows as \"Waiting for confirmation\" in My bookings.",
     "toBookings": "Go to My bookings",
-    "toConsult": "Consult this hospital"
+    "toConsult": "Consult this hospital",
+    "dept": "Department",
+    "language": "Consultation language",
+    "needAll": "Choose the department, consultation language and nationality, and tick both boxes above to send the request."
   },
   "booking": {
     "nationality": "Nationality",
@@ -628,7 +643,8 @@
       "timeConflict": "This overlaps another booking. You can't request within 1 hour before or after a booking you already have (including pending ones). Please pick another time.",
       "sameDay": "You already have a booking (or request) at this hospital on that day. To change the time, edit it in My bookings.",
       "tooMany": "You have 5 requests waiting for a reply. Wait for the hospitals to answer or cancel ones you don't need, then try again."
-    }
+    },
+    "choose": "Please choose"
   },
   "staff": {
     "whoLabel": "Account type",
@@ -645,6 +661,7 @@
     "regNoHint": "Format: M-2009-03-01-0013",
     "err": {
       "hospitalTaken": "This hospital has already joined. Contact its owner account.",
+      "signupClosed": "We are not accepting sign-ups for real hospitals during the demo period. Please contact the operator to join.",
       "notRegistered": "Not a registered institution or not operating, so it cannot join.",
       "tooMany": "Too many attempts. Please try again later."
     }
@@ -659,20 +676,24 @@
       "health_insurance": "I am enrolled in (or a dependent under) Korea's National Health Insurance"
     },
     "residentNote": "You count as a foreign resident of Korea. You can still browse hospital information, but by law you cannot request consultations or bookings or get hospital suggestions.",
-    "bookingBlocked": "By law, foreign residents of Korea cannot request consultations or bookings (you can still browse hospital information). If your status has changed, answer again in My Page.",
+    "bookingBlocked": "MediDaegu consultations and bookings are only for foreign nationals visiting Korea short-term. Foreigners living in Korea and Korean nationals (including those living abroad) can view hospital information only. If your stay or nationality has changed, answer again in My Page.",
     "editLink": "Go to My Page",
     "status": "Stay in Korea",
     "statusValue": {
       "shortTerm": "Short-term visit",
-      "resident": "Resident (browse only)",
+      "resident": "No consultations or bookings (information only)",
       "none": "Not answered yet"
     },
     "edit": "Answer again",
     "save": "Save",
     "err": {
       "required": "Please answer the questions about your stay first.",
-      "notEligible": "Foreign residents of Korea cannot request consultations or bookings. If your status has changed, answer again in My Page."
-    }
+      "notEligible": "MediDaegu consultations and bookings are only for foreign nationals visiting Korea short-term. Foreigners living in Korea and Korean nationals (including those living abroad) can view hospital information only. If your stay or nationality has changed, answer again in My Page."
+    },
+    "nationality": "Nationality",
+    "koreanNote": "Korean nationals, even if living abroad, can’t send consultation or booking requests or get hospital suggestions through MediDaegu. You can still view hospital information.",
+    "choose": "Please choose",
+    "eligibilityNote": "MediDaegu consultations and bookings are only for foreign nationals visiting Korea short-term. Foreigners living in Korea and Korean nationals (including those living abroad) can view hospital information only."
   },
   "filter": {
     "label": "Hospital filters",

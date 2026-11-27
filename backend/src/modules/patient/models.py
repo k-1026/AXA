@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from core.db import Base, utcnow
 
-LANGS = ("ko", "en", "zh-TW", "zh-CN", "vi")
+LANGS = ("ko", "en", "zh-TW", "zh-CN", "vi", "ja")  # ja: 2026-11-26 추가 (마이그레이션 0014)
 RESIDENCIES = ("short_term", "resident")
 
 

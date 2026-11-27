@@ -37,7 +37,7 @@ HOSPITALS: list[dict] = [
      "address_en": "Demo-ro 2, Suseong-gu, Daegu", "tel": "053-000-0002"},
     {"id": 9003, "name_ko": "가상성형외과의원", "name_en": "Demo Plastic Surgery Clinic", "district": "중구",
      "departments": ["성형외과"], "type": "의원", "is_registered_facility": True,
-     "staff_languages": ["zh", "vi"], "ai_translation_chat": False,
+     "staff_languages": ["zh", "vi"], "ai_translation_chat": True,
      "hours": {"mon": "10:00-19:00", "tue": "10:00-19:00", "wed": "10:00-19:00", "thu": "10:00-19:00",
                "fri": "10:00-19:00", "sat": "10:00-16:00", "sun": None},
      "address_en": "Demo-gil 3, Jung-gu, Daegu", "tel": "053-000-0003"},

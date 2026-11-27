@@ -401,3 +401,13 @@ def test_override_Y면_API_값도_검증한_값으로_바꾼다(client, db_engin
     assert days["tue"]["open_time"] == "09:00:00"  # 검증 값이 빈 요일은 API 그대로
     assert days["tue"]["source"].startswith("건강보험심사평가원")
     assert days["sat"]["state"] == "closed"
+
+
+def test_심평원_번호가_대구_밖_지역번호이고_등록_명단과_지역번호만_다르면_등록_명단_값():
+    from modules.hospital.loader import _tel
+
+    assert _tel("063-745-1190", "053-745-1190") == "053-745-1190"  # 빌리브피부과의원 (2026-11-26)
+    assert _tel("053-710-1007", "053-710-9999") == "053-710-1007"  # 대구 번호는 그대로
+    assert _tel("063-745-1190", "053-111-2222") == "063-745-1190"  # 번호 자체가 다르면 바꾸지 않음
+    assert _tel("1588-1234", "053-1588-1234") == "1588-1234"
+    assert _tel(None, "053-745-1190") is None and _tel("053-1", None) == "053-1"

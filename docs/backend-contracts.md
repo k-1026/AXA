@@ -44,7 +44,7 @@
 | `sid` | 로그인 세션 id (`auth_sessions.id`) | 없음 (직원도 필요하면 B가 같은 방식으로) |
 | `exp` | 만료 시각 | 만료 시각 |
 
-- 발급: A(`auth`). 환자 `POST /auth/patient/signup`·`login`, 병원 관계자 `POST /auth/staff/signup`(입점 = 병원 계정 + 대표 직원 `owner`, 등록 유치기관·영업 중만, `{email, password, hospital_id, registration_no, consents}`)·`POST /auth/staff/login` — **가입할 때 환자/병원을 나눔**. 직원 토큰은 세션 없음. 검증 의존성(`core/security.py`): `current_patient()`, `current_staff()` — 병원 API는 `current_staff()`로 받은 `tenant_id`로만 조회
+- 발급: A(`auth`). 환자 `POST /auth/patient/signup`·`login`, 병원 관계자 `POST /auth/staff/signup`(입점 = 병원 계정 + 대표 직원 `owner`, 등록 유치기관·영업 중만 + 지금은 가상 병원(`is_demo`)만 — 실제 병원 403 `auth.signup_closed`(결정 34), `{email, password, hospital_id, registration_no, consents}`)·`POST /auth/staff/login` — **가입할 때 환자/병원을 나눔**. 직원 토큰은 세션 없음. 검증 의존성(`core/security.py`): `current_patient()`, `current_staff()` — 병원 API는 `current_staff()`로 받은 `tenant_id`로만 조회
 - `current_patient()`는 요청마다 DB에서 세션 확인: 로그아웃·만료·탈퇴(계정 삭제)면 401 `auth.required` → **로그아웃하면 그 토큰은 바로 못 씀** (`POST /auth/patient/logout`, 다른 기기 세션은 유지)
 
 ## 4. 에러 형식·코드
@@ -60,6 +60,7 @@
 | `auth.invalid_credentials` | 401 | 이메일 또는 비밀번호가 맞지 않음 (어느 쪽인지 알려주지 않음) |
 | `auth.email_taken` | 409 | 이미 가입된 이메일 (환자·직원 각각) |
 | `auth.hospital_taken` | 409 | 이미 입점한 병원 (병원 1곳 = 병원 계정 1개, 직원 가입 때) |
+| `auth.signup_closed` | 403 | 아직 입점 신청을 받지 않는 병원 (지금은 시연용 가상 병원 `is_demo`만 가입, 결정 34) |
 | `auth.too_many_attempts` | 429 | 로그인·탈퇴 비밀번호 실패 초과: 이메일당 15분 5회, IP당 15분 20회 (`detail.retry_after` 초). 성공하면 그 이메일 기록 초기화. 지금은 서버 메모리 → 운영 전 공유 저장소로 |
 | `not_found` | 404 | 없거나 **내 것이 아님** (남의 데이터는 403 대신 404) |
 | `validation` | 422 | 입력 오류 |
@@ -97,6 +98,7 @@
 | `consent.service.require(db, patient_id, kinds: list[str], request_id=None)` | A | A·B | 없으면 `consent.required` |
 | `consent.service.record(db, patient_id, kind, version, lang, request_id=None)` | A | A | → `ConsentOut` |
 | `notification.service.notify(db, patient_id, kind, request_id, status=None)` | A | B (상태 변경·답장, **commit 전**) | `kind` = status·reply·aftercare. commit하지 않음 → 부르는 쪽 commit에 같이 (결정 27) |
+| `notification.service.notify_staff(db, tenant_id, kind, request_id, status=None)` | A | B (요청 생성·환자 상태 변경) · A (질문·사후관리, **commit 전**) | `kind` = request·status·question·aftercare. commit하지 않음 (2026-11-27) |
 | `audit.service.log_action(db, tenant_id, actor, action, ref)` | B | A·B | 기록만 |
 | `hospital.service.get_basic(db, hospital_id)` | A | B (대시보드 병원 정보) | → `HospitalBasic`(`id`, `ykiho`, `name_ko`, `name_en`, `type_code`, `sggu`, `addr_ko`, `tel`, `is_registered_facility`, `is_demo`, `can_request`) / 없으면 `not_found` |
 | `hospital.service.require_requestable(db, hospital_id)` | A | A (요청서 제출 전) | → `HospitalBasic` / 미등록·영업 중 아님이면 403 `hospital.not_requestable` (`detail.reason` = `unregistered`/`not_operating`), 없으면 `not_found` |
@@ -111,7 +113,7 @@
 | `department_code` | str | O | 진료과 코드 = `departments.code` (`dermatology`, `plastic`, `internal`, `ophthalmology` …) |
 | `preferred_slots` | list[datetime] | O | 1~3개, 시간대 포함, 지금 이후만 → UTC로 저장 |
 | `patient_timezone` | str (IANA, 예 `Asia/Taipei`) | O | 화면 표시용 |
-| `lang` | str (`ko`/`en`/`zh-TW`/`zh-CN`/`vi`) | O | 요청 언어 (`patients.preferred_lang`·프론트 번역과 같은 5개) |
+| `lang` | str (`ko`/`en`/`zh-TW`/`zh-CN`/`vi`/`ja`) | O | 요청 언어 (`patients.preferred_lang`·프론트 번역과 같은 6개, `ja`는 2026-11-26 추가) |
 | `nationality` | str (국가 코드) | O | |
 | `contact_method` | str (`email`/…) | O | |
 | `visa_needed` | bool | O | |
@@ -193,9 +195,22 @@
 - Supabase: `notifications` RLS 정책 `notifications_own`(authenticated, `patient_id = auth.jwt()->>'sub'`), Realtime 발행 `supabase_realtime`에 추가 (마이그레이션 0010)
 - 탈퇴하면 같이 삭제 (FK CASCADE)
 
+**병원(직원) 쪽 실시간 알림** (2026-11-27, 대시보드가 새 요청을 바로 다시 불러오게)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `POST /tenant/notifications/realtime-token` | **직원 로그인 필요**. `{url, token, expires_at}` — 1시간 토큰 (`sub` = 직원 id, `tenant_id` = 자기 병원, `role` = authenticated) | 401, 503 `realtime.unavailable` |
+
+- 표 `staff_notifications` (`tenant_id`, `kind` = request·status·question·aftercare, `request_id`, `status`) — 글·건강정보 없음. 마이그레이션 0016
+- 기록 시점 (모두 같은 commit, `notification.service.notify_staff()`): `booking.create_request`(request) · `booking._move` 중 **환자가 한 변경**(status: cancelled·confirmed) · `question.ask`(question) · `aftercare.patient_open`(aftercare)
+- Supabase: RLS 정책 `staff_notifications_own_tenant`(authenticated, `tenant_id = auth.jwt()->>'tenant_id'`), Realtime 발행에 추가. 병원이 지워지면 같이 삭제 (FK CASCADE)
+- 목록 API는 없음 (대시보드는 INSERT를 받으면 기존 목록 API를 다시 부름)
+
 ### 6-6. 환자 체류 형태 (A, `modules/patient/`, 결정 28)
 
-`ResidencyIn{country(ISO 2자리 거주국), alien_registration, domestic_residence, health_insurance}` — ① 외국인등록(G-1 제외) ② 국내거소신고 ③ 국민건강보험 가입자·피부양자. **하나라도 true거나 `country = KR`이면 `resident`**, 아니면 `short_term` (compliance 2-1)
+`ResidencyIn{country(ISO 2자리 거주국), nationality?(ISO 2자리 국적, 2026-11-27), alien_registration, domestic_residence, health_insurance}` — ① 외국인등록(G-1 제외) ② 국내거소신고 ③ 국민건강보험 가입자·피부양자. **하나라도 true거나 `country = KR`이거나 `nationality = KR`이면 `resident`**, 아니면 `short_term` (compliance 2-1, 결정 36). `nationality`는 판단에만 쓰고 저장하지 않음 (국적은 요청서에서만)
+
+- 예약 요청 본문 `nationality = KR`이면 계정 답과 상관없이 403 `residency.not_eligible` (`detail.reason = korean_nationality`). 챗봇 `prepare_booking_request`도 `not_available`
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
@@ -217,7 +232,7 @@
 | `GET /chatbot/sessions/{id}` | 한 대화 + `messages[{role, content, refused, created_at}]` (개인정보를 가린 글만) | 404 `not_found` |
 | `DELETE /chatbot/sessions/{id}` | 대화 삭제 → 204 | 404 `not_found` |
 
-- **언어**: `ko`, `en`, `zh-TW`, `zh-CN`, `vi`. 별칭 `zh`·`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`. 그 밖은 422
+- **언어**: `ko`, `en`, `zh-TW`, `zh-CN`, `vi`, `ja`(2026-11-26 추가). 별칭 `zh`·`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`. 그 밖은 422
 - **카드** `{type, data}` 9종: `hospital_list`, `hospital_suggestions`, `hospital_detail`, `price_list`, `sources`, `time_slots`, `booking_draft`, `booking_list`, `aftercare_thread`. 숫자·병원 정보는 도구 결과에서 코드가 넣음
 - `aftercare_thread` 카드(결정 26): `{status: "opened", thread_id(없으면 ""), booking_id, hospital_id, topic, first_message, notice}` — 메시지는 **보내지 않음**. 화면은 버튼으로 사후관리 화면을 열고 `first_message`를 입력창에 채움, 환자가 보냄
 - **요청서 카드**(`booking_draft`)의 `data.request`는 6절 `BookingCreate` 모양(희망 일시 UTC). 프론트 [제출] = `POST /hospitals/{hospital_id}/booking-requests`에 `request` + 환자가 체크한 `consents`(`data.consents_required` 목록)를 그대로. **챗봇 전용 제출 경로 없음**
@@ -238,6 +253,12 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-27 | 5·6-2 | 병원 상세 페이지 조회 기록 `POST /hospitals/page-views` (로그인 없이, `{hospital: ykiho, visitor_key, lang?}` → 204, 없는 병원 404) 신설, 대시보드 `summary`·`series`의 `views`를 채움(`suppressed`에서 뺌). 새 모듈 `modules/pageview`, 마이그레이션 0017 (결정 37) | A (**B 확인 필요** — `booking/analytics.py` 수정) | `backend-A-page-views` → `backend` (`backend-A-staff-realtime`·`backend-A-analytics-series` 다음) |
+| 2026-11-27 | 6-2 | 병원 대시보드 그래프용 `GET /tenant/analytics/series?from&to` 신설 (최대 12구간·366일, 구간마다 `now`·`prev`의 요청·확정·방문·취소율 = 그 구간 summary의 now와 같음). 기존 `summary`는 그대로 | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-analytics-series` → `backend` |
+| 2026-11-27 | 6-1·6-6·7 | 체류 형태에 `nationality?` 추가 — 한국 국적이면 `resident` (저장 안 함), 요청서 국적 KR은 403 `residency.not_eligible`(`korean_nationality`), 챗봇 초안도 막음 (결정 36, 칸 추가만, 마이그레이션 없음) | A | `backend-A-residency-nationality` → `backend` |
+| 2026-11-27 | 5·6-5 | 병원 실시간 알림: `POST /tenant/notifications/realtime-token`, 표 `staff_notifications`(0016), `notify_staff()`를 `booking.create_request`·`_move`(환자 변경)·`question.ask`·`aftercare.patient_open`에서 호출 (결정 35) | A·B (사용자가 둘 다 담당, booking 파일 수정 — **B 확인 필요**) | `backend-A-staff-realtime` → `backend` |
+| 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
+| 2026-11-25 | 3·4 | 직원 가입은 가상 병원(`is_demo`)만, 실제 병원은 403 `auth.signup_closed` (설정 `STAFF_SIGNUP_REAL_HOSPITALS`로만 엶, 결정 34) | A (**B 확인 필요**) | `backend-A-contract-signup-closed` → `backend` |
 | 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |
 | 2026-11-23 | 6-3 | 사진 썸네일: 업로드 `thumb?` → `thumb_upload_url`, 첨부 `thumb?`, 응답 첨부에 `thumb_url`(환자·병원, 없으면 null) — 칸 추가만 (결정 29) | A (**B 확인 필요** — aftercare는 B 모듈, `router_tenant` 응답 칸 추가) | `backend-A-media-thumbs` → `backend` |
 | 2026-11-23 | 6-1·6-2·7 | 방문 전 환자 질문 `POST /me/booking-requests/{id}/questions`, 환자·병원 예약 응답에 `questions`, 챗봇 `hospital_question` 카드(초안만) (결정 32, 마이그레이션 0013). 챗봇 조건 맞춤 제안·예약 = 입점 가상 병원만 (결정 31) | A (**B 확인 필요** — booking 응답 칸 추가, `router_tenant` 한 곳) | `backend-A-chatbot-demo-flow` → `backend` (`backend-A-web-push` 다음) |

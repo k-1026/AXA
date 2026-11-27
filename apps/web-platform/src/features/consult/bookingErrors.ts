@@ -14,7 +14,10 @@ export function bookingErrorKey(e: unknown): string {
     if (e.code === 'residency.required') return 'residency.err.required';
     if (e.code === 'residency.not_eligible') return 'residency.err.notEligible';
     if (e.code === 'booking.invalid_transition') return 'booking.err.invalidTransition';
-    if (e.code === 'validation') return 'auth.err.validation';
+    if (e.code === 'validation') {
+      const errs = Array.isArray(e.detail.errors) ? (e.detail.errors as { type?: string }[]) : [];
+      return errs.some((x) => x.type === 'closed') ? 'consult.form.errClosed' : 'auth.err.validation';
+    }
     if (e.code === 'network') return 'auth.err.network';
     if (e.code === 'auth.required') return 'booking.err.login';
   }

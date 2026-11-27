@@ -25,7 +25,8 @@
       "unsupported": "Trình duyệt này không hỗ trợ thông báo.",
       "ios": "Trên iPhone/iPad, nhấn Chia sẻ → \"Thêm vào Màn hình chính\" rồi mở từ đó để nhận thông báo.",
       "serverOff": "Hiện chưa dùng được thông báo trên thiết bị. Thông báo trong trang vẫn hoạt động.",
-      "failed": "Không đổi được cài đặt thông báo. Vui lòng thử lại sau."
+      "failed": "Không đổi được cài đặt thông báo. Vui lòng thử lại sau.",
+      "cardTitle": "Nhận thông báo khi bệnh viện trả lời"
     },
     "reminder": {
       "48h": "Lịch hẹn tại {{hospital}} còn chưa đầy 2 ngày. Nếu không đến được, hãy hủy sớm trong Quản lý đặt lịch.",
@@ -138,6 +139,10 @@
   "hospital": {
     "homepage": "Trang web",
     "instagram": "Instagram",
+    "email": "Email",
+    "languages": "Ngôn ngữ tư vấn",
+    "parkingNote": "Thông tin đỗ xe",
+    "edited": "Có thông tin do phòng khám cập nhật",
     "more": "Xem thêm (còn {{count}} cơ sở)",
     "empty": "Không có bệnh viện phù hợp.",
     "back": "Danh sách bệnh viện",
@@ -160,7 +165,9 @@
     "rcvSat": "Giờ tiếp nhận (Thứ 7)",
     "noPhoto": "Chưa có ảnh đại diện",
     "consultBtn": "Tư vấn",
-    "reserveBtn": "Đặt lịch"
+    "reserveBtn": "Đặt lịch",
+    "notJoined": "Bệnh viện này chưa tham gia MediDaegu. Vui lòng liên hệ trực tiếp với bệnh viện.",
+    "callBtn": "Gọi điện"
   },
   "prices": {
     "more": "Xem thêm (còn {{count}} mục)",
@@ -182,7 +189,10 @@
       "close": "Đóng",
       "srcHira": "Giá công khai trên HIRA",
       "srcWeb": "Trang web cơ sở"
-    }
+    },
+    "searchResult": "{{count}} thủ thuật liên quan đến “{{q}}”",
+    "noResult": "Không tìm thấy thủ thuật liên quan đến “{{q}}”, đang hiển thị tất cả.",
+    "clearSearch": "Xem tất cả"
   },
   "mypage": {
     "home": "Trang chủ",
@@ -377,7 +387,7 @@
       "askDept": "Bạn đang tìm chuyên khoa nào?",
       "askRegion": "Bạn muốn tìm ở khu vực nào?\nChọn khu vực để xem thông tin bệnh viện và kênh liên hệ chính thức.",
       "hospitals": "Trong Thông tin bệnh viện, bạn có thể xem các bệnh viện phù hợp theo khoảng cách hoặc tên. Vui lòng kiểm tra liên hệ chính thức và giờ khám của từng bệnh viện.",
-      "price": "Bạn có thể xem khoảng giá theo dịch vụ trong Hướng dẫn giá. Chi phí thực tế khác nhau, vui lòng xác nhận với bệnh viện.",
+      "price": "Vào Hướng dẫn giá để xem các thủ thuật được hỗ trợ và khoảng giá. Chi phí thực tế khác nhau tùy bệnh viện, vui lòng xác nhận với bệnh viện.",
       "interpret": "Hỗ trợ phiên dịch khác nhau tùy bệnh viện. Vui lòng kiểm tra ngôn ngữ hỗ trợ qua liên hệ chính thức của bệnh viện trước khi đến. Nếu cần phiên dịch du lịch, hãy gọi đường dây 1330.",
       "tour": "Thông tin du lịch Daegu đang được chuẩn bị. Tránh lịch trình dày ngay sau điều trị và hỏi bệnh viện về hướng dẫn hồi phục.",
       "emergency": "Đây có thể là tình huống khẩn cấp. Hãy gọi 119 ngay hoặc đến phòng cấp cứu gần nhất. 119 hỗ trợ phiên dịch tiếng nước ngoài.",
@@ -519,7 +529,9 @@
       "changeTitle": "Đổi lịch",
       "changeSubmit": "Gửi yêu cầu đổi",
       "changeHint": "Bệnh viện sẽ kiểm tra lại. Trước đó lịch hiển thị \"Chờ xác nhận\".",
-      "errTime": "Vui lòng chọn thời gian sau hiện tại."
+      "errTime": "Vui lòng chọn thời gian sau hiện tại.",
+      "errClosed": "Bệnh viện không làm việc vào ngày hoặc giờ đó. Vui lòng chọn ngày và giờ trong giờ làm việc.",
+      "closedOption": "Nghỉ"
     },
     "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
   },
@@ -574,7 +586,7 @@
     "none": "Chưa có lần khám nào hoàn tất.",
     "start": "Sau khi lần khám được ghi nhận hoàn tất, bạn có thể trao đổi với nhân viên y tế của bệnh viện tại đây.",
     "visitedOn": "Khám ngày {{date}}",
-    "doctorLabel": "{{name}} · Nhân viên y tế",
+    "doctorLabel": "{{name}} · Nhân viên bệnh viện",
     "notice": "Hãy hỏi nhân viên y tế của bệnh viện về tình trạng sau điều trị. Nếu triệu chứng nặng hoặc xấu đi đột ngột, hãy gọi ngay cho bệnh viện hoặc 119.",
     "empty": "Hãy để lại câu hỏi hoặc tình trạng hiện tại. Bạn cũng có thể gửi ảnh và video.",
     "sampleNote": "Bệnh viện và tin nhắn mẫu, không phải hồ sơ khám thật.",
@@ -611,7 +623,10 @@
     "doneTitle": "Đã gửi yêu cầu đặt lịch",
     "doneBody": "Lịch hẹn được xác nhận sau khi bệnh viện kiểm tra. Trước đó, lịch sẽ hiển thị \"Chờ xác nhận\" trong Quản lý đặt lịch.",
     "toBookings": "Đến Quản lý đặt lịch",
-    "toConsult": "Tư vấn với bệnh viện này"
+    "toConsult": "Tư vấn với bệnh viện này",
+    "dept": "Chuyên khoa",
+    "language": "Ngôn ngữ tư vấn",
+    "needAll": "Hãy chọn chuyên khoa, ngôn ngữ tư vấn và quốc tịch, rồi đánh dấu cả hai ô ở trên để gửi yêu cầu."
   },
   "booking": {
     "nationality": "Quốc tịch",
@@ -628,7 +643,8 @@
       "timeConflict": "Thời gian này trùng với lịch hẹn khác. Không thể gửi yêu cầu trong vòng 1 giờ trước hoặc sau lịch hẹn bạn đã có (kể cả lịch đang chờ xác nhận). Vui lòng chọn giờ khác.",
       "sameDay": "Bạn đã có lịch hẹn (hoặc yêu cầu) ở bệnh viện này trong ngày đó. Để đổi giờ, hãy sửa trong Quản lý đặt lịch.",
       "tooMany": "Bạn có 5 yêu cầu đang chờ phản hồi. Hãy chờ bệnh viện trả lời hoặc hủy yêu cầu không cần, rồi thử lại."
-    }
+    },
+    "choose": "Vui lòng chọn"
   },
   "staff": {
     "whoLabel": "Loại tài khoản",
@@ -645,6 +661,7 @@
     "regNoHint": "Định dạng: M-2009-03-01-0013",
     "err": {
       "hospitalTaken": "Bệnh viện này đã tham gia. Liên hệ tài khoản đại diện.",
+      "signupClosed": "Trong thời gian trình diễn, chúng tôi chưa nhận đăng ký của bệnh viện thực. Vui lòng liên hệ đơn vị vận hành để tham gia.",
       "notRegistered": "Không phải cơ sở đã đăng ký hoặc không hoạt động nên không thể tham gia.",
       "tooMany": "Thử quá nhiều lần. Vui lòng thử lại sau."
     }
@@ -659,20 +676,24 @@
       "health_insurance": "Tôi tham gia (hoặc là người phụ thuộc) Bảo hiểm Y tế Quốc dân Hàn Quốc"
     },
     "residentNote": "Bạn được xem là người nước ngoài cư trú tại Hàn Quốc. Bạn vẫn xem được thông tin bệnh viện, nhưng theo luật không thể gửi yêu cầu tư vấn, đặt lịch hoặc nhận gợi ý bệnh viện.",
-    "bookingBlocked": "Theo luật, người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch (vẫn xem được thông tin bệnh viện). Nếu tình trạng của bạn đã thay đổi, hãy trả lời lại ở Trang của tôi.",
+    "bookingBlocked": "Dịch vụ tư vấn·đặt lịch của MediDaegu chỉ dành cho người mang quốc tịch nước ngoài đến Hàn Quốc ngắn hạn. Người nước ngoài sống tại Hàn Quốc và người mang quốc tịch Hàn Quốc (kể cả sống ở nước ngoài) chỉ có thể xem thông tin bệnh viện. Nếu tình trạng lưu trú hoặc quốc tịch của bạn thay đổi, hãy trả lời lại ở Trang của tôi.",
     "editLink": "Đến Trang của tôi",
     "status": "Lưu trú tại Hàn Quốc",
     "statusValue": {
       "shortTerm": "Thăm ngắn hạn",
-      "resident": "Cư trú (chỉ xem thông tin)",
+      "resident": "Không thể tư vấn·đặt lịch (chỉ xem thông tin)",
       "none": "Chưa trả lời"
     },
     "edit": "Trả lời lại",
     "save": "Lưu",
     "err": {
       "required": "Vui lòng trả lời câu hỏi về tình trạng lưu trú trước.",
-      "notEligible": "Người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch. Nếu tình trạng đã thay đổi, hãy trả lời lại ở Trang của tôi."
-    }
+      "notEligible": "Dịch vụ tư vấn·đặt lịch của MediDaegu chỉ dành cho người mang quốc tịch nước ngoài đến Hàn Quốc ngắn hạn. Người nước ngoài sống tại Hàn Quốc và người mang quốc tịch Hàn Quốc (kể cả sống ở nước ngoài) chỉ có thể xem thông tin bệnh viện. Nếu tình trạng lưu trú hoặc quốc tịch của bạn thay đổi, hãy trả lời lại ở Trang của tôi."
+    },
+    "nationality": "Quốc tịch",
+    "koreanNote": "Người mang quốc tịch Hàn Quốc, kể cả khi sống ở nước ngoài, không thể gửi yêu cầu tư vấn·đặt lịch hoặc nhận gợi ý bệnh viện qua MediDaegu. Bạn vẫn có thể xem thông tin bệnh viện.",
+    "choose": "Vui lòng chọn",
+    "eligibilityNote": "Dịch vụ tư vấn·đặt lịch của MediDaegu chỉ dành cho người mang quốc tịch nước ngoài đến Hàn Quốc ngắn hạn. Người nước ngoài sống tại Hàn Quốc và người mang quốc tịch Hàn Quốc (kể cả sống ở nước ngoài) chỉ có thể xem thông tin bệnh viện."
   },
   "filter": {
     "label": "Bộ lọc bệnh viện",
