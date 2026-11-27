@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js';
 import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
+import { clearStaffGet } from './staffGet';
 
 // 대시보드 자동 새로고침
 // - 11/27 실시간: 환자가 요청·취소·수락·질문·사후관리 글을 보내면 서버가 staff_notifications에 한 줄 → Supabase Realtime으로
@@ -21,6 +22,7 @@ let channel: RealtimeChannel | null = null;
 let timer = 0;
 
 const bump = () => {
+  clearStaffGet(); // 묶어 둔 값 버리고 새로 받게
   liveCount += 1;
   listeners.forEach((f) => f());
 };

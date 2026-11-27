@@ -1,10 +1,11 @@
 // 홈 "기간 성과" (운영 후 모드). 사용자가 기간을 고르고, 지표마다 이번 기간(실선)·직전 같은 길이 기간(점선) 그래프
 // 숫자는 실제 DB: GET /tenant/analytics/summary?from&to (기간 합계만 줌) → 기간을 최대 12구간으로 나눠 구간마다 불러 선을 그림
-// 나중에 백엔드가 날짜별 숫자(series)를 주면 loadTrends만 바꾸면 됨
+// 나중에 백엔드가 날짜별 숫자(series)를 주면 loadBuckets만 바꾸면 됨
+// 11/27: 합계(1번)를 먼저 받아 숫자부터 보여 주고, 그래프 구간(최대 24번)은 그 뒤 다른 카드 요청보다 뒤에 (staffGet 줄 맨 뒤)
 import { useEffect, useMemo, useState } from 'react';
-import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { fmt } from './ui';
+import { staffGet } from './staffGet';
 
 type KpiKey = 'views' | 'requests' | 'confirmed' | 'visited' | 'cancelRate';
 type Kpi = { key: KpiKey; now: number | null; prev: number | null; unit: 'count' | 'percent'; lowerIsBetter?: boolean };
@@ -38,33 +39,36 @@ const PRESETS = [
 
 class Expired extends Error {}
 
-async function getSummary(from: string, to: string, token: string): Promise<Summary> {
-  const res = await fetch(`${API_BASE}/tenant/analytics/summary?from=${from}&to=${to}`, { headers: { Authorization: 'Bearer ' + token } });
+const summaryPath = (from: string, to: string) => `/tenant/analytics/summary?from=${from}&to=${to}`;
+// 이번 달 1일~오늘 — "이번 달"(처음 값)과 같은 주소. 홈 "오늘 할 일"도 이 주소를 써서 한 번만 부름
+export const monthSummaryPath = () => { const t = iso(new Date()); return summaryPath(t.slice(0, 8) + '01', t); };
+
+async function getSummary(from: string, to: string, first = true): Promise<Summary> {
+  const res = await staffGet(summaryPath(from, to), { first });
   if (res.status === 401) throw new Expired();
   if (!res.ok) throw new Error(String(res.status));
-  return res.json();
+  return res.body as Summary;
 }
 
 const toRecord = (s: Summary) => Object.fromEntries(s.kpi.map((k) => [k.key, k.now])) as Record<KpiKey, number | null>;
 
-async function loadTrends(from: string, to: string, token: string): Promise<Trends> {
+async function loadBuckets(from: string, to: string): Promise<Pick<Trends, 'buckets' | 'size'>> {
   const days = daysBetween(from, to);
   const size = Math.ceil(days / MAX_BUCKETS); // 구간 하나의 날 수
   const starts: number[] = [];
   for (let i = 0; i < days; i += size) starts.push(i);
   const range = (base: string, i: number) => [addDays(base, i), addDays(base, Math.min(i + size, days) - 1)] as const;
   const prevFrom = addDays(from, -days);
-  const [summary, nowParts, prevParts] = await Promise.all([
-    getSummary(from, to, token),
-    Promise.all(starts.map((i) => getSummary(...range(from, i), token))),
-    Promise.all(starts.map((i) => getSummary(...range(prevFrom, i), token))),
+  const [nowParts, prevParts] = await Promise.all([
+    Promise.all(starts.map((i) => getSummary(...range(from, i), false))),
+    Promise.all(starts.map((i) => getSummary(...range(prevFrom, i), false))),
   ]);
   const buckets = starts.map((i, n) => ({
     label: md(range(from, i)[0]),
     now: toRecord(nowParts[n]),
     prev: toRecord(prevParts[n]),
   }));
-  return { summary, buckets, size };
+  return { buckets, size };
 }
 
 // ---------- 이번 기간·지난 기간 겹친 선 그래프 (값 없음 = 끊김) ----------
@@ -117,8 +121,15 @@ export default function KpiTrends({ onExpired, onSummary }: { onExpired: () => v
     let alive = true;
     setState('loading');
     onSummary?.(null);
-    loadTrends(from, to, token)
-      .then((d) => { if (alive) { setData(d); setState('ok'); onSummary?.(d.summary); } })
+    getSummary(from, to)
+      .then(async (summary) => {
+        if (!alive) return;
+        setData({ summary, buckets: [], size: 0 }); // 숫자 먼저
+        setState('ok');
+        onSummary?.(summary);
+        const b = await loadBuckets(from, to);
+        if (alive) setData({ summary, ...b });
+      })
       .catch((e) => { if (!alive) return; if (e instanceof Expired) onExpired(); else setState('error'); });
     return () => { alive = false; };
   }, [from, to, invalid, onExpired, onSummary]);
@@ -157,7 +168,7 @@ export default function KpiTrends({ onExpired, onSummary }: { onExpired: () => v
         </div>
         <p className="period-note">
           {invalid ? <span className="period-err">{invalid}</span>
-            : p ? <>이번 기간 {md(p.from)}~{md(p.to)} · 비교 {md(p.prevFrom)}~{md(p.prevTo)}{data && data.size > 1 && ` · 그래프 한 점 = ${data.size}일`}</>
+            : p ? <>이번 기간 {md(p.from)}~{md(p.to)} · 비교 {md(p.prevFrom)}~{md(p.prevTo)}{data && data.size > 1 && ` · 그래프 한 점 = ${data.size}일`}{data && !data.size && ' · 그래프 불러오는 중…'}</>
             : '불러오는 중…'}
           {state === 'error' && !invalid && <span className="period-err"> · 서버에서 불러오지 못했어요</span>}
         </p>
@@ -181,7 +192,7 @@ export default function KpiTrends({ onExpired, onSummary }: { onExpired: () => v
                 <>
                   <span className="kpi-val">{data ? show(k?.now ?? null, m.unit) : '…'}</span>
                   <span className="trend-sub">지난 기간 {data ? show(k?.prev ?? null, m.unit) : '…'}</span>
-                  {data && <CompareChart buckets={data.buckets} k={m.key} />}
+                  {data && data.buckets.length > 0 && <CompareChart buckets={data.buckets} k={m.key} />}
                 </>
               )}
             </div>
