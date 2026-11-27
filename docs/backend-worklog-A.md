@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-translate-retry · Claude (번역 실패는 다시 시도)
+- 한 일: **B 파일 `agent/translate.py`·`booking/router_tenant.py`·`booking/schemas.py` 수정 (사용자 지시)** — `translate()`가 실패·빈 답이면 0.6초 뒤 한 번 더. `retry_missing()`: 최근 30일 요청서 글·방문 전 질문·병원 답장·사후관리 글 중 번역이 빠지고 동의가 있는 것을 다시 번역. 직원 `POST /tenant/translations/retry`(최대 10), 정리 `/internal/translations`(최대 50, GitHub Actions 1시간마다 — reminders.yml에 한 단계). 병원 예약 응답에 `translation_allowed` → 대시보드가 "동의 없음"과 "번역 실패(다시 시도)"를 나눠 보임
+- 바뀐 계약: contracts 변경 이력 1줄
+- 테스트: 백엔드 338개 통과 (새 4개: 그 자리 재시도·두 번 실패·나중에 다시 번역(동의 있는 것만)·정리 작업 비밀값)
+- 다음 할 일: 대시보드 표시 (`frontend-translate-retry`)
+- B에게 요청: 확인
+- 막힌 것·질문: 없음
+
 ### 2026-11-27 · backend-A-page-views · Claude (요청 1번: 방문자 수 = 상세 페이지 조회)
 - 한 일: 새 모듈 `modules/pageview` (`page_events` 테이블, 마이그레이션 0017 — 0016 다음이라 `backend-A-staff-realtime` 위에 만들고 `backend-A-analytics-series`를 합침). `POST /hospitals/page-views` 로그인 없이, 같은 병원·방문자·한국 날짜는 한 줄. **B 파일 `booking/analytics.py` 수정 (사용자 지시)** — `summary`·`series`의 `views` = 기간 안 줄 수(날마다 다른 방문자 수의 합), 지난 기간도
 - 바뀐 계약: contracts 변경 이력 1줄, 결정 37
