@@ -20,7 +20,8 @@ function thisWeekKst(): [string, string] {
   return [mon.toISOString().slice(0, 10), new Date(mon.getTime() + 6 * 864e5).toISOString().slice(0, 10)];
 }
 
-export default function BookingStatusTiles({ onExpired }: { onExpired: () => void }) {
+// rev가 바뀌면 다시 불러옴 (처리·자동 새로고침). 불러오는 동안 이전 숫자는 그대로 둠
+export default function BookingStatusTiles({ rev = 0, onExpired }: { rev?: number; onExpired: () => void }) {
   const [counts, setCounts] = useState<Counts | null>(null);
   const [error, setError] = useState(false);
 
@@ -46,7 +47,7 @@ export default function BookingStatusTiles({ onExpired }: { onExpired: () => voi
         else setError(true);
       });
     return () => { alive = false; };
-  }, [onExpired]);
+  }, [onExpired, rev]);
 
   const v = (n: number | undefined) => (counts ? fmt(n ?? 0) : error ? '—' : '…');
   const href = '/dashboard/legacy#booking';

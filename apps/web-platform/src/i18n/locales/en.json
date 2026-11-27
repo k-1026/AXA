@@ -603,7 +603,10 @@
     "doneTitle": "Booking request sent",
     "doneBody": "Your booking is confirmed once the hospital checks it. Until then it shows as \"Waiting for confirmation\" in My bookings.",
     "toBookings": "Go to My bookings",
-    "toConsult": "Consult this hospital"
+    "toConsult": "Consult this hospital",
+    "dept": "Department",
+    "language": "Consultation language",
+    "needAll": "Choose the department, consultation language and nationality, and tick both boxes above to send the request."
   },
   "booking": {
     "nationality": "Nationality",
@@ -620,7 +623,8 @@
       "timeConflict": "This overlaps another booking. You can't request within 1 hour before or after a booking you already have (including pending ones). Please pick another time.",
       "sameDay": "You already have a booking (or request) at this hospital on that day. To change the time, edit it in My bookings.",
       "tooMany": "You have 5 requests waiting for a reply. Wait for the hospitals to answer or cancel ones you don't need, then try again."
-    }
+    },
+    "choose": "Please choose"
   },
   "staff": {
     "whoLabel": "Account type",
