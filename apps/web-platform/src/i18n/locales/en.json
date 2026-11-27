@@ -661,20 +661,24 @@
       "health_insurance": "I am enrolled in (or a dependent under) Korea's National Health Insurance"
     },
     "residentNote": "You count as a foreign resident of Korea. You can still browse hospital information, but by law you cannot request consultations or bookings or get hospital suggestions.",
-    "bookingBlocked": "By law, foreign residents of Korea cannot request consultations or bookings (you can still browse hospital information). If your status has changed, answer again in My Page.",
+    "bookingBlocked": "MediDaegu consultations and bookings are only for foreign nationals visiting Korea short-term. Foreigners living in Korea and Korean nationals (including those living abroad) can view hospital information only. If your stay or nationality has changed, answer again in My Page.",
     "editLink": "Go to My Page",
     "status": "Stay in Korea",
     "statusValue": {
       "shortTerm": "Short-term visit",
-      "resident": "Resident (browse only)",
+      "resident": "No consultations or bookings (information only)",
       "none": "Not answered yet"
     },
     "edit": "Answer again",
     "save": "Save",
     "err": {
       "required": "Please answer the questions about your stay first.",
-      "notEligible": "Foreign residents of Korea cannot request consultations or bookings. If your status has changed, answer again in My Page."
-    }
+      "notEligible": "MediDaegu consultations and bookings are only for foreign nationals visiting Korea short-term. Foreigners living in Korea and Korean nationals (including those living abroad) can view hospital information only. If your stay or nationality has changed, answer again in My Page."
+    },
+    "nationality": "Nationality",
+    "koreanNote": "Korean nationals, even if living abroad, can’t send consultation or booking requests or get hospital suggestions through MediDaegu. You can still view hospital information.",
+    "choose": "Please choose",
+    "eligibilityNote": "MediDaegu consultations and bookings are only for foreign nationals visiting Korea short-term. Foreigners living in Korea and Korean nationals (including those living abroad) can view hospital information only."
   },
   "filter": {
     "label": "Hospital filters",

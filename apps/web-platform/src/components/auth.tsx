@@ -4,7 +4,7 @@ import { api, ApiError, setUnauthorizedHandler } from './api';
 import { accountKeyOf, removeAccountData, resetAccountMemory, setCurrentAccount, type AccountKey } from './account';
 import { readSessionSetting, readSetting, removeSetting, writeSessionSetting, writeSetting } from './storage';
 import { disablePush } from '../features/notifications/webPush';
-import type { Residency, ResidencyAnswers } from '../features/residency/ResidencyQuestions';
+import { withoutBlankNationality, type Residency, type ResidencyAnswers } from '../features/residency/ResidencyQuestions';
 
 // 로그인 상태
 // - 실제 회원: 백엔드 회원가입·로그인. 토큰은 이 브라우저(localStorage)에 두고, 로그아웃하면 서버 세션도 끝냄
@@ -133,14 +133,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (input: SignupInput) => {
     const r = await api<{ access_token: string }>('/auth/patient/signup', {
       method: 'POST',
-      body: input,
+      body: { ...input, residency: withoutBlankNationality(input.residency) },
     });
     await startSession(r.access_token);
   };
 
   // 체류 형태 다시 답하기 (PUT /me/residency). 판단은 서버가 하고 결과를 돌려줌
   const setResidency = async (answers: ResidencyAnswers) => {
-    const me = await api<Me>('/me/residency', { method: 'PUT', token, body: answers });
+    const me = await api<Me>('/me/residency', { method: 'PUT', token, body: withoutBlankNationality(answers) });
     setUser(toUser(me));
     return me.residency ?? 'short_term';
   };
