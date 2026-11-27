@@ -98,6 +98,7 @@
 | `consent.service.require(db, patient_id, kinds: list[str], request_id=None)` | A | A·B | 없으면 `consent.required` |
 | `consent.service.record(db, patient_id, kind, version, lang, request_id=None)` | A | A | → `ConsentOut` |
 | `notification.service.notify(db, patient_id, kind, request_id, status=None)` | A | B (상태 변경·답장, **commit 전**) | `kind` = status·reply·aftercare. commit하지 않음 → 부르는 쪽 commit에 같이 (결정 27) |
+| `notification.service.notify_staff(db, tenant_id, kind, request_id, status=None)` | A | B (요청 생성·환자 상태 변경) · A (질문·사후관리, **commit 전**) | `kind` = request·status·question·aftercare. commit하지 않음 (2026-11-27) |
 | `audit.service.log_action(db, tenant_id, actor, action, ref)` | B | A·B | 기록만 |
 | `hospital.service.get_basic(db, hospital_id)` | A | B (대시보드 병원 정보) | → `HospitalBasic`(`id`, `ykiho`, `name_ko`, `name_en`, `type_code`, `sggu`, `addr_ko`, `tel`, `is_registered_facility`, `is_demo`, `can_request`) / 없으면 `not_found` |
 | `hospital.service.require_requestable(db, hospital_id)` | A | A (요청서 제출 전) | → `HospitalBasic` / 미등록·영업 중 아님이면 403 `hospital.not_requestable` (`detail.reason` = `unregistered`/`not_operating`), 없으면 `not_found` |
@@ -194,6 +195,17 @@
 - Supabase: `notifications` RLS 정책 `notifications_own`(authenticated, `patient_id = auth.jwt()->>'sub'`), Realtime 발행 `supabase_realtime`에 추가 (마이그레이션 0010)
 - 탈퇴하면 같이 삭제 (FK CASCADE)
 
+**병원(직원) 쪽 실시간 알림** (2026-11-27, 대시보드가 새 요청을 바로 다시 불러오게)
+
+| 메서드·경로 | 하는 일 | 에러 |
+|---|---|---|
+| `POST /tenant/notifications/realtime-token` | **직원 로그인 필요**. `{url, token, expires_at}` — 1시간 토큰 (`sub` = 직원 id, `tenant_id` = 자기 병원, `role` = authenticated) | 401, 503 `realtime.unavailable` |
+
+- 표 `staff_notifications` (`tenant_id`, `kind` = request·status·question·aftercare, `request_id`, `status`) — 글·건강정보 없음. 마이그레이션 0016
+- 기록 시점 (모두 같은 commit, `notification.service.notify_staff()`): `booking.create_request`(request) · `booking._move` 중 **환자가 한 변경**(status: cancelled·confirmed) · `question.ask`(question) · `aftercare.patient_open`(aftercare)
+- Supabase: RLS 정책 `staff_notifications_own_tenant`(authenticated, `tenant_id = auth.jwt()->>'tenant_id'`), Realtime 발행에 추가. 병원이 지워지면 같이 삭제 (FK CASCADE)
+- 목록 API는 없음 (대시보드는 INSERT를 받으면 기존 목록 API를 다시 부름)
+
 ### 6-6. 환자 체류 형태 (A, `modules/patient/`, 결정 28)
 
 `ResidencyIn{country(ISO 2자리 거주국), alien_registration, domestic_residence, health_insurance}` — ① 외국인등록(G-1 제외) ② 국내거소신고 ③ 국민건강보험 가입자·피부양자. **하나라도 true거나 `country = KR`이면 `resident`**, 아니면 `short_term` (compliance 2-1)
@@ -239,6 +251,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-27 | 5·6-5 | 병원 실시간 알림: `POST /tenant/notifications/realtime-token`, 표 `staff_notifications`(0016), `notify_staff()`를 `booking.create_request`·`_move`(환자 변경)·`question.ask`·`aftercare.patient_open`에서 호출 (결정 35) | A·B (사용자가 둘 다 담당, booking 파일 수정 — **B 확인 필요**) | `backend-A-staff-realtime` → `backend` |
 | 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
 | 2026-11-25 | 3·4 | 직원 가입은 가상 병원(`is_demo`)만, 실제 병원은 403 `auth.signup_closed` (설정 `STAFF_SIGNUP_REAL_HOSPITALS`로만 엶, 결정 34) | A (**B 확인 필요**) | `backend-A-contract-signup-closed` → `backend` |
 | 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |

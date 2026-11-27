@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-staff-realtime · Claude (병원 대시보드 실시간 알림)
+- 한 일: `staff_notifications` 표(0016, RLS·Realtime) · `notify_staff()` · `POST /tenant/notifications/realtime-token`. 환자 요청 생성·취소·수락·질문·사후관리 글에서 병원에 한 줄 (결정 35)
+- 바뀐 계약: contracts 5·6-5
+- 테스트: backend 324 passed (새 테스트 `test_staff_notifications.py` 3개)
+- 다음 할 일: 공용 DB에 0015(리마인드, #122)·0016 적용 — **공용 DB가 아직 0014라 main의 리마인드 알림(kind=reminder)이 CHECK에 걸림**
+- B에게 요청: `booking/service.py`의 `create_request`·`_move`에 `notify_staff()` 한 줄씩 넣음 — 확인 부탁
+- 막힌 것·질문: 없음
+
 ### 2026-11-25 · backend-A-contract-signup-closed · backend-A-signup-guard · Claude (입점 신청 막기, 전체 점검 N1)
 - 한 일: 직원 가입(`auth/staff.py` signup)이 등록번호 확인·운영자 승인 없이 실제 병원 owner를 만들고 `requests_enabled=True` → 누구나 실제 병원 160곳 중 아무 데나 먼저 가입해 그 병원 환자 요청서를 받을 수 있었음. 이제 가상 병원(`is_demo`)만 가입, 실제 병원은 403 `auth.signup_closed`(계정 안 만듦). 설정 `staff_signup_real_hospitals`(env `STAFF_SIGNUP_REAL_HOSPITALS`, 기본 false) — **`core/config.py` 공통 파일 변경**. 테스트 conftest에서 false 고정. 앞서 `backend-A-request-hours`(PR #106): 환자 희망 일시도 진료시간 안만(422 `closed`, loc `preferred_slots[i]`) + 챗봇 초안 단계 검사
 - 바뀐 계약: contracts 3·4절 (`auth.signup_closed` 403), 변경 이력 1줄, 결정 34
