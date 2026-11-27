@@ -1,6 +1,6 @@
 // 홈 "오늘 할 일" 타일 4개 (옛 /dashboard/legacy 홈에서 가져옴, 화면은 새 디자인)
 // 새 상담·오늘 방문: GET /tenant/analytics/summary 의 today · 미답변 사후관리: GET /tenant/aftercare (해결 안 된 대화의 unanswered)
-// 결제 금액 입력은 백엔드 기능이 아직 없어 예시 숫자. 누르면 새 화면의 상담·예약 / 사후관리 / 진료·결제 확인 탭으로
+// 결제 금액 입력 = 방문 완료(visited)인데 결제 금액을 아직 안 넣은 예약 수 (11/27, GET /tenant/booking-requests?status=visited). 누르면 새 화면의 상담·예약 / 사후관리 / 진료·결제 확인 탭으로
 import { useEffect, useState } from 'react';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { fmt } from './ui';
@@ -8,7 +8,7 @@ import { useAutoRefresh } from './autoRefresh';
 import { monthSummaryPath } from './KpiTrends';
 import { staffGet } from './staffGet';
 
-type Today = { newRequests: number; visitsToday: number; aftercareUnanswered: number };
+type Today = { newRequests: number; visitsToday: number; aftercareUnanswered: number; toPay: number };
 type Thread = { status: string; unanswered: number };
 
 async function get<T>(path: string): Promise<T> {
@@ -30,11 +30,12 @@ export default function TodayTiles({ onExpired }: { onExpired: () => void }) {
       // 홈 "기간 성과"(이번 달)와 같은 주소 → 서버에는 한 번만
       get<{ today: { newRequests: number; visitsToday: number } }>(monthSummaryPath()),
       get<Thread[]>('/tenant/aftercare'),
+      get<unknown[]>('/tenant/booking-requests?status=visited'),
     ])
-      .then(([s, threads]) => {
+      .then(([s, threads, visited]) => {
         if (!alive) return;
         const open = threads.filter((t) => t.status !== 'resolved' && t.unanswered > 0).length;
-        setToday({ newRequests: s.today.newRequests, visitsToday: s.today.visitsToday, aftercareUnanswered: open });
+        setToday({ newRequests: s.today.newRequests, visitsToday: s.today.visitsToday, aftercareUnanswered: open, toPay: visited.length });
       })
       .catch((e: Error) => {
         if (!alive) return;
@@ -50,7 +51,7 @@ export default function TodayTiles({ onExpired }: { onExpired: () => void }) {
     { label: '새 상담 요청', val: v(today?.newRequests), go: '답변하러 가기 →', href: '#booking', live: true },
     { label: '미답변 사후관리', val: v(today?.aftercareUnanswered), go: today ? (ac ? `답하지 않은 대화 ${ac}개 →` : '미답변 없음 →') : '불러오는 중…', href: '#aftercare', live: true, alert: ac > 0 },
     { label: '오늘 방문 예정', val: v(today?.visitsToday), go: '확정된 오늘 예약 →', href: '#booking', live: true },
-    { label: '결제 금액 입력', val: '1', go: '방문 완료 R-1036 →', href: '#receipt', live: false },
+    { label: '결제 금액 입력', val: v(today?.toPay), go: today ? (today.toPay ? '방문 완료 → 금액 입력 →' : '입력할 것 없음 →') : '불러오는 중…', href: '#receipt', live: true, alert: (today?.toPay ?? 0) > 0 },
   ];
 
   return (

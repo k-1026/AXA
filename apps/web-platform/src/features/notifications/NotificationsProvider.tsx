@@ -15,7 +15,7 @@ import { hospitalNames } from '../hospital/name';
 const FALLBACK_MS = 60_000;
 const PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-export type NotifyStatus = 'confirmed' | 'rejected' | 'proposed' | 'visited' | 'no_show' | 'expired';
+export type NotifyStatus = 'confirmed' | 'rejected' | 'proposed' | 'visited' | 'no_show' | 'expired' | 'paid';
 // 방문 전 리마인드 단계 (kind=reminder, backend notification/reminders.py)
 export type ReminderStage = '48h' | '24h' | '2h';
 type Target = '/mypage/bookings' | '/booking' | '/aftercare';

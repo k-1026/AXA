@@ -7,15 +7,16 @@ import { clearStaffGet, staffGet } from './staffGet';
 export type DbReq = {
   id: string; status: string; nationality: string; lang: string; department_code?: string; treatment: string | null; visa_needed: boolean;
   preferred_slots: string[]; confirmed_slot: string | null; created_at: string;
+  paid_amount?: number | null; paid_method?: string | null; // 결제 확인 (paid, 11/27)
   message_original: string | null; message_translated: string | null;
   replies?: { text_ko: string; text_translated: string | null; sent_at: string }[];
   questions?: { text_original: string; text_translated: string | null; created_at: string }[];
 };
 export type ActionMode = 'confirm' | 'propose' | 'reject' | 'visited' | 'no_show';
 
-export const DB_STATUSES = ['pending', 'proposed', 'confirmed', 'visited', 'no_show'] as const;
+export const DB_STATUSES = ['pending', 'proposed', 'confirmed', 'visited', 'no_show', 'paid'] as const;
 export const ST: Record<string, string> = {
-  pending: '대기', proposed: '시간 제안함', confirmed: '확정', visited: '방문 완료', no_show: '미방문', cancelled: '취소', rejected: '거절',
+  pending: '대기', proposed: '시간 제안함', confirmed: '확정', visited: '방문 완료', no_show: '미방문', paid: '결제 확인', cancelled: '취소', rejected: '거절',
 };
 export const NAT: Record<string, string> = { KR: '한국', TW: '대만', CN: '중국', JP: '일본', MN: '몽골', VN: '베트남', US: '미국', TH: '태국' };
 export const LANG: Record<string, string> = { 'zh-TW': '번체', 'zh-CN': '간체', en: '영어', vi: '베트남어', ja: '일본어', ko: '한국어' };

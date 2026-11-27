@@ -13,6 +13,7 @@ const NOTE: Partial<Record<DisplayStatus, string>> = {
   rejected: 'bookings.rejectedNote',
   expired: 'bookings.expiredNote',
   visited: 'consult.visitedNote',
+  paid: 'consult.paidNote',
   no_show: 'bookings.noShowNote',
 };
 

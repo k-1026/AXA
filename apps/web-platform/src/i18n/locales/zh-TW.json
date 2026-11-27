@@ -12,7 +12,8 @@
       "proposed": "{{hospital}}提議了其他時間。",
       "visited": "您在{{hospital}}的就診已記錄為完成，現在可以使用術後管理對話。",
       "no_show": "您在{{hospital}}的預約被記錄為未到診。",
-      "expired": "您向{{hospital}}申請的希望日期均已過去。"
+      "expired": "您向{{hospital}}申請的希望日期均已過去。",
+      "paid": "{{hospital}}已確認您的付款。"
     },
     "reply": "{{hospital}}傳來{{count}}則諮詢回覆。",
     "aftercare": "{{hospital}}醫護人員傳來{{count}}則術後管理訊息。",
@@ -490,7 +491,8 @@
       "visited": "已就診",
       "proposed": "醫院提議其他時間",
       "expired": "已過期",
-      "no_show": "未到診"
+      "no_show": "未到診",
+      "paid": "已確認付款"
     },
     "quick": {
       "booking": "預約諮詢",
@@ -519,7 +521,8 @@
       "errClosed": "該日期或時間不在醫院門診時間內，請選擇門診時間內的日期與時間。",
       "closedOption": "休診"
     },
-    "visitedNote": "已完成就診，可在術後管理中與醫護人員交流。"
+    "visitedNote": "已完成就診，可在術後管理中與醫護人員交流。",
+    "paidNote": "醫院已確認付款金額。您可以在術後管理中與醫護人員交流。"
   },
   "bookings": {
     "backToChats": "返回諮詢列表",
