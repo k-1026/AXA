@@ -27,7 +27,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 from core.db import Base, utcnow
 from modules.patient.models import LANGS
 
-STATUSES = ("pending", "proposed", "confirmed", "rejected", "cancelled", "expired", "visited", "no_show")
+STATUSES = ("pending", "proposed", "confirmed", "rejected", "cancelled", "expired", "visited", "no_show", "paid")
+# 결제 확인 (11/27, 0018): 방문 완료 뒤 병원이 실제 결제 금액·수단을 넣으면 paid. 수수료 = 확인된 진료비 × 요율 (요금안 v4)
+PAY_METHODS = ("card", "cash", "transfer", "other")
 ACTORS = ("patient", "staff", "system")
 CANCEL_REASONS = ("schedule", "cost", "interpreter", "transport", "other_hospital", "other", "none")
 # 병원 직원 거절 사유 (contracts 2절). booking_events.reason(20자)에 코드로, 문장은 프론트 i18n
@@ -65,12 +67,16 @@ class BookingRequest(Base):
     patient_timezone: Mapped[str] = mapped_column(String(64), default="Asia/Seoul")
     channel: Mapped[str] = mapped_column(String(20), default="direct")  # 홍보 링크 코드
     confirmed_slot: Mapped[datetime | None]  # 확정·제안된 시간 (UTC)
+    paid_amount: Mapped[int | None] = mapped_column(Integer)  # 결제 확인 금액 (원, 부가세 제외). paid일 때만
+    paid_method: Mapped[str | None] = mapped_column(String(12))  # PAY_METHODS
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=utcnow, onupdate=utcnow)
 
     __table_args__ = (
         CheckConstraint(_in("status", STATUSES), name="status"),
         CheckConstraint(_in("lang", LANGS), name="lang"),
+        CheckConstraint("paid_amount IS NULL OR paid_amount > 0", name="paid_amount"),
+        CheckConstraint("paid_method IS NULL OR " + _in("paid_method", PAY_METHODS), name="paid_method"),
         Index("ix_booking_requests_tenant_created", "tenant_id", "created_at"),
         Index("ix_booking_requests_tenant_status", "tenant_id", "status"),
         Index("ix_booking_requests_patient", "patient_id", "created_at"),

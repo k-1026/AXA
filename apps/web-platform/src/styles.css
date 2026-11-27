@@ -3268,7 +3268,8 @@ body.chat-open {
 .chat-input textarea {
   flex: 1;
   min-width: 0;
-  max-height: calc(1.5em * 5 + 20px); /* 5줄까지 늘어나고 그 뒤는 스크롤 */
+  /* 화면 높이에 맞춰: 최대 8줄, 화면 높이의 30%를 넘지 않음 (작은 화면은 2줄까지는 보장), 그 뒤는 스크롤 (11/27) */
+  max-height: clamp(calc(1.5em * 2 + 20px), 30vh, calc(1.5em * 8 + 20px));
   padding: 10px 8px;
   border: 0;
   background: none;
@@ -3282,6 +3283,16 @@ body.chat-open {
 }
 
 /* 포커스 표시는 바깥 입력 상자(.chat-input:focus-within)가 하므로 안쪽 선은 겹치지 않게 뺀다 */
+.chat-input textarea:disabled {
+  cursor: not-allowed;
+}
+
+.chat-send-error {
+  margin: 6px 4px 0;
+  color: var(--c-red, #c0392b);
+  font-size: 0.875rem;
+}
+
 .chat-input textarea:focus-visible {
   outline: none;
 }

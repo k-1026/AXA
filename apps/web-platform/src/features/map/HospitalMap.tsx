@@ -4,6 +4,7 @@ import { canvas, divIcon, type Layer } from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
+import { TILE_ATTRIBUTION, TILE_URL } from './tiles';
 import { DEPARTMENT_COLORS } from '../hospital/filters';
 import { useHospitalName } from '../hospital/name';
 import type { DepartmentKey, Hospital } from '../hospital/types';
@@ -132,10 +133,7 @@ export function HospitalMap({ hospitals, fetchedAt, selectedDept, focus = null }
   return (
     // preferCanvas: 병원 전체(수는 데이터에 따라 다름)를 마커로 그려도 느려지지 않게
     <MapContainer center={DAEGU_CENTER} zoom={DAEGU_ZOOM} preferCanvas renderer={dotRenderer} className="hospital-map">
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} />
       <FocusView focus={focus} markers={markers} />
       {plain.map((h) => (
         <CircleMarker

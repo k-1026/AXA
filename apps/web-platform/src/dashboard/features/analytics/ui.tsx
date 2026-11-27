@@ -7,8 +7,8 @@ export const won = (n: number) => `${fmt(n)}원`;
 export const SMALL = 5;
 export const masked = (n: number) => (n < SMALL ? '5 미만' : fmt(n));
 
-type Kind = 'public' | 'example' | 'setup';
-const KIND_LABEL: Record<Kind, string> = { public: '공공', example: '예시', setup: '설정' };
+type Kind = 'public' | 'example' | 'setup' | 'live';
+const KIND_LABEL: Record<Kind, string> = { public: '공공', example: '예시', setup: '설정', live: '실제' };
 
 export function Badge({ kind }: { kind: Kind }) {
   return <span className={`badge badge-${kind}`}>{KIND_LABEL[kind]}</span>;

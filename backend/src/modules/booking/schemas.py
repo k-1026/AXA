@@ -23,15 +23,20 @@ class BookingOut(BaseModel):
     message_translated: str | None
     channel: str
     confirmed_slot: datetime | None
+    paid_amount: int | None = None  # 결제 확인(paid) 금액, 원·부가세 제외
+    paid_method: str | None = None  # card · cash · transfer · other
     created_at: datetime
 
 
 class StaffAction(BaseModel):
     """confirm·propose는 시간(slot, UTC)을 받음. 확정할 때 이미 제안한 시간이 있으면 생략 가능.
-    reject는 사유 코드(reason, 선택): fully_booked · not_offered · needs_consult · other (contracts 2절)"""
+    reject는 사유 코드(reason, 선택): fully_booked · not_offered · needs_consult · other (contracts 2절)
+    paid(결제 확인)는 금액(amount, 원·부가세 제외)·수단(method: card · cash · transfer · other) 필수 (11/27)"""
 
     slot: datetime | None = None
     reason: str | None = None
+    amount: int | None = None
+    method: str | None = None
 
 
 class ReplyIn(BaseModel):
@@ -55,3 +60,5 @@ class TenantBookingOut(BookingOut):
     replies: list[ReplyOut] = []
     # 방문 전 환자 질문 [{text_original, text_translated(한국어), created_at}] — A 추가 (결정 32, B 확인)
     questions: list[dict] = []
+    # 번역(해외 LLM) 동의가 있는지 — 번역이 비어 있을 때 "동의 없음"과 "번역 실패(다시 시도)"를 구분 (11/27)
+    translation_allowed: bool = False

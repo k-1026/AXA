@@ -24,6 +24,7 @@ const GROUP: Record<DisplayStatus, Filter> = {
   proposed: 'pending',
   confirmed: 'confirmed',
   visited: 'visited',
+  paid: 'visited', // 결제 확인도 "방문 완료" 묶음
   cancelled: 'cancelled',
   rejected: 'cancelled',
   expired: 'cancelled',
@@ -112,7 +113,7 @@ export function BookingsPage() {
           const key = message.id;
           const status = displayStatus(booking);
           const cancelled = GROUP[status] === 'cancelled';
-          const done = status === 'visited';
+          const done = status === 'visited' || status === 'paid';
           // 변경·취소는 병원이 확정하기 전(대기·다른 시간 제안)에만 (계약 2절: 환자 취소는 pending·proposed에서만)
           const editable = status === 'pending' || status === 'proposed';
           return (
