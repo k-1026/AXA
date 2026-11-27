@@ -1,7 +1,6 @@
 // 홈 "기간 성과" (운영 후 모드). 사용자가 기간을 고르고, 지표마다 이번 기간(실선)·직전 같은 길이 기간(점선) 그래프
-// 숫자는 실제 DB: GET /tenant/analytics/summary?from&to (기간 합계만 줌) → 기간을 최대 12구간으로 나눠 구간마다 불러 선을 그림
-// 나중에 백엔드가 날짜별 숫자(series)를 주면 loadBuckets만 바꾸면 됨
-// 11/27: 합계(1번)를 먼저 받아 숫자부터 보여 주고, 그래프 구간(최대 24번)은 그 뒤 다른 카드 요청보다 뒤에 (staffGet 줄 맨 뒤)
+// 숫자는 실제 DB: 합계 GET /tenant/analytics/summary?from&to, 그래프 GET /tenant/analytics/series?from&to (최대 12구간을 한 번에)
+// 11/27: 합계를 먼저 받아 숫자부터 보여 주고 그래프는 그 뒤. series가 없는 서버(배포 전)면 예전처럼 구간마다 summary
 import { useEffect, useMemo, useState } from 'react';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { fmt } from './ui';
@@ -52,7 +51,23 @@ async function getSummary(from: string, to: string, first = true): Promise<Summa
 
 const toRecord = (s: Summary) => Object.fromEntries(s.kpi.map((k) => [k.key, k.now])) as Record<KpiKey, number | null>;
 
+type Nums = Record<Exclude<KpiKey, 'views'>, number | null>;
+type Series = { size: number; buckets: { from: string; to: string; now: Nums; prev: Nums }[] };
+const withViews = (n: Nums) => ({ views: null, ...n });
+
 async function loadBuckets(from: string, to: string): Promise<Pick<Trends, 'buckets' | 'size'>> {
+  const res = await staffGet(`/tenant/analytics/series?from=${from}&to=${to}`, { first: false });
+  if (res.status === 401) throw new Expired();
+  if (res.ok) {
+    const s = res.body as Series;
+    return { size: s.size, buckets: s.buckets.map((b) => ({ label: md(b.from), now: withViews(b.now), prev: withViews(b.prev) })) };
+  }
+  if (res.status !== 404) throw new Error(String(res.status));
+  return loadBucketsEach(from, to);
+}
+
+// 예전 방식 (series 없는 서버): 구간마다 summary
+async function loadBucketsEach(from: string, to: string): Promise<Pick<Trends, 'buckets' | 'size'>> {
   const days = daysBetween(from, to);
   const size = Math.ceil(days / MAX_BUCKETS); // 구간 하나의 날 수
   const starts: number[] = [];
