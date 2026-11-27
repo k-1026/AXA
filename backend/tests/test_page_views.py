@@ -81,3 +81,15 @@ def test_dashboard_views_are_my_hospital_only_with_prev_period(client, db):
     token = create_access_token(str(uuid.uuid4()), "staff", tenant_id=str(t.id))
     body = client.get("/api/v1/tenant/analytics/summary?from=2026-11-01&to=2026-11-27", headers={"Authorization": f"Bearer {token}"}).json()
     assert next(k for k in body["kpi"] if k["key"] == "views")["now"] == 3
+
+
+def test_series_daily_one_point_per_day(client, db):
+    t = _tenant(db, 9001)
+    service.record_view(db, "DEMO-9001", KEY_A, None, today=date(2026, 11, 2))
+    service.record_view(db, "DEMO-9001", KEY_B, None, today=date(2026, 11, 2))
+    s = analytics.series(db, t.id, date(2026, 11, 1), date(2026, 11, 27), daily=True)
+    assert s["size"] == 1 and len(s["buckets"]) == 27
+    assert [b["now"]["views"] for b in s["buckets"][:3]] == [0, 2, 0]
+    h = {"Authorization": "Bearer " + create_access_token(str(uuid.uuid4()), "staff", tenant_id=str(t.id))}
+    assert client.get("/api/v1/tenant/analytics/series?from=2026-11-01&to=2026-11-27&daily=true", headers=h).json()["size"] == 1
+    assert client.get("/api/v1/tenant/analytics/series?from=2026-08-01&to=2026-11-27&daily=true", headers=h).status_code == 422

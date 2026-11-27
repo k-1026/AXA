@@ -18,7 +18,7 @@ from core.db import utcnow
 from core.errors import AppError
 from modules.agent import translate
 from modules.notification import service as notification
-from modules.booking.models import CANCEL_REASONS, REJECT_REASONS, BookingEvent, BookingRequest, Reply
+from modules.booking.models import CANCEL_REASONS, PAY_METHODS, REJECT_REASONS, BookingEvent, BookingRequest, Reply
 from modules.hospital.models import HospitalHours
 from modules.tenant.models import StaffUser, Tenant
 
@@ -32,12 +32,13 @@ TRANSITIONS: dict[tuple[str, str], str] = {
     ("proposed", "propose"): "proposed",  # 다른 시간으로 다시 제안
     ("confirmed", "visited"): "visited",
     ("confirmed", "no_show"): "no_show",
+    ("visited", "paid"): "paid",  # 결제 확인: 실제 결제 금액·수단 입력 (11/27)
     # 환자
     ("proposed", "patient_accept"): "confirmed",
     ("pending", "patient_cancel"): "cancelled",
     ("proposed", "patient_cancel"): "cancelled",  # 제안 거절 = 취소 (B 결정 2026-11-17)
 }
-STAFF_ACTIONS = ("confirm", "reject", "propose", "visited", "no_show")
+STAFF_ACTIONS = ("confirm", "reject", "propose", "visited", "no_show", "paid")
 
 
 def _not_found() -> AppError:
@@ -245,12 +246,22 @@ def staff_act(
     action: str,
     slot: datetime | None = None,
     reason: str | None = None,
+    amount: int | None = None,
+    method: str | None = None,
 ) -> BookingRequest:
     if action not in STAFF_ACTIONS:
         raise AppError(409, "booking.invalid_transition", "지금 상태에서는 할 수 없는 변경입니다", {"action": action})
     if reason is not None and (action != "reject" or reason not in REJECT_REASONS):  # 거절 사유는 거절에만, 정해진 코드만
         raise AppError(422, "validation", "거절 사유 코드가 올바르지 않습니다", {"errors": [{"loc": ["reason"], "type": "enum"}]})
+    if action == "paid":  # 결제 금액(원, 부가세 제외)·수단은 결제 확인에만, 둘 다 필수
+        bad = [f for f, ok in (("amount", amount is not None and 0 < amount <= 1_000_000_000), ("method", method in PAY_METHODS)) if not ok]
+        if bad:
+            raise AppError(422, "validation", "결제 금액·결제 수단을 확인하세요", {"errors": [{"loc": [f], "type": "missing"} for f in bad]})
+    elif amount is not None or method is not None:
+        raise AppError(422, "validation", "결제 금액은 결제 확인에만 넣을 수 있습니다", {"errors": [{"loc": ["amount"], "type": "extra"}]})
     req = staff_get(db, tenant_id, request_id)
+    if action == "paid" and req.status == "visited":
+        req.paid_amount, req.paid_method = amount, method
     if action == "propose" and slot is not None:
         _check_open(db, req.hospital_id, slot)
     if action in ("confirm", "propose") and req.patient_id is not None:
