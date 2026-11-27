@@ -239,6 +239,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-27 | 6-2 | 병원 대시보드 그래프용 `GET /tenant/analytics/series?from&to` 신설 (최대 12구간·366일, 구간마다 `now`·`prev`의 요청·확정·방문·취소율 = 그 구간 summary의 now와 같음). 기존 `summary`는 그대로 | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-analytics-series` → `backend` |
 | 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
 | 2026-11-25 | 3·4 | 직원 가입은 가상 병원(`is_demo`)만, 실제 병원은 403 `auth.signup_closed` (설정 `STAFF_SIGNUP_REAL_HOSPITALS`로만 엶, 결정 34) | A (**B 확인 필요**) | `backend-A-contract-signup-closed` → `backend` |
 | 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |

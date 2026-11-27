@@ -100,3 +100,19 @@ def analytics_summary(
     if start > end:
         raise AppError(422, "validation", "기간이 올바르지 않습니다", {"errors": [{"loc": ["from"], "type": "range"}]})
     return analytics.summary(db, _tenant(staff), start, end, today)
+
+
+@router.get("/analytics/series")
+def analytics_series(
+    db: Db,
+    staff: Staff,
+    start: Annotated[date | None, Query(alias="from")] = None,
+    end: Annotated[date | None, Query(alias="to")] = None,
+):
+    """그래프용 구간별 숫자 (최대 12구간, 이번 기간·지난 기간). 기간 기본값은 summary와 같음, 최대 366일."""
+    today = datetime.now(ZoneInfo("Asia/Seoul")).date()
+    end = end or today
+    start = start or end.replace(day=1)
+    if start > end or (end - start).days + 1 > analytics.SERIES_MAX_DAYS:
+        raise AppError(422, "validation", "기간이 올바르지 않습니다", {"errors": [{"loc": ["from"], "type": "range"}]})
+    return analytics.series(db, _tenant(staff), start, end)

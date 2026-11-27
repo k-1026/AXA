@@ -115,6 +115,7 @@ confirmed ──(병원) 미방문 처리────▶ no_show
 | 메서드·경로 | 응답 | 교체되는 프로토타입 값 (`sample.ts`) |
 |---|---|---|
 | `GET /tenant/analytics/summary?from=&to=` | `{ kpi: [...], today: {...} }` | `KPI`, `TODAY` |
+| `GET /tenant/analytics/series?from=&to=` (11/27) | `{ size, buckets: [{ from, to, now, prev }] }` — 그래프 구간을 한 번에 | 홈 "기간 성과" 그래프 |
 | `GET /tenant/analytics/inflow?from=&to=` | `{ channels, languages, treatments, buttons, preVisitTopics }` | `CHANNELS`, `LANGUAGES`, `TREATMENTS`, `BUTTONS`, `PRE_VISIT_QUESTIONS` |
 | `GET /tenant/analytics/booking?from=&to=` | `{ funnel, firstReply, cancelReasons, repeatChanges, preferredDays }` | `FUNNEL`, `FIRST_REPLY`, `CANCEL_REASONS`, `REPEAT_CHANGES`, `PREFERRED_DAYS` |
 | `GET /tenant/analytics/aftercare?from=&to=` | `{ status, keywords, sampleCase, improvements, satisfaction }` | `AFTERCARE_*`, `IMPROVEMENTS`, `SATISFACTION` |

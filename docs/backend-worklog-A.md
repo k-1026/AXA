@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-analytics-series · Claude (대시보드 첫 화면 느림)
+- 한 일: **B 파일 `booking/analytics.py`·`router_tenant.py` 수정 (사용자 지시: "그냥 너가 하고 올리면")** — `GET /tenant/analytics/series?from&to` 추가. 홈 "기간 성과" 그래프가 구간마다 summary를 따로 불러 처음 접속 때 19번(로컬 측정 그래프까지 6.3초) → 1번. 조회 2번(요청 생성 시각, 확정·취소·방문 이벤트 시각)을 한국 날짜로 나눠 구간 합. 구간 크기 = ceil(일수/12), 지난 기간은 같은 길이 바로 앞 기간을 같은 위치로. 최대 366일(넘으면 422). summary는 그대로
+- 바뀐 계약: contracts 변경 이력 1줄 (6-2 병원 API 추가), `dashboard-integration.md` 표 1줄
+- 테스트: 백엔드 323개 통과 (새 2개: 구간 숫자 = 그 구간 summary의 now·prev, 한국 날짜 경계, 직원만·기간 제한)
+- 다음 할 일: 프론트 `KpiTrends`가 series 사용 (`frontend-dashboard-load`)
+- B에게 요청: `analytics.series` 확인 (summary 계산과 같은 기준인지)
+- 막힌 것·질문: 없음
+
 ### 2026-11-25 · backend-A-contract-signup-closed · backend-A-signup-guard · Claude (입점 신청 막기, 전체 점검 N1)
 - 한 일: 직원 가입(`auth/staff.py` signup)이 등록번호 확인·운영자 승인 없이 실제 병원 owner를 만들고 `requests_enabled=True` → 누구나 실제 병원 160곳 중 아무 데나 먼저 가입해 그 병원 환자 요청서를 받을 수 있었음. 이제 가상 병원(`is_demo`)만 가입, 실제 병원은 403 `auth.signup_closed`(계정 안 만듦). 설정 `staff_signup_real_hospitals`(env `STAFF_SIGNUP_REAL_HOSPITALS`, 기본 false) — **`core/config.py` 공통 파일 변경**. 테스트 conftest에서 false 고정. 앞서 `backend-A-request-hours`(PR #106): 환자 희망 일시도 진료시간 안만(422 `closed`, loc `preferred_slots[i]`) + 챗봇 초안 단계 검사
 - 바뀐 계약: contracts 3·4절 (`auth.signup_closed` 403), 변경 이력 1줄, 결정 34
