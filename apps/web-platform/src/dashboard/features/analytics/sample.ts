@@ -118,3 +118,30 @@ export const PLATFORM_SHARE = [
   { label: '상담 요청 비중', pct: 5.3 },
   { label: '같은 진료과 안에서 방문자 비중', pct: 11.8 },
 ];
+
+// ── 진료·결제 확인: 월별 확인 완료 매출 (예시, 최근 12개월 · 부가세 제외 진료비) ── 결제 확인 API 생기면 GET /tenant/revenue/monthly 로 교체
+// 이번 달(11월)은 결제 확인 현황 카드와 같은 값 (21건 · ₩15,330,000 · 확인 중 ₩3,060,000)
+export const MONTHLY_REVENUE: { month: string; revenue: number; count: number; checking?: number }[] = [
+  { month: '2025-12', revenue: 4380000, count: 6 },
+  { month: '2026-01', revenue: 3650000, count: 5 },
+  { month: '2026-02', revenue: 5110000, count: 7 },
+  { month: '2026-03', revenue: 6570000, count: 9 },
+  { month: '2026-04', revenue: 8030000, count: 11 },
+  { month: '2026-05', revenue: 7300000, count: 10 },
+  { month: '2026-06', revenue: 9490000, count: 13 },
+  { month: '2026-07', revenue: 10950000, count: 15 },
+  { month: '2026-08', revenue: 12410000, count: 17 },
+  { month: '2026-09', revenue: 11680000, count: 16 },
+  { month: '2026-10', revenue: 13690000, count: 18 },
+  { month: '2026-11', revenue: 15330000, count: 21, checking: 3060000 },
+];
+
+// ── 사후관리 처리 현황: 로그인 없는 미리보기(?preview=1)에서 보여 주는 예시 대화 목록 (실명·실제 환자 정보 없음) ──
+const hAgo = (h: number) => new Date(Date.now() - h * 3600e3).toISOString();
+export const SAMPLE_AFTERCARE_THREADS = () => [
+  { id: '7c2a-d1', request_id: '1a7c-r1', status: 'new' as const, tags: [], summary: '레이저 토닝 이틀 뒤 붉은기 문의', lang: 'zh-TW', nationality: 'TW', treatment: 'laser_toning', visited_slot: hAgo(50), last_message_at: hAgo(1.5), last_message: '還是有點紅，正常嗎？', unanswered: 1 },
+  { id: 'b41e-d2', request_id: '58b0-r2', status: 'in_progress' as const, tags: ['붓기'], summary: '보톡스 후 붓기 경과 확인 중', lang: 'vi', nationality: 'VN', treatment: 'botox', visited_slot: hAgo(170), last_message_at: hAgo(26), last_message: 'Cảm ơn bác sĩ', unanswered: 0 },
+  { id: 'e9d3-d3', request_id: 'c3e2-r3', status: 'new' as const, tags: [], summary: '귀국 후 연고 사용 기간 문의', lang: 'en', nationality: 'MN', treatment: 'acne_scar', visited_slot: hAgo(340), last_message_at: hAgo(6), last_message: 'How long should I keep using the ointment?', unanswered: 2 },
+  { id: '2b6f-d5', request_id: '7e19-r5', status: 'in_progress' as const, tags: [], summary: '기미 치료 후 색소 변화 문의', lang: 'ja', nationality: 'JP', treatment: 'melasma', visited_slot: hAgo(120), last_message_at: hAgo(3), last_message: 'まだ少し赤いです', unanswered: 1 },
+  { id: '35f8-d4', request_id: '9d41-r4', status: 'resolved' as const, tags: ['붓기', '재방문 일정'], summary: '필러 후 붓기 — 해결', lang: 'zh-CN', nationality: 'CN', treatment: 'filler', visited_slot: hAgo(600), last_message_at: hAgo(300), last_message: '好多了，谢谢', unanswered: 0 },
+];

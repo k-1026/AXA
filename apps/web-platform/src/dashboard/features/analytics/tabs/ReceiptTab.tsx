@@ -5,6 +5,8 @@ import { useState } from 'react';
 import type { TabProps } from './props';
 import { Card, Locked, fmt } from '../ui';
 import { useTier } from '../membership';
+import MonthlyRevenueChart from '../MonthlyRevenueChart';
+import { MONTHLY_REVENUE } from '../sample';
 
 type Row = { id: string; day: string; item: string; amount: number | null; pay: string; file: string; patient: string; status: 'done' | 'checking' | 'waiting' };
 const ROWS: Row[] = [
@@ -60,6 +62,11 @@ export default function ReceiptTab({ mode }: TabProps) {
           <div className="today-tile is-static"><span className="today-label">환자 이의 제기</span><span className="today-val">0건</span><span className="today-go">금액이 다르면 운영자가 확인</span></div>
         </div>
       </section>
+
+      <Card title="월별 매출 추이" kind="example" wide>
+        <MonthlyRevenueChart rows={MONTHLY_REVENUE} rate={rate} monthlyFee={fee} />
+        <p className="mini">결제 확인일 기준 한국 시간으로 월을 나눠요 · 수수료 = 확인 완료 진료비 × {tierName} 요율 {pct}% (등급이 바뀐 달은 결제 때 적용된 요율로 계산 예정) · 예시 데이터, 결제 확인 기능이 서버에 연결되면 실제 값으로 바뀌어요</p>
+      </Card>
 
       <Card title={`방문 완료 건 — 최근 ${rows.length}건 (이번 달 전체 24건)`} kind="example" wide>
         <div className="tbl-scroll">
