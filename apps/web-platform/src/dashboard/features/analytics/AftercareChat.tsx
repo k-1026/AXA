@@ -3,7 +3,7 @@
 // - 답장: POST /tenant/aftercare/{id}/messages (확인 단계 후 발송) · 상태: PATCH /tenant/aftercare/{id} {status, tags}
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readStaffToken } from '../../../features/staff/staffSession';
-import { Expired, LANG, NAT, TRT, call, errText, slotLabel } from './bookingShared';
+import { Expired, LANG, NAT, TRT, call, errText, slotLabel, retryTranslations } from './bookingShared';
 import { WaitBadge, WaitLegend, clinicMinutes, useClinicClock, waitLevel } from './waitTime';
 
 type Status = 'new' | 'in_progress' | 'resolved';
@@ -24,6 +24,9 @@ const who = (t: Thread) => `${NAT[t.nationality] || t.nationality} · ${LANG[t.l
 const title = (t: Thread) => t.tags[0] || TRT[t.treatment ?? ''] || t.treatment || '사후관리';
 const sub = (t: Thread) => `${AC_ST[t.status]}${t.visited_slot ? ` · 방문 ${slotLabel(t.visited_slot)}` : ''}`;
 const https = (u?: string) => !!u && /^https:\/\//.test(u);
+
+// 사후관리 목록에는 번역 동의 여부가 없어 한 문구로 (동의가 있으면 서버가 다시 번역함)
+const TR_MISSING = '(번역 없음 — 다시 번역하는 중이거나 번역 동의 없음)';
 
 export default function AftercareChat({ rev, onExpired, onChanged }: { rev: number; onExpired: () => void; onChanged: () => void }) {
   const [list, setList] = useState<Thread[] | null>(null);
@@ -64,7 +67,13 @@ export default function AftercareChat({ rev, onExpired, onChanged }: { rev: numb
 
   const openThread = useCallback(async (id: string) => {
     setLoadingThread(true);
-    try { setThread(await call<ThreadFull>(`/tenant/aftercare/${id}`)); }
+    try {
+      const t = await call<ThreadFull>(`/tenant/aftercare/${id}`);
+      setThread(t);
+      // 번역이 빠진 글이 있으면 서버에 다시 번역을 맡기고(동의 있는 것만), 된 게 있으면 다시 불러옴 (11/27)
+      const gap = t.messages.some((m) => !m.text_translated && !(m.sender === 'patient' && isKo(m.text_original)) && m.text_original !== '📷');
+      if (gap && (await retryTranslations())) setThread(await call<ThreadFull>(`/tenant/aftercare/${id}`));
+    }
     catch (e) { if (!fail(e)) setNote({ ok: false, msg: '대화를 열지 못했어요: ' + errText((e as Error).message) }); }
     finally { setLoadingThread(false); }
   }, [fail]);
@@ -179,7 +188,7 @@ export default function AftercareChat({ rev, onExpired, onChanged }: { rev: numb
                 : thread?.messages.length ? thread.messages.map((m) => {
                   const patient = m.sender === 'patient';
                   const files = (m.attachments ?? []).filter((a) => https(a.url));
-                  const tr = patient ? (m.text_translated || (isKo(m.text_original) ? null : '(번역 전)')) : (m.text_translated || '(번역 연결 전)');
+                  const tr = patient ? (m.text_translated || (isKo(m.text_original) ? null : TR_MISSING)) : (m.text_translated || TR_MISSING);
                   return (
                     <div key={m.id} className={`msg msg-${patient ? 'patient' : 'staff'}`}>
                       {!(m.text_original === '📷' && files.length) && <p>{m.text_original}</p>}
