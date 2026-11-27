@@ -608,7 +608,10 @@
     "doneTitle": "Đã gửi yêu cầu đặt lịch",
     "doneBody": "Lịch hẹn được xác nhận sau khi bệnh viện kiểm tra. Trước đó, lịch sẽ hiển thị \"Chờ xác nhận\" trong Quản lý đặt lịch.",
     "toBookings": "Đến Quản lý đặt lịch",
-    "toConsult": "Tư vấn với bệnh viện này"
+    "toConsult": "Tư vấn với bệnh viện này",
+    "dept": "Chuyên khoa",
+    "language": "Ngôn ngữ tư vấn",
+    "needAll": "Hãy chọn chuyên khoa, ngôn ngữ tư vấn và quốc tịch, rồi đánh dấu cả hai ô ở trên để gửi yêu cầu."
   },
   "booking": {
     "nationality": "Quốc tịch",
@@ -625,7 +628,8 @@
       "timeConflict": "Thời gian này trùng với lịch hẹn khác. Không thể gửi yêu cầu trong vòng 1 giờ trước hoặc sau lịch hẹn bạn đã có (kể cả lịch đang chờ xác nhận). Vui lòng chọn giờ khác.",
       "sameDay": "Bạn đã có lịch hẹn (hoặc yêu cầu) ở bệnh viện này trong ngày đó. Để đổi giờ, hãy sửa trong Quản lý đặt lịch.",
       "tooMany": "Bạn có 5 yêu cầu đang chờ phản hồi. Hãy chờ bệnh viện trả lời hoặc hủy yêu cầu không cần, rồi thử lại."
-    }
+    },
+    "choose": "Vui lòng chọn"
   },
   "staff": {
     "whoLabel": "Loại tài khoản",

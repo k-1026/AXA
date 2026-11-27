@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { LANGUAGES } from '../i18n';
 import { todayKst } from '../lib/common';
 import { nowKstTime } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
@@ -10,6 +11,7 @@ import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { useHospitals } from '../features/hospital/useHospitals';
 import { hospitalNames, useHospitalName } from '../features/hospital/name';
 import { addDays, DAYS_AHEAD, isBookable, slotsFor } from '../features/reserve/availability';
+import type { DepartmentKey } from '../features/hospital/types';
 
 // 공개 URL로 배포된 화면인지 (localhost·127.0.0.1이 아니면 공개 배포로 봄) — "예시 일정 · 실제 예약 아님" 문구용
 const IS_PUBLIC_DEPLOY = typeof window !== 'undefined'
@@ -28,6 +30,9 @@ export function ReservePage() {
   const [month, setMonth] = useState(today.slice(0, 7)); // YYYY-MM
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  // 진료과·상담 언어는 환자가 직접 고름 (전에는 병원 첫 진료과·화면 언어로 그냥 보냄 → 한국어 화면이면 상담 언어 ko, 11/26)
+  const [dept, setDept] = useState<DepartmentKey | ''>('');
+  const [language, setLanguage] = useState('');
   const [done, setDone] = useState(false);
   const [consent, setConsent] = useState(emptyConsent);
   const residency = useAuth().user?.residency;
@@ -86,8 +91,12 @@ export function ReservePage() {
   };
 
   const member = consult.mode === 'member';
+  const deptValue = dept || (h.depts.length === 1 ? h.depts[0] : ''); // 진료과가 하나뿐이면 그것
+  // 예약 버튼: 진료과·상담 언어를 고르고, 회원이면 국적·단기 방문·전달 동의까지 해야 눌림
+  const canSubmit = !!date && !!time && !!deptValue && !!language
+    && (!member || (residency !== 'resident' && consentReady(consent, false, residency)));
   const submit = async () => {
-    if (!date || !time) return;
+    if (!canSubmit) return;
     if (member && residency === 'resident') return setError(t('residency.err.notEligible'));
     if (member && !consentReady(consent, false, residency)) return setError(t('booking.err.consentNeeded'));
     setError('');
@@ -95,8 +104,8 @@ export function ReservePage() {
     try {
       if (member) await checkResidency(consent);
       await consult.requestBookingFor(
-        { hospitalId: h.id, name: hospitalNames(h), dept: h.depts[0], district: h.district, photo: h.photo },
-        { date, time, language: locale },
+        { hospitalId: h.id, name: hospitalNames(h), dept: deptValue, district: h.district, photo: h.photo },
+        { date, time, language },
         member ? toExtra(consent, false) : undefined,
       );
       setDone(true);
@@ -190,11 +199,28 @@ export function ReservePage() {
           {date && time && (
             <div className="reserve-confirm">
               <p><strong>{dateLabel(date)} {time}</strong></p>
+              <div className="reserve-fields">
+                <label className="auth-field">
+                  <span>{t('reserve.dept')}</span>
+                  <select value={deptValue} onChange={(e) => setDept(e.target.value as DepartmentKey)}>
+                    <option value="" disabled>{t('booking.choose')}</option>
+                    {h.depts.map((d) => <option key={d} value={d}>{t(`dept.${d}`)}</option>)}
+                  </select>
+                </label>
+                <label className="auth-field">
+                  <span>{t('reserve.language')}</span>
+                  <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+                    <option value="" disabled>{t('booking.choose')}</option>
+                    {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+                  </select>
+                </label>
+              </div>
               {member && <BookingConsentFields value={consent} onChange={setConsent} hasNote={false} />}
               {error && <p className="consult-form-error" role="alert">{error}</p>}
-              <button type="button" className="reserve-submit" onClick={submit} disabled={busy}>
+              <button type="button" className="reserve-submit" onClick={submit} disabled={busy || !canSubmit}>
                 {busy ? t('auth.submitting') : t('reserve.submit')}
               </button>
+              {!canSubmit && !busy && residency !== 'resident' && <p className="reserve-need">{t('reserve.needAll')}</p>}
             </div>
           )}
           <p className="reserve-note">{t('reserve.note')}</p>

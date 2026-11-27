@@ -5386,6 +5386,30 @@ body.chat-open {
   cursor: pointer;
 }
 
+/* 예약 화면: 진료과·상담 언어 고르기, 다 고르기 전에는 신청 버튼 흐리게 (11/26) */
+.reserve-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px 12px;
+  width: 100%;
+}
+
+.reserve-fields select {
+  width: 100%;
+}
+
+.reserve-submit:disabled {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.reserve-need {
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 .reserve-note {
   margin: 0;
   font-size: 0.8rem;

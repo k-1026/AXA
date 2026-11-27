@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { fmt } from './ui';
+import { useAutoRefresh } from './autoRefresh';
 
 type Today = { newRequests: number; visitsToday: number; aftercareUnanswered: number };
 type Thread = { status: string; unanswered: number };
@@ -18,6 +19,7 @@ async function get<T>(path: string, token: string): Promise<T> {
 export default function TodayTiles({ onExpired }: { onExpired: () => void }) {
   const [today, setToday] = useState<Today | null>(null);
   const [error, setError] = useState(false);
+  const auto = useAutoRefresh(); // 새 요청 수가 바로 바뀌게 (30초마다·탭으로 돌아올 때)
 
   useEffect(() => {
     const token = readStaffToken();
@@ -38,7 +40,7 @@ export default function TodayTiles({ onExpired }: { onExpired: () => void }) {
         else setError(true);
       });
     return () => { alive = false; };
-  }, [onExpired]);
+  }, [onExpired, auto]);
 
   const v = (n: number | undefined) => (today ? fmt(n ?? 0) : error ? '—' : '…');
   const ac = today?.aftercareUnanswered ?? 0;

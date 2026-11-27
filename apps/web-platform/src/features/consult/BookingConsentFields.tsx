@@ -20,7 +20,7 @@ export interface ConsentState {
 }
 
 export const emptyConsent = (): ConsentState => ({
-  nationality: 'TW',
+  nationality: '', // 고르기 전에는 비움 (전에는 TW로 시작해서 안 바꾸면 TW로 갔음, 11/26)
   shortTerm: false,
   privacy: false,
   overseas: false,
@@ -28,7 +28,7 @@ export const emptyConsent = (): ConsentState => ({
 });
 
 export const consentReady = (c: ConsentState, hasNote: boolean, residency?: Residency | null) =>
-  residency !== 'resident' && c.shortTerm && c.privacy && (!hasNote || c.overseas);
+  residency !== 'resident' && !!c.nationality && c.shortTerm && c.privacy && (!hasNote || c.overseas);
 
 // 예약 요청 직전: 계정에 답이 없으면 여기서 받은 3문항을 서버에 저장 (PUT /me/residency), 국내 거주면 멈춤
 export function useResidencyCheck() {
@@ -72,6 +72,7 @@ export function BookingConsentFields({ value, onChange, hasNote }: { value: Cons
       <label className="auth-field">
         <span>{t('booking.nationality')}</span>
         <select value={value.nationality} onChange={(e) => set('nationality', e.target.value)}>
+          <option value="" disabled>{t('booking.choose')}</option>
           {COUNTRIES.map((c) => (
             <option key={c} value={c}>
               {names?.of(c) ?? c}
