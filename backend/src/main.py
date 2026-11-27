@@ -18,6 +18,7 @@ from modules.booking.router_tenant import router as booking_tenant_router
 from modules.chatbot.router import router as chatbot_router
 from modules.fx.router import router as fx_router
 from modules.hospital.router import router as hospital_router
+from modules.pageview.router import router as pageview_router
 from modules.maintenance.router import router as maintenance_router
 from modules.notification.router import push_router
 from modules.notification.router import staff_router as notification_staff_router
@@ -47,6 +48,7 @@ api.include_router(auth_router)
 api.include_router(patient_router)
 api.include_router(fx_router)
 api.include_router(hospital_router)
+api.include_router(pageview_router)
 api.include_router(chatbot_router)
 api.include_router(maintenance_router)
 api.include_router(booking_patient_router)

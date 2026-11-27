@@ -251,6 +251,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-27 | 5·6-2 | 병원 상세 페이지 조회 기록 `POST /hospitals/page-views` (로그인 없이, `{hospital: ykiho, visitor_key, lang?}` → 204, 없는 병원 404) 신설, 대시보드 `summary`·`series`의 `views`를 채움(`suppressed`에서 뺌). 새 모듈 `modules/pageview`, 마이그레이션 0017 (결정 37) | A (**B 확인 필요** — `booking/analytics.py` 수정) | `backend-A-page-views` → `backend` (`backend-A-staff-realtime`·`backend-A-analytics-series` 다음) |
 | 2026-11-27 | 6-2 | 병원 대시보드 그래프용 `GET /tenant/analytics/series?from&to` 신설 (최대 12구간·366일, 구간마다 `now`·`prev`의 요청·확정·방문·취소율 = 그 구간 summary의 now와 같음). 기존 `summary`는 그대로 | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-analytics-series` → `backend` |
 | 2026-11-27 | 5·6-5 | 병원 실시간 알림: `POST /tenant/notifications/realtime-token`, 표 `staff_notifications`(0016), `notify_staff()`를 `booking.create_request`·`_move`(환자 변경)·`question.ask`·`aftercare.patient_open`에서 호출 (결정 35) | A·B (사용자가 둘 다 담당, booking 파일 수정 — **B 확인 필요**) | `backend-A-staff-realtime` → `backend` |
 | 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
