@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-paid · Claude (요청부터 결제까지 확인)
+- 한 일: **B 파일 `booking/models.py`·`service.py`·`schemas.py`·`router_tenant.py` 수정 (사용자 지시)** — 상태 `paid` + `visited → paid` 병원 행동(금액·수단 필수), `paid_amount`·`paid_method` 칸(마이그레이션 0018, 상태 CHECK 2곳 다시 만듦). 알림 상태 `paid`, 사후관리·챗봇 예약 요약은 `paid`도 방문 완료로 봄. 단계별 시연 스크립트 `backend/scripts/seed_flow_demo.py` (가상 환자 6명: 대기·시간 제안·확정·방문 완료·결제 확인 2, `--remove`로만 지움, SQLite로 두 번 돌려 같은 결과 확인)
+- 바뀐 계약: contracts 2절·변경 이력, 결정 38
+- 테스트: 백엔드 343개 통과 (새 9개: 결제 확인 흐름·알림, visited에서만, 금액·수단 검증, 다른 행동에 금액 X, API·목록)
+- 다음 할 일: 공용 DB 0018 적용(사용자 확인 후) → 시연 스크립트 실행, 대시보드 "진료·결제 확인" 탭·환자 화면 연결 (`frontend-paid`)
+- B에게 요청: 상태 흐름 변경 확인
+- 막힌 것·질문: 환자 금액 확인·이의 제기·영수증 파일은 아직 없음
+
 ### 2026-11-27 · backend-A-page-views · Claude (요청 1번: 방문자 수 = 상세 페이지 조회)
 - 한 일: 새 모듈 `modules/pageview` (`page_events` 테이블, 마이그레이션 0017 — 0016 다음이라 `backend-A-staff-realtime` 위에 만들고 `backend-A-analytics-series`를 합침). `POST /hospitals/page-views` 로그인 없이, 같은 병원·방문자·한국 날짜는 한 줄. **B 파일 `booking/analytics.py` 수정 (사용자 지시)** — `summary`·`series`의 `views` = 기간 안 줄 수(날마다 다른 방문자 수의 합), 지난 기간도
 - 바뀐 계약: contracts 변경 이력 1줄, 결정 37

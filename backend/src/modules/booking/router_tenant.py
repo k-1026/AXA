@@ -75,7 +75,7 @@ def reply(request_id: uuid.UUID, body: ReplyIn, db: Db, staff: Staff):
 @router.post("/booking-requests/{request_id}/{action}", response_model=BookingOut)
 def act(
     request_id: uuid.UUID,
-    action: Literal["confirm", "reject", "propose", "visited", "no-show"],
+    action: Literal["confirm", "reject", "propose", "visited", "no-show", "paid"],
     db: Db,
     staff: Staff,
     body: StaffAction | None = None,
@@ -83,6 +83,7 @@ def act(
     return service.staff_act(
         db, _tenant(staff), staff.staff_id, request_id, action.replace("-", "_"),
         body.slot if body else None, reason=body.reason if body else None,
+        amount=body.amount if body else None, method=body.method if body else None,
     )
 
 

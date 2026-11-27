@@ -44,10 +44,10 @@ def _row(req: BookingRequest, names: dict[int, str | None]) -> JSON:
         "status": req.status,
         "preferred": [s for s in (_kst(x) for x in req.preferred_slots or []) if s],
         # confirmed_slot 칸은 확정 시간과 병원이 제안한 시간을 같이 담음 (booking/models.py)
-        "confirmed_slot": slot if req.status in ("confirmed", "visited", "no_show") else None,
+        "confirmed_slot": slot if req.status in ("confirmed", "visited", "no_show", "paid") else None,
         "proposed_slot": slot if req.status == "proposed" else None,
         "created_at": _kst(req.created_at),
-        "visited": req.status == "visited",
+        "visited": req.status in ("visited", "paid"),
     }
 
 

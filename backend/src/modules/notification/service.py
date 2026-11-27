@@ -19,7 +19,7 @@ from modules.booking.models import BookingRequest
 from modules.notification import push
 from modules.notification.models import KINDS, STAFF_KINDS, Notification, StaffNotification
 
-NOTIFY_STATUS = ("confirmed", "rejected", "proposed", "visited", "no_show", "expired")
+NOTIFY_STATUS = ("confirmed", "rejected", "proposed", "visited", "no_show", "expired", "paid")
 REMINDER_STAGES = ("48h", "24h", "2h")  # 방문 전 리마인드 (notification/reminders.py)
 LIST_LIMIT = 50
 REALTIME_TTL = timedelta(hours=1)
