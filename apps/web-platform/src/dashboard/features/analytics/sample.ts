@@ -106,12 +106,6 @@ export const SATISFACTION = { score: 4.6, responses: 17 };
 // 사후관리 평균 첫 답변 (분, 옛 대시보드 예시 5시간 40분) — 목록 API에 메시지 시각이 없어 예시 (대화별 조회는 열람 기록이 남아 쓰지 않음)
 export const AFTERCARE_FIRST_REPLY_MIN = 340;
 
-// ── 홈: 방문자 수 이번 달 vs 지난달 (일별, 옛 대시보드 통계 탭 예시값 그대로) ── page_events 생기면 실제로
-export const DAILY_VISITORS = {
-  now: [52, 61, 48, 70, 66, 90, 95, 58, 63, 72, 69, 84, 101, 97, 76, 88],
-  prev: [44, 50, 47, 55, 60, 71, 78, 49, 52, 58, 61, 66, 80, 79, 62, 70],
-};
-
 // ── 홈: 메디대구 전체 이용자 중 우리 병원 (옛 대시보드 통계 탭 예시값) ── 비율만, 다른 병원 순위·숫자는 안 보여 줌
 export const PLATFORM_SHARE = [
   { label: '병원 페이지 방문자 비중', pct: 4.1 },
