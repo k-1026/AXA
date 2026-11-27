@@ -241,7 +241,7 @@ def test_summary_counts_only_my_tenant_and_period(db):
     assert (k["requests"]["now"], k["requests"]["prev"]) == (3, 1)
     assert k["confirmed"]["now"] == 2 and k["visited"]["now"] == 1
     assert k["cancelRate"]["now"] == 50
-    assert k["views"]["now"] is None and "views" in s["suppressed"]
+    assert (k["views"]["now"], k["views"]["prev"]) == (0, 0) and "views" not in s["suppressed"]  # 조회 기록 없음
     assert s["period"]["prevFrom"] == "2026-10-16" and s["period"]["prevTo"] == "2026-10-31"
     assert s["today"]["visitsToday"] == 1  # reqs[1] 확정, 오늘 11:00
     assert s["today"]["newRequests"] == 1  # 지난 기간 요청 1건이 아직 pending
@@ -278,7 +278,7 @@ def test_series_buckets_match_summary_for_each_range(db):
     s = analytics.series(db, t.id, date(2026, 11, 1), date(2026, 11, 27))
     assert s["size"] == 3 and len(s["buckets"]) == 9
     assert s["buckets"][0]["from"] == "2026-11-01" and s["buckets"][-1]["to"] == "2026-11-27"
-    keys = ("requests", "confirmed", "visited", "cancelRate")
+    keys = ("views", "requests", "confirmed", "visited", "cancelRate")
     for b in s["buckets"]:
         k = {x["key"]: x for x in analytics.summary(db, t.id, date.fromisoformat(b["from"]), date.fromisoformat(b["to"]))["kpi"]}
         assert b["now"] == {key: k[key]["now"] for key in keys}

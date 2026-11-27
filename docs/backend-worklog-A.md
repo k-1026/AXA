@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-page-views · Claude (요청 1번: 방문자 수 = 상세 페이지 조회)
+- 한 일: 새 모듈 `modules/pageview` (`page_events` 테이블, 마이그레이션 0017 — 0016 다음이라 `backend-A-staff-realtime` 위에 만들고 `backend-A-analytics-series`를 합침). `POST /hospitals/page-views` 로그인 없이, 같은 병원·방문자·한국 날짜는 한 줄. **B 파일 `booking/analytics.py` 수정 (사용자 지시)** — `summary`·`series`의 `views` = 기간 안 줄 수(날마다 다른 방문자 수의 합), 지난 기간도
+- 바뀐 계약: contracts 변경 이력 1줄, 결정 37
+- 테스트: 백엔드 330개 통과 (새 4개: 하루 한 번만 셈·개인정보 칸 없음·API 검증·대시보드 숫자는 내 병원만+지난 기간+series)
+- 다음 할 일: 공용 DB에 0017 적용 (사용자 확인 후), 프론트 상세 페이지에서 보내기·대시보드 그래프 (`frontend-page-views`)
+- B에게 요청: `analytics.summary`·`series` 변경 확인
+- 막힌 것·질문: 보관 기간(제안 13개월) 미정, 요청 횟수 제한 없음(같은 날 같은 값은 한 줄이라 숫자는 안 부풀지만 다른 값을 계속 보내면 늘어남)
+
 ### 2026-11-27 · backend-A-analytics-series · Claude (대시보드 첫 화면 느림)
 - 한 일: **B 파일 `booking/analytics.py`·`router_tenant.py` 수정 (사용자 지시: "그냥 너가 하고 올리면")** — `GET /tenant/analytics/series?from&to` 추가. 홈 "기간 성과" 그래프가 구간마다 summary를 따로 불러 처음 접속 때 19번(로컬 측정 그래프까지 6.3초) → 1번. 조회 2번(요청 생성 시각, 확정·취소·방문 이벤트 시각)을 한국 날짜로 나눠 구간 합. 구간 크기 = ceil(일수/12), 지난 기간은 같은 길이 바로 앞 기간을 같은 위치로. 최대 366일(넘으면 422). summary는 그대로
 - 바뀐 계약: contracts 변경 이력 1줄 (6-2 병원 API 추가), `dashboard-integration.md` 표 1줄
