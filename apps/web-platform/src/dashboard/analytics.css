@@ -430,3 +430,27 @@
   .hd .grid { grid-template-columns: 1fr; }
   .hd .funnel li { grid-template-columns: 84px 1fr 44px 36px; gap: 6px; }
 }
+
+/* 월별 매출 추이 (MonthlyRevenueChart) */
+.hd .rev { display: flex; flex-direction: column; gap: 10px; }
+.hd .rev-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.hd .trend-legend i.lg-bar { width: 12px; height: 12px; border: 0; background: var(--accent); border-radius: 3px; }
+.hd .trend-legend i.lg-chk { width: 12px; height: 12px; border: 0; background: #b9d1f9; border-radius: 3px; margin-left: 10px; }
+.hd .trend-legend i.lg-com { border-top-color: var(--example); margin-left: 10px; }
+.hd .rev-chart { width: 100%; height: auto; display: block; }
+.hd .rev-chart .grid { stroke: var(--surface-muted); stroke-width: 1; }
+.hd .rev-chart .base { stroke: var(--border); stroke-width: 1; }
+.hd .rev-chart .axis { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.hd .rev-chart .axis-com { fill: var(--example); }
+.hd .rev-chart .axis-n { font-size: 10px; }
+.hd .rev-chart .bar { fill: var(--accent); opacity: .78; }
+.hd .rev-chart .bar-chk { fill: #b9d1f9; }
+.hd .rev-chart .is-sel .bar { opacity: 1; }
+.hd .rev-chart .is-sel .axis { fill: var(--text); font-weight: 700; }
+.hd .rev-chart .com { fill: none; stroke: var(--example); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.hd .rev-chart .com-pt { fill: var(--surface); stroke: var(--example); stroke-width: 2; }
+.hd .rev-chart .hit { fill: transparent; cursor: pointer; outline: none; }
+.hd .rev-chart .hit:focus-visible { fill: rgba(31, 111, 235, .08); }
+.hd .rev-detail { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; padding: 8px 12px; border-radius: 10px; background: var(--surface-muted); font-size: .85rem; }
+.hd .rev-detail .up { color: var(--good); font-weight: 700; }
+.hd .rev-detail .down { color: var(--bad); font-weight: 700; }
