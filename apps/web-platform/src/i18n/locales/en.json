@@ -49,7 +49,8 @@
     "about": "About",
     "booking": "Consultation / Booking",
     "aftercare": "Aftercare",
-    "mypage": "My page"
+    "mypage": "My page",
+    "guide": "Guidebook"
   },
   "map": {
     "title": "Daegu hospital map",
@@ -74,6 +75,9 @@
     "notReady": "Data coming soon"
   },
   "popup": {
+    "partner": "MediDaegu partner",
+    "premium": "Premium",
+    "premiumTip": "A premium hospital selected by MediDaegu",
     "type": "Type",
     "addr": "Address",
     "tel": "Phone",
@@ -176,6 +180,16 @@
     "fxProvider": "Bank of Korea ECOS",
     "fxFallback": "Could not load exchange rates, so prices are shown in Korean won.",
     "fxReference": "Converted with the European Central Bank reference rate ({{date}}). Actual charges may differ.",
+    "hospitals": {
+      "see": "See {{count}} clinics",
+      "pending": "Clinic info coming soon",
+      "none": "We don't have a list of clinics for this treatment yet because no public data is available. Please check each clinic's details for the treatments it offers.",
+      "count": "{{count}} clinics offering this treatment (by name, not a ranking)",
+      "basis": "These clinics either list this treatment's price in HIRA's public non-covered fee data ({{date}}) or mention it on their own website (checked {{webDate}}). Please confirm availability and cost with the clinic.",
+      "close": "Close",
+      "srcHira": "Price on HIRA",
+      "srcWeb": "Clinic website"
+    },
     "searchResult": "{{count}} treatments related to “{{q}}”",
     "noResult": "No treatments matched “{{q}}”, so all are shown.",
     "clearSearch": "Show all"
@@ -716,5 +730,102 @@
       "vi": "Vietnamese",
       "ru": "Russian"
     }
+  },
+  "guide": {
+    "title": "MediDaegu Guidebook",
+    "subtitle": "Find a clinic in Daegu, request a consultation or booking, and get aftercare — how to use MediDaegu, step by step.",
+    "toc": "Contents",
+    "footnote": "MediDaegu helps you find clinics and connects your consultation and booking requests. Diagnosis and treatment are done by the clinic, and you pay the clinic directly.",
+    "s": {
+      "about": {
+        "title": "What MediDaegu does",
+        "link": "Browse clinics",
+        "items": [
+          "See Daegu clinic information in 6 languages (Korean, English, Simplified and Traditional Chinese, Vietnamese, Japanese).",
+          "When you request a consultation or booking, the clinic reviews and confirms it itself.",
+          "After your visit, you can send aftercare messages to that clinic’s medical staff.",
+          "Change the screen language and price currency (KRW, etc.) at the top right."
+        ],
+        "eyebrow": "Find, ask and book in one place"
+      },
+      "start": {
+        "title": "Getting started: sign up",
+        "link": "Log in / Sign up",
+        "items": [
+          "Clinic information and the price guide are open to everyone, no login needed.",
+          "The chatbot, Consultation / Booking, Aftercare and My page need a login.",
+          "When you sign up, answer 3 questions about your stay (alien registration, domestic residence report, National Health Insurance).",
+          "By law, only foreigners visiting Korea for a short stay for treatment can request consultations or bookings. Foreigners living in Korea can view clinic information only."
+        ],
+        "eyebrow": "1 minute to sign up, 3 questions"
+      },
+      "find": {
+        "title": "Finding a clinic",
+        "link": "View clinics",
+        "items": [
+          "On the main map, tap a colored dot (one color per department) to open the clinic’s details.",
+          "In Hospitals, filter by department, district and staff language.",
+          "Languages are shown as “direct communication” or “interpreter support”.",
+          "Prices in the price guide are for reference only. Always confirm the actual cost with the clinic during your consultation."
+        ],
+        "eyebrow": "Choose by department, area and language"
+      },
+      "chatbot": {
+        "title": "AI chatbot Mr. Gwon",
+        "link": "Open the chatbot",
+        "items": [
+          "Tell it the treatment and area you want — it finds clinics and helps you fill in a booking request.",
+          "It does not make medical judgments, such as reading symptoms or saying whether a procedure is safe for you. Ask the doctor at your consultation.",
+          "AI answers can be wrong. Check the date, time and details before you send a request."
+        ],
+        "eyebrow": "Just ask — it finds clinics for you"
+      },
+      "booking": {
+        "title": "Consultation and booking requests",
+        "link": "Go to Consultation / Booking",
+        "items": [
+          "On a clinic’s page, tap [Book] to pick a date and time, or [Contact this hospital] to start a 1:1 chat.",
+          "After you send a request it shows “Waiting for confirmation”; the clinic confirms it or suggests another time.",
+          "You can change or cancel a request yourself until the clinic confirms it.",
+          "Requests must be at least 60 minutes apart from your other bookings, 1 per clinic per day, and up to 5 waiting requests at a time."
+        ],
+        "eyebrow": "The clinic confirms it directly"
+      },
+      "before": {
+        "title": "Before your visit",
+        "link": "View my bookings",
+        "items": [
+          "When a clinic replies or changes a status, you’ll see it on the bell icon and the menu badge.",
+          "For confirmed bookings, reminders are sent 48 hours, 24 hours and 2 hours before your visit.",
+          "If you can’t make it, please cancel in advance so another patient can use that time.",
+          "Clinic addresses also show the original Korean. Show it to your taxi driver as is."
+        ],
+        "eyebrow": "Reminders so you don’t miss it"
+      },
+      "after": {
+        "title": "After your visit",
+        "link": "Go to Aftercare",
+        "items": [
+          "Once the clinic marks your visit as completed, you can chat with its medical staff in Aftercare.",
+          "The clinic is added to Visit log in My page automatically, and you can write down how it went. Only you can see it.",
+          "Your saved clinics and bookings are also gathered in My page."
+        ],
+        "eyebrow": "Care continues after your visit"
+      },
+      "safety": {
+        "title": "Emergencies and safety",
+        "link": "Medical law notice",
+        "items": [
+          "In an emergency — chest pain, trouble breathing, heavy bleeding — call 119 right away.",
+          "If symptoms get worse after a procedure, call the clinic directly instead of waiting for an aftercare reply.",
+          "MediDaegu does not give medical advice and does not recommend specific clinics."
+        ],
+        "eyebrow": "In an emergency, call 119 first"
+      }
+    },
+    "eyebrow": "For first-time visitors",
+    "cta": "Find a clinic",
+    "cta2": "Ask the chatbot",
+    "closeTitle": "Start your care in Daegu today"
   }
 }

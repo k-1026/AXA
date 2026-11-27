@@ -6188,3 +6188,414 @@ body.chat-open {
     flex: 1;
   }
 }
+
+/* 가이드북 (외국인 환자용 이용 방법, 2026-11-26) — 큰 제목 + 시작 버튼 · 01~08 번호 단계 · 마지막 시작 버튼 */
+.guide-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 32px 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent-soft), #ffffff 70%);
+  border: 1px solid var(--border);
+}
+
+.guide-hero h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  line-height: 1.25;
+}
+
+.guide-hero-sub {
+  margin: 0;
+  max-width: 640px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.guide-eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.guide-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.guide-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.guide-cta.is-secondary {
+  background: #ffffff;
+  color: var(--accent);
+}
+
+.guide-toc ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-toc a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+.guide-toc a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.guide-num {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-card {
+  display: flex;
+  gap: 20px;
+  padding: 24px;
+  scroll-margin-top: 16px;
+}
+
+.guide-step-no {
+  flex-shrink: 0;
+  width: 56px;
+  color: var(--accent);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.guide-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.guide-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.guide-card ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.65;
+}
+
+.guide-link {
+  align-self: flex-start;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.guide-link:hover {
+  text-decoration: underline;
+}
+
+/* 응급·안전은 눈에 띄게 (빨강) */
+.guide-card.is-safety {
+  border-left: 4px solid #dc2626;
+}
+
+.guide-card.is-safety .guide-step-no,
+.guide-card.is-safety .guide-eyebrow {
+  color: #b91c1c;
+}
+
+.guide-close {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.guide-close h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.guide-footnote {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .guide-hero {
+    padding: 24px 18px;
+  }
+
+  .guide-hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .guide-card {
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+  }
+
+  .guide-step-no {
+    font-size: 1.5rem;
+  }
+}
+
+/* 가격 가이드: 시술 카드를 누르면 이 시술을 하는 병원 창 (2026-11-27) */
+.procedure-card.is-clickable {
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.procedure-card.is-clickable:hover,
+.procedure-card.is-clickable:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgb(16 24 40 / 0.08);
+}
+
+.procedure-open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 제목 버튼이 카드 전체를 덮음 */
+.procedure-open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.procedure-open:focus-visible {
+  outline: none;
+}
+
+.procedure-hosp {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.procedure-hosp.is-pending {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.proc-hosp {
+  max-width: 480px;
+  max-height: min(80vh, 640px);
+}
+
+.proc-hosp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.proc-hosp-close {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.proc-hosp-count,
+.proc-hosp-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.proc-hosp-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.proc-hosp-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.proc-hosp-item:hover {
+  border-color: var(--accent);
+}
+
+.proc-hosp-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.proc-hosp-text small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.mp-dialog > p.proc-hosp-note,
+.proc-hosp-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.proc-hosp-row {
+  position: relative;
+}
+
+.proc-hosp-row .proc-hosp-item {
+  padding-right: 110px;
+}
+
+/* 근거 표시 (심평원 가격 공개 / 홈페이지 안내) */
+.proc-hosp-src {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.proc-hosp-src.is-web {
+  background: var(--accent-soft, #e3edfd);
+  color: var(--accent);
+}
+
+/* 메인 지도: 입점 병원 십자 마커 · 프리미엄 회원은 네모 테두리 (2026-11-27, HospitalMap.tsx partnerIcon) */
+.partner-pin {
+  background: none;
+  border: none;
+}
+.partner-pin svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.35));
+}
+/* 정보창: 광고 표시처럼 작은 회색 칸 */
+.popup-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 2px 0 6px;
+}
+.popup-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid #d0d4da;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6b7280;
+  background: #fff;
+}
+.popup-badge.is-premium {
+  border-color: #e3b341;
+  color: #8a6100;
+  background: #fff8e1;
+}
+.popup-badge.is-premium {
+  position: relative;
+  cursor: help;
+}
+.popup-tip {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
+  z-index: 2;
+  width: max-content;
+  max-width: 220px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #1f2937;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: normal;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.popup-badge.is-premium:hover .popup-tip,
+.popup-badge.is-premium:focus-visible .popup-tip {
+  display: block;
+}

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { Currency } from '../../components/currency';
 import { formatConverted } from '../../components/exchangeRates';
 import { useLocalized } from '../../lib/common';
+import { PROCEDURE_HOSPITALS } from './procedureHospitalData';
 import type { Procedure, ProcedureCategory } from './procedures';
 
 // 좁은 카드에서 금액이 숫자 중간이 아니라 '~' 뒤에서 줄바꿈되도록 (폭 없는 공백)
@@ -12,14 +13,17 @@ interface Props {
   category: ProcedureCategory;
   currency: Currency;
   rate?: number; // 1원 = rate. 없으면(원화 선택·환율 못 받음) 원화로만
+  onOpen: () => void; // 카드를 누르면 이 시술을 하는 병원 창
 }
 
-export function ProcedureCard({ procedure: p, category, currency, rate }: Props) {
+export function ProcedureCard({ procedure: p, category, currency, rate, onOpen }: Props) {
   const { t, i18n } = useTranslation();
   // 병원 이름과 같은 규칙: 한국어 외 모든 언어는 영어로 통일
   const label = useLocalized();
   // 영어로 보일 때는 영어 글꼴·하이픈 줄바꿈 (중국어 글꼴은 영문 폭이 넓어 좁은 카드에서 단어가 잘림)
   const labelLang = i18n.language === 'ko' ? undefined : 'en';
+
+  const hospCount = PROCEDURE_HOSPITALS[p.ko]?.length ?? 0;
 
   const krw = p.price && {
     min: p.price.min.toLocaleString('en-US'),
@@ -34,13 +38,18 @@ export function ProcedureCard({ procedure: p, category, currency, rate }: Props)
       : null;
 
   return (
-    <article className="procedure-card">
+    <article className="procedure-card is-clickable">
       {/* 팀에서 만든 일러스트만 쓴다 (전후 사진은 쓰지 않음, docs/compliance.md). 없으면 빈 자리 */}
       <div className={`hospital-photo procedure-photo ${p.image ? 'has-image' : ''}`} aria-hidden="true">
         {p.image && <img src={`/procedures/${p.image}`} alt="" loading="lazy" />}
       </div>
       <p className="hospital-type" lang={labelLang}>{label(category)}</p>
-      <h2 lang={labelLang}>{label(p)}</h2>
+      {/* 제목 버튼이 카드 전체를 덮어서 카드 어디를 눌러도 열림 (.procedure-open::after) */}
+      <h2 lang={labelLang}>
+        <button type="button" className="procedure-open" onClick={onOpen}>
+          {label(p)}
+        </button>
+      </h2>
       {!krw ? (
         <p className="procedure-price is-pending">{t('prices.pending')}</p>
       ) : converted ? (
@@ -52,6 +61,9 @@ export function ProcedureCard({ procedure: p, category, currency, rate }: Props)
       ) : (
         <p className="procedure-price">{t('prices.range', krw)}</p>
       )}
+      <p className={`procedure-hosp ${hospCount ? '' : 'is-pending'}`}>
+        {hospCount ? t('prices.hospitals.see', { count: hospCount }) : t('prices.hospitals.pending')}
+      </p>
     </article>
   );
 }
