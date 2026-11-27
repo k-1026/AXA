@@ -18,7 +18,7 @@
 - 가상 병원(9001~9004, `seed_demo_shared.py`가 만든 tenant)에만 — 실제 병원은 건드리지 않음 (compliance 2-6)
 - 가상 환자: `flow-demo-<n>@example.com`, 로그인 불가 비밀번호(해시 아님), 국적·언어는 외국인 단기 방문자(KR·ko 없음, 결정 36)
 - 다시 돌리면 이 환자들을 지우고 새로 만듦 (예약·이력·질문·답장·사후관리도 같이)
-- 실명·실제 환자 정보 없음. 글은 미리 쓴 가상 문장 (LLM 안 부름)
+- 실명·실제 환자 정보 없음. 글·번역은 미리 쓴 가상 문장 (LLM 안 부름) — 환자 글에는 한국어 번역을 같이 넣어 대시보드에 "번역 전"이 안 보이게
 """
 
 import argparse
@@ -48,6 +48,19 @@ from modules.tenant.models import StaffUser, Tenant  # noqa: E402
 KST = ZoneInfo("Asia/Seoul")
 EMAIL = "flow-demo-{n}@example.com"
 NO_LOGIN = "!flow-demo-no-login"  # argon2 해시가 아니라 어떤 비밀번호로도 로그인 안 됨
+# 환자 글의 한국어 번역 (병원 대시보드는 번역을 같이 보여 줌 — 비우면 "번역 전"으로 보임). 미리 쓴 가상 번역, LLM 안 부름
+KO = {
+    "想做雷射淨膚，請問需要做幾次？": "레이저 토닝을 받고 싶어요. 몇 번 받아야 하나요?",
+    "Tôi muốn điều trị nám, ngày nào còn chỗ?": "기미 치료를 받고 싶어요. 어느 날짜에 자리가 있나요?",
+    "エラボトックスの相談を予約したいです。": "사각턱 보톡스 상담을 예약하고 싶어요.",
+    "I'd like a consultation for acne scars.": "여드름 흉터 상담을 받고 싶어요.",
+    "想预约激光嫩肤。": "레이저 토닝을 예약하고 싶어요.",
+    "想治療肝斑，大概要幾次？": "기미 치료를 받고 싶어요. 대략 몇 번 받아야 하나요?",
+    "治療後臉有點紅，正常嗎？": "치료 뒤 얼굴이 조금 붉어요. 정상인가요?",
+    "好多了，謝謝！下次什麼時候可以再做？": "많이 좋아졌어요, 감사합니다! 다음에는 언제 다시 받을 수 있나요?",
+}
+# 병원(한국어) 글의 환자 언어 번역 — 사후관리 대화
+TW = {"시술 뒤 2~3일 붉은 기는 흔합니다. 진정 크림을 바르고 뜨거운 곳은 피해 주세요.": "術後2~3天泛紅很常見。請擦鎮靜霜，並避免高溫場所。"}
 
 
 def kst(d, h: int, m: int = 0) -> datetime:
@@ -91,7 +104,8 @@ def booking(db: Session, p: Patient, t: Tenant, nationality: str, created: datet
     req = BookingRequest(
         patient_id=p.id, tenant_id=t.id, hospital_id=t.hospital_id, status=status, lang=p.preferred_lang,
         nationality=nationality, contact_method="email", department_code="dermatology", treatment=treatment,
-        visa_needed=False, preferred_slots=[wish.isoformat()], message_original=msg, patient_timezone=p.timezone,
+        visa_needed=False, preferred_slots=[wish.isoformat()], message_original=msg, message_translated=KO.get(msg),
+        patient_timezone=p.timezone,
         confirmed_slot=slot, paid_amount=paid[0] if paid else None, paid_method=paid[1] if paid else None,
         created_at=created, updated_at=path[-1][1] if path else created,
     )
@@ -184,7 +198,7 @@ def main() -> None:
             ("patient", "好多了，謝謝！下次什麼時候可以再做？", kst(d(-18), 10, 20)),
         ]:
             db.add(AftercareMessage(thread_id=th.id, sender=sender, staff_id=staff_id if sender == "staff" else None,
-                                    text_original=text, attachments=[], created_at=at))
+                                    text_original=text, text_translated=KO.get(text) or TW.get(text), attachments=[], created_at=at))
 
         if args.dry_run:
             db.rollback()
