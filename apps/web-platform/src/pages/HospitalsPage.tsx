@@ -42,7 +42,7 @@ export function HospitalsPage() {
       <HospitalFilterBar hospitals={items} applied={applied} onApply={apply} />
       {resident && (
         <p className="residency-blocked">
-          {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
+          {t('residency.eligibilityNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
         </p>
       )}
 

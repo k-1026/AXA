@@ -200,6 +200,7 @@ function SignupForm() {
   const mismatch = f.confirm.length > 0 && f.password !== f.confirm;
   const allAgreed = f.age14 && f.terms && f.privacy;
   const canSubmit =
+    !!residency.nationality && // 국적 (11/27, 한국 국적이면 국내 거주 취급)
     !!f.email && f.password.length >= PASSWORD_MIN && f.password === f.confirm && allAgreed && !busy;
 
   const submit = async (e: FormEvent) => {

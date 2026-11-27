@@ -1898,6 +1898,14 @@ button.mp-add {
   color: #fff;
 }
 
+/* 체류 형태 다시 답하기: 국적을 고르기 전에는 흐리게 (11/27) */
+.mp-login-button:disabled {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
 .mp-login-secondary {
   background: var(--surface);
   color: var(--accent);

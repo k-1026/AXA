@@ -657,20 +657,24 @@
       "health_insurance": "Tôi tham gia (hoặc là người phụ thuộc) Bảo hiểm Y tế Quốc dân Hàn Quốc"
     },
     "residentNote": "Bạn được xem là người nước ngoài cư trú tại Hàn Quốc. Bạn vẫn xem được thông tin bệnh viện, nhưng theo luật không thể gửi yêu cầu tư vấn, đặt lịch hoặc nhận gợi ý bệnh viện.",
-    "bookingBlocked": "Theo luật, người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch (vẫn xem được thông tin bệnh viện). Nếu tình trạng của bạn đã thay đổi, hãy trả lời lại ở Trang của tôi.",
+    "bookingBlocked": "Dịch vụ tư vấn·đặt lịch của MediDaegu chỉ dành cho người mang quốc tịch nước ngoài đến Hàn Quốc ngắn hạn. Người nước ngoài sống tại Hàn Quốc và người mang quốc tịch Hàn Quốc (kể cả sống ở nước ngoài) chỉ có thể xem thông tin bệnh viện. Nếu tình trạng lưu trú hoặc quốc tịch của bạn thay đổi, hãy trả lời lại ở Trang của tôi.",
     "editLink": "Đến Trang của tôi",
     "status": "Lưu trú tại Hàn Quốc",
     "statusValue": {
       "shortTerm": "Thăm ngắn hạn",
-      "resident": "Cư trú (chỉ xem thông tin)",
+      "resident": "Không thể tư vấn·đặt lịch (chỉ xem thông tin)",
       "none": "Chưa trả lời"
     },
     "edit": "Trả lời lại",
     "save": "Lưu",
     "err": {
       "required": "Vui lòng trả lời câu hỏi về tình trạng lưu trú trước.",
-      "notEligible": "Người nước ngoài cư trú tại Hàn Quốc không thể gửi yêu cầu tư vấn, đặt lịch. Nếu tình trạng đã thay đổi, hãy trả lời lại ở Trang của tôi."
-    }
+      "notEligible": "Dịch vụ tư vấn·đặt lịch của MediDaegu chỉ dành cho người mang quốc tịch nước ngoài đến Hàn Quốc ngắn hạn. Người nước ngoài sống tại Hàn Quốc và người mang quốc tịch Hàn Quốc (kể cả sống ở nước ngoài) chỉ có thể xem thông tin bệnh viện. Nếu tình trạng lưu trú hoặc quốc tịch của bạn thay đổi, hãy trả lời lại ở Trang của tôi."
+    },
+    "nationality": "Quốc tịch",
+    "koreanNote": "Người mang quốc tịch Hàn Quốc, kể cả khi sống ở nước ngoài, không thể gửi yêu cầu tư vấn·đặt lịch hoặc nhận gợi ý bệnh viện qua MediDaegu. Bạn vẫn có thể xem thông tin bệnh viện.",
+    "choose": "Vui lòng chọn",
+    "eligibilityNote": "Dịch vụ tư vấn·đặt lịch của MediDaegu chỉ dành cho người mang quốc tịch nước ngoài đến Hàn Quốc ngắn hạn. Người nước ngoài sống tại Hàn Quốc và người mang quốc tịch Hàn Quốc (kể cả sống ở nước ngoài) chỉ có thể xem thông tin bệnh viện."
   },
   "filter": {
     "label": "Bộ lọc bệnh viện",

@@ -63,7 +63,7 @@ export function HospitalDetailPage() {
           </ul>
           {resident ? (
             <p className="residency-blocked">
-              {t('residency.residentNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
+              {t('residency.eligibilityNote')} <Link to="/mypage">{t('residency.editLink')}</Link>
             </p>
           ) : h.demo ? (
             // 목록 카드와 같은 두 버튼: 예약하기(달력 → 시간 → 신청) · 병원에 상담하기 (2026-11-26). 입점(가상) 병원만
