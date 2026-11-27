@@ -17,6 +17,12 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-analytics-series · Claude (대시보드 첫 화면 느림)
+- 한 일: **B 파일 `booking/analytics.py`·`router_tenant.py` 수정 (사용자 지시: "그냥 너가 하고 올리면")** — `GET /tenant/analytics/series?from&to` 추가. 홈 "기간 성과" 그래프가 구간마다 summary를 따로 불러 처음 접속 때 19번(로컬 측정 그래프까지 6.3초) → 1번. 조회 2번(요청 생성 시각, 확정·취소·방문 이벤트 시각)을 한국 날짜로 나눠 구간 합. 구간 크기 = ceil(일수/12), 지난 기간은 같은 길이 바로 앞 기간을 같은 위치로. 최대 366일(넘으면 422). summary는 그대로
+- 바뀐 계약: contracts 변경 이력 1줄 (6-2 병원 API 추가), `dashboard-integration.md` 표 1줄
+- 테스트: 백엔드 323개 통과 (새 2개: 구간 숫자 = 그 구간 summary의 now·prev, 한국 날짜 경계, 직원만·기간 제한)
+- 다음 할 일: 프론트 `KpiTrends`가 series 사용 (`frontend-dashboard-load`)
+- B에게 요청: `analytics.series` 확인 (summary 계산과 같은 기준인지)
 ### 2026-11-27 · backend-A-residency-nationality · Claude (국적 한국 → 국내 거주 취급)
 - 한 일: `ResidencyIn.nationality?` (KR → resident, 저장 안 함), 예약 요청서 국적 KR → 403 `residency.not_eligible`(`korean_nationality`), 챗봇 `prepare_booking_request` 국적 KR → not_available (결정 36)
 - 바뀐 계약: contracts 6-1·6-6·7 (칸 추가만)

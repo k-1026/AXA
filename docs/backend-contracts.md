@@ -253,6 +253,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-27 | 6-2 | 병원 대시보드 그래프용 `GET /tenant/analytics/series?from&to` 신설 (최대 12구간·366일, 구간마다 `now`·`prev`의 요청·확정·방문·취소율 = 그 구간 summary의 now와 같음). 기존 `summary`는 그대로 | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-analytics-series` → `backend` |
 | 2026-11-27 | 6-1·6-6·7 | 체류 형태에 `nationality?` 추가 — 한국 국적이면 `resident` (저장 안 함), 요청서 국적 KR은 403 `residency.not_eligible`(`korean_nationality`), 챗봇 초안도 막음 (결정 36, 칸 추가만, 마이그레이션 없음) | A | `backend-A-residency-nationality` → `backend` |
 | 2026-11-27 | 5·6-5 | 병원 실시간 알림: `POST /tenant/notifications/realtime-token`, 표 `staff_notifications`(0016), `notify_staff()`를 `booking.create_request`·`_move`(환자 변경)·`question.ask`·`aftercare.patient_open`에서 호출 (결정 35) | A·B (사용자가 둘 다 담당, booking 파일 수정 — **B 확인 필요**) | `backend-A-staff-realtime` → `backend` |
 | 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
