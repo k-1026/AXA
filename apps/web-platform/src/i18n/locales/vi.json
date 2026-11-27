@@ -169,7 +169,17 @@
     "fxNotice": "Số tiền quy đổi chỉ để tham khảo. Chi phí thực tế tính bằng won Hàn Quốc theo báo giá của bệnh viện. Tỷ giá áp dụng ngày {{applied}} (Ngân hàng Trung ương Hàn Quốc, số liệu ngày {{base}}; cập nhật lúc {{hour}}:00 giờ Hàn Quốc mỗi ngày) ·",
     "fxProvider": "Bank of Korea ECOS",
     "fxFallback": "Không tải được tỷ giá, giá được hiển thị bằng won Hàn Quốc.",
-    "fxReference": "Quy đổi theo tỷ giá tham khảo của Ngân hàng Trung ương châu Âu ({{date}}). Số tiền thực tế có thể khác."
+    "fxReference": "Quy đổi theo tỷ giá tham khảo của Ngân hàng Trung ương châu Âu ({{date}}). Số tiền thực tế có thể khác.",
+    "hospitals": {
+      "see": "Xem {{count}} cơ sở",
+      "pending": "Đang cập nhật thông tin cơ sở",
+      "none": "Chưa có danh sách cơ sở thực hiện dịch vụ này vì chưa có dữ liệu công khai. Vui lòng xem thông tin từng cơ sở để biết dịch vụ được cung cấp.",
+      "count": "{{count}} cơ sở thực hiện dịch vụ này (theo tên, không phải xếp hạng)",
+      "basis": "Các cơ sở có giá dịch vụ này trong dữ liệu chi phí ngoài bảo hiểm công khai của HIRA ({{date}}) hoặc có dịch vụ này trên trang web của cơ sở (kiểm tra {{webDate}}). Vui lòng xác nhận khả năng thực hiện và chi phí với cơ sở.",
+      "close": "Đóng",
+      "srcHira": "Giá công khai trên HIRA",
+      "srcWeb": "Trang web cơ sở"
+    }
   },
   "mypage": {
     "home": "Trang chủ",

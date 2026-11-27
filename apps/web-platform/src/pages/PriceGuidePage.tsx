@@ -1,9 +1,11 @@
+import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FilterGrid } from '../features/hospital/FilterGrid';
 import { DEPARTMENTS } from '../features/hospital/filters';
 import { ProcedureCard } from '../features/price-info/ProcedureCard';
-import { PROCEDURE_CATEGORIES } from '../features/price-info/procedures';
+import { ProcedureHospitals } from '../features/price-info/ProcedureHospitals';
+import { PROCEDURE_CATEGORIES, type Procedure } from '../features/price-info/procedures';
 import { useCurrency } from '../components/currency';
 import { useExchangeRates, useFallbackRate } from '../components/exchangeRates';
 import { useLoadMore } from '../components/useLoadMore';
@@ -14,6 +16,9 @@ export function PriceGuidePage() {
   const { t, i18n } = useTranslation();
   const [params, setParams] = useSearchParams();
   const dept = params.get('dept');
+  // 누른 시술 → 이 시술을 하는 병원 창
+  const [opened, setOpened] = useState<Procedure | null>(null);
+  const closeOpened = useCallback(() => setOpened(null), []);
   const { currency } = useCurrency();
   // 원화가 아닌 통화를 골랐을 때만 환율을 받는다
   const fx = useExchangeRates(currency !== 'KRW');
@@ -62,11 +67,12 @@ export function PriceGuidePage() {
               {visibleCards
                 .filter((v) => v.d === d)
                 .map(({ c, p }) => (
-                  <ProcedureCard key={p.ko} procedure={p} category={c} currency={currency} rate={rate} />
+                  <ProcedureCard key={p.ko} procedure={p} category={c} currency={currency} rate={rate} onOpen={() => setOpened(p)} />
                 ))}
             </div>
           </section>
         ))}
+      {opened && <ProcedureHospitals procedure={opened} onClose={closeOpened} />}
       {autoLoading && <div ref={sentinelRef} className="load-more-sentinel" aria-hidden="true" />}
 
       <p className="detail-source">{t('prices.notice')}</p>

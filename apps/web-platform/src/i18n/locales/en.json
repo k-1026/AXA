@@ -169,7 +169,17 @@
     "fxNotice": "Converted amounts are for reference only. Actual costs are in Korean won as quoted by the hospital. Rates applied on {{applied}} (Bank of Korea, as of {{base}}; updated daily at {{hour}}:00 KST) ·",
     "fxProvider": "Bank of Korea ECOS",
     "fxFallback": "Could not load exchange rates, so prices are shown in Korean won.",
-    "fxReference": "Converted with the European Central Bank reference rate ({{date}}). Actual charges may differ."
+    "fxReference": "Converted with the European Central Bank reference rate ({{date}}). Actual charges may differ.",
+    "hospitals": {
+      "see": "See {{count}} clinics",
+      "pending": "Clinic info coming soon",
+      "none": "We don't have a list of clinics for this treatment yet because no public data is available. Please check each clinic's details for the treatments it offers.",
+      "count": "{{count}} clinics offering this treatment (by name, not a ranking)",
+      "basis": "These clinics either list this treatment's price in HIRA's public non-covered fee data ({{date}}) or mention it on their own website (checked {{webDate}}). Please confirm availability and cost with the clinic.",
+      "close": "Close",
+      "srcHira": "Price on HIRA",
+      "srcWeb": "Clinic website"
+    }
   },
   "mypage": {
     "home": "Home",
