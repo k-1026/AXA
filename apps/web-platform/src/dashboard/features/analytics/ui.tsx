@@ -130,3 +130,9 @@ export function Funnel({ steps }: { steps: { name: string; n: number }[] }) {
     </ol>
   );
 }
+
+// 같은 탭 안의 카드로 이동 (제목으로 찾음 — 카드 컴포넌트는 고치지 않음). 타일 링크가 옛 대시보드 대신 여기로
+export function goToCard(title: string) {
+  const h = [...document.querySelectorAll<HTMLElement>('.hd .card-head h3')].find((x) => x.textContent?.trim().startsWith(title));
+  h?.closest('.card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}

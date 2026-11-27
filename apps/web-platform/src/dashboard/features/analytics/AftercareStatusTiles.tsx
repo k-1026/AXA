@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { API_BASE } from '../../../components/api';
 import { isStaffPreview, readStaffToken } from '../../../features/staff/staffSession';
-import { fmt } from './ui';
+import { fmt, goToCard } from './ui';
 import { AFTERCARE_FIRST_REPLY_MIN, SAMPLE_AFTERCARE_THREADS, SATISFACTION } from './sample';
 
 // GET /tenant/aftercare 한 줄 (환자 목록에서 쓰는 것까지)
@@ -57,13 +57,12 @@ export default function AftercareStatusTiles({ onExpired, filter, onFilter, onLi
   }, [onExpired, onList]);
 
   const v = (n: number | undefined) => (counts ? fmt(n ?? 0) : error ? '—' : '…');
-  const href = '/dashboard/legacy#aftercare';
   const tiles: { label: string; val: string; go: string; key?: AcFilter; alert?: boolean; example?: boolean; stars?: number }[] = [
     { key: 'fresh', label: '신규 문의', val: v(counts?.fresh), go: '새 대화 환자 보기 →' },
     { key: 'unanswered', label: '미답변', val: v(counts?.unanswered), go: counts ? (counts.unanswered ? `답하지 않은 환자 ${counts.unanswered}명 →` : '미답변 없음 →') : '불러오는 중…', alert: (counts?.unanswered ?? 0) > 0 },
     { key: 'working', label: '처리 중', val: v(counts?.working), go: '진행 중인 환자 보기 →' },
     { key: 'resolved', label: '해결 완료', val: v(counts?.resolved), go: '해결된 환자 보기 →' },
-    { label: '평균 첫 답변', val: `${Math.floor(AFTERCARE_FIRST_REPLY_MIN / 60)}시간 ${AFTERCARE_FIRST_REPLY_MIN % 60}분`, go: '환자 문의 → 병원 첫 답장', example: true },
+    { label: '평균 첫 답변', val: `${Math.floor(AFTERCARE_FIRST_REPLY_MIN / 60)}시간 ${AFTERCARE_FIRST_REPLY_MIN % 60}분`, go: '사후관리 채팅으로 →', example: true },
     { label: '만족도 (5점 만점)', val: `${SATISFACTION.score}`, go: `응답 ${SATISFACTION.responses}명 · 병원 내부용`, example: true, stars: SATISFACTION.score },
   ];
 
@@ -86,7 +85,9 @@ export default function AftercareStatusTiles({ onExpired, filter, onFilter, onLi
               <span className="today-go">{filter === t.key ? '목록 닫기 ↑' : t.go}</span>
             </button>
           ) : (
-          <a key={t.label} href={href} className={`today-tile${t.alert ? ' is-alert' : ''}`}>
+          // 평균 첫 답변 → 아래 사후관리 채팅으로 이동, 만족도 → 아직 볼 화면이 없어 누르지 않는 칸 (예전에는 둘 다 옛 대시보드로 갔음)
+          <a key={t.label} href="#aftercare" onClick={(e) => { e.preventDefault(); if (!t.stars) goToCard('사후관리 채팅'); }}
+            className={`today-tile${t.alert ? ' is-alert' : ''}${t.stars != null ? ' is-static' : ''}`} {...(t.stars != null ? { 'aria-disabled': true, tabIndex: -1 } : {})}>
             <span className="today-label">{t.label}{t.example && <span className="badge badge-example">예시</span>}</span>
             <span className="today-val">{t.val}{t.stars != null && <small className="stars" aria-label={`5점 중 ${t.stars}점`}>{'★'.repeat(Math.round(t.stars))}{'☆'.repeat(5 - Math.round(t.stars))}</small>}</span>
             <span className="today-go">{t.go}</span>

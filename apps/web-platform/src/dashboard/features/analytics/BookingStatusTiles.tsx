@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { REPEAT_CHANGES } from './sample';
-import { fmt } from './ui';
+import { fmt, goToCard } from './ui';
 import { staffGet } from './staffGet';
 
 type Req = { status: string; confirmed_slot: string | null };
@@ -50,12 +50,12 @@ export default function BookingStatusTiles({ rev = 0, onExpired }: { rev?: numbe
   }, [onExpired, rev]);
 
   const v = (n: number | undefined) => (counts ? fmt(n ?? 0) : error ? '—' : '…');
-  const href = '/dashboard/legacy#booking';
+  // 누르면 같은 탭 안의 카드로 이동 (예전에는 옛 대시보드 /dashboard/legacy 로 갔음)
   const tiles = [
-    { label: '대기', val: v(counts?.pending), go: counts?.pending ? '확정·시간 제안하러 가기 →' : '대기 중인 요청 없음 →', alert: (counts?.pending ?? 0) > 0, live: true },
-    { label: '시간 제안함', val: v(counts?.proposed), go: '환자 답을 기다리는 중 →', live: true },
-    { label: '이번 주 확정', val: v(counts?.thisWeek), go: `${thisWeekKst().map((d) => `${+d.slice(5, 7)}/${+d.slice(8)}`).join('~')} 진료 예약 →`, live: true },
-    { label: '반복 변경 (2회 이상)', val: fmt(REPEAT_CHANGES), go: '변경이 잦은 예약 →', live: false },
+    { label: '대기', val: v(counts?.pending), go: counts?.pending ? '확정·시간 제안하러 가기 →' : '대기 중인 요청 없음 →', alert: (counts?.pending ?? 0) > 0, live: true, to: '요청 목록' },
+    { label: '시간 제안함', val: v(counts?.proposed), go: '환자 답을 기다리는 중 →', live: true, to: '요청 목록' },
+    { label: '이번 주 확정', val: v(counts?.thisWeek), go: `${thisWeekKst().map((d) => `${+d.slice(5, 7)}/${+d.slice(8)}`).join('~')} 진료 예약 →`, live: true, to: '예약 캘린더' },
+    { label: '반복 변경 (2회 이상)', val: fmt(REPEAT_CHANGES), go: '취소·변경 사유 보기 →', live: false, to: '예약 취소·변경 사유' },
   ];
 
   return (
@@ -67,7 +67,7 @@ export default function BookingStatusTiles({ rev = 0, onExpired }: { rev?: numbe
       </header>
       <div className="today-tiles">
         {tiles.map((t) => (
-          <a key={t.label} href={href} className={`today-tile${t.alert ? ' is-alert' : ''}`}>
+          <a key={t.label} href="#booking" onClick={(e) => { e.preventDefault(); goToCard(t.to); }} className={`today-tile${t.alert ? ' is-alert' : ''}`}>
             <span className="today-label">{t.label}{!t.live && <span className="badge badge-example">예시</span>}</span>
             <span className="today-val">{t.val}</span>
             <span className="today-go">{t.go}</span>
