@@ -4,14 +4,17 @@ import { useAuth } from '../../components/auth';
 import { searchText, uid } from '../../lib/common';
 import { useHospitals } from '../hospital/useHospitals';
 import { hospitalNames } from '../hospital/name';
-import { acceptMine, cancelMine, createBooking, listMine, toLocal, ykihoOf, type BookingExtra } from './bookingApi';
+import { acceptMine, askQuestion, cancelMine, createBooking, listMine, toLocal, ykihoOf, type BookingExtra } from './bookingApi';
+import { useNotifications } from '../notifications/NotificationsProvider';
 import { checkBookingRules } from './bookingRules';
 import { SAMPLE_THREADS } from './sampleThreads';
 import type { BookingRequest, ConsultThread } from './types';
 
 // 저장 방식
 // - demo: 예시 상담으로 시작, 바꾼 내용은 메모리에만
-// - member: 예약 요청·취소는 서버(/hospitals/{id}/booking-requests, /me/booking-requests), 상담 글은 아직 메모리 (상담 답장 API는 B)
+// - member: 예약 요청·취소는 서버(/hospitals/{id}/booking-requests, /me/booking-requests)
+//   상담 글은 그 병원의 방문 전 예약 요청에 질문으로 보냄(POST …/questions, 11/27 — 전에는 메모리에만 있어 병원에 안 갔음)
+//   병원 답장·상태는 알림(Realtime)이 오면 바로 다시 불러옴 (전에는 화면을 열 때 한 번만)
 // 메모리는 계정별로 나누고, 로그아웃·탈퇴하면 모두 지운다 (같은 탭의 다음 사용자에게 보이지 않게)
 // 병원 답변은 병원 담당자가 직접 쓴다. 이 화면은 답을 지어내지 않는다
 type Mode = 'demo' | 'member';
@@ -40,6 +43,9 @@ export function useConsultThreads() {
   const mode: Mode = user?.demo ? 'demo' : 'member';
   const hospitals = useHospitals();
   const [list, setList] = useState<ConsultThread[]>(() => load(account, mode));
+  // 병원이 답장하거나 상태를 바꾸면 알림이 옴 → 이 값이 바뀌면 서버의 내 예약을 다시 불러와 답장을 붙임
+  const { notices } = useNotifications();
+  const serverSignal = notices.filter((n) => n.kind === 'reply' || n.kind === 'status').map((n) => `${n.key}:${n.count}`).join('|');
   const [activeId, setActiveId] = useState<string | null>(null);
   const accountRef = useRef(account);
   accountRef.current = account;
@@ -95,7 +101,7 @@ export function useConsultThreads() {
     return () => {
       alive = false;
     };
-  }, [mode, token, account, hospitals.status]);
+  }, [mode, token, account, hospitals.status, serverSignal]);
 
   // 지금 계정의 메모리에만 저장 (계정이 바뀐 뒤 늦게 도착한 변경은 버림)
   const update = useCallback((fn: (prev: ConsultThread[]) => ConsultThread[]) => {
@@ -178,7 +184,32 @@ export function useConsultThreads() {
     append(id, { text: notice });
   };
 
-  const send = (text: string) => active && text.trim() && append(active.hospitalId, { text: text.trim() });
+  // 상담 글을 병원에 보낼 예약 요청 (방문 전 = 확인 대기·시간 제안·확정 중 가장 최근). 없으면 병원에 전달할 곳이 없음
+  const openRequestOf = (t: ConsultThread | null) =>
+    [...(t?.messages ?? [])].reverse().find((m) => m.booking?.serverId && ['pending', 'proposed', 'confirmed'].includes(m.booking.status))?.booking?.serverId;
+  const canSend = mode === 'demo' || !!openRequestOf(active);
+
+  // 실제 회원: 서버에 질문으로 보냄 (실패하면 거부된 Promise → 화면이 글을 지우지 않고 오류 표시). 데모: 메모리에만
+  const send = async (text: string) => {
+    const body = text.trim();
+    if (!active || !body) return;
+    const serverId = openRequestOf(active);
+    if (mode === 'member' && token) {
+      if (!serverId) throw new Error('consult.needBooking');
+      const s = await askQuestion(token, serverId, body);
+      const q = s.questions?.[s.questions.length - 1];
+      const id = active.hospitalId;
+      update((prev) =>
+        prev.map((t) =>
+          t.hospitalId === id
+            ? { ...t, messages: [...t.messages, { id: questionId(serverId, q?.created_at ?? new Date().toISOString()), from: 'user' as const, at: q?.created_at ?? new Date().toISOString(), text: body }] }
+            : t,
+        ),
+      );
+      return;
+    }
+    append(active.hospitalId, { text: body });
+  };
 
   // 실제 회원은 서버에 예약 요청을 보내고(실패하면 거부된 Promise → 폼이 오류 표시), 서버가 준 상태로 남긴다
   // 내 살아 있는 예약 전부 (중복 예약 규칙 비교용, bookingRules.ts)
@@ -216,5 +247,5 @@ export function useConsultThreads() {
 
   const bookings = threads.flatMap((t) => t.messages.filter((m) => m.booking).map((m) => ({ thread: t, message: m, booking: m.booking! })));
 
-  return { mode, threads, active, select, open, send, requestBooking, requestBookingFor, changeBooking, cancelBooking, acceptBooking, search, bookings };
+  return { mode, threads, active, select, open, send, canSend, requestBooking, requestBookingFor, changeBooking, cancelBooking, acceptBooking, search, bookings };
 }

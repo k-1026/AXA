@@ -91,7 +91,7 @@ export default function BookingCalendar({ rev = 0, onExpired, onChanged }: { rev
         </div>
       </header>
       <p className="cal-legend">
-        {['pending', 'proposed', 'confirmed', 'visited', 'no_show'].map((s) => <span key={s}><i className={`ev-dot st-${s}`} />{ST[s]}</span>)}
+        {['pending', 'proposed', 'confirmed', 'visited', 'paid', 'no_show'].map((s) => <span key={s}><i className={`ev-dot st-${s}`} />{ST[s]}</span>)}
         <span><i className="ev-dot st-manual" />수기 예약</span>
         <span className="cal-hint">{state === 'error' ? '서버에서 불러오지 못했어요' : state === 'loading' ? '불러오는 중…' : '날짜를 누르면 예약 추가·처리'}</span>
       </p>

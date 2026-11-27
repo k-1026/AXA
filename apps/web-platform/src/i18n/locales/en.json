@@ -12,7 +12,8 @@
       "proposed": "{{hospital}} proposed another time.",
       "visited": "Your visit to {{hospital}} is marked complete. You can now use follow-up chat.",
       "no_show": "Your booking at {{hospital}} was marked as not visited.",
-      "expired": "All preferred dates for your request to {{hospital}} have passed."
+      "expired": "All preferred dates for your request to {{hospital}} have passed.",
+      "paid": "{{hospital}} confirmed your payment."
     },
     "reply": "{{hospital}} sent {{count}} consultation reply(s).",
     "aftercare": "Staff at {{hospital}} sent {{count}} follow-up message(s).",
@@ -490,7 +491,8 @@
       "visited": "Visited",
       "proposed": "New time proposed",
       "expired": "Expired",
-      "no_show": "No-show"
+      "no_show": "No-show",
+      "paid": "Payment confirmed"
     },
     "quick": {
       "booking": "Booking",
@@ -519,7 +521,10 @@
       "errClosed": "The hospital is not open at that day or time. Please choose a date and time within its hours.",
       "closedOption": "Closed"
     },
-    "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare."
+    "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare.",
+    "paidNote": "The hospital confirmed your payment. You can talk with the medical team in aftercare.",
+    "needBooking": "Send a booking request first to message the hospital staff",
+    "sendFailed": "Couldn't send. Please try again in a moment."
   },
   "bookings": {
     "backToChats": "Back to chats",

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { TILE_ATTRIBUTION, TILE_URL } from '../features/map/tiles';
 import { DEPARTMENT_COLORS } from '../features/hospital/filters';
 import { HospitalPhoto } from '../features/hospital/HospitalPhoto';
 import { instagramHandle, useHospitalName } from '../features/hospital/name';
@@ -163,10 +164,7 @@ export function HospitalDetailPage() {
         <section className="detail-card detail-map-card">
           <h2>{t('hospital.location')}</h2>
           <MapContainer center={[h.lat, h.lng]} zoom={16} className="detail-map">
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} />
             <CircleMarker
               center={[h.lat, h.lng]}
               radius={9}

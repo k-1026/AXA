@@ -10,7 +10,7 @@ import { staffGet } from './staffGet';
 
 type Req = { status: string; confirmed_slot: string | null };
 type Counts = { pending: number; proposed: number; thisWeek: number };
-const STATUSES = ['pending', 'proposed', 'confirmed', 'visited', 'no_show'] as const;
+const STATUSES = ['pending', 'proposed', 'confirmed', 'visited', 'no_show', 'paid'] as const;
 
 // 한국 날짜 (YYYY-MM-DD)
 const kday = (d: Date) => new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10);

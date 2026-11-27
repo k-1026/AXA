@@ -12,7 +12,8 @@
       "proposed": "{{hospital}} đã đề xuất thời gian khác.",
       "visited": "Lần khám tại {{hospital}} đã được ghi nhận hoàn tất. Bạn có thể trò chuyện sau điều trị.",
       "no_show": "Lịch hẹn tại {{hospital}} được ghi nhận là không đến.",
-      "expired": "Các ngày mong muốn trong yêu cầu gửi {{hospital}} đều đã qua."
+      "expired": "Các ngày mong muốn trong yêu cầu gửi {{hospital}} đều đã qua.",
+      "paid": "{{hospital}} đã xác nhận thanh toán của bạn."
     },
     "reply": "{{hospital}} đã gửi {{count}} phản hồi tư vấn.",
     "aftercare": "Nhân viên y tế {{hospital}} đã gửi {{count}} tin nhắn sau điều trị.",
@@ -490,7 +491,8 @@
       "visited": "Đã khám",
       "proposed": "Đề xuất giờ khác",
       "expired": "Đã hết hạn",
-      "no_show": "Không đến"
+      "no_show": "Không đến",
+      "paid": "Đã xác nhận thanh toán"
     },
     "quick": {
       "booking": "Hỏi đặt lịch",
@@ -519,7 +521,10 @@
       "errClosed": "Bệnh viện không làm việc vào ngày hoặc giờ đó. Vui lòng chọn ngày và giờ trong giờ làm việc.",
       "closedOption": "Nghỉ"
     },
-    "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám."
+    "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám.",
+    "paidNote": "Bệnh viện đã xác nhận số tiền thanh toán. Bạn có thể trao đổi với đội ngũ y tế trong mục chăm sóc sau điều trị.",
+    "needBooking": "Hãy gửi yêu cầu đặt lịch trước để nhắn tin cho nhân viên bệnh viện",
+    "sendFailed": "Không gửi được. Vui lòng thử lại sau giây lát."
   },
   "bookings": {
     "backToChats": "Quay lại danh sách tư vấn",

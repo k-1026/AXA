@@ -5,8 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import {
   ACTIONS, ActionDialog, Expired, ST, call, errText, loadOpenRequests, reqId, reqTitle, reqWho, slotLabel,
-  type ActionMode, type DbReq,
-} from './bookingShared';
+  type ActionMode, type DbReq, TR_RETRYING, retryTranslations } from './bookingShared';
 import { WaitBadge, WaitLegend, clinicMinutes, useClinicClock, waitLevel } from './waitTime';
 
 type Msg = { from: 'patient' | 'staff'; main: string; sub: string | null; at: string };
@@ -32,11 +31,13 @@ const sub = (r: DbReq) =>
   + (r.visa_needed ? ' · 예약확인서 필요' : '');
 
 function messages(r: DbReq): Msg[] {
-  const tr = (t: string | null, orig: string | null, missing = '(번역 전)') => t || (isKo(orig) ? null : missing);
+  // 번역이 비었을 때: 동의가 있으면 실패한 것 → 서버가 다시 번역 중, 없으면 원문만 (11/27)
+  const missing = r.translation_allowed ? TR_RETRYING : '(번역 동의 없음 — 원문만)';
+  const tr = (t: string | null, orig: string | null) => t || (isKo(orig) ? null : missing);
   const first: Msg[] = r.message_original ? [{ from: 'patient', main: r.message_original, sub: tr(r.message_translated, r.message_original), at: r.created_at }] : [];
   const rest: Msg[] = [
-    ...(r.replies ?? []).map((x) => ({ from: 'staff' as const, main: x.text_ko, sub: x.text_translated || '(번역 연결 전 — 환자에게 한국어 원문)', at: x.sent_at })),
-    ...(r.questions ?? []).map((x) => ({ from: 'patient' as const, main: x.text_original, sub: tr(x.text_translated, x.text_original, '(번역 전 — 번역 동의 없음)'), at: x.created_at })),
+    ...(r.replies ?? []).map((x) => ({ from: 'staff' as const, main: x.text_ko, sub: x.text_translated || (r.translation_allowed ? `${TR_RETRYING} (지금은 환자에게 한국어 원문)` : '(번역 동의 없음 — 환자에게 한국어 원문)'), at: x.sent_at })),
+    ...(r.questions ?? []).map((x) => ({ from: 'patient' as const, main: x.text_original, sub: tr(x.text_translated, x.text_original), at: x.created_at })),
   ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
   return [...first, ...rest];
 }
@@ -55,8 +56,14 @@ export default function ConsultChat({ rev, onExpired, onChanged }: { rev: number
   const waitMin = (r: DbReq) => { const since = waitingSince(r); return since ? clinicMinutes(since, now, hours) : null; };
 
   const load = useCallback(async () => {
-    try { setList(await loadOpenRequests()); setError(false); }
-    catch (e) { if (e instanceof Expired) onExpired(); else setError(true); }
+    try {
+      const rows = await loadOpenRequests();
+      setList(rows);
+      setError(false);
+      // 동의가 있는데 번역이 빠진 글이 있으면 서버에 다시 번역을 맡기고, 된 게 있으면 다시 불러옴
+      const gap = rows.some((r) => r.translation_allowed && messages(r).some((m) => m.sub?.startsWith(TR_RETRYING)));
+      if (gap && (await retryTranslations())) setList(await loadOpenRequests());
+    } catch (e) { if (e instanceof Expired) onExpired(); else setError(true); }
   }, [onExpired]);
   useEffect(() => { if (readStaffToken()) load(); }, [load, rev]);
 
