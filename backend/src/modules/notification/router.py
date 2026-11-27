@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from core.config import get_settings
 from core.db import get_db
-from core.security import PatientPrincipal, current_patient, patient_uuid
+from core.security import PatientPrincipal, StaffPrincipal, current_patient, current_staff, patient_uuid
 from modules.notification import push, service
 
 router = APIRouter(prefix="/me/notifications", tags=["notification"])
@@ -55,6 +55,19 @@ def read(body: ReadIn, db: Db, me: Me) -> dict[str, int]:
 @router.post("/realtime-token", response_model=RealtimeOut)
 def realtime_token(me: Me):
     token, exp = service.realtime_token(patient_uuid(me))
+    return RealtimeOut(url=get_settings().supabase_url, token=token, expires_at=exp)
+
+
+# ---------- 병원(직원) 실시간 알림 (11/27) ----------
+
+staff_router = APIRouter(prefix="/tenant/notifications", tags=["notification"])
+Staff = Annotated[StaffPrincipal, Depends(current_staff)]
+
+
+@staff_router.post("/realtime-token", response_model=RealtimeOut)
+def staff_realtime_token(staff: Staff):
+    """대시보드가 staff_notifications(자기 병원) INSERT를 구독 → 새 요청이 오면 바로 다시 불러옴."""
+    token, exp = service.staff_realtime_token(staff.staff_id, staff.tenant_id)
     return RealtimeOut(url=get_settings().supabase_url, token=token, expires_at=exp)
 
 

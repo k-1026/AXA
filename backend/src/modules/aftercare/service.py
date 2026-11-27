@@ -77,6 +77,7 @@ def patient_open(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID, text
     # 병원 직원용 한국어 번역 (요청서 번역 동의가 있을 때만, 실패하면 원문만 — 결정 25)
     ko = translate.for_request(db, req.id, text, "ko", req.tenant_id)
     _add(db, thread, "patient", text, photo=photo, attachments=attachments, translated=ko)
+    notification.notify_staff(db, req.tenant_id, "aftercare", req.id)  # 병원 대시보드에 바로 (11/27)
     db.commit()
     db.refresh(thread)
     return thread
