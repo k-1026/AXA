@@ -17,6 +17,13 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-views-daily · Claude (홈 방문자 일별 카드)
+- 한 일: **B 파일 `booking/analytics.py`·`router_tenant.py` 수정 (사용자 지시)** — `series`에 `daily=true`(하루 = 한 점, 최대 62일, 넘으면 422). 홈 "방문자 수 — 이번 달 vs 지난 기간 (일별)" 카드가 예시값 대신 이 값
+- 바뀐 계약: contracts 변경 이력 1줄
+- 테스트: 백엔드 335개 통과 (새 1개)
+- 다음 할 일: 없음
+- B에게 요청: 확인
+- 막힌 것·질문: 없음
 ### 2026-11-27 · backend-A-paid · Claude (요청부터 결제까지 확인)
 - 한 일: **B 파일 `booking/models.py`·`service.py`·`schemas.py`·`router_tenant.py` 수정 (사용자 지시)** — 상태 `paid` + `visited → paid` 병원 행동(금액·수단 필수), `paid_amount`·`paid_method` 칸(마이그레이션 0018, 상태 CHECK 2곳 다시 만듦). 알림 상태 `paid`, 사후관리·챗봇 예약 요약은 `paid`도 방문 완료로 봄. 단계별 시연 스크립트 `backend/scripts/seed_flow_demo.py` (가상 환자 6명: 대기·시간 제안·확정·방문 완료·결제 확인 2, `--remove`로만 지움, SQLite로 두 번 돌려 같은 결과 확인)
 - 바뀐 계약: contracts 2절·변경 이력, 결정 38
