@@ -93,3 +93,10 @@ def test_사진만_한국어끼리는_번역하지_않음(llm):
     assert translate.translate("📷", "ko") is None
     assert translate.translate("hello", "xx") is None
     assert llm.calls == []
+
+
+def test_앱의_모든_언어로_번역할_수_있다(llm):
+    # 언어를 새로 넣을 때 번역 쪽이 빠지지 않게 (11/27: ja가 빠져 일본어 환자 메시지가 원문만 갔음)
+    from modules.patient.models import LANGS
+    assert set(LANGS) <= set(translate.LANG_NAMES)
+    assert translate.translate("사진을 보내 주세요", "ja") == "[Japanese] 사진을 보내 주세요"

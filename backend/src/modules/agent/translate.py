@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 LANG_NAMES = {
     "ko": "Korean", "en": "English", "vi": "Vietnamese",
     "zh-TW": "Traditional Chinese (Taiwan)", "zh-CN": "Simplified Chinese",
+    "ja": "Japanese",  # 11/26 일본어 추가 때 빠져서 일본어 환자 메시지가 번역되지 않았음 (11/27)
 }
 MAX_CHARS = 4000
 
