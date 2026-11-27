@@ -16,14 +16,16 @@ const FALLBACK_MS = 60_000;
 const PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export type NotifyStatus = 'confirmed' | 'rejected' | 'proposed' | 'visited' | 'no_show' | 'expired';
+// 방문 전 리마인드 단계 (kind=reminder, backend notification/reminders.py)
+export type ReminderStage = '48h' | '24h' | '2h';
 type Target = '/mypage/bookings' | '/booking' | '/aftercare';
 
 interface ServerNotice {
   id: number;
-  kind: 'status' | 'reply' | 'aftercare';
+  kind: 'status' | 'reply' | 'aftercare' | 'reminder';
   request_id: string;
   hospital_id: number | null;
-  status: NotifyStatus | null;
+  status: NotifyStatus | ReminderStage | null;
   created_at: string;
   read: boolean;
 }
@@ -32,7 +34,7 @@ export type Notice = {
   key: string;
   ids: number[]; // 같은 예약의 같은 종류는 한 줄로 묶음 (예: 답장 3개)
   kind: ServerNotice['kind'];
-  status?: NotifyStatus;
+  status?: NotifyStatus | ReminderStage;
   count: number;
   requestId: string;
   hospital?: KoEn;
@@ -51,7 +53,7 @@ interface Ctx {
 const NotificationsContext = createContext<Ctx>({ notices: [], markRead: () => {}, markAll: () => {}, countFor: () => 0, live: false });
 export const useNotifications = () => useContext(NotificationsContext);
 
-const TARGET: Record<ServerNotice['kind'], Target> = { status: '/mypage/bookings', reply: '/booking', aftercare: '/aftercare' };
+const TARGET: Record<ServerNotice['kind'], Target> = { status: '/mypage/bookings', reply: '/booking', aftercare: '/aftercare', reminder: '/mypage/bookings' };
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user, account, token } = useAuth();
@@ -145,7 +147,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const groups = new Map<string, Notice>();
     for (const n of rows) {
       if (n.read) continue;
-      const key = n.kind === 'status' ? `status:${n.request_id}:${n.id}` : `${n.kind}:${n.request_id}`;
+      const key = n.kind === 'status' || n.kind === 'reminder' ? `${n.kind}:${n.request_id}:${n.id}` : `${n.kind}:${n.request_id}`;
       const g = groups.get(key);
       if (g) {
         g.ids.push(n.id);
