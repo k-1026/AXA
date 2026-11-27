@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n';
 import { todayKst } from '../lib/common';
 import { nowKstTime } from '../features/consult/format';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
-import { BookingConsentFields, consentReady, emptyConsent, toExtra, useResidencyCheck } from '../features/consult/BookingConsentFields';
+import { BookingConsentFields, consentReady, emptyConsent, toExtra, useResidencyCheck, type ConsentState } from '../features/consult/BookingConsentFields';
+import { readSessionSetting, writeSessionSetting } from '../components/storage';
 import { useAuth } from '../components/auth';
 import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { useHospitals } from '../features/hospital/useHospitals';
@@ -18,6 +19,21 @@ import type { DepartmentKey } from '../features/hospital/types';
 const IS_PUBLIC_DEPLOY = typeof window !== 'undefined'
   && !['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
 
+// 다른 화면에 갔다 와도 고른 값 유지 (11/27): 병원별로 이 탭(sessionStorage)에만. 예약을 보내면 지움
+// 지난 날짜·이미 지난 시간·예약 안 되는 시간은 다시 채우지 않음 (아래 useEffect)
+type Draft = { month: string; date: string; time: string; dept: DepartmentKey | ''; language: string; consent: ConsentState };
+const draftKey = (id?: string) => `reserveDraft.${id ?? ''}`;
+function readDraft(id: string | undefined, today: string): Partial<Draft> {
+  try {
+    const d = JSON.parse(readSessionSetting(draftKey(id)) ?? 'null') as Partial<Draft> | null;
+    if (!d) return {};
+    if (d.date && d.date < today) return { ...d, month: undefined, date: '', time: '' };
+    return d;
+  } catch {
+    return {};
+  }
+}
+
 // 병원 목록의 "예약하기": 달력에서 날짜 → 그날 예약 가능한 시간 → 예약 신청
 // 신청하면 그 병원 상담에 예약 요청(확인 대기)으로 남고, 확정은 병원이 한다
 export function ReservePage() {
@@ -28,14 +44,15 @@ export function ReservePage() {
   const consult = useConsultThreads();
   const today = todayKst();
   const nowTime = nowKstTime();
-  const [month, setMonth] = useState(today.slice(0, 7)); // YYYY-MM
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [draft] = useState(() => readDraft(id, today));
+  const [month, setMonth] = useState(draft.month ?? today.slice(0, 7)); // YYYY-MM
+  const [date, setDate] = useState(draft.date ?? '');
+  const [time, setTime] = useState(draft.time ?? '');
   // 진료과·상담 언어는 환자가 직접 고름 (전에는 병원 첫 진료과·화면 언어로 그냥 보냄 → 한국어 화면이면 상담 언어 ko, 11/26)
-  const [dept, setDept] = useState<DepartmentKey | ''>('');
-  const [language, setLanguage] = useState('');
+  const [dept, setDept] = useState<DepartmentKey | ''>(draft.dept ?? '');
+  const [language, setLanguage] = useState(draft.language ?? '');
   const [done, setDone] = useState(false);
-  const [consent, setConsent] = useState(emptyConsent);
+  const [consent, setConsent] = useState<ConsentState>(() => ({ ...emptyConsent(), ...draft.consent }));
   const residency = useAuth().user?.residency;
   const checkResidency = useResidencyCheck();
   const [error, setError] = useState('');
@@ -44,6 +61,18 @@ export function ReservePage() {
   const locale = i18n.language;
   const lastDay = addDays(today, DAYS_AHEAD - 1);
   const h = state.status === 'ready' ? state.data.items.find((x) => x.id === id) : undefined;
+
+  // 다시 채운 날짜·시간이 지금은 예약 안 되면 비움 (병원 정보를 받은 뒤 한 번)
+  useEffect(() => {
+    if (!h || !date) return;
+    if (!isBookable(h, date, today, nowTime)) { setDate(''); setTime(''); return; }
+    if (time && !slotsFor(h, date, today, nowTime).some((s) => s.time === time && s.free)) setTime('');
+  }, [h]); // 병원 정보가 처음 들어올 때만 (고르는 중에는 화면이 이미 막음)
+
+  useEffect(() => {
+    if (done) return;
+    writeSessionSetting(draftKey(id), JSON.stringify({ month, date, time, dept, language, consent } satisfies Draft));
+  }, [id, done, month, date, time, dept, language, consent]);
 
   // 달력 칸: 월요일 시작, 앞쪽 빈칸 포함
   const cells = useMemo(() => {
@@ -109,6 +138,7 @@ export function ReservePage() {
         { date, time, language },
         member ? toExtra(consent, false) : undefined,
       );
+      writeSessionSetting(draftKey(id), null);
       setDone(true);
     } catch (err) {
       setError(t(bookingErrorKey(err)));
