@@ -30,7 +30,8 @@ export default function App() {
   const data = publicData as PublicData;
   const navigate = useNavigate();
   const [tab, setTab] = useState<string>(tabFromHash);
-  const [mode, setMode] = useState<Mode>('initial');
+  // 모드 토글은 없앰: 로그인하면 바로 운영 후 화면 (초기 모드 코드는 탭 안에 남아 있음)
+  const mode: Mode = 'operating';
   // 진료과: 헤더 선택 대신 로그인한 병원의 진료과 중 통계가 있는 첫 번째 (없으면 피부과)
   const [dept, setDept] = useState<DeptKey>('dermatology');
   const [setup, setSetup] = useState(SETUP_ITEMS);
@@ -72,10 +73,6 @@ export default function App() {
         <div className="hospital">
           <b>{real ? profile.name : `예시 ${DEPT_LABEL[dept]}의원`}</b>
           <span>{real ? `대구${profile.district ? ` ${profile.district}` : ''}${profile.demo ? ' · 가상 병원' : ''}` : `대구 ${SAMPLE_DISTRICT} · 가상 병원`}</span>
-        </div>
-        <div className="mode" role="group" aria-label="데이터 상태">
-          <button type="button" aria-pressed={mode === 'initial'} onClick={() => setMode('initial')}>초기 (데이터 없음)</button>
-          <button type="button" aria-pressed={mode === 'operating'} onClick={() => setMode('operating')}>운영 후 (예시)</button>
         </div>
         <button type="button" className="btn-ghost" onClick={() => { clearStaffToken(); navigate('/login', { replace: true, state: { who: 'staff' } }); }}>로그아웃</button>
       </header>
