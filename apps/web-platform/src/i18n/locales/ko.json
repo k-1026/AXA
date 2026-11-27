@@ -74,6 +74,9 @@
     "notReady": "데이터 준비 중"
   },
   "popup": {
+    "partner": "입점 병원",
+    "premium": "프리미엄",
+    "premiumTip": "메디대구가 선별한 프리미엄 병원입니다",
     "type": "종류",
     "addr": "주소",
     "tel": "전화",

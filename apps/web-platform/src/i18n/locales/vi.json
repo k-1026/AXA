@@ -74,6 +74,9 @@
     "notReady": "Đang chuẩn bị dữ liệu"
   },
   "popup": {
+    "partner": "Đối tác MediDaegu",
+    "premium": "Premium",
+    "premiumTip": "Bệnh viện premium do MediDaegu tuyển chọn",
     "type": "Loại",
     "addr": "Địa chỉ",
     "tel": "Điện thoại",

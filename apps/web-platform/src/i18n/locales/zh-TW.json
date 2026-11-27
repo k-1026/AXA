@@ -74,6 +74,9 @@
     "notReady": "資料準備中"
   },
   "popup": {
+    "partner": "入駐醫院",
+    "premium": "高級",
+    "premiumTip": "MediDaegu 精選的高級醫院",
     "type": "類型",
     "addr": "地址",
     "tel": "電話",

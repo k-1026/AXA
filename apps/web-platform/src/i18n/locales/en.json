@@ -74,6 +74,9 @@
     "notReady": "Data coming soon"
   },
   "popup": {
+    "partner": "MediDaegu partner",
+    "premium": "Premium",
+    "premiumTip": "A premium hospital selected by MediDaegu",
     "type": "Type",
     "addr": "Address",
     "tel": "Phone",

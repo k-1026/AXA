@@ -40,6 +40,9 @@
     "notReady": "データ準備中"
   },
   "popup": {
+    "partner": "提携病院",
+    "premium": "プレミアム",
+    "premiumTip": "メディ大邱が選んだプレミアム病院です",
     "type": "種別",
     "addr": "住所",
     "tel": "電話",
