@@ -81,6 +81,8 @@ def _move(
     req.updated_at = utcnow()
     if actor_type != "patient":  # 병원·시스템이 바꾼 것만 환자에게 알림 (같은 commit, 결정 27)
         notification.notify(db, req.patient_id, "status", req.id, nxt)
+    else:  # 환자가 취소·수락한 것은 병원 대시보드에 (11/27)
+        notification.notify_staff(db, req.tenant_id, "status", req.id, nxt)
     db.commit()
     db.refresh(req)
     return req
@@ -168,6 +170,7 @@ def create_request(db: Session, patient_id: uuid.UUID, tenant_id: uuid.UUID, dat
     db.add(req)
     db.flush()
     db.add(BookingEvent(request_id=req.id, from_status=None, to_status="pending", actor_type="patient", actor_id=str(patient_id)))
+    notification.notify_staff(db, tenant_id, "request", req.id)  # 병원 대시보드에 바로 (같은 commit)
     db.commit()
     db.refresh(req)
     return req
