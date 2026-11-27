@@ -2,30 +2,34 @@
 // 새 상담·오늘 방문: GET /tenant/analytics/summary 의 today · 미답변 사후관리: GET /tenant/aftercare (해결 안 된 대화의 unanswered)
 // 결제 금액 입력은 백엔드 기능이 아직 없어 예시 숫자. 누르면 새 화면의 상담·예약 / 사후관리 / 진료·결제 확인 탭으로
 import { useEffect, useState } from 'react';
-import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { fmt } from './ui';
+import { useAutoRefresh } from './autoRefresh';
+import { monthSummaryPath } from './KpiTrends';
+import { staffGet } from './staffGet';
 
 type Today = { newRequests: number; visitsToday: number; aftercareUnanswered: number };
 type Thread = { status: string; unanswered: number };
 
-async function get<T>(path: string, token: string): Promise<T> {
-  const res = await fetch(API_BASE + path, { headers: { Authorization: 'Bearer ' + token } });
+async function get<T>(path: string): Promise<T> {
+  const res = await staffGet(path);
   if (!res.ok) throw new Error(String(res.status));
-  return res.json();
+  return res.body as T;
 }
 
 export default function TodayTiles({ onExpired }: { onExpired: () => void }) {
   const [today, setToday] = useState<Today | null>(null);
   const [error, setError] = useState(false);
+  const auto = useAutoRefresh(); // 새 요청 수가 바로 바뀌게 (30초마다·탭으로 돌아올 때)
 
   useEffect(() => {
     const token = readStaffToken();
     if (!token) return;
     let alive = true;
     Promise.all([
-      get<{ today: { newRequests: number; visitsToday: number } }>('/tenant/analytics/summary', token),
-      get<Thread[]>('/tenant/aftercare', token),
+      // 홈 "기간 성과"(이번 달)와 같은 주소 → 서버에는 한 번만
+      get<{ today: { newRequests: number; visitsToday: number } }>(monthSummaryPath()),
+      get<Thread[]>('/tenant/aftercare'),
     ])
       .then(([s, threads]) => {
         if (!alive) return;
@@ -38,7 +42,7 @@ export default function TodayTiles({ onExpired }: { onExpired: () => void }) {
         else setError(true);
       });
     return () => { alive = false; };
-  }, [onExpired]);
+  }, [onExpired, auto]);
 
   const v = (n: number | undefined) => (today ? fmt(n ?? 0) : error ? '—' : '…');
   const ac = today?.aftercareUnanswered ?? 0;

@@ -4,6 +4,7 @@ import { StatCard } from '../features/mypage/StatCard';
 import { ScheduleCard } from '../features/mypage/ScheduleCard';
 import { ChecklistCard } from '../features/mypage/ChecklistCard';
 import { AccountBar } from '../features/mypage/AccountBar';
+import { PushToggle } from '../features/notifications/PushToggle';
 import { LegalLinks } from '../features/legal/LegalLinks';
 import { CalendarCheckIcon, CalendarIcon, ClockIcon, HospitalHeartIcon } from '../features/mypage/icons';
 import { useConsultThreads } from '../features/consult/useConsultThreads';
@@ -55,6 +56,7 @@ export function MyPage() {
         <ChecklistCard initial={data.checklist} />
       </div>
 
+      <PushToggle variant="card" />
       <AccountBar />
       <LegalLinks />
     </div>

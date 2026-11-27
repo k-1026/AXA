@@ -241,7 +241,7 @@ def test_summary_counts_only_my_tenant_and_period(db):
     assert (k["requests"]["now"], k["requests"]["prev"]) == (3, 1)
     assert k["confirmed"]["now"] == 2 and k["visited"]["now"] == 1
     assert k["cancelRate"]["now"] == 50
-    assert k["views"]["now"] is None and "views" in s["suppressed"]
+    assert (k["views"]["now"], k["views"]["prev"]) == (0, 0) and "views" not in s["suppressed"]  # 조회 기록 없음
     assert s["period"]["prevFrom"] == "2026-10-16" and s["period"]["prevTo"] == "2026-10-31"
     assert s["today"]["visitsToday"] == 1  # reqs[1] 확정, 오늘 11:00
     assert s["today"]["newRequests"] == 1  # 지난 기간 요청 1건이 아직 pending
@@ -257,6 +257,47 @@ def test_summary_api_requires_staff_and_returns_shape(client, db):
     assert client.get("/api/v1/tenant/analytics/summary").status_code == 401
     bad = client.get("/api/v1/tenant/analytics/summary?from=2026-11-20&to=2026-11-01", headers=_staff_headers(t))
     assert bad.status_code == 422
+
+
+def test_series_buckets_match_summary_for_each_range(db):
+    """구간 숫자 = 그 구간으로 summary를 부른 값 (예전 프론트가 구간마다 summary를 부르던 것과 같게)"""
+    t, other = _tenant(db, "A", 9001), _tenant(db, "B", 9002)
+    slot = datetime(2026, 11, 16, 2, 0, tzinfo=timezone.utc)
+    reqs = [service.create_request(db, _patient(db).id, t.id, _data()) for _ in range(3)]
+    service.staff_act(db, t.id, "s", reqs[0].id, "confirm", slot)
+    service.staff_act(db, t.id, "s", reqs[0].id, "visited")
+    service.staff_act(db, t.id, "s", reqs[1].id, "confirm", slot)
+    service.patient_cancel(db, reqs[2].patient_id, reqs[2].id, "cost")
+    _at(db, reqs[0].id, datetime(2026, 11, 3, 16, 0, tzinfo=timezone.utc))  # 한국 11/4 01:00 (UTC 날짜와 다름)
+    _at(db, reqs[1].id, datetime(2026, 11, 10, tzinfo=timezone.utc))
+    _at(db, reqs[2].id, datetime(2026, 11, 26, tzinfo=timezone.utc))
+    old = service.create_request(db, _patient(db).id, t.id, _data())
+    _at(db, old.id, datetime(2026, 10, 20, tzinfo=timezone.utc))
+    service.create_request(db, _patient(db).id, other.id, _data())
+
+    s = analytics.series(db, t.id, date(2026, 11, 1), date(2026, 11, 27))
+    assert s["size"] == 3 and len(s["buckets"]) == 9
+    assert s["buckets"][0]["from"] == "2026-11-01" and s["buckets"][-1]["to"] == "2026-11-27"
+    keys = ("views", "requests", "confirmed", "visited", "cancelRate")
+    for b in s["buckets"]:
+        k = {x["key"]: x for x in analytics.summary(db, t.id, date.fromisoformat(b["from"]), date.fromisoformat(b["to"]))["kpi"]}
+        assert b["now"] == {key: k[key]["now"] for key in keys}
+    days = (date(2026, 11, 27) - date(2026, 11, 1)).days + 1
+    for i, b in enumerate(s["buckets"]):
+        a = date(2026, 11, 1) - timedelta(days=days) + timedelta(days=i * 3)
+        k = {x["key"]: x for x in analytics.summary(db, t.id, a, a + timedelta(days=2))["kpi"]}
+        assert b["prev"] == {key: k[key]["now"] for key in keys}
+    assert sum(b["now"]["requests"] for b in s["buckets"]) == 3
+    assert s["buckets"][1]["now"]["confirmed"] == 1  # 11/4 (한국 날짜) 구간
+
+
+def test_series_api_requires_staff_and_limits_range(client, db):
+    t = _tenant(db)
+    r = client.get("/api/v1/tenant/analytics/series?from=2026-11-01&to=2026-11-03", headers=_staff_headers(t))
+    assert r.status_code == 200 and r.json()["size"] == 1 and len(r.json()["buckets"]) == 3
+    assert client.get("/api/v1/tenant/analytics/series").status_code == 401
+    for q in ("from=2026-11-20&to=2026-11-01", "from=2025-01-01&to=2026-11-01"):
+        assert client.get(f"/api/v1/tenant/analytics/series?{q}", headers=_staff_headers(t)).status_code == 422
 
 
 def _hours(db: Session, hospital_id: int) -> None:

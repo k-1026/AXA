@@ -98,3 +98,22 @@ def test_브라우저_사전_요청에서_PUT_허용(client):
         "Origin": "http://localhost:5173", "Access-Control-Request-Method": "PUT",
         "Access-Control-Request-Headers": "authorization,content-type"})
     assert r.status_code == 200 and "PUT" in r.headers["access-control-allow-methods"]
+
+
+# --- 국적 (11/27, 결정 36): 한국 국적이면 해외에 살아도 국내 거주 취급 ---
+def test_한국_국적이면_해외_거주여도_국내_거주_취급(client):
+    assert me(client, signup(client, {**VISITOR, "nationality": "KR"}))["residency"] == "resident"
+    assert me(client, signup(client, {**VISITOR, "nationality": "TW"}, email="tw@example.com"))["residency"] == "short_term"
+
+
+def test_국적은_ISO_2자리만_그리고_저장하지_않음(client):
+    data = {**SIGNUP, "email": "bad2@example.com", "residency": {**VISITOR, "nationality": "Korea"}}
+    assert client.post(f"{API}/auth/patient/signup", json=data).status_code == 422
+    assert "nationality" not in me(client, signup(client, {**VISITOR, "nationality": "JP"}, email="jp@example.com"))
+
+
+def test_요청서_국적이_한국이면_403(client, db):
+    r = client.post(f"{API}/hospitals/{make_hospital(db).id}/booking-requests", json=body(nationality="KR"),
+                    headers=signup(client, VISITOR))
+    assert r.status_code == 403
+    assert (r.json()["code"], r.json()["detail"]["reason"]) == ("residency.not_eligible", "korean_nationality")

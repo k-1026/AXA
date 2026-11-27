@@ -1898,6 +1898,14 @@ button.mp-add {
   color: #fff;
 }
 
+/* 체류 형태 다시 답하기: 국적을 고르기 전에는 흐리게 (11/27) */
+.mp-login-button:disabled {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
 .mp-login-secondary {
   background: var(--surface);
   color: var(--accent);
@@ -5386,6 +5394,30 @@ body.chat-open {
   cursor: pointer;
 }
 
+/* 예약 화면: 진료과·상담 언어 고르기, 다 고르기 전에는 신청 버튼 흐리게 (11/26) */
+.reserve-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px 12px;
+  width: 100%;
+}
+
+.reserve-fields select {
+  width: 100%;
+}
+
+.reserve-submit:disabled {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.reserve-need {
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 .reserve-note {
   margin: 0;
   font-size: 0.8rem;
@@ -5521,6 +5553,26 @@ body.chat-open {
   font: inherit;
   font-size: 0.85rem;
   cursor: pointer;
+}
+
+/* 알림 받기 카드: 예약 완료 화면·마이페이지 (11/27) */
+.notify-push-card {
+  align-self: stretch;
+  margin-top: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--accent-line, var(--border));
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  text-align: left;
+}
+
+.notify-push-card .notify-push-title {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.notify-push-card p {
+  font-size: 0.85rem;
 }
 
 /* 체류 형태 3문항 (결정 28) — 가입·예약·마이페이지 */

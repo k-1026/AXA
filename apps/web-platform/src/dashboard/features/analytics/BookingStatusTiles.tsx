@@ -3,10 +3,10 @@
 // 이번 주 확정 = 확정된 진료일(confirmed_slot)이 이번 주(월~일, 한국 날짜)인 확정·방문·미방문 예약
 // 반복 변경(2회 이상)은 근거 데이터가 백엔드에 없어 예시. 누르면 확정·답장 기능이 있는 옛 화면으로
 import { useEffect, useState } from 'react';
-import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
 import { REPEAT_CHANGES } from './sample';
 import { fmt } from './ui';
+import { staffGet } from './staffGet';
 
 type Req = { status: string; confirmed_slot: string | null };
 type Counts = { pending: number; proposed: number; thisWeek: number };
@@ -20,7 +20,8 @@ function thisWeekKst(): [string, string] {
   return [mon.toISOString().slice(0, 10), new Date(mon.getTime() + 6 * 864e5).toISOString().slice(0, 10)];
 }
 
-export default function BookingStatusTiles({ onExpired }: { onExpired: () => void }) {
+// rev가 바뀌면 다시 불러옴 (처리·자동 새로고침). 불러오는 동안 이전 숫자는 그대로 둠
+export default function BookingStatusTiles({ rev = 0, onExpired }: { rev?: number; onExpired: () => void }) {
   const [counts, setCounts] = useState<Counts | null>(null);
   const [error, setError] = useState(false);
 
@@ -29,10 +30,10 @@ export default function BookingStatusTiles({ onExpired }: { onExpired: () => voi
     if (!token) return;
     let alive = true;
     Promise.all(STATUSES.map(async (s) => {
-      const res = await fetch(`${API_BASE}/tenant/booking-requests?status=${s}`, { headers: { Authorization: 'Bearer ' + token } });
+      const res = await staffGet(`/tenant/booking-requests?status=${s}`);
       if (res.status === 401) throw new Error('401');
       if (!res.ok) throw new Error(String(res.status));
-      return res.json() as Promise<Req[]>;
+      return res.body as Req[];
     }))
       .then(([pending, proposed, ...done]) => {
         if (!alive) return;
@@ -46,7 +47,7 @@ export default function BookingStatusTiles({ onExpired }: { onExpired: () => voi
         else setError(true);
       });
     return () => { alive = false; };
-  }, [onExpired]);
+  }, [onExpired, rev]);
 
   const v = (n: number | undefined) => (counts ? fmt(n ?? 0) : error ? '—' : '…');
   const href = '/dashboard/legacy#booking';

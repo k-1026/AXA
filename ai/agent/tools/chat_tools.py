@@ -405,6 +405,11 @@ def prepare_booking_request(args: JSON, ctx: ToolContext) -> JSON:
     nationality = str(args["nationality"]).strip().upper()
     if not re.fullmatch(r"[A-Z]{2}", nationality):
         raise ToolError("nationality는 ISO 3166-1 alpha-2 국가 코드(예: TW, VN, US)여야 합니다")
+    if nationality == "KR":  # 한국 국적은 해외에 살아도 유치 대상 아님 (결정 36, 서버도 403)
+        return {"status": "not_available",
+                "reason": "Consultation requests through MediDaegu are for foreign short-term visitors. Korean nationals "
+                          "(even if living abroad) can't send requests through us. Please contact the hospital directly.",
+                "hospital_tel": daegu_tel(h["tel"])}
     draft = {
         "hospital_id": h["id"], "hospital_name_en": h["name_en"], "department": department,
         "department_code": DEPT_CODES[department], "preferred_slots": slots, "language": args["language"], "nationality": nationality,

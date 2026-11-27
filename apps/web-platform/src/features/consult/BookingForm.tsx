@@ -107,7 +107,8 @@ export function BookingForm({ initial, hospital, member = false, onSubmit, onCan
       <p className="consult-form-hint">{t(initial ? 'consult.form.changeHint' : 'consult.form.hint')}</p>
       <div className="consult-form-actions">
         <button type="button" onClick={onCancel}>{t('consult.form.cancel')}</button>
-        <button type="submit" className="is-primary" disabled={busy}>
+        {/* 회원은 국적·단기 방문·필수 동의를 다 해야 눌림 (예약 화면과 같게, 11/26) */}
+        <button type="submit" className="is-primary" disabled={busy || (member && !consentReady(consent, hasNote, residency))}>
           {busy ? t('auth.submitting') : t(initial ? 'consult.form.changeSubmit' : 'consult.form.submit')}
         </button>
       </div>

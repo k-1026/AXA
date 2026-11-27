@@ -1,10 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import i18n from '../i18n';
+import i18n, { LANGUAGES } from '../i18n';
 import { api, ApiError, setUnauthorizedHandler } from './api';
 import { accountKeyOf, removeAccountData, resetAccountMemory, setCurrentAccount, type AccountKey } from './account';
 import { readSessionSetting, readSetting, removeSetting, writeSessionSetting, writeSetting } from './storage';
 import { disablePush } from '../features/notifications/webPush';
-import type { Residency, ResidencyAnswers } from '../features/residency/ResidencyQuestions';
+import { withoutBlankNationality, type Residency, type ResidencyAnswers } from '../features/residency/ResidencyQuestions';
 
 // 로그인 상태
 // - 실제 회원: 백엔드 회원가입·로그인. 토큰은 이 브라우저(localStorage)에 두고, 로그아웃하면 서버 세션도 끝냄
@@ -16,6 +16,7 @@ export interface User {
   email?: string;
   // 체류 형태 (결정 28): null이면 아직 안 답함 → 첫 예약 요청 때 물음. resident면 정보 열람만
   residency?: Residency | null;
+  lang?: string; // 계정 언어 (preferred_lang). 화면 언어를 바꾸면 같이 저장
 }
 
 export interface SignupInput {
@@ -42,7 +43,7 @@ const TOKEN_KEY = 'token';
 const DEMO_USER: User = { name: 'Emma', demo: true };
 
 function toUser(me: Me): User {
-  return { id: me.id, name: me.display_name || me.email.split('@')[0], demo: false, email: me.email, residency: me.residency ?? null };
+  return { id: me.id, name: me.display_name || me.email.split('@')[0], demo: false, email: me.email, residency: me.residency ?? null, lang: me.preferred_lang };
 }
 
 const AuthContext = createContext<{
@@ -112,6 +113,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [token, clearToken]);
 
+  // 화면 위 언어를 바꾸면 계정 언어도 저장 (11/26 팀 결정 — 전에는 다음 로그인 때 가입 언어로 돌아감)
+  // 로그인 때 계정 언어로 맞추는 것(startSession)은 값이 같아서 보내지 않음. 데모·비로그인은 이 브라우저에만
+  useEffect(() => {
+    if (!token || !user || user.demo) return;
+    const onChange = (lng: string) => {
+      if (lng === user.lang || !LANGUAGES.some((l) => l.code === lng)) return;
+      api<Me>('/me', { method: 'PATCH', token, body: { preferred_lang: lng } })
+        .then((me) => setUser(toUser(me)))
+        .catch(() => {}); // 저장 실패해도 화면 언어는 바뀐 그대로
+    };
+    i18n.on('languageChanged', onChange);
+    return () => i18n.off('languageChanged', onChange);
+  }, [token, user]);
+
   const startSession = async (accessToken: string) => {
     const me = await api<Me>('/me', { token: accessToken });
     resetAccountMemory(); // 앞 계정(데모 포함)의 메모리 데이터를 남기지 않음
@@ -133,14 +148,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (input: SignupInput) => {
     const r = await api<{ access_token: string }>('/auth/patient/signup', {
       method: 'POST',
-      body: input,
+      body: { ...input, residency: withoutBlankNationality(input.residency) },
     });
     await startSession(r.access_token);
   };
 
   // 체류 형태 다시 답하기 (PUT /me/residency). 판단은 서버가 하고 결과를 돌려줌
   const setResidency = async (answers: ResidencyAnswers) => {
-    const me = await api<Me>('/me/residency', { method: 'PUT', token, body: answers });
+    const me = await api<Me>('/me/residency', { method: 'PUT', token, body: withoutBlankNationality(answers) });
     setUser(toUser(me));
     return me.residency ?? 'short_term';
   };

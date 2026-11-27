@@ -17,7 +17,7 @@ from core.db import utcnow
 from core.errors import AppError
 from modules.booking.models import BookingRequest
 from modules.notification import push
-from modules.notification.models import KINDS, Notification
+from modules.notification.models import KINDS, STAFF_KINDS, Notification, StaffNotification
 
 NOTIFY_STATUS = ("confirmed", "rejected", "proposed", "visited", "no_show", "expired")
 REMINDER_STAGES = ("48h", "24h", "2h")  # 방문 전 리마인드 (notification/reminders.py)
@@ -34,6 +34,13 @@ def notify(db: Session, patient_id: uuid.UUID | None, kind: str, request_id: uui
         return
     db.add(Notification(patient_id=patient_id, kind=kind, request_id=request_id, status=status))
     push.queue(db, patient_id, kind, request_id, status)  # 구독한 브라우저에 commit 뒤 푸시 (결정 30)
+
+
+def notify_staff(db: Session, tenant_id: uuid.UUID | None, kind: str, request_id: uuid.UUID, status: str | None = None) -> None:
+    """병원 대시보드용 한 줄 (commit하지 않음 — 요청·상태 변경과 같은 처리 안에서 저장)."""
+    if tenant_id is None or kind not in STAFF_KINDS:
+        return
+    db.add(StaffNotification(tenant_id=tenant_id, kind=kind, request_id=request_id, status=status))
 
 
 def list_mine(db: Session, patient_id: uuid.UUID) -> list[tuple[Notification, int | None]]:
@@ -66,6 +73,22 @@ def realtime_token(patient_id: uuid.UUID) -> tuple[str, datetime]:
     exp = now + REALTIME_TTL
     token = jwt.encode(
         {"sub": str(patient_id), "role": "authenticated", "aud": "authenticated", "iat": now, "exp": exp},
+        s.supabase_jwt_secret,
+        algorithm="HS256",
+    )
+    return token, exp
+
+
+def staff_realtime_token(staff_id: str, tenant_id: str) -> tuple[str, datetime]:
+    """직원용 Realtime 토큰: 환자 것과 같은 방식에 tenant_id를 더함. RLS가 자기 병원 staff_notifications만 보여 줌.
+    sub는 직원 id라 환자 알림(notifications, sub = patient_id)은 하나도 안 보임."""
+    s = get_settings()
+    if not (s.supabase_jwt_secret and s.supabase_url):
+        raise AppError(503, "realtime.unavailable", "실시간 알림을 쓸 수 없습니다")
+    now = datetime.now(timezone.utc)
+    exp = now + REALTIME_TTL
+    token = jwt.encode(
+        {"sub": staff_id, "tenant_id": tenant_id, "role": "authenticated", "aud": "authenticated", "iat": now, "exp": exp},
         s.supabase_jwt_secret,
         algorithm="HS256",
     )
