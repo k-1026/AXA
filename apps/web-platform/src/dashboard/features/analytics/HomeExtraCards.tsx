@@ -47,7 +47,7 @@ export function VisitorsCard() {
   return (
     <Card title="방문자 수 — 이번 달 vs 직전 같은 기간 (일별)" kind="live">
       <p className="trend-legend"><i className="lg-now" /> 이번 달 {fmt(sum(now))}명 <i className="lg-prev" /> 직전 같은 기간 {fmt(sum(prev))}명</p>
-      <svg className="trend" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="일별 방문자 이번 달과 지난달">
+      <svg className="trend" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="일별 방문자 이번 달과 직전 같은 기간">
         {ticks.map((t) => (
           <g key={t}>
             <line x1={L} x2={W - R} y1={py(t)} y2={py(t)} className="base" />
