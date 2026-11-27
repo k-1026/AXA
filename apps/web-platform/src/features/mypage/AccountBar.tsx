@@ -78,7 +78,7 @@ function ResidencyDialog({ onClose }: { onClose: () => void }) {
           <button type="button" className="mp-login-secondary" onClick={onClose} disabled={busy}>
             {t('mypage.account.cancel')}
           </button>
-          <button type="submit" className="mp-login-button" disabled={busy}>
+          <button type="submit" className="mp-login-button" disabled={busy || !answers.nationality}>
             {busy ? t('auth.submitting') : t('residency.save')}
           </button>
         </div>

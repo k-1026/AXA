@@ -7,6 +7,7 @@ import BookingCalendar from '../BookingCalendar';
 import BookingRequestList from '../BookingRequestList';
 import ConsultChat from '../ConsultChat';
 import { useStaffExpired } from '../useStaffExpired';
+import { useAutoRefresh } from '../autoRefresh';
 import { DEPT_LABEL } from '../types';
 
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -28,14 +29,15 @@ export default function BookingTab({ data, mode, dept }: TabProps) {
   const onExpired = useStaffExpired();
   const [rev, setRev] = useState(0); // 캘린더·요청 목록·채팅 중 한 곳에서 처리하면 모두 다시 불러옴
   const changed = () => setRev((n) => n + 1);
+  const live = rev + useAutoRefresh(); // + 30초마다·탭으로 돌아올 때 (환자가 보낸 새 요청이 바로 보이게)
 
   return (
     <div className="grid">
       {/* 예약 현황 (DB): 운영 후 모드에서만 맨 위 */}
-      {operating && <BookingStatusTiles key={rev} onExpired={onExpired} />}
+      {operating && <BookingStatusTiles rev={live} onExpired={onExpired} />}
 
       {/* 예약 캘린더 (DB + 수기): 운영 후 모드에서만 */}
-      {operating && <BookingCalendar rev={rev} onExpired={onExpired} onChanged={changed} />}
+      {operating && <BookingCalendar rev={live} onExpired={onExpired} onChanged={changed} />}
 
       {/* 예약 가능 요일·자주 묻는 질문: 초기 모드에서만 (운영 후 모드에서는 뺌) */}
       {!operating && (
@@ -85,8 +87,8 @@ export default function BookingTab({ data, mode, dept }: TabProps) {
       {operating ? (
         <>
           {/* 운영 후: 공공 카드(진료시간·비급여 가격) 대신 요청 목록 · 상담 채팅 (DB) */}
-          <BookingRequestList rev={rev} onExpired={onExpired} onChanged={changed} />
-          <ConsultChat rev={rev} onExpired={onExpired} onChanged={changed} />
+          <BookingRequestList rev={live} onExpired={onExpired} onChanged={changed} />
+          <ConsultChat rev={live} onExpired={onExpired} onChanged={changed} />
         </>
       ) : (
         <>
