@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-views-daily · Claude (홈 방문자 일별 카드)
+- 한 일: **B 파일 `booking/analytics.py`·`router_tenant.py` 수정 (사용자 지시)** — `series`에 `daily=true`(하루 = 한 점, 최대 62일, 넘으면 422). 홈 "방문자 수 — 이번 달 vs 지난 기간 (일별)" 카드가 예시값 대신 이 값
+- 바뀐 계약: contracts 변경 이력 1줄
+- 테스트: 백엔드 335개 통과 (새 1개)
+- 다음 할 일: 없음
+- B에게 요청: 확인
+- 막힌 것·질문: 없음
+
 ### 2026-11-27 · backend-A-page-views · Claude (요청 1번: 방문자 수 = 상세 페이지 조회)
 - 한 일: 새 모듈 `modules/pageview` (`page_events` 테이블, 마이그레이션 0017 — 0016 다음이라 `backend-A-staff-realtime` 위에 만들고 `backend-A-analytics-series`를 합침). `POST /hospitals/page-views` 로그인 없이, 같은 병원·방문자·한국 날짜는 한 줄. **B 파일 `booking/analytics.py` 수정 (사용자 지시)** — `summary`·`series`의 `views` = 기간 안 줄 수(날마다 다른 방문자 수의 합), 지난 기간도
 - 바뀐 계약: contracts 변경 이력 1줄, 결정 37

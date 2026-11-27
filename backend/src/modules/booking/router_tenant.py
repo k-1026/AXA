@@ -108,11 +108,14 @@ def analytics_series(
     staff: Staff,
     start: Annotated[date | None, Query(alias="from")] = None,
     end: Annotated[date | None, Query(alias="to")] = None,
+    daily: bool = False,
 ):
-    """그래프용 구간별 숫자 (최대 12구간, 이번 기간·지난 기간). 기간 기본값은 summary와 같음, 최대 366일."""
+    """그래프용 구간별 숫자 (최대 12구간, 이번 기간·지난 기간). 기간 기본값은 summary와 같음, 최대 366일.
+    daily=true면 하루 = 한 점 (최대 62일) — 홈 "방문자 수 일별" 카드 (11/27)"""
     today = datetime.now(ZoneInfo("Asia/Seoul")).date()
     end = end or today
     start = start or end.replace(day=1)
-    if start > end or (end - start).days + 1 > analytics.SERIES_MAX_DAYS:
+    limit = analytics.SERIES_MAX_DAILY if daily else analytics.SERIES_MAX_DAYS
+    if start > end or (end - start).days + 1 > limit:
         raise AppError(422, "validation", "기간이 올바르지 않습니다", {"errors": [{"loc": ["from"], "type": "range"}]})
-    return analytics.series(db, _tenant(staff), start, end)
+    return analytics.series(db, _tenant(staff), start, end, daily=daily)
