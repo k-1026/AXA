@@ -60,3 +60,5 @@ class TenantBookingOut(BookingOut):
     replies: list[ReplyOut] = []
     # 방문 전 환자 질문 [{text_original, text_translated(한국어), created_at}] — A 추가 (결정 32, B 확인)
     questions: list[dict] = []
+    # 번역(해외 LLM) 동의가 있는지 — 번역이 비어 있을 때 "동의 없음"과 "번역 실패(다시 시도)"를 구분 (11/27)
+    translation_allowed: bool = False
