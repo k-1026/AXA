@@ -77,6 +77,15 @@ tr:last-child td { border-bottom: 0; }
 .mascot span { position: relative; font-size: 15px; font-weight: 600; color: var(--ink); background: var(--surface); border: 1px solid var(--border); padding: 9px 14px; border-radius: 14px; }
 .mascot span b { color: var(--accent); }
 .mascot span::after { content: ""; position: absolute; right: -7px; top: 50%; width: 12px; height: 12px; background: var(--surface); border-right: 1px solid var(--border); border-top: 1px solid var(--border); transform: translateY(-50%) rotate(45deg); }
+/* 8 마지막 장: 시연 사이트 주소 */
+.closing { justify-content: center; align-items: center; text-align: center; }
+.closing .brandbar { justify-content: center; }
+.closing h1 { font-size: 40px; margin-top: 34px; }
+.closing .demo { display: inline-flex; align-items: center; gap: 14px; margin-top: 26px; padding: 18px 34px; border-radius: 18px; background: var(--surface); border: 2px solid var(--accent-line); box-shadow: 0 6px 20px rgb(31 111 235 / .10); text-decoration: none; }
+.closing .demo .lbl { font-size: 15px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; }
+.closing .demo .addr { font-size: 38px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; }
+.closing .note { margin-top: 18px; font-size: 16px; color: var(--text-muted); }
+.closing .foot { position: absolute; left: 56px; right: 56px; bottom: 0; }
 .cover .meta { margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; }
 .tl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 30px; }
 .tl .card { padding: 12px 14px; }
@@ -214,7 +223,7 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
     <div class="card"><div class="d">11/25–26</div><p>피드백 반영 · 예약 규칙 · 대시보드 재구성</p></div>
   </div>
   <div style="flex:1"></div>
-  <div class="foot"><span class="src">표시: <b class="as">[가정]</b> = 근거 자료 없이 둔 값 · 숫자마다 아래 줄에 출처 · 기간: GitHub 전체 브랜치 커밋 266건 (11/18–11/26)</span><span class="no">0 / 7</span></div>
+  <div class="foot"><span class="src">표시: <b class="as">[가정]</b> = 근거 자료 없이 둔 값 · 숫자마다 아래 줄에 출처 · 기간: GitHub 전체 브랜치 커밋 266건 (11/18–11/26)</span><span class="no">0 / 8</span></div>
 </section>
 
 <!-- 1 11/18에 비어 있던 것 -->
@@ -234,7 +243,7 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
       </table>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: 발표/피치덱-11.18 7장 · 발표/피드백-11.18_피치구조.md · market/verify.md (2026-11-19) · research/의료관광/시장규모-TAM-SAM-SOM.md 2절 · docs/subscription-plans.md v4 · docs/deploy-vercel.md</span><span class="no">1 / 7</span></div>
+  <div class="foot"><span class="src">출처: 발표/피치덱-11.18 7장 · 발표/피드백-11.18_피치구조.md · market/verify.md (2026-11-19) · research/의료관광/시장규모-TAM-SAM-SOM.md 2절 · docs/subscription-plans.md v4 · docs/deploy-vercel.md</span><span class="no">1 / 8</span></div>
 </section>
 
 <!-- 2 고객 근거 -->
@@ -262,7 +271,7 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
     </div>
     <div class="card" style="padding:10px 16px; background:var(--accent-soft); border-color:var(--accent-line);"><p>Top 3 유지 — <b>C-2 피부·성형 가격 기준 없음</b>이 여전히 1위 (VOC 308건)</p></div>
   </div>
-  <div class="foot"><span class="src">출처: painpoint/painpoint_def.md v4 (11/19)·v5 (11/23) · voc_3차_반영.md · voc_4차_반영.md · voc_tiktok.md · voc_threads_facebook.md · 인용은 공개 댓글 요약·번역</span><span class="no">2 / 7</span></div>
+  <div class="foot"><span class="src">출처: painpoint/painpoint_def.md v4 (11/19)·v5 (11/23) · voc_3차_반영.md · voc_4차_반영.md · voc_tiktok.md · voc_threads_facebook.md · 인용은 공개 댓글 요약·번역</span><span class="no">2 / 8</span></div>
 </section>
 
 <!-- 3 시장 -->
@@ -314,7 +323,7 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: research/의료관광/시장규모-TAM-SAM-SOM.md 1~2절 · market/verify.md D01·D02·D05·D06·D07·D10~D27 · market/market_model.xlsx — 진흥원 「2025 외국인환자 유치실적 통계분석」 · 「2024 신용카드 데이터로 본 외국인환자 소비패턴」 · KCTI 데이터 포커스 4호 · 확인 2026-11-19</span><span class="no">3 / 7</span></div>
+  <div class="foot"><span class="src">출처: research/의료관광/시장규모-TAM-SAM-SOM.md 1~2절 · market/verify.md D01·D02·D05·D06·D07·D10~D27 · market/market_model.xlsx — 진흥원 「2025 외국인환자 유치실적 통계분석」 · 「2024 신용카드 데이터로 본 외국인환자 소비패턴」 · KCTI 데이터 포커스 4호 · 확인 2026-11-19</span><span class="no">3 / 8</span></div>
 </section>
 
 <!-- 4 BM -->
@@ -357,7 +366,7 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: bm/요금안-or-검토.md 결정 v4 · docs/subscription-plans.md · simulation/pnl_sim.md v4 · simulation/conclusions.json · simulation/output/images/대시보드_요약_인건비345만.png (2026-11-24) · 상한: 외국인환자 유치 수수료율 통합 고시 제3조</span><span class="no">4 / 7</span></div>
+  <div class="foot"><span class="src">출처: bm/요금안-or-검토.md 결정 v4 · docs/subscription-plans.md · simulation/pnl_sim.md v4 · simulation/conclusions.json · simulation/output/images/대시보드_요약_인건비345만.png (2026-11-24) · 상한: 외국인환자 유치 수수료율 통합 고시 제3조</span><span class="no">4 / 8</span></div>
 </section>
 
 <!-- 5 병원 유입 -->
@@ -381,7 +390,7 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
     </div>
     <p class="muted" style="font-size:13.5px; margin:0;">혜택 예산 예시 약 315만 원 (신규 30곳 + 추천 성공 10건) → 병원당 건수 효과의 13%만 나와도 본전 <span class="as">[가정]</span> · 프리미엄 전환은 목표가 아님 — 월 4건 넘는 병원에게만 권하는 도구</p>
   </div>
-  <div class="foot"><span class="src">출처: marketing/병원-유입-전략.md v3 1·4·5·7절 (2026-11-24, 초안·가정값) · marketing/B2B-병원-마케팅.md v3 · marketing/병원-제안서/메디대구_병원제안서.pdf · simulation/conclusions.json</span><span class="no">5 / 7</span></div>
+  <div class="foot"><span class="src">출처: marketing/병원-유입-전략.md v3 1·4·5·7절 (2026-11-24, 초안·가정값) · marketing/B2B-병원-마케팅.md v3 · marketing/병원-제안서/메디대구_병원제안서.pdf · simulation/conclusions.json</span><span class="no">5 / 8</span></div>
 </section>
 
 <!-- 6 만든 것 -->
@@ -427,7 +436,7 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: apps/web-platform · backend · docs/팀-활동-정리.md 11/19~26 · data/processed/daegu_registered_institutions.csv · daegu_hours_manual.csv · price-info/estimates.ts(34)·koreanMedicinePrices.ts(9) · docs/번역-표기-기준.md · docs/booking-rules.md · 의료법 제27조 제3항 제2호</span><span class="no">6 / 7</span></div>
+  <div class="foot"><span class="src">출처: apps/web-platform · backend · docs/팀-활동-정리.md 11/19~26 · data/processed/daegu_registered_institutions.csv · daegu_hours_manual.csv · price-info/estimates.ts(34)·koreanMedicinePrices.ts(9) · docs/번역-표기-기준.md · docs/booking-rules.md · 의료법 제27조 제3항 제2호</span><span class="no">6 / 8</span></div>
 </section>
 
 <!-- 7 남은 일 -->
@@ -464,9 +473,25 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">출처: docs/팀-활동-정리.md 11/25–26 · docs/booking-rules.md 2·3장 · data/interim/언어/크롤링_프롬프트.md</span><span class="no">7 / 7</span></div>
+  <div class="foot"><span class="src">출처: docs/팀-활동-정리.md 11/25–26 · docs/booking-rules.md 2·3장 · data/interim/언어/크롤링_프롬프트.md</span><span class="no">7 / 8</span></div>
 </section>
 
+
+<!-- 8 마지막: 시연 사이트 -->
+<section class="slide closing">
+  <div class="brandbar">
+    <span class="md-logo">
+      <svg class="md-logo-mark" viewBox="0 0 336 276" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="24" stroke-linejoin="round"><path d="M24 228V24l72 84 72-84v180"/><path d="M168 24h42a102 102 0 0 1 0 204h-18"/><circle cx="168" cy="228" r="24"/></g></svg>
+      <span class="md-logo-word"><span class="md-logo-medi">MEDI</span><span class="md-logo-daegu">DAEGU</span></span>
+    </span>
+    <span class="slogan">대구 의료 예약의 시작, 메디대구.</span>
+  </div>
+  <h1>직접 써 보세요 — <em>메디대구 시연 사이트</em></h1>
+  <a class="demo" href="https://axa-tqse.vercel.app/" target="_blank" rel="noopener"><span class="lbl">시연</span><span class="addr">axa-tqse.vercel.app</span></a>
+  <p class="note">가상 병원 4곳 · 가상 환자로 시연 — 실제 병원에 예약이 전달되지 않아요 · 6개 언어 · AI 상담 미스터 권</p>
+  <div class="mascot" style="margin: 26px 0 0;"><img src="미스터권.png" alt="메디대구 챗봇 미스터 권"></div>
+  <div class="foot"><span class="src">주소: https://axa-tqse.vercel.app/ (Vercel 배포, 웹 화면) · 피드백은 남은 일(7장)의 두 질문에 주세요</span><span class="no">8 / 8</span></div>
+</section>
 </div>
 <div id="nav">← / → 로 넘김</div>
 <script>
