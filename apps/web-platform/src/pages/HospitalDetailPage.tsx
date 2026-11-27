@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
@@ -10,17 +11,24 @@ import type { Hospital } from '../features/hospital/types';
 import { HospitalAddress } from '../features/hospital/HospitalAddress';
 import { languageSupportOf, type SupportLang } from '../features/hospital/languageSupport';
 import { useIsResident } from '../components/auth';
+import { recordPageView } from '../features/hospital/pageView';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 export function HospitalDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const state = useHospitals();
   const nameOf = useHospitalName();
   const resident = useIsResident();
+
+  // 병원 대시보드 "상세페이지 방문자" (하루 한 번, 개인정보 없음 — features/hospital/pageView.ts)
+  const found = state.status === 'ready' && state.data.items.some((x) => x.id === id);
+  useEffect(() => {
+    if (found && id) recordPageView(id, i18n.language);
+  }, [found, id]); // 언어를 바꿔도 다시 보내지 않음
 
   if (state.status === 'loading') return <p className="list-status">{t('map.loading')}</p>;
   if (state.status === 'error') return <p className="list-status">{t('map.error')}</p>;

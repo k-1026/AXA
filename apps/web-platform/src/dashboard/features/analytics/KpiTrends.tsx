@@ -51,9 +51,9 @@ async function getSummary(from: string, to: string, first = true): Promise<Summa
 
 const toRecord = (s: Summary) => Object.fromEntries(s.kpi.map((k) => [k.key, k.now])) as Record<KpiKey, number | null>;
 
-type Nums = Record<Exclude<KpiKey, 'views'>, number | null>;
+type Nums = Record<KpiKey, number | null>; // views = 상세페이지 방문자 (11/27부터, 없는 서버면 빠짐)
 type Series = { size: number; buckets: { from: string; to: string; now: Nums; prev: Nums }[] };
-const withViews = (n: Nums) => ({ views: null, ...n });
+const withViews = (n: Nums) => ({ ...n, views: n.views ?? null });
 
 async function loadBuckets(from: string, to: string): Promise<Pick<Trends, 'buckets' | 'size'>> {
   const res = await staffGet(`/tenant/analytics/series?from=${from}&to=${to}`, { first: false });
