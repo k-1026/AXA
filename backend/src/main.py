@@ -20,6 +20,7 @@ from modules.fx.router import router as fx_router
 from modules.hospital.router import router as hospital_router
 from modules.maintenance.router import router as maintenance_router
 from modules.notification.router import push_router
+from modules.notification.router import staff_router as notification_staff_router
 from modules.notification.router import router as notification_router
 from modules.patient.router import router as patient_router
 from modules.tenant.router import router as tenant_router
@@ -56,6 +57,7 @@ api.include_router(aftercare_patient_router)
 api.include_router(audit_router)
 api.include_router(notification_router)
 api.include_router(push_router)
+api.include_router(notification_staff_router)
 
 app.include_router(api)
 
