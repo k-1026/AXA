@@ -41,6 +41,7 @@ export function NotificationBell() {
     const hospital = n.hospital ? text(n.hospital) : t('notify.hospital');
     if (n.kind === 'status') return t(`notify.status.${n.status}`, { hospital });
     if (n.kind === 'reply') return t('notify.reply', { hospital, count: n.count });
+    if (n.kind === 'reminder') return t(`notify.reminder.${n.status}`, { hospital });
     return t('notify.aftercare', { hospital, count: n.count });
   };
   const when = (iso: string) =>
