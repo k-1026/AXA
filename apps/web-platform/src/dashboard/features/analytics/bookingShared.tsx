@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import { API_BASE } from '../../../components/api';
 import { readStaffToken } from '../../../features/staff/staffSession';
+import { clearStaffGet, staffGet } from './staffGet';
 
 export type DbReq = {
-  id: string; status: string; nationality: string; lang: string; treatment: string | null; visa_needed: boolean;
+  id: string; status: string; nationality: string; lang: string; department_code?: string; treatment: string | null; visa_needed: boolean;
   preferred_slots: string[]; confirmed_slot: string | null; created_at: string;
   message_original: string | null; message_translated: string | null;
   replies?: { text_ko: string; text_translated: string | null; sent_at: string }[];
@@ -18,6 +19,7 @@ export const ST: Record<string, string> = {
 };
 export const NAT: Record<string, string> = { KR: '한국', TW: '대만', CN: '중국', JP: '일본', MN: '몽골', VN: '베트남', US: '미국', TH: '태국' };
 export const LANG: Record<string, string> = { 'zh-TW': '번체', 'zh-CN': '간체', en: '영어', vi: '베트남어', ja: '일본어', ko: '한국어' };
+export const DEPT: Record<string, string> = { dermatology: '피부과', plastic: '성형외과', ophthalmology: '안과', internal: '내과', dental: '치과', korean_medicine: '한방' };
 export const TRT: Record<string, string> = { laser_toning: '레이저 토닝', acne_scar: '여드름 흉터', botox: '보톡스', melasma: '기미 치료', filler: '필러' };
 export const REJECT: Record<string, string> = { fully_booked: '예약이 마감됐어요', not_offered: '하지 않는 진료예요', needs_consult: '대면 상담이 먼저 필요해요', other: '기타' };
 export const ERR: Record<string, string> = {
@@ -40,7 +42,8 @@ export const slotLabel = (iso: string) => `${md(kday(iso))}(${dow(kday(iso))}) $
 
 export const reqId = (r: DbReq) => `R-${r.id.slice(0, 4).toUpperCase()}`;
 export const reqWho = (r: DbReq) => `${NAT[r.nationality] || r.nationality} · ${LANG[r.lang] || r.lang}`;
-export const reqTitle = (r: DbReq) => TRT[r.treatment ?? ''] || r.treatment || '상담';
+// 시술명이 없으면 진료과로 (예약 화면에서 진료과만 고른 요청)
+export const reqTitle = (r: DbReq) => TRT[r.treatment ?? ''] || r.treatment || (r.department_code ? `${DEPT[r.department_code] || r.department_code} 상담` : '상담');
 // 상태별 병원이 할 수 있는 처리 (백엔드 TRANSITIONS와 같게: 시간 제안한 건은 환자가 수락해야 확정)
 export const ACTIONS: Record<string, { mode: ActionMode; label: string }[]> = {
   pending: [{ mode: 'confirm', label: '확정' }, { mode: 'propose', label: '시간 제안' }, { mode: 'reject', label: '거절' }],
@@ -49,15 +52,23 @@ export const ACTIONS: Record<string, { mode: ActionMode; label: string }[]> = {
 };
 
 export class Expired extends Error {}
+// GET은 여러 카드가 같이 쓰도록 묶어서 (staffGet), 처리(POST 등) 뒤에는 묶어 둔 값을 비움
 export async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = readStaffToken();
-  const res = await fetch(API_BASE + path, {
-    ...init,
-    headers: { Authorization: 'Bearer ' + token, ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
-  });
-  const body = await res.json().catch(() => ({}));
-  if (res.status === 401) throw new Expired();
-  if (!res.ok) throw new Error(body.code || String(res.status));
+  let status: number, ok: boolean, body: { code?: string };
+  if (!init?.method || init.method === 'GET') {
+    ({ status, ok, body } = await staffGet(path));
+  } else {
+    const token = readStaffToken();
+    const res = await fetch(API_BASE + path, {
+      ...init,
+      headers: { Authorization: 'Bearer ' + token, ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
+    });
+    clearStaffGet();
+    ({ status, ok } = res);
+    body = await res.json().catch(() => ({}));
+  }
+  if (status === 401) throw new Expired();
+  if (!ok) throw new Error(body.code || String(status));
   return body as T;
 }
 
