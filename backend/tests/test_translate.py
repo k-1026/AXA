@@ -100,3 +100,78 @@ def test_앱의_모든_언어로_번역할_수_있다(llm):
     from modules.patient.models import LANGS
     assert set(LANGS) <= set(translate.LANG_NAMES)
     assert translate.translate("사진을 보내 주세요", "ja") == "[Japanese] 사진을 보내 주세요"
+
+
+# ---------- 실패하면 다시 번역 (11/27) ----------
+
+
+class FlakyLLM(FakeLLM):
+    """처음 n번은 실패, 그 뒤는 성공"""
+
+    def __init__(self, fail_times):
+        super().__init__()
+        self.left = fail_times
+
+    def chat(self, messages, **kw):
+        if self.left:
+            self.left -= 1
+            self.calls.append(messages)
+            raise RuntimeError("down")
+        return super().chat(messages, **kw)
+
+
+@pytest.fixture
+def no_wait(monkeypatch):
+    monkeypatch.setattr(translate, "RETRY_WAIT", 0)
+
+
+def test_한번_실패하면_그자리에서_다시_시도(monkeypatch, no_wait):
+    fake = FlakyLLM(1)
+    monkeypatch.setattr(translate, "_llm", lambda: fake)
+    assert translate.translate("臉還是紅的", "ko") == "[Korean] 臉還是紅的"
+    assert len(fake.calls) == 2
+
+
+def test_두번_다_실패하면_None(monkeypatch, no_wait):
+    fake = FlakyLLM(5)
+    monkeypatch.setattr(translate, "_llm", lambda: fake)
+    assert translate.translate("臉還是紅的", "ko") is None
+    assert len(fake.calls) == translate.ATTEMPTS
+
+
+def test_빠진_번역은_나중에_다시_번역_동의_있는_것만(client, db, monkeypatch, no_wait):
+    monkeypatch.setattr(translate, "_llm", lambda: FakeLLM(fail=True))
+    p, t = _patient(db), _tenant(db)
+    r = _req(db, p, t)
+    _consent(db, p, r)
+    thread = aftercare.patient_open(db, p.id, r.id, "臉還是紅的")
+    r2 = _req(db, _patient(db), t, visited=False)  # 동의 없음
+    aftercare_reply = booking.staff_reply(db, t.id, str(uuid.uuid4()), r.id, "내일 오세요")
+    other = booking.staff_reply(db, t.id, str(uuid.uuid4()), r2.id, "가능합니다")
+    assert aftercare_reply.text_translated is None and other.text_translated is None
+
+    fake = FakeLLM()
+    monkeypatch.setattr(translate, "_llm", lambda: fake)
+    staff = demo_staff(db, t.id)
+    h = {"Authorization": "Bearer " + create_access_token(str(staff.id), "staff", tenant_id=str(t.id))}
+    res = client.post("/api/v1/tenant/translations/retry", headers=h)
+    assert res.status_code == 200 and res.json()["translated"] == 2 and res.json()["failed"] == 0
+    _, _, msgs = aftercare.tenant_messages(db, t.id, thread.id)
+    db.refresh(aftercare_reply)
+    db.refresh(other)
+    assert msgs[0].text_translated == "[Korean] 臉還是紅的"
+    assert aftercare_reply.text_translated == "[Traditional Chinese (Taiwan)] 내일 오세요"
+    assert other.text_translated is None  # 동의 없음 → 그대로
+
+    lst = client.get("/api/v1/tenant/booking-requests", headers=h).json()
+    flags = {x["id"]: x["translation_allowed"] for x in lst}
+    assert flags[str(r.id)] is True and flags[str(r2.id)] is False
+    assert client.post("/api/v1/tenant/translations/retry").status_code == 401
+
+
+def test_정리_작업은_비밀값이_있어야(client, monkeypatch):
+    from core.config import get_settings
+    monkeypatch.setattr(get_settings(), "cron_secret", "s3cret-for-test")
+    assert client.post("/api/v1/internal/translations").status_code == 401
+    ok = client.post("/api/v1/internal/translations", headers={"Authorization": "Bearer s3cret-for-test"})
+    assert ok.status_code == 200 and set(ok.json()) == {"translated", "failed", "left"}

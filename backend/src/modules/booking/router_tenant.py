@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from core.db import get_db
 from core.errors import AppError
 from core.security import StaffPrincipal, current_staff
+from modules.agent import translate
 from modules.audit import service as audit
 from modules.booking import analytics, service
 from modules.booking.schemas import BookingOut, ReplyIn, ReplyOut, StaffAction, TenantBookingOut
@@ -33,11 +34,13 @@ def _with_replies(db: Session, reqs: list) -> list[TenantBookingOut]:
     """요청서 + 보낸 답장 (한 번에 조회)"""
     replies = service.sent_replies(db, [r.id for r in reqs])
     asked = question_service.for_requests(db, [r.id for r in reqs])  # 방문 전 환자 질문 (A, 결정 32)
+    can_translate = translate.allowed_many(db, [r.id for r in reqs])
     return [
         TenantBookingOut.model_validate(r).model_copy(update={
             "replies": [ReplyOut.model_validate(x) for x in replies[r.id]],
             "questions": [{"text_original": q.text_original, "text_translated": q.text_translated, "created_at": q.created_at}
                           for q in asked[r.id]],
+            "translation_allowed": r.id in can_translate,
         })
         for r in reqs
     ]
@@ -75,7 +78,7 @@ def reply(request_id: uuid.UUID, body: ReplyIn, db: Db, staff: Staff):
 @router.post("/booking-requests/{request_id}/{action}", response_model=BookingOut)
 def act(
     request_id: uuid.UUID,
-    action: Literal["confirm", "reject", "propose", "visited", "no-show"],
+    action: Literal["confirm", "reject", "propose", "visited", "no-show", "paid"],
     db: Db,
     staff: Staff,
     body: StaffAction | None = None,
@@ -83,6 +86,7 @@ def act(
     return service.staff_act(
         db, _tenant(staff), staff.staff_id, request_id, action.replace("-", "_"),
         body.slot if body else None, reason=body.reason if body else None,
+        amount=body.amount if body else None, method=body.method if body else None,
     )
 
 
@@ -108,11 +112,20 @@ def analytics_series(
     staff: Staff,
     start: Annotated[date | None, Query(alias="from")] = None,
     end: Annotated[date | None, Query(alias="to")] = None,
+    daily: bool = False,
 ):
-    """그래프용 구간별 숫자 (최대 12구간, 이번 기간·지난 기간). 기간 기본값은 summary와 같음, 최대 366일."""
+    """그래프용 구간별 숫자 (최대 12구간, 이번 기간·지난 기간). 기간 기본값은 summary와 같음, 최대 366일.
+    daily=true면 하루 = 한 점 (최대 62일) — 홈 "방문자 수 일별" 카드 (11/27)"""
     today = datetime.now(ZoneInfo("Asia/Seoul")).date()
     end = end or today
     start = start or end.replace(day=1)
-    if start > end or (end - start).days + 1 > analytics.SERIES_MAX_DAYS:
+    limit = analytics.SERIES_MAX_DAILY if daily else analytics.SERIES_MAX_DAYS
+    if start > end or (end - start).days + 1 > limit:
         raise AppError(422, "validation", "기간이 올바르지 않습니다", {"errors": [{"loc": ["from"], "type": "range"}]})
-    return analytics.series(db, _tenant(staff), start, end)
+    return analytics.series(db, _tenant(staff), start, end, daily=daily)
+
+
+@router.post("/translations/retry")
+def retry_translations(db: Db, staff: Staff) -> dict[str, int]:
+    """우리 병원 글 중 번역이 빠진 것을 다시 번역 (동의가 있는 것만, 한 번에 최대 10개). 대시보드가 번역 빠진 글을 보면 부름 (11/27)."""
+    return translate.retry_missing(db, _tenant(staff), limit=10)

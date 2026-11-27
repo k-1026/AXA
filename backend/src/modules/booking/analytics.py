@@ -120,6 +120,7 @@ def summary(db: Session, tenant_id: uuid.UUID, start: date, end: date, today: da
 
 SERIES_MAX_BUCKETS = 12  # 그래프 점 수 (프론트 KpiTrends와 같게)
 SERIES_MAX_DAYS = 366
+SERIES_MAX_DAILY = 62
 
 
 def _kst_day(ts: datetime) -> date:
@@ -128,12 +129,12 @@ def _kst_day(ts: datetime) -> date:
     return ts.astimezone(KST).date()
 
 
-def series(db: Session, tenant_id: uuid.UUID, start: date, end: date) -> dict:
+def series(db: Session, tenant_id: uuid.UUID, start: date, end: date, daily: bool = False) -> dict:
     """[start, end]를 최대 12구간으로 나눠 구간마다 요청·확정·방문·취소율. 지난 기간(같은 길이 바로 앞)도 같은 위치로 나눔.
 
     구간 숫자는 그 구간으로 summary를 부른 kpi의 now와 같음."""
     days = (end - start).days + 1
-    size = -(-days // SERIES_MAX_BUCKETS)
+    size = 1 if daily else -(-days // SERIES_MAX_BUCKETS)  # daily: 하루 = 한 점 (홈 "방문자 수 일별" 카드, 최대 SERIES_MAX_DAILY일)
     prev_start = start - timedelta(days=days)
     a, _ = _utc_range(prev_start, prev_start)
     _, b = _utc_range(end, end)

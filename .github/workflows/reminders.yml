@@ -1,4 +1,5 @@
 # 방문 전 리마인드 알림 (docs/booking-rules.md 3-2 N1) — 1시간마다 백엔드 /internal/reminders를 부른다
+# + 번역이 실패해 빠진 글 다시 번역 /internal/translations (11/27)
 # Vercel Cron은 무료(Hobby) 요금제에서 하루 1번만 돌 수 있어서 2시간 전 알림을 못 보냄 → GitHub Actions로 1시간마다
 # 필요한 저장소 Secrets (Settings → Secrets and variables → Actions):
 #   API_URL      백엔드 주소 (예: https://axa-seven.vercel.app)
@@ -28,3 +29,12 @@ jobs:
             exit 0
           fi
           curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "${API_URL%/}/api/v1/internal/reminders"
+      - name: Retry missing translations
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$CRON_SECRET" ]; then
+            exit 0
+          fi
+          curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "${API_URL%/}/api/v1/internal/translations" || echo "번역 다시 시도 실패 (다음 시간에 다시)"
