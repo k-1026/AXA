@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: '/booking', key: 'booking' },
   { to: '/aftercare', key: 'aftercare' },
   { to: '/mypage', key: 'mypage' },
+  { to: '/guide', key: 'guide' }, // 가이드북: 이용 방법 (로그인 없이)
 ] as const;
 
 export function Sidebar() {

@@ -48,7 +48,8 @@
     "about": "Giới thiệu dịch vụ",
     "booking": "Tư vấn / Đặt lịch",
     "aftercare": "Chăm sóc sau khám",
-    "mypage": "Trang của tôi"
+    "mypage": "Trang của tôi",
+    "guide": "Sổ tay hướng dẫn"
   },
   "map": {
     "title": "Bản đồ bệnh viện Daegu",
@@ -695,5 +696,102 @@
       "vi": "Tiếng Việt",
       "ru": "Tiếng Nga"
     }
+  },
+  "guide": {
+    "title": "Sổ tay MediDaegu",
+    "subtitle": "Tìm bệnh viện ở Daegu, gửi yêu cầu tư vấn·đặt lịch và nhận chăm sóc sau khám — hướng dẫn sử dụng cho người mới.",
+    "toc": "Mục lục",
+    "footnote": "MediDaegu giúp bạn tìm thông tin bệnh viện và kết nối yêu cầu tư vấn·đặt lịch. Chẩn đoán và điều trị do nhân viên y tế của bệnh viện thực hiện, và bạn thanh toán trực tiếp tại bệnh viện.",
+    "s": {
+      "about": {
+        "title": "MediDaegu là gì",
+        "link": "Xem bệnh viện",
+        "items": [
+          "Xem thông tin bệnh viện ở Daegu bằng 6 ngôn ngữ (tiếng Hàn, Anh, Trung giản thể, Trung phồn thể, Việt, Nhật).",
+          "Khi bạn gửi yêu cầu tư vấn·đặt lịch, bệnh viện sẽ tự xem và xác nhận.",
+          "Sau khi khám, bạn có thể nhắn tin chăm sóc sau khám cho nhân viên y tế của bệnh viện đó.",
+          "Đổi ngôn ngữ hiển thị và đơn vị tiền (KRW…) ở góc trên bên phải."
+        ],
+        "eyebrow": "Tìm, hỏi và đặt lịch ở một nơi"
+      },
+      "start": {
+        "title": "Bắt đầu: đăng ký",
+        "link": "Đăng nhập / Đăng ký",
+        "items": [
+          "Thông tin bệnh viện và hướng dẫn giá xem được mà không cần đăng nhập.",
+          "Chatbot, Tư vấn/Đặt lịch, Chăm sóc sau khám và Trang của tôi cần đăng nhập.",
+          "Khi đăng ký, hãy trả lời 3 câu hỏi về hình thức lưu trú (đăng ký người nước ngoài, khai báo cư trú trong nước, Bảo hiểm Y tế Quốc gia).",
+          "Theo luật, chỉ người nước ngoài đến Hàn Quốc ngắn hạn để khám chữa bệnh mới được gửi yêu cầu tư vấn·đặt lịch. Người nước ngoài sống ở Hàn Quốc chỉ xem được thông tin bệnh viện."
+        ],
+        "eyebrow": "Đăng ký 1 phút, 3 câu hỏi"
+      },
+      "find": {
+        "title": "Tìm bệnh viện",
+        "link": "Xem thông tin bệnh viện",
+        "items": [
+          "Trên bản đồ chính, nhấn vào chấm màu (mỗi chuyên khoa một màu) để mở thông tin bệnh viện.",
+          "Trong Thông tin bệnh viện, lọc theo chuyên khoa, khu vực và ngôn ngữ hỗ trợ.",
+          "Ngôn ngữ được chia thành \"giao tiếp trực tiếp\" và \"hỗ trợ phiên dịch\".",
+          "Giá trong hướng dẫn giá chỉ để tham khảo. Hãy hỏi bệnh viện chi phí thực tế khi tư vấn."
+        ],
+        "eyebrow": "Chọn theo chuyên khoa, khu vực, ngôn ngữ"
+      },
+      "chatbot": {
+        "title": "Chatbot AI Mr. Gwon",
+        "link": "Mở chatbot",
+        "items": [
+          "Nói điều trị và khu vực bạn muốn — chatbot tìm bệnh viện và giúp bạn điền yêu cầu đặt lịch.",
+          "Chatbot không đưa ra phán đoán y tế, như đánh giá triệu chứng hay thủ thuật có an toàn không. Hãy hỏi bác sĩ khi tư vấn.",
+          "Câu trả lời của AI có thể sai. Hãy kiểm tra ngày, giờ và nội dung trước khi gửi yêu cầu."
+        ],
+        "eyebrow": "Chỉ cần hỏi, chatbot sẽ tìm giúp"
+      },
+      "booking": {
+        "title": "Yêu cầu tư vấn·đặt lịch",
+        "link": "Đến Tư vấn/Đặt lịch",
+        "items": [
+          "Ở trang bệnh viện, nhấn [Đặt lịch] để chọn ngày giờ, hoặc [Liên hệ bệnh viện] để bắt đầu trò chuyện 1:1.",
+          "Sau khi gửi, yêu cầu ở trạng thái \"Chờ xác nhận\"; bệnh viện sẽ xác nhận hoặc đề xuất giờ khác.",
+          "Trước khi bệnh viện xác nhận, bạn có thể tự đổi hoặc hủy.",
+          "Mỗi yêu cầu phải cách các lịch hẹn khác của bạn ít nhất 60 phút, mỗi bệnh viện 1 lịch/ngày, và tối đa 5 yêu cầu đang chờ cùng lúc."
+        ],
+        "eyebrow": "Bệnh viện trực tiếp xác nhận"
+      },
+      "before": {
+        "title": "Trước khi đến khám",
+        "link": "Xem quản lý lịch hẹn",
+        "items": [
+          "Khi bệnh viện trả lời hoặc đổi trạng thái, bạn sẽ thấy thông báo ở biểu tượng chuông và số trên menu.",
+          "Với lịch đã xác nhận, nhắc nhở được gửi trước 48 giờ, 24 giờ và 2 giờ.",
+          "Nếu không đến được, hãy hủy trước để bệnh nhân khác dùng được giờ đó.",
+          "Địa chỉ bệnh viện có kèm bản tiếng Hàn gốc. Hãy đưa nguyên cho tài xế taxi xem."
+        ],
+        "eyebrow": "Nhắc nhở để bạn không bỏ lỡ"
+      },
+      "after": {
+        "title": "Sau khi khám",
+        "link": "Đến Chăm sóc sau khám",
+        "items": [
+          "Khi bệnh viện đánh dấu \"đã khám\", bạn có thể trò chuyện với nhân viên y tế trong Chăm sóc sau khám.",
+          "Bệnh viện đã đến sẽ tự động có trong Nhật ký khám ở Trang của tôi, và bạn có thể ghi lại trải nghiệm. Chỉ mình bạn xem được.",
+          "Bệnh viện đã lưu và lịch hẹn cũng được gom lại ở Trang của tôi."
+        ],
+        "eyebrow": "Vẫn được chăm sóc sau khi khám"
+      },
+      "safety": {
+        "title": "Khẩn cấp và an toàn",
+        "link": "Thông tin pháp luật y tế",
+        "items": [
+          "Khi khẩn cấp — đau ngực, khó thở, chảy máu nhiều — hãy gọi ngay 119.",
+          "Nếu triệu chứng nặng hơn sau thủ thuật, hãy gọi thẳng cho bệnh viện, đừng chờ tin nhắn chăm sóc sau khám.",
+          "MediDaegu không tư vấn y tế và không giới thiệu bệnh viện cụ thể."
+        ],
+        "eyebrow": "Khẩn cấp thì gọi 119 trước"
+      }
+    },
+    "eyebrow": "Dành cho người lần đầu",
+    "cta": "Tìm bệnh viện",
+    "cta2": "Hỏi chatbot",
+    "closeTitle": "Bắt đầu khám chữa bệnh ở Daegu ngay hôm nay"
   }
 }

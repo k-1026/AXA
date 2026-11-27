@@ -21,6 +21,7 @@ import { ChatbotPage } from './pages/ChatbotPage';
 import { VisitsPage } from './pages/VisitsPage';
 import { ConsultPage } from './pages/ConsultPage';
 import { ReservePage } from './pages/ReservePage';
+import { GuidePage } from './pages/GuidePage';
 import { BookingsPage } from './pages/BookingsPage';
 import { AftercarePage } from './pages/AftercarePage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -56,6 +57,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="mypage/visits" element={<RequireLogin><VisitsPage /></RequireLogin>} />
             <Route path="mypage/:section" element={<RequireLogin><PlaceholderPage titleKey="nav.mypage" /></RequireLogin>} />
             <Route path="legal/:slug" element={<LegalPage />} />
+            {/* 가이드북: 이용 방법, 로그인 없이 누구나 */}
+            <Route path="guide" element={<GuidePage />} />
             {/* 챗봇도 사이트 헤더·메뉴는 그대로, 대화 목록은 챗봇 영역 안에 따로. 로그인한 사람만 (데모 계정 포함, plan-step7 결정 4) */}
             <Route path="chatbot" element={<RequireLogin><ChatbotPage /></RequireLogin>} />
             {/* 상담/예약: 병원별 1:1 상담 (확정은 병원) · 사후관리: 방문 완료 예약별로 그 병원 의료진과 대화 (둘 다 로그인 필요) */}
