@@ -64,6 +64,19 @@ tr:last-child td { border-bottom: 0; }
 .cover { justify-content: center; }
 .cover h1 { font-size: 46px; margin-top: 10px; }
 .cover .lead { font-size: 20px; margin-top: 8px; }
+.cover { position: relative; }
+.brandbar { display: flex; align-items: center; gap: 22px; }
+.md-logo { display: inline-flex; align-items: center; gap: 12px; color: var(--accent); }
+.md-logo-mark { height: 46px; width: auto; }
+.md-logo-word { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Segoe UI', var(--font); }
+.md-logo-medi { font-size: 26px; font-weight: 600; letter-spacing: .16em; margin-right: -.16em; }
+.md-logo-daegu { margin-top: 4px; font-size: 12.5px; font-weight: 500; letter-spacing: .32em; margin-right: -.32em; }
+.slogan { padding-left: 22px; border-left: 2px solid var(--border); font-size: 22px; font-weight: 700; color: var(--ink); }
+.mascot { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.mascot img { width: 120px; height: 120px; border-radius: 50%; background: #fff; border: 4px solid var(--accent-soft); object-fit: cover; }
+.mascot span { position: relative; font-size: 15px; font-weight: 600; color: var(--ink); background: var(--surface); border: 1px solid var(--border); padding: 9px 14px; border-radius: 14px; }
+.mascot span b { color: var(--accent); }
+.mascot span::after { content: ""; position: absolute; right: -7px; top: 50%; width: 12px; height: 12px; background: var(--surface); border-right: 1px solid var(--border); border-top: 1px solid var(--border); transform: translateY(-50%) rotate(45deg); }
 .cover .meta { margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; }
 .tl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 30px; }
 .tl .card { padding: 12px 14px; }
@@ -180,6 +193,15 @@ table.goals td { font-size: 17px; padding: 14px 12px; }
 
 <!-- 0 표지 -->
 <section class="slide cover">
+  <!-- 표지 상단: 메디대구 로고(웹 헤더와 같은 SVG) + 슬로건(웹 header.tagline) + 챗봇 미스터 권 -->
+  <div class="brandbar">
+    <span class="md-logo">
+      <svg class="md-logo-mark" viewBox="0 0 336 276" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="24" stroke-linejoin="round"><path d="M24 228V24l72 84 72-84v180"/><path d="M168 24h42a102 102 0 0 1 0 204h-18"/><circle cx="168" cy="228" r="24"/></g></svg>
+      <span class="md-logo-word"><span class="md-logo-medi">MEDI</span><span class="md-logo-daegu">DAEGU</span></span>
+    </span>
+    <span class="slogan">대구 의료 예약의 시작, 메디대구.</span>
+    <div class="mascot"><span>안녕하세요, AI 상담 <b>미스터 권</b>이에요!</span><img src="미스터권.png" alt="메디대구 챗봇 미스터 권"></div>
+  </div>
   <div style="flex:1"></div>
   <div class="eyebrow">AXA · 데이터 2팀 · 진행 발표 (11/27)</div>
   <h1>11/18 피치 이후 9일 — <em>근거를 다시 쌓고, BM을 확정하고,<br>시연할 수 있는 서비스</em>를 만들었다</h1>
