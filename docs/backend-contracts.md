@@ -30,6 +30,9 @@
 | `proposed` | 병원이 다른 시간 제안 | 병원 직원 — 제안 시간은 그 병원 진료시간 안(휴진일·진료 전후·점심이면 422 `validation`, `loc: ["slot"]`; 진료시간 데이터 없으면 막지 않음, 결정 33) |
 | `cancelled` | 환자 취소 | 환자 (`pending`·`proposed`에서만) |
 | `expired` | 희망 날짜가 모두 지남 | 시스템 |
+| `visited` | 방문 완료 | 병원 직원 (`confirmed`에서) |
+| `no_show` | 미방문 | 병원 직원 (`confirmed`에서) |
+| `paid` | **결제 확인** (11/27, 결정 38) | 병원 직원 (`visited`에서만) — `POST /tenant/booking-requests/{id}/paid` 본문 `{"amount": 원(부가세 제외, 1 이상), "method": card·cash·transfer·other}` 둘 다 필수(없으면 422 `validation`), 다른 행동에 `amount`·`method` → 422. 응답·목록에 `paid_amount`·`paid_method`. 환자에게 상태 알림. 사후관리는 `visited`·`paid` 둘 다 열림 |
 
 - 미정: 환자가 `proposed`를 거절하면? (`backend-decisions.md`에 결정되면 여기 반영)
 - **거절 사유** (`POST /tenant/booking-requests/{id}/reject` 본문 `{"reason": …}`, 선택): `fully_booked`(예약 마감) · `not_offered`(하지 않는 진료) · `needs_consult`(대면 상담 필요) · `other`(기타). `booking_events.reason`에 코드로 저장(마이그레이션 없음), 환자 화면 문장은 프론트 i18n. 목록에 없는 코드 → 422 `validation`, 거절이 아닌 행동에 `reason` → 422
@@ -253,6 +256,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-27 | 2 | 상태 `paid`(결제 확인) 추가: `visited → paid`, `POST /tenant/booking-requests/{id}/paid {amount, method}`, 응답에 `paid_amount`·`paid_method`, 알림 상태 `paid`, 사후관리는 `paid`도 (결정 38, 마이그레이션 0018) | A가 B 파일 수정 (**사용자 지시**) | `backend-A-paid` → `backend` |
 | 2026-11-27 | 5·6-2 | 병원 상세 페이지 조회 기록 `POST /hospitals/page-views` (로그인 없이, `{hospital: ykiho, visitor_key, lang?}` → 204, 없는 병원 404) 신설, 대시보드 `summary`·`series`의 `views`를 채움(`suppressed`에서 뺌). 새 모듈 `modules/pageview`, 마이그레이션 0017 (결정 37) | A (**B 확인 필요** — `booking/analytics.py` 수정) | `backend-A-page-views` → `backend` (`backend-A-staff-realtime`·`backend-A-analytics-series` 다음) |
 | 2026-11-27 | 6-2 | 병원 대시보드 그래프용 `GET /tenant/analytics/series?from&to` 신설 (최대 12구간·366일, 구간마다 `now`·`prev`의 요청·확정·방문·취소율 = 그 구간 summary의 now와 같음). 기존 `summary`는 그대로 | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-analytics-series` → `backend` |
 | 2026-11-27 | 6-1·6-6·7 | 체류 형태에 `nationality?` 추가 — 한국 국적이면 `resident` (저장 안 함), 요청서 국적 KR은 403 `residency.not_eligible`(`korean_nationality`), 챗봇 초안도 막음 (결정 36, 칸 추가만, 마이그레이션 없음) | A | `backend-A-residency-nationality` → `backend` |

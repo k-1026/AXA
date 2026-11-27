@@ -45,7 +45,7 @@ def _openable(db: Session, patient_id: uuid.UUID, request_id: uuid.UUID) -> Book
     if req is None or req.patient_id != patient_id:
         raise _not_found()
     tenant = db.get(Tenant, req.tenant_id)
-    if req.status != "visited" or tenant is None or not tenant.aftercare_enabled:
+    if req.status not in ("visited", "paid") or tenant is None or not tenant.aftercare_enabled:  # 결제 확인 뒤에도 사후관리
         # 방문 전이거나 사후관리 미지원 병원 → 환자 화면에서는 "병원에 직접 연락" 안내
         raise AppError(409, "booking.invalid_transition", "사후관리 대화를 열 수 없습니다", {"status": req.status})
     return req
