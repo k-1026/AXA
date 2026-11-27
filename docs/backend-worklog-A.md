@@ -17,6 +17,14 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-residency-nationality · Claude (국적 한국 → 국내 거주 취급)
+- 한 일: `ResidencyIn.nationality?` (KR → resident, 저장 안 함), 예약 요청서 국적 KR → 403 `residency.not_eligible`(`korean_nationality`), 챗봇 `prepare_booking_request` 국적 KR → not_available (결정 36)
+- 바뀐 계약: contracts 6-1·6-6·7 (칸 추가만)
+- 테스트: backend 324 passed (test_residency 3개 추가), AI 244 passed (1개 추가)
+- 다음 할 일: 화면 가입·마이페이지에 국적 질문 (frontend PR)
+- B에게 요청: 없음
+- 막힌 것·질문: 재외국민이 법적으로 외국인환자인지 미확인 — 규제 담당 확인 필요
+
 ### 2026-11-25 · backend-A-contract-signup-closed · backend-A-signup-guard · Claude (입점 신청 막기, 전체 점검 N1)
 - 한 일: 직원 가입(`auth/staff.py` signup)이 등록번호 확인·운영자 승인 없이 실제 병원 owner를 만들고 `requests_enabled=True` → 누구나 실제 병원 160곳 중 아무 데나 먼저 가입해 그 병원 환자 요청서를 받을 수 있었음. 이제 가상 병원(`is_demo`)만 가입, 실제 병원은 403 `auth.signup_closed`(계정 안 만듦). 설정 `staff_signup_real_hospitals`(env `STAFF_SIGNUP_REAL_HOSPITALS`, 기본 false) — **`core/config.py` 공통 파일 변경**. 테스트 conftest에서 false 고정. 앞서 `backend-A-request-hours`(PR #106): 환자 희망 일시도 진료시간 안만(422 `closed`, loc `preferred_slots[i]`) + 챗봇 초안 단계 검사
 - 바뀐 계약: contracts 3·4절 (`auth.signup_closed` 403), 변경 이력 1줄, 결정 34

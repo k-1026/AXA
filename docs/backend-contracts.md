@@ -196,7 +196,9 @@
 
 ### 6-6. 환자 체류 형태 (A, `modules/patient/`, 결정 28)
 
-`ResidencyIn{country(ISO 2자리 거주국), alien_registration, domestic_residence, health_insurance}` — ① 외국인등록(G-1 제외) ② 국내거소신고 ③ 국민건강보험 가입자·피부양자. **하나라도 true거나 `country = KR`이면 `resident`**, 아니면 `short_term` (compliance 2-1)
+`ResidencyIn{country(ISO 2자리 거주국), nationality?(ISO 2자리 국적, 2026-11-27), alien_registration, domestic_residence, health_insurance}` — ① 외국인등록(G-1 제외) ② 국내거소신고 ③ 국민건강보험 가입자·피부양자. **하나라도 true거나 `country = KR`이거나 `nationality = KR`이면 `resident`**, 아니면 `short_term` (compliance 2-1, 결정 36). `nationality`는 판단에만 쓰고 저장하지 않음 (국적은 요청서에서만)
+
+- 예약 요청 본문 `nationality = KR`이면 계정 답과 상관없이 403 `residency.not_eligible` (`detail.reason = korean_nationality`). 챗봇 `prepare_booking_request`도 `not_available`
 
 | 메서드·경로 | 하는 일 | 에러 |
 |---|---|---|
@@ -239,6 +241,7 @@
 
 | 날짜 | 절 | 바뀐 것 | 누가 (A/B) | PR |
 |---|---|---|---|---|
+| 2026-11-27 | 6-1·6-6·7 | 체류 형태에 `nationality?` 추가 — 한국 국적이면 `resident` (저장 안 함), 요청서 국적 KR은 403 `residency.not_eligible`(`korean_nationality`), 챗봇 초안도 막음 (결정 36, 칸 추가만, 마이그레이션 없음) | A | `backend-A-residency-nationality` → `backend` |
 | 2026-11-26 | 6·7 | 언어 코드에 `ja` 추가 (`patients`·`booking_requests`·`chat_sessions` CHECK, 마이그레이션 0014) · 챗봇 상세 `can_request_consultation` = 입점 병원만 | A·B (사용자가 둘 다 담당) | `backend-chatbot` → `backend` |
 | 2026-11-25 | 3·4 | 직원 가입은 가상 병원(`is_demo`)만, 실제 병원은 403 `auth.signup_closed` (설정 `STAFF_SIGNUP_REAL_HOSPITALS`로만 엶, 결정 34) | A (**B 확인 필요**) | `backend-A-contract-signup-closed` → `backend` |
 | 2026-11-24 | 2 | 병원 `proposed → confirm` 제거(제안 시간은 환자 수락만), 시간 제안은 진료시간 안만 (결정 33) | A가 B 파일 수정 (**사용자 지시** — B 확인 필요) | `backend-A-vercel-cron` → `backend` |

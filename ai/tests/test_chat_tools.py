@@ -322,3 +322,18 @@ def test_db_mode_draft_rejects_lunch_break_and_candidates_skip_it():
     mon = R.run("check_availability", {"hospital_id": 9003, "date_from": "2026-12-07", "date_to": "2026-12-08"}, ctx)["slots"]
     assert "12:00" in mon["2026-12-07"] and "13:00" not in mon["2026-12-07"]
     assert "13:00" not in mon["2026-12-08"] and "12:00" in mon["2026-12-08"]  # 정보 없으면 예전처럼 13시만 뺌
+
+
+def test_db_mode_draft_refuses_korean_nationality():
+    # 11/27 결정 36: 한국 국적은 해외에 살아도 상담 요청 불가 (서버도 403)
+    class Db:
+        def booking_info(self, hospital_id):
+            return {"id": 9001, "name_ko": "x", "name_en": "x", "district": "수성구", "departments": ["피부과"],
+                    "is_registered_facility": True, "accepts_requests": True, "staff_languages": [], "ai_translation_chat": False,
+                    "address_en": "x", "tel": "053-000-0001", "hours": {}}
+    ctx = ToolContext(residency="short_term", hospitals=Db())
+    base = {"hospital_id": 9001, "department": "피부과", "language": "en", "inquiry": "x", "visa_needed": False,
+            "preferred_slots": ["2026-12-01 11:00"]}
+    kr = R.run("prepare_booking_request", {**base, "nationality": "kr"}, ctx)
+    assert kr["status"] == "not_available" and "Korean nationals" in kr["reason"] and kr["hospital_tel"]
+    assert R.run("prepare_booking_request", {**base, "nationality": "US"}, ctx)["status"] == "draft"
