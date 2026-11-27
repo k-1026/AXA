@@ -25,7 +25,8 @@
       "unsupported": "This browser does not support notifications.",
       "ios": "On iPhone/iPad, tap Share → \"Add to Home Screen\" and open it from there to get notifications.",
       "serverOff": "Device notifications are not available right now. In-site notifications still work.",
-      "failed": "Could not change the notification setting. Please try again later."
+      "failed": "Could not change the notification setting. Please try again later.",
+      "cardTitle": "Get notified when the hospital replies"
     },
     "reminder": {
       "48h": "Your booking at {{hospital}} is within 2 days. If you can't make it, please cancel early in My bookings.",

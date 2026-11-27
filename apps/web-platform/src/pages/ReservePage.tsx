@@ -9,6 +9,7 @@ import { BookingConsentFields, consentReady, emptyConsent, toExtra, useResidency
 import { useAuth } from '../components/auth';
 import { bookingErrorKey } from '../features/consult/bookingErrors';
 import { useHospitals } from '../features/hospital/useHospitals';
+import { PushToggle } from '../features/notifications/PushToggle';
 import { hospitalNames, useHospitalName } from '../features/hospital/name';
 import { addDays, DAYS_AHEAD, isBookable, slotsFor } from '../features/reserve/availability';
 import type { DepartmentKey } from '../features/hospital/types';
@@ -125,6 +126,8 @@ export function ReservePage() {
           <p className="reserve-done-name">{nameOf(h)}</p>
           <p className="reserve-done-when">{dateLabel(date)} {time}</p>
           <p className="reserve-note">{t('reserve.doneBody')}</p>
+          {/* 병원 답이 오면 사이트를 닫아도 알림 (아직 안 켠 기기만) */}
+          <PushToggle variant="card" onlyWhenOff />
           <div className="reserve-done-actions">
             <Link to="/mypage/bookings" className="is-primary">{t('reserve.toBookings')}</Link>
             <Link to={`/booking?hospital=${encodeURIComponent(h.id)}`}>{t('reserve.toConsult')}</Link>

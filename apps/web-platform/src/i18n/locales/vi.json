@@ -25,7 +25,8 @@
       "unsupported": "Trình duyệt này không hỗ trợ thông báo.",
       "ios": "Trên iPhone/iPad, nhấn Chia sẻ → \"Thêm vào Màn hình chính\" rồi mở từ đó để nhận thông báo.",
       "serverOff": "Hiện chưa dùng được thông báo trên thiết bị. Thông báo trong trang vẫn hoạt động.",
-      "failed": "Không đổi được cài đặt thông báo. Vui lòng thử lại sau."
+      "failed": "Không đổi được cài đặt thông báo. Vui lòng thử lại sau.",
+      "cardTitle": "Nhận thông báo khi bệnh viện trả lời"
     },
     "reminder": {
       "48h": "Lịch hẹn tại {{hospital}} còn chưa đầy 2 ngày. Nếu không đến được, hãy hủy sớm trong Quản lý đặt lịch.",

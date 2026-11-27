@@ -5555,6 +5555,26 @@ body.chat-open {
   cursor: pointer;
 }
 
+/* 알림 받기 카드: 예약 완료 화면·마이페이지 (11/27) */
+.notify-push-card {
+  align-self: stretch;
+  margin-top: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--accent-line, var(--border));
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  text-align: left;
+}
+
+.notify-push-card .notify-push-title {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.notify-push-card p {
+  font-size: 0.85rem;
+}
+
 /* 체류 형태 3문항 (결정 28) — 가입·예약·마이페이지 */
 .residency-questions {
   display: flex;
