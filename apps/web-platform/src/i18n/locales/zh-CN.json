@@ -522,7 +522,9 @@
       "closedOption": "休诊"
     },
     "visitedNote": "已完成就诊，可在术后管理中与医护人员交流。",
-    "paidNote": "医院已确认付款金额。您可以在术后管理中与医护人员交流。"
+    "paidNote": "医院已确认付款金额。您可以在术后管理中与医护人员交流。",
+    "needBooking": "发送预约申请后即可给医院负责人发消息",
+    "sendFailed": "发送失败，请稍后再试。"
   },
   "bookings": {
     "backToChats": "返回咨询列表",

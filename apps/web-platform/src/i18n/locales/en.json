@@ -522,7 +522,9 @@
       "closedOption": "Closed"
     },
     "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare.",
-    "paidNote": "The hospital confirmed your payment. You can talk with the medical team in aftercare."
+    "paidNote": "The hospital confirmed your payment. You can talk with the medical team in aftercare.",
+    "needBooking": "Send a booking request first to message the hospital staff",
+    "sendFailed": "Couldn't send. Please try again in a moment."
   },
   "bookings": {
     "backToChats": "Back to chats",

@@ -522,7 +522,9 @@
       "closedOption": "休診"
     },
     "visitedNote": "已完成就診，可在術後管理中與醫護人員交流。",
-    "paidNote": "醫院已確認付款金額。您可以在術後管理中與醫護人員交流。"
+    "paidNote": "醫院已確認付款金額。您可以在術後管理中與醫護人員交流。",
+    "needBooking": "送出預約申請後即可傳訊息給醫院負責人",
+    "sendFailed": "傳送失敗，請稍後再試。"
   },
   "bookings": {
     "backToChats": "返回諮詢列表",

@@ -99,6 +99,10 @@ export async function createBooking(
 
 export const listMine = (token: string) => api<ServerBooking[]>('/me/booking-requests', { token });
 
+// 상담 화면에서 보낸 글 = 그 병원 예약 요청에 붙는 방문 전 질문 (결정 32) → 병원 대시보드 상담 채팅에 바로 보임
+export const askQuestion = (token: string, serverId: string, text: string) =>
+  api<ServerBooking>(`/me/booking-requests/${serverId}/questions`, { method: 'POST', token, body: { text } });
+
 export const cancelMine = (token: string, serverId: string) =>
   api<ServerBooking>(`/me/booking-requests/${serverId}/cancel`, { method: 'POST', token, body: {} });
 

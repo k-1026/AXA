@@ -522,7 +522,9 @@
       "closedOption": "Nghỉ"
     },
     "visitedNote": "Đã khám xong. Bạn có thể trao đổi với nhân viên y tế trong mục Chăm sóc sau khám.",
-    "paidNote": "Bệnh viện đã xác nhận số tiền thanh toán. Bạn có thể trao đổi với đội ngũ y tế trong mục chăm sóc sau điều trị."
+    "paidNote": "Bệnh viện đã xác nhận số tiền thanh toán. Bạn có thể trao đổi với đội ngũ y tế trong mục chăm sóc sau điều trị.",
+    "needBooking": "Hãy gửi yêu cầu đặt lịch trước để nhắn tin cho nhân viên bệnh viện",
+    "sendFailed": "Không gửi được. Vui lòng thử lại sau giây lát."
   },
   "bookings": {
     "backToChats": "Quay lại danh sách tư vấn",
