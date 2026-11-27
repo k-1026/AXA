@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MenuIcon, PlusIcon, SendIcon, TranslateIcon } from '../features/chatbot/icons';
@@ -33,7 +33,18 @@ export function ConsultPage() {
   const [drawer, setDrawer] = useState(false);
   const [form, setForm] = useState(false);
   const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [quickOpen, setQuickOpen] = useState(true);
+  const box = useRef<HTMLTextAreaElement>(null);
+
+  // 입력한 줄 수만큼 높이를 늘림 (최대 높이는 화면 높이에 따라 CSS max-height, 넘으면 스크롤)
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [draft]);
   useVisualViewport();
 
   // 병원 상세·예약 관리에서 들어온 경우: 같은 병원 상담이 있으면 열고, 없으면 새로 만든다
@@ -71,11 +82,30 @@ export function ConsultPage() {
     // consult는 렌더마다 새 객체라 의존성에서 일부러 뺌 (열린 상담·안 읽은 수가 바뀔 때만 실행)
   }, [active?.hospitalId, active?.unread]);
 
+  const sendDraft = async () => {
+    if (!draft.trim() || sending || !consult.canSend) return;
+    setSending(true);
+    setSendError('');
+    try {
+      await consult.send(draft);
+      setDraft('');
+    } catch {
+      setSendError(t('consult.sendFailed')); // 글은 그대로 두고 다시 보낼 수 있게
+    } finally {
+      setSending(false);
+    }
+  };
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!draft.trim()) return;
-    consult.send(draft);
-    setDraft('');
+    void sendDraft();
+  };
+
+  // Enter = 보내기, Shift+Enter = 줄바꿈 (챗봇과 같게). 한글 조합 중 Enter는 글자 확정이라 보내지 않음
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing || e.keyCode === 229) return;
+    e.preventDefault();
+    void sendDraft();
   };
 
   return (
@@ -178,18 +208,24 @@ export function ConsultPage() {
                 >
                   <PlusIcon />
                 </button>
-                <input
+                <textarea
+                  ref={box}
+                  rows={1}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
-                  placeholder={t('consult.placeholder')}
+                  onKeyDown={onKeyDown}
+                  placeholder={consult.canSend ? t('consult.placeholder') : t('consult.needBooking')}
                   aria-label={t('consult.placeholder')}
                   enterKeyHint="send"
                   autoComplete="off"
+                  maxLength={2000} // 서버 질문 길이 한도
+                  disabled={!consult.canSend}
                 />
-                <button type="submit" className="chat-send" disabled={!draft.trim()} aria-label={t('consult.send')}>
+                <button type="submit" className="chat-send" disabled={!draft.trim() || sending || !consult.canSend} aria-label={t('consult.send')}>
                   <SendIcon />
                 </button>
               </form>
+              {sendError && <p className="chat-send-error" role="alert">{sendError}</p>}
               <p className="chat-disclaimer">{t('consult.hours')}</p>
             </div>
           </>

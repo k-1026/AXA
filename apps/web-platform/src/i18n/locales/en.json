@@ -519,7 +519,9 @@
       "errClosed": "The hospital is not open at that day or time. Please choose a date and time within its hours.",
       "closedOption": "Closed"
     },
-    "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare."
+    "visitedNote": "Visit completed. You can talk with the medical staff in Aftercare.",
+    "needBooking": "Send a booking request first to message the hospital staff",
+    "sendFailed": "Couldn't send. Please try again in a moment."
   },
   "bookings": {
     "backToChats": "Back to chats",
