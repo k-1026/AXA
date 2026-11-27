@@ -17,6 +17,13 @@
 
 ## 기록
 
+### 2026-11-27 · backend-A-residency-nationality · Claude (국적 한국 → 국내 거주 취급)
+- 한 일: `ResidencyIn.nationality?` (KR → resident, 저장 안 함), 예약 요청서 국적 KR → 403 `residency.not_eligible`(`korean_nationality`), 챗봇 `prepare_booking_request` 국적 KR → not_available (결정 36)
+- 바뀐 계약: contracts 6-1·6-6·7 (칸 추가만)
+- 테스트: backend 324 passed (test_residency 3개 추가), AI 244 passed (1개 추가)
+- 다음 할 일: 화면 가입·마이페이지에 국적 질문 (frontend PR)
+- B에게 요청: 없음
+- 막힌 것·질문: 재외국민이 법적으로 외국인환자인지 미확인 — 규제 담당 확인 필요
 ### 2026-11-27 · backend-A-staff-realtime · Claude (병원 대시보드 실시간 알림)
 - 한 일: `staff_notifications` 표(0016, RLS·Realtime) · `notify_staff()` · `POST /tenant/notifications/realtime-token`. 환자 요청 생성·취소·수락·질문·사후관리 글에서 병원에 한 줄 (결정 35)
 - 바뀐 계약: contracts 5·6-5

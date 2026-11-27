@@ -62,6 +62,8 @@ def create(hospital_id: int, body: BookingCreate, db: Db, me: Me):
     patient_id = patient_uuid(me)
     # 계정의 체류 형태 (가입 때 3문항, 결정 28). 본문 residency는 제출 때 한 번 더 확인하는 값
     patient_service.require_short_term(db, patient_id)
+    if body.nationality == "KR":  # 한국 국적은 해외에 살아도 받지 않음 (결정 36) — 계정 답과 별개로 요청서 국적도 확인
+        raise AppError(403, "residency.not_eligible", "한국 국적은 상담·예약 요청을 할 수 없습니다", {"reason": "korean_nationality"})
     hospital_service.require_requestable(db, hospital_id)  # 미등록·영업 중 아님 → 403, 없으면 404
     tenant = db.scalar(select(Tenant).where(Tenant.hospital_id == hospital_id))
     if tenant is None or not tenant.requests_enabled:

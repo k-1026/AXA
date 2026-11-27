@@ -26,18 +26,22 @@ def blank_to_none(v: str | None) -> str | None:
 
 
 class ResidencyIn(BaseModel):
-    """체류 형태 3문항 (compliance 2-1). 하나라도 "예"이거나 거주국이 한국이면 국내 거주 → 정보 열람만.
+    """체류 형태 3문항 (compliance 2-1). 하나라도 "예"이거나 거주국·국적이 한국이면 국내 거주 취급 → 정보 열람만.
 
     ① 외국인등록 (단기 체류 G-1 제외) ② 국내거소신고 (외국국적동포) ③ 국민건강보험 가입자·피부양자
+    국적(nationality)은 판단에만 쓰고 계정에 저장하지 않음 (국적은 요청서에서만, models.py 머리말). 결정 36
     """
 
     country: str = Field(pattern=r"^[A-Z]{2}$")  # 거주국 ISO 3166-1 alpha-2
+    # 국적 (11/27 추가, 선택 — 예전 화면·챗봇은 안 보냄). 한국 국적이면 해외에 살아도 유치 대상으로 받지 않음 (팀 결정)
+    nationality: str | None = Field(default=None, pattern=r"^[A-Z]{2}$")
     alien_registration: bool
     domestic_residence: bool
     health_insurance: bool
 
     def residency(self) -> str:
-        resident = self.country == "KR" or self.alien_registration or self.domestic_residence or self.health_insurance
+        resident = (self.country == "KR" or self.nationality == "KR"
+                    or self.alien_registration or self.domestic_residence or self.health_insurance)
         return "resident" if resident else "short_term"
 
 
