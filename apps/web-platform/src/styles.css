@@ -1237,7 +1237,17 @@ a {
   display: block;
 }
 
-/* 배너는 AdRotator가 5초마다 돌림. 태블릿 이하는 한 자리만 */
+/* 두 칸 배너: 두 자리 전체를 쓰고 원본 비율 그대로 (자르지 않음) */
+.ad-slot.ad-wide {
+  grid-column: 1 / -1;
+}
+
+.ad-slot.ad-wide img {
+  aspect-ratio: auto;
+  height: auto;
+}
+
+/* 배너는 AdRotator가 5초마다 두 칸씩 넘김. 태블릿 이하는 한 자리만 */
 @media (max-width: 860px) {
   .ad-rotator > .ad-second {
     display: none;

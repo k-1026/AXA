@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from core.db import Base, utcnow
 
-KINDS = ("status", "reply", "aftercare")
+KINDS = ("status", "reply", "aftercare", "reminder")  # reminder: 방문 전 알림 (status = 48h·24h·2h)
 BigIntId = BigInteger().with_variant(Integer(), "sqlite")
 
 
@@ -23,12 +23,12 @@ class Notification(Base):
     patient_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("patients.id", ondelete="CASCADE"))
     kind: Mapped[str] = mapped_column(String(12))
     request_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("booking_requests.id", ondelete="CASCADE"))
-    status: Mapped[str | None] = mapped_column(String(12))  # kind=status일 때 바뀐 상태
+    status: Mapped[str | None] = mapped_column(String(12))  # kind=status: 바뀐 상태, kind=reminder: 48h·24h·2h
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
     read_at: Mapped[datetime | None]
 
     __table_args__ = (
-        CheckConstraint("kind IN ('status', 'reply', 'aftercare')", name="kind"),
+        CheckConstraint("kind IN ('status', 'reply', 'aftercare', 'reminder')", name="kind"),
         Index("ix_notifications_patient", "patient_id", "created_at"),
     )
 
